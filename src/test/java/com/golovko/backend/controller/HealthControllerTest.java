@@ -11,9 +11,9 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest
-
+@WebMvcTest(HealthController.class)
 public class HealthControllerTest {
+
     @Autowired
     private MockMvc mvc;
 
@@ -21,5 +21,4 @@ public class HealthControllerTest {
     public void testHealth() throws Exception {
         mvc.perform(get("/health")).andExpect(status().isOk());
     }
-
 }
