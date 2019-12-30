@@ -1,20 +1,26 @@
 package com.golovko.backend.dto;
 
-import java.util.UUID;
+import java.util.Objects;
 
-public class UserReadDTO {
+public class UserCreateDTO {
 
-    private UUID id;
     private String username;
     private String password;
     private String email;
 
-    public UUID getId() {
-        return id;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserCreateDTO createDTO = (UserCreateDTO) o;
+        return username.equals(createDTO.username) &&
+                password.equals(createDTO.password) &&
+                email.equals(createDTO.email);
     }
 
-    public void setId(UUID id) {
-        this.id = id;
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password, email);
     }
 
     public String getUsername() {
