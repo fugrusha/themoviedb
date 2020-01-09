@@ -1,7 +1,6 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.User;
 import com.golovko.backend.dto.MovieCreateDTO;
 import com.golovko.backend.dto.MovieReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -19,7 +18,7 @@ public class MovieService {
 
     public MovieReadDTO getMovie(UUID id) {
         Movie movie = movieRepository.findById(id).orElseThrow(() -> {
-            throw new EntityNotFoundException(User.class, id);
+            throw new EntityNotFoundException(Movie.class, id);
         });
 
         return toRead(movie);
