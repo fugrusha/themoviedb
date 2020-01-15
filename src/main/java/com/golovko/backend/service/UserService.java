@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.User;
 import com.golovko.backend.dto.UserCreateDTO;
+import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.UserRepository;
@@ -17,9 +18,7 @@ public class UserService {
     private UserRepository userRepository;
 
     public UserReadDTO getUser(UUID id) {
-        User user = userRepository.findById(id).orElseThrow(() -> {
-            throw new EntityNotFoundException(User.class, id);
-        });
+        User user = getUserRequired(id);
         return toRead(user);
     }
 
@@ -40,5 +39,29 @@ public class UserService {
 
         user = userRepository.save(user);
         return toRead(user);
+    }
+
+    public UserReadDTO patchUser(UUID id, UserPatchDTO patch) {
+
+        User user = getUserRequired(id);
+
+        if (patch.getUsername() != null) {
+            user.setUsername(patch.getUsername()); // username cannot be editable
+        }
+        if (patch.getEmail() != null){
+            user.setEmail(patch.getEmail());
+        }
+        if (patch.getPassword() != null){
+            user.setPassword(patch.getPassword());
+        }
+
+        user = userRepository.save(user);
+        return toRead(user);
+    }
+
+    private User getUserRequired(UUID id) {
+        return userRepository.findById(id).orElseThrow(() -> {
+            throw new EntityNotFoundException(User.class, id);
+        });
     }
 }

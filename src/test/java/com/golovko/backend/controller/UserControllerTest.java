@@ -3,6 +3,7 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.User;
 import com.golovko.backend.dto.UserCreateDTO;
+import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.UserService;
@@ -21,8 +22,7 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -40,11 +40,7 @@ public class UserControllerTest {
 
     @Test
     public void testGetUser() throws Exception {
-        UserReadDTO user = new UserReadDTO();
-        user.setId(UUID.randomUUID());
-        user.setUsername("Vitalka");
-        user.setPassword("123456");
-        user.setEmail("vetal@gmail.com");
+        UserReadDTO user = createUserReadDTO();
 
         Mockito.when(userService.getUser(user.getId())).thenReturn(user);
 
@@ -95,11 +91,7 @@ public class UserControllerTest {
         createDTO.setPassword("12345");
         createDTO.setEmail("david101@email.com");
 
-        UserReadDTO readDTO = new UserReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setUsername("david");
-        readDTO.setPassword("12345");
-        readDTO.setEmail("david101@email.com");
+        UserReadDTO readDTO = createUserReadDTO();
 
         Mockito.when(userService.createUser(createDTO)).thenReturn(readDTO);
 
@@ -111,5 +103,36 @@ public class UserControllerTest {
 
         UserReadDTO actualUser = objectMapper.readValue(result, UserReadDTO.class);
         Assertions.assertThat(actualUser).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testPatchUser() throws Exception {
+        UserPatchDTO patchDTO = new UserPatchDTO();
+        patchDTO.setUsername("david");
+        patchDTO.setEmail("david101@email.com");
+        patchDTO.setPassword("12345");
+
+        UserReadDTO readDTO = createUserReadDTO();
+
+        Mockito.when(userService.patchUser(readDTO.getId(), patchDTO)).thenReturn(readDTO);
+
+        String resultJson = mvc.perform(patch("/api/v1/users/{id}", readDTO.getId().toString())
+                .content(objectMapper.writeValueAsString(patchDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
+        Assert.assertEquals(readDTO, actualUser);
+
+    }
+
+    private UserReadDTO createUserReadDTO() {
+        UserReadDTO readDTO = new UserReadDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setUsername("david");
+        readDTO.setEmail("david101@email.com");
+        readDTO.setPassword("12345");
+        return readDTO;
     }
 }

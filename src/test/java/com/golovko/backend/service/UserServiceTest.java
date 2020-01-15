@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.User;
 import com.golovko.backend.dto.UserCreateDTO;
+import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.UserRepository;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = "delete from users", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = "delete from usr", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UserServiceTest {
 
     @Autowired
@@ -31,12 +32,7 @@ public class UserServiceTest {
 
     @Test
     public void testGetUser() {
-        User user = new User();
-        user.setId(UUID.randomUUID());
-        user.setUsername("Vitalka");
-        user.setPassword("123456");
-        user.setEmail("vetal@gmail.com");
-        user = userRepository.save(user);
+        User user = createUser();
 
         UserReadDTO readDTO = userService.getUser(user.getId());
         Assertions.assertThat(readDTO).isEqualToComparingFieldByField(user);
@@ -60,5 +56,50 @@ public class UserServiceTest {
 
         User user = userRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(readDTO).isEqualToComparingFieldByField(user);
+    }
+
+    @Test
+    public void testPatchUser() {
+        User user = createUser();
+
+        UserPatchDTO patch = new UserPatchDTO();
+        patch.setUsername("Volodya");
+        patch.setEmail("vovka@mail.ru");
+        patch.setPassword("098765");
+        UserReadDTO readDTO = userService.patchUser(user.getId(), patch);
+
+        Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
+
+        user = userRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(user).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testPatchUserEmptyPatch() {
+        User user = createUser();
+
+        UserPatchDTO patchDTO = new UserPatchDTO();
+        UserReadDTO readDTO = userService.patchUser(user.getId(), patchDTO);
+
+        Assert.assertNotNull(readDTO.getEmail());
+        Assert.assertNotNull(readDTO.getUsername());
+        Assert.assertNotNull(readDTO.getPassword());
+
+        User userAfterUpdate = userRepository.findById(readDTO.getId()).get();
+
+        Assert.assertNotNull(userAfterUpdate.getEmail());
+        Assert.assertNotNull(userAfterUpdate.getUsername());
+        Assert.assertNotNull(userAfterUpdate.getPassword());
+
+        Assertions.assertThat(user).isEqualToComparingFieldByField(userAfterUpdate);
+    }
+
+    private User createUser() {
+        User user = new User();
+        user.setUsername("Vitalka");
+        user.setPassword("123456");
+        user.setEmail("vetal@gmail.com");
+        user = userRepository.save(user);
+        return user;
     }
 }
