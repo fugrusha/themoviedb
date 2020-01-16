@@ -25,7 +25,10 @@ public class Movie {
 
     @JsonFormat(pattern = "dd-MM-yyyy", shape = Shape.STRING)
     private Date releaseDate;
+
     private String description;
+
     private boolean isReleased;
+
     private double averageRating;
 }

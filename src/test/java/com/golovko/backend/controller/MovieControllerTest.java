@@ -4,6 +4,7 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.MovieCreateDTO;
+import com.golovko.backend.dto.MoviePatchDTO;
 import com.golovko.backend.dto.MovieReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieService;
@@ -18,13 +19,11 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.util.Date;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -40,14 +39,20 @@ public class MovieControllerTest {
     @MockBean
     private MovieService movieService;
 
+    private MovieReadDTO createMovieReadDTO() {
+        MovieReadDTO readDTO = new MovieReadDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setMovieTitle("Guess Who");
+        readDTO.setDescription("12345");
+        readDTO.setReleaseDate(new Date(2019,12,5));
+        readDTO.setReleased(false);
+        readDTO.setAverageRating(8.3);
+        return readDTO;
+    }
+
     @Test
     public void getMovieByIdTest() throws Exception {
-        MovieReadDTO dto = new MovieReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setMovieTitle("Titanic");
-        dto.setDescription("moving movie");
-        dto.setReleaseDate(new Date(2019,12,5));
-        dto.setReleased(true);
+        MovieReadDTO dto = createMovieReadDTO();
 
         Mockito.when(movieService.getMovie(dto.getId())).thenReturn(dto);
 
@@ -71,12 +76,7 @@ public class MovieControllerTest {
         createDTO.setReleaseDate(new Date(2019,12,5));
         createDTO.setReleased(false);
 
-        MovieReadDTO readDTO = new MovieReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setMovieTitle("Guess Who");
-        readDTO.setDescription("12345");
-        readDTO.setReleaseDate(new Date(2019,12,5));
-        createDTO.setReleased(false);
+        MovieReadDTO readDTO = createMovieReadDTO();
 
         Mockito.when(movieService.createMovie(createDTO)).thenReturn(readDTO);
 
@@ -88,6 +88,39 @@ public class MovieControllerTest {
 
         MovieReadDTO actualMovie = objectMapper.readValue(result, MovieReadDTO.class);
         Assertions.assertThat(actualMovie).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void patchMovieTest() throws Exception {
+        MoviePatchDTO patchDTO = new MoviePatchDTO();
+        patchDTO.setMovieTitle("title");
+        patchDTO.setDescription("some description");
+        patchDTO.setReleased(true);
+        patchDTO.setReleaseDate(new Date(1990,07,10));
+        patchDTO.setAverageRating(0.1);
+
+        MovieReadDTO readDTO = createMovieReadDTO();
+
+        Mockito.when(movieService.patchMovie(readDTO.getId(), patchDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(patch("/api/v1/movies/{id}", readDTO.getId().toString())
+                .content(objectMapper.writeValueAsString(patchDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MovieReadDTO actualMovie = objectMapper.readValue(resultJson, MovieReadDTO.class);
+        Assert.assertEquals(readDTO, actualMovie);
+    }
+
+    @Test
+    public void testDeleteMovie() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/movies/{id}", id.toString()))
+                .andExpect(status().isOk());
+
+        Mockito.verify(movieService).deleteMovie(id);
     }
 
     @Test
@@ -104,14 +137,5 @@ public class MovieControllerTest {
         Assert.assertTrue(result.contains(exception.getMessage()));
     }
 
-    @Test
-    public void getMovieIdTypeMismatchTest() throws Exception {
-        String invalidId = "123";
 
-        String result = mockMvc.perform(get("/api/v1/movies/{id}", invalidId))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        Assert.assertTrue(result.contains(MethodArgumentTypeMismatchException.class.getSimpleName()));
-    }
 }

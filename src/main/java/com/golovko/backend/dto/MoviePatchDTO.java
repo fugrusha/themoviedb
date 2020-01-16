@@ -6,7 +6,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.util.Date;
 
 @Data
-public class MovieCreateDTO {
+public class MoviePatchDTO {
+
     private String movieTitle;
 
     @DateTimeFormat(pattern = "dd-MM-yyyy")

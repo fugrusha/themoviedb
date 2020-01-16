@@ -22,6 +22,12 @@ public class UserService {
         return toRead(user);
     }
 
+    private User getUserRequired(UUID id) {
+        return userRepository.findById(id).orElseThrow(() -> {
+            throw new EntityNotFoundException(User.class, id);
+        });
+    }
+
     private UserReadDTO toRead(User user) {
         UserReadDTO dto = new UserReadDTO();
         dto.setId(user.getId());
@@ -57,12 +63,6 @@ public class UserService {
 
         user = userRepository.save(user);
         return toRead(user);
-    }
-
-    private User getUserRequired(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> {
-            throw new EntityNotFoundException(User.class, id);
-        });
     }
 
     public void deleteUser(UUID id) {

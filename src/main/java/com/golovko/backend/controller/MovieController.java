@@ -1,6 +1,7 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.dto.MovieCreateDTO;
+import com.golovko.backend.dto.MoviePatchDTO;
 import com.golovko.backend.dto.MovieReadDTO;
 import com.golovko.backend.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,16 @@ public class MovieController {
     @PostMapping
     public MovieReadDTO createMovie(@RequestBody MovieCreateDTO createDTO) {
         return movieService.createMovie(createDTO);
+    }
+
+    @PatchMapping("/{id}")
+    public MovieReadDTO patchMovie(@PathVariable UUID id, @RequestBody MoviePatchDTO patchDTO) {
+        return movieService.patchMovie(id, patchDTO);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteMovie(@PathVariable UUID id){
+        movieService.deleteMovie(id);
     }
 
 }

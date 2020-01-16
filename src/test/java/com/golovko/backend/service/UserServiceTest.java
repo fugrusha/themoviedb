@@ -104,7 +104,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void testDeleteuser() {
+    public void testDeleteUser() {
         User user = createUser();
 
         userService.deleteUser(user.getId());

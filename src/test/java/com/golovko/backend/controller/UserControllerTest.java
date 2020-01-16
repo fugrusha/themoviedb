@@ -133,7 +133,6 @@ public class UserControllerTest {
 
         UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
         Assert.assertEquals(readDTO, actualUser);
-
     }
 
     @Test
