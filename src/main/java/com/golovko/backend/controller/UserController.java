@@ -30,4 +30,9 @@ public class UserController {
     public UserReadDTO patchUser(@PathVariable UUID id, @RequestBody UserPatchDTO patch) {
         return userService.patchUser(id, patch);
     }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable UUID id) {
+        userService.deleteUser(id);
+    }
 }

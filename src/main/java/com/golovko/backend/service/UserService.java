@@ -64,4 +64,8 @@ public class UserService {
             throw new EntityNotFoundException(User.class, id);
         });
     }
+
+    public void deleteUser(UUID id) {
+        userRepository.delete(getUserRequired(id));
+    }
 }

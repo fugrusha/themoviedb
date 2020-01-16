@@ -30,6 +30,15 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
+    private User createUser() {
+        User user = new User();
+        user.setUsername("Vitalka");
+        user.setPassword("123456");
+        user.setEmail("vetal@gmail.com");
+        user = userRepository.save(user);
+        return user;
+    }
+
     @Test
     public void testGetUser() {
         User user = createUser();
@@ -94,12 +103,18 @@ public class UserServiceTest {
         Assertions.assertThat(user).isEqualToComparingFieldByField(userAfterUpdate);
     }
 
-    private User createUser() {
-        User user = new User();
-        user.setUsername("Vitalka");
-        user.setPassword("123456");
-        user.setEmail("vetal@gmail.com");
-        user = userRepository.save(user);
-        return user;
+    @Test
+    public void testDeleteuser() {
+        User user = createUser();
+
+        userService.deleteUser(user.getId());
+        Assert.assertFalse(userRepository.existsById(user.getId()));
     }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testDeleteUserNotFound() {
+        userService.deleteUser(UUID.randomUUID());
+    }
+
+
 }

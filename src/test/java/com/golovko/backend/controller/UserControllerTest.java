@@ -38,6 +38,15 @@ public class UserControllerTest {
     @MockBean
     private UserService userService;
 
+    private UserReadDTO createUserReadDTO() {
+        UserReadDTO readDTO = new UserReadDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setUsername("david");
+        readDTO.setEmail("david101@email.com");
+        readDTO.setPassword("12345");
+        return readDTO;
+    }
+
     @Test
     public void testGetUser() throws Exception {
         UserReadDTO user = createUserReadDTO();
@@ -127,12 +136,14 @@ public class UserControllerTest {
 
     }
 
-    private UserReadDTO createUserReadDTO() {
-        UserReadDTO readDTO = new UserReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setUsername("david");
-        readDTO.setEmail("david101@email.com");
-        readDTO.setPassword("12345");
-        return readDTO;
+    @Test
+    public void testDeleteUser() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mvc.perform(delete("/api/v1/users/{id}", id.toString()))
+                .andExpect(status().isOk());
+
+        Mockito.verify(userService).deleteUser(id);
     }
+
 }
