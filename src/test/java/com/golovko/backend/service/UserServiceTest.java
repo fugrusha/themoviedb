@@ -58,6 +58,7 @@ public class UserServiceTest {
         create.setUsername("Vitalik");
         create.setPassword("123456");
         create.setEmail("vetal@gmail.com");
+
         UserReadDTO readDTO = userService.createUser(create);
 
         Assertions.assertThat(create).isEqualToComparingFieldByField(readDTO);
@@ -75,6 +76,7 @@ public class UserServiceTest {
         patch.setUsername("Volodya");
         patch.setEmail("vovka@mail.ru");
         patch.setPassword("098765");
+
         UserReadDTO readDTO = userService.patchUser(user.getId(), patch);
 
         Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
@@ -106,8 +108,8 @@ public class UserServiceTest {
     @Test
     public void testDeleteUser() {
         User user = createUser();
-
         userService.deleteUser(user.getId());
+
         Assert.assertFalse(userRepository.existsById(user.getId()));
     }
 

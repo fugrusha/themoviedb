@@ -20,7 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -44,7 +44,7 @@ public class MovieControllerTest {
         readDTO.setId(UUID.randomUUID());
         readDTO.setMovieTitle("Guess Who");
         readDTO.setDescription("12345");
-        readDTO.setReleaseDate(new Date(2019,12,5));
+        readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
         readDTO.setReleased(false);
         readDTO.setAverageRating(8.3);
         return readDTO;
@@ -73,7 +73,7 @@ public class MovieControllerTest {
         MovieCreateDTO createDTO = new MovieCreateDTO();
         createDTO.setMovieTitle("Guess Who");
         createDTO.setDescription("12345");
-        createDTO.setReleaseDate(new Date(2019,12,5));
+        createDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
         createDTO.setReleased(false);
 
         MovieReadDTO readDTO = createMovieReadDTO();
@@ -96,7 +96,7 @@ public class MovieControllerTest {
         patchDTO.setMovieTitle("title");
         patchDTO.setDescription("some description");
         patchDTO.setReleased(true);
-        patchDTO.setReleaseDate(new Date(1990,07,10));
+        patchDTO.setReleaseDate(LocalDate.parse("1800-07-10"));
         patchDTO.setAverageRating(0.1);
 
         MovieReadDTO readDTO = createMovieReadDTO();

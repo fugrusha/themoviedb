@@ -7,7 +7,7 @@ import lombok.Setter;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static com.fasterxml.jackson.annotation.JsonFormat.Shape;
@@ -23,12 +23,12 @@ public class Movie {
 
     private String movieTitle;
 
-    @JsonFormat(pattern = "dd-MM-yyyy", shape = Shape.STRING)
-    private Date releaseDate;
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = Shape.STRING)
+    private LocalDate releaseDate;
 
     private String description;
 
     private boolean isReleased;
 
-    private double averageRating;
+    private Double averageRating;
 }

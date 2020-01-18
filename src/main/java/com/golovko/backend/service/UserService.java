@@ -23,9 +23,9 @@ public class UserService {
     }
 
     private User getUserRequired(UUID id) {
-        return userRepository.findById(id).orElseThrow(() -> {
-            throw new EntityNotFoundException(User.class, id);
-        });
+        return userRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(User.class, id)
+        );
     }
 
     private UserReadDTO toRead(User user) {
