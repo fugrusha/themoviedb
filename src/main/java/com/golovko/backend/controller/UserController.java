@@ -1,6 +1,7 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.dto.UserCreateDTO;
+import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
 import com.golovko.backend.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,5 +24,15 @@ public class UserController {
     @PostMapping
     public UserReadDTO createUser(@RequestBody UserCreateDTO createDTO) {
         return userService.createUser(createDTO);
+    }
+
+    @PatchMapping("/{id}")
+    public UserReadDTO patchUser(@PathVariable UUID id, @RequestBody UserPatchDTO patch) {
+        return userService.patchUser(id, patch);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteUser(@PathVariable UUID id) {
+        userService.deleteUser(id);
     }
 }

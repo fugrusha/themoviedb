@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.User;
 import com.golovko.backend.dto.UserCreateDTO;
+import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.UserRepository;
@@ -20,7 +21,7 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = "delete from users", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = "delete from usr", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UserServiceTest {
 
     @Autowired
@@ -29,14 +30,18 @@ public class UserServiceTest {
     @Autowired
     private UserService userService;
 
-    @Test
-    public void testGetUser() {
+    private User createUser() {
         User user = new User();
-        user.setId(UUID.randomUUID());
         user.setUsername("Vitalka");
         user.setPassword("123456");
         user.setEmail("vetal@gmail.com");
         user = userRepository.save(user);
+        return user;
+    }
+
+    @Test
+    public void testGetUser() {
+        User user = createUser();
 
         UserReadDTO readDTO = userService.getUser(user.getId());
         Assertions.assertThat(readDTO).isEqualToComparingFieldByField(user);
@@ -53,6 +58,7 @@ public class UserServiceTest {
         create.setUsername("Vitalik");
         create.setPassword("123456");
         create.setEmail("vetal@gmail.com");
+
         UserReadDTO readDTO = userService.createUser(create);
 
         Assertions.assertThat(create).isEqualToComparingFieldByField(readDTO);
@@ -61,4 +67,56 @@ public class UserServiceTest {
         User user = userRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(readDTO).isEqualToComparingFieldByField(user);
     }
+
+    @Test
+    public void testPatchUser() {
+        User user = createUser();
+
+        UserPatchDTO patch = new UserPatchDTO();
+        patch.setUsername("Volodya");
+        patch.setEmail("vovka@mail.ru");
+        patch.setPassword("098765");
+
+        UserReadDTO readDTO = userService.patchUser(user.getId(), patch);
+
+        Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
+
+        user = userRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(user).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testPatchUserEmptyPatch() {
+        User user = createUser();
+
+        UserPatchDTO patchDTO = new UserPatchDTO();
+        UserReadDTO readDTO = userService.patchUser(user.getId(), patchDTO);
+
+        Assert.assertNotNull(readDTO.getEmail());
+        Assert.assertNotNull(readDTO.getUsername());
+        Assert.assertNotNull(readDTO.getPassword());
+
+        User userAfterUpdate = userRepository.findById(readDTO.getId()).get();
+
+        Assert.assertNotNull(userAfterUpdate.getEmail());
+        Assert.assertNotNull(userAfterUpdate.getUsername());
+        Assert.assertNotNull(userAfterUpdate.getPassword());
+
+        Assertions.assertThat(user).isEqualToComparingFieldByField(userAfterUpdate);
+    }
+
+    @Test
+    public void testDeleteUser() {
+        User user = createUser();
+        userService.deleteUser(user.getId());
+
+        Assert.assertFalse(userRepository.existsById(user.getId()));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testDeleteUserNotFound() {
+        userService.deleteUser(UUID.randomUUID());
+    }
+
+
 }

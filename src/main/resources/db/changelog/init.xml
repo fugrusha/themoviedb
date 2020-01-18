@@ -5,7 +5,7 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="create_users_table" author="andrew">
-        <createTable tableName="users">
+        <createTable tableName="usr">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
@@ -16,12 +16,12 @@
     </changeSet>
 
     <changeSet id="create_movie_table" author="andrew">
-        <createTable tableName="movies">
+        <createTable tableName="movie">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
             <column name="movie_title" type="varchar(128)"/>
-            <column name="release_date" type="timestamp"/>
+            <column name="release_date" type="date"/>
             <column name="description" type="varchar(1000)"/>
             <column name="is_released" type="boolean"/>
             <column name="average_rating" type="double"/>

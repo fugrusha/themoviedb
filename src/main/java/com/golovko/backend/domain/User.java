@@ -1,6 +1,7 @@
 package com.golovko.backend.domain;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -9,8 +10,9 @@ import javax.persistence.Table;
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
-@Data
+@Table(name = "usr")
+@Setter
+@Getter
 public class User {
 
     @Id

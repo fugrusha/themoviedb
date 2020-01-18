@@ -4,11 +4,9 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
-import java.util.UUID;
 
 @Data
-public class MovieReadDTO {
-    private UUID id;
+public class MoviePatchDTO {
 
     private String movieTitle;
 
