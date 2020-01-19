@@ -24,7 +24,11 @@ public class UserRepositoryTest {
     @Test
     public void testSave() {
         User user = new User();
+        user.setUsername("Vitalka");
+        user.setPassword("123456");
+        user.setEmail("vetal@gmail.com");
         user = userRepository.save(user);
+
         assertNotNull(user.getId());
         assertTrue(userRepository.findById(user.getId()).isPresent());
     }

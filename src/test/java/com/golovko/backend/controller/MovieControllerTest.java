@@ -62,10 +62,24 @@ public class MovieControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        MovieReadDTO actualMovie = objectMapper.readValue(resultJSON,MovieReadDTO.class);
+        MovieReadDTO actualMovie = objectMapper.readValue(resultJSON, MovieReadDTO.class);
         Assertions.assertThat(actualMovie).isEqualToComparingFieldByField(dto);
 
         Mockito.verify(movieService).getMovie(dto.getId());
+    }
+
+    @Test
+    public void getMovieWrongIdTest() throws Exception {
+        UUID wrongId = UUID.randomUUID();
+
+        EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
+        Mockito.when(movieService.getMovie(wrongId)).thenThrow(exception);
+
+        String result = mockMvc.perform(get("/api/v1/movies/{id}", wrongId))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Assert.assertTrue(result.contains(exception.getMessage()));
     }
 
     @Test
@@ -95,7 +109,7 @@ public class MovieControllerTest {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         patchDTO.setMovieTitle("title");
         patchDTO.setDescription("some description");
-        patchDTO.setReleased(true);
+        patchDTO.setIsReleased(true);
         patchDTO.setReleaseDate(LocalDate.parse("1800-07-10"));
         patchDTO.setAverageRating(0.1);
 
@@ -122,20 +136,4 @@ public class MovieControllerTest {
 
         Mockito.verify(movieService).deleteMovie(id);
     }
-
-    @Test
-    public void getMovieWrongIdTest() throws Exception {
-        UUID wrongId = UUID.randomUUID();
-
-        EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
-        Mockito.when(movieService.getMovie(wrongId)).thenThrow(exception);
-
-        String result = mockMvc.perform(get("/api/v1/movies/{id}", wrongId))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse().getContentAsString();
-
-        Assert.assertTrue(result.contains(exception.getMessage()));
-    }
-
-
 }

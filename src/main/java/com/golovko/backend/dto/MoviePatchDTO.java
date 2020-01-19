@@ -15,7 +15,7 @@ public class MoviePatchDTO {
 
     private String description;
 
-    private boolean isReleased;
+    private Boolean isReleased;
 
     private Double averageRating;
 }

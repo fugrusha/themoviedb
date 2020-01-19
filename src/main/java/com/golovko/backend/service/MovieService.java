@@ -34,7 +34,7 @@ public class MovieService {
         dto.setMovieTitle(movie.getMovieTitle());
         dto.setDescription(movie.getDescription());
         dto.setReleaseDate(movie.getReleaseDate());
-        dto.setReleased(movie.isReleased());
+        dto.setReleased(movie.getIsReleased());
         dto.setAverageRating(movie.getAverageRating());
 
         return dto;
@@ -45,7 +45,7 @@ public class MovieService {
         movie.setMovieTitle(createDTO.getMovieTitle());
         movie.setDescription(createDTO.getDescription());
         movie.setReleaseDate(createDTO.getReleaseDate());
-        movie.setReleased(createDTO.isReleased());
+        movie.setIsReleased(createDTO.isReleased());
         movie.setAverageRating(createDTO.getAverageRating());
 
         movie = movieRepository.save(movie);
@@ -68,8 +68,8 @@ public class MovieService {
         if (patchDTO.getReleaseDate() != null){
             movie.setReleaseDate(patchDTO.getReleaseDate());
         }
-        if (patchDTO.isReleased() != movie.isReleased()){
-            movie.setReleased(patchDTO.isReleased());
+        if (patchDTO.getIsReleased() != null){
+            movie.setIsReleased(patchDTO.getIsReleased());
         }
 
         movie = movieRepository.save(movie);
