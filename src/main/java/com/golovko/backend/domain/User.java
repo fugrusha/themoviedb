@@ -3,10 +3,7 @@ package com.golovko.backend.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.util.UUID;
 
 @Entity
@@ -19,7 +16,15 @@ public class User {
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
+    @Column(nullable = false)
     private String username;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
     private String email;
+
+//    @OneToMany(mappedBy = "author")
+//    private List<Report> reports;
 }

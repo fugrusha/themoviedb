@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -21,6 +22,7 @@ public class Movie {
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
+    @Column(nullable = false)
     private String movieTitle;
 
     @JsonFormat(pattern = "yyyy-MM-dd", shape = Shape.STRING)
@@ -28,7 +30,7 @@ public class Movie {
 
     private String description;
 
-    private boolean isReleased;
+    private Boolean isReleased;
 
     private Double averageRating;
 }

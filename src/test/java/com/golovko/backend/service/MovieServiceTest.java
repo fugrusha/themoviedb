@@ -35,7 +35,7 @@ public class MovieServiceTest {
         Movie movie = new Movie();
         movie.setMovieTitle("Title of the Movie");
         movie.setDescription("movie description");
-        movie.setReleased(false);
+        movie.setIsReleased(false);
         movie.setReleaseDate(LocalDate.parse("1990-05-14"));
         movie.setAverageRating(5.0);
         movie = movieRepository.save(movie);
@@ -51,7 +51,7 @@ public class MovieServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getMovieWrongId() {
+    public void getMovieWrongIdTest() {
         movieService.getMovie(UUID.randomUUID());
     }
 
@@ -80,7 +80,7 @@ public class MovieServiceTest {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         patchDTO.setMovieTitle("another title");
         patchDTO.setDescription("another description");
-        patchDTO.setReleased(true);
+        patchDTO.setIsReleased(true);
         patchDTO.setReleaseDate(LocalDate.parse("2002-02-03"));
         patchDTO.setAverageRating(10.0);
 
@@ -102,7 +102,7 @@ public class MovieServiceTest {
         Assert.assertNotNull(readDTO.getMovieTitle());
         Assert.assertNotNull(readDTO.getDescription());
         Assert.assertNotNull(readDTO.getReleaseDate());
-        Assertions.assertThat(readDTO.isReleased()).isEqualTo(movie.isReleased());
+        Assertions.assertThat(readDTO.isReleased()).isEqualTo(movie.getIsReleased());
         Assert.assertNotNull(readDTO.getAverageRating());
 
         Movie movieAfterUpdate = movieRepository.findById(readDTO.getId()).get();
@@ -110,7 +110,7 @@ public class MovieServiceTest {
         Assert.assertNotNull(movieAfterUpdate.getMovieTitle());
         Assert.assertNotNull(movieAfterUpdate.getDescription());
         Assert.assertNotNull(movieAfterUpdate.getReleaseDate());
-        Assertions.assertThat(readDTO.isReleased()).isEqualTo(movie.isReleased());
+        Assertions.assertThat(readDTO.isReleased()).isEqualTo(movie.getIsReleased());
         Assert.assertNotNull(movieAfterUpdate.getAverageRating());
 
         Assertions.assertThat(movie).isEqualToComparingFieldByField(movieAfterUpdate);
