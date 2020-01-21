@@ -14,4 +14,6 @@ public class ReportReadDTO {
     private String reportText;
 
     private ReportType reportType;
+
+//    private UUID userId;
 }

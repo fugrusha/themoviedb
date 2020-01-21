@@ -17,57 +17,38 @@ public class ReportService {
     @Autowired
     private ReportRepository reportRepository;
 
-    private Report getReportRequired(UUID id) {
-        return reportRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(Report.class, id)
-        );
-    }
-
-    private ReportReadDTO toRead(Report report) {
-        ReportReadDTO dto = new ReportReadDTO();
-        dto.setId(report.getId());
-        dto.setReportTitle(report.getReportTitle());
-        dto.setReportText(report.getReportText());
-        dto.setReportType(report.getReportType());
-        return dto;
-    }
+    @Autowired
+    private TranslationService translationService;
 
     public ReportReadDTO getReport(UUID id) {
         Report report = getReportRequired(id);
-        return toRead(report);
+        return translationService.toRead(report);
     }
 
-
     public ReportReadDTO createReport(ReportCreateDTO createDTO) {
-        Report report = new Report();
-//        report.setIssueDate(Instant.now());
-        report.setReportTitle(createDTO.getReportTitle());
-        report.setReportText(createDTO.getReportText());
-        report.setReportType(createDTO.getReportType());
+        Report report = translationService.toEntity(createDTO);
 
         report = reportRepository.save(report);
-        return toRead(report);
+        return translationService.toRead(report);
     }
 
     public ReportReadDTO patchReport(UUID id, ReportPatchDTO patchDTO) {
         Report report = getReportRequired(id);
 
-        if (patchDTO.getReportTitle() != null) {
-            report.setReportTitle(patchDTO.getReportTitle());
-        }
-        if (patchDTO.getReportText() != null) {
-            report.setReportText(patchDTO.getReportText());
-        }
-        if (patchDTO.getReportType() != null) {
-            report.setReportType(patchDTO.getReportType());
-        }
+        translationService.patchEntity(patchDTO, report);
 
         report = reportRepository.save(report);
 
-        return toRead(report);
+        return translationService.toRead(report);
     }
 
     public void deleteReport(UUID id) {
         reportRepository.delete(getReportRequired(id));
+    }
+
+    private Report getReportRequired(UUID id) {
+        return reportRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(Report.class, id)
+        );
     }
 }

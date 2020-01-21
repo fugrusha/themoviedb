@@ -1,11 +1,11 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.User;
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.dto.UserCreateDTO;
 import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.repository.UserRepository;
+import com.golovko.backend.repository.ApplicationUserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,35 +21,35 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = "delete from usr", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = "delete from application_user", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class UserServiceTest {
 
     @Autowired
-    private UserRepository userRepository;
+    private ApplicationUserRepository applicationUserRepository;
 
     @Autowired
-    private UserService userService;
+    private ApplicationUserService applicationUserService;
 
-    private User createUser() {
-        User user = new User();
-        user.setUsername("Vitalka");
-        user.setPassword("123456");
-        user.setEmail("vetal@gmail.com");
-        user = userRepository.save(user);
-        return user;
+    private ApplicationUser createUser() {
+        ApplicationUser applicationUser = new ApplicationUser();
+        applicationUser.setUsername("Vitalka");
+        applicationUser.setPassword("123456");
+        applicationUser.setEmail("vetal@gmail.com");
+        applicationUser = applicationUserRepository.save(applicationUser);
+        return applicationUser;
     }
 
     @Test
     public void testGetUser() {
-        User user = createUser();
+        ApplicationUser applicationUser = createUser();
 
-        UserReadDTO readDTO = userService.getUser(user.getId());
-        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(user);
+        UserReadDTO readDTO = applicationUserService.getUser(applicationUser.getId());
+        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(applicationUser);
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void testGetUserWrongId() {
-        userService.getUser(UUID.randomUUID());
+        applicationUserService.getUser(UUID.randomUUID());
     }
 
     @Test
@@ -59,63 +59,63 @@ public class UserServiceTest {
         create.setPassword("123456");
         create.setEmail("vetal@gmail.com");
 
-        UserReadDTO readDTO = userService.createUser(create);
+        UserReadDTO readDTO = applicationUserService.createUser(create);
 
         Assertions.assertThat(create).isEqualToComparingFieldByField(readDTO);
         Assert.assertNotNull(readDTO.getId());
 
-        User user = userRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(user);
+        ApplicationUser applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(applicationUser);
     }
 
     @Test
     public void testPatchUser() {
-        User user = createUser();
+        ApplicationUser applicationUser = createUser();
 
         UserPatchDTO patch = new UserPatchDTO();
         patch.setUsername("Volodya");
         patch.setEmail("vovka@mail.ru");
         patch.setPassword("098765");
 
-        UserReadDTO readDTO = userService.patchUser(user.getId(), patch);
+        UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patch);
 
         Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
 
-        user = userRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(user).isEqualToComparingFieldByField(readDTO);
+        applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test
     public void testPatchUserEmptyPatch() {
-        User user = createUser();
+        ApplicationUser applicationUser = createUser();
 
         UserPatchDTO patchDTO = new UserPatchDTO();
-        UserReadDTO readDTO = userService.patchUser(user.getId(), patchDTO);
+        UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patchDTO);
 
         Assert.assertNotNull(readDTO.getEmail());
         Assert.assertNotNull(readDTO.getUsername());
         Assert.assertNotNull(readDTO.getPassword());
 
-        User userAfterUpdate = userRepository.findById(readDTO.getId()).get();
+        ApplicationUser applicationUserAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
 
-        Assert.assertNotNull(userAfterUpdate.getEmail());
-        Assert.assertNotNull(userAfterUpdate.getUsername());
-        Assert.assertNotNull(userAfterUpdate.getPassword());
+        Assert.assertNotNull(applicationUserAfterUpdate.getEmail());
+        Assert.assertNotNull(applicationUserAfterUpdate.getUsername());
+        Assert.assertNotNull(applicationUserAfterUpdate.getPassword());
 
-        Assertions.assertThat(user).isEqualToComparingFieldByField(userAfterUpdate);
+        Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(applicationUserAfterUpdate);
     }
 
     @Test
     public void testDeleteUser() {
-        User user = createUser();
-        userService.deleteUser(user.getId());
+        ApplicationUser applicationUser = createUser();
+        applicationUserService.deleteUser(applicationUser.getId());
 
-        Assert.assertFalse(userRepository.existsById(user.getId()));
+        Assert.assertFalse(applicationUserRepository.existsById(applicationUser.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteUserNotFound() {
-        userService.deleteUser(UUID.randomUUID());
+        applicationUserService.deleteUser(UUID.randomUUID());
     }
 
 

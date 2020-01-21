@@ -1,7 +1,7 @@
 package com.golovko.backend.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
 
@@ -9,7 +9,7 @@ import java.time.LocalDate;
 public class MovieCreateDTO {
     private String movieTitle;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
     private LocalDate releaseDate;
 
     private String description;

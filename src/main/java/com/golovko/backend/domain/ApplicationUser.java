@@ -3,14 +3,16 @@ package com.golovko.backend.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
 import java.util.UUID;
 
 @Entity
-@Table(name = "usr")
 @Setter
 @Getter
-public class User {
+public class ApplicationUser {
 
     @Id
     @GeneratedValue(generator = "UUID")

@@ -10,4 +10,6 @@ public class ReportCreateDTO {
     private String reportText;
 
     private ReportType reportType;
+
+//    private UUID userId;
 }

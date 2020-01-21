@@ -1,13 +1,13 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golovko.backend.domain.User;
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.dto.UserCreateDTO;
 import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
-import com.golovko.backend.service.UserService;
+import com.golovko.backend.service.ApplicationUserService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(UserController.class)
-public class UserControllerTest {
+public class ApplicationUserControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -38,7 +38,7 @@ public class UserControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserService userService;
+    private ApplicationUserService applicationUserService;
 
     private UserReadDTO createUserReadDTO() {
         UserReadDTO readDTO = new UserReadDTO();
@@ -53,7 +53,7 @@ public class UserControllerTest {
     public void testGetUser() throws Exception {
         UserReadDTO user = createUserReadDTO();
 
-        Mockito.when(userService.getUser(user.getId())).thenReturn(user);
+        Mockito.when(applicationUserService.getUser(user.getId())).thenReturn(user);
 
         String resultJson = mvc.perform(get("/api/v1/users/{id}", user.getId()))
                 .andExpect(status().isOk())
@@ -66,15 +66,15 @@ public class UserControllerTest {
         UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
         Assertions.assertThat(actualUser).isEqualToComparingFieldByField(user);
 
-        Mockito.verify(userService).getUser(user.getId());
+        Mockito.verify(applicationUserService).getUser(user.getId());
     }
 
     @Test
     public void testGetUserWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
 
-        EntityNotFoundException exception = new EntityNotFoundException(User.class, wrongId);
-        Mockito.when(userService.getUser(wrongId)).thenThrow(exception);
+        EntityNotFoundException exception = new EntityNotFoundException(ApplicationUser.class, wrongId);
+        Mockito.when(applicationUserService.getUser(wrongId)).thenThrow(exception);
 
         String resultJson = mvc.perform(get("/api/v1/users/{id}", wrongId))
                 .andExpect(status().isNotFound())
@@ -112,7 +112,7 @@ public class UserControllerTest {
 
         UserReadDTO readDTO = createUserReadDTO();
 
-        Mockito.when(userService.createUser(createDTO)).thenReturn(readDTO);
+        Mockito.when(applicationUserService.createUser(createDTO)).thenReturn(readDTO);
 
         String result = mvc.perform(post("/api/v1/users")
                 .content(objectMapper.writeValueAsString(createDTO))
@@ -133,7 +133,7 @@ public class UserControllerTest {
 
         UserReadDTO readDTO = createUserReadDTO();
 
-        Mockito.when(userService.patchUser(readDTO.getId(), patchDTO)).thenReturn(readDTO);
+        Mockito.when(applicationUserService.patchUser(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
         String resultJson = mvc.perform(patch("/api/v1/users/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
@@ -152,7 +152,7 @@ public class UserControllerTest {
         mvc.perform(delete("/api/v1/users/{id}", id.toString()))
                 .andExpect(status().isOk());
 
-        Mockito.verify(userService).deleteUser(id);
+        Mockito.verify(applicationUserService).deleteUser(id);
     }
 
 }
