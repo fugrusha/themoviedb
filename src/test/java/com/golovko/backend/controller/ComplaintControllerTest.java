@@ -1,13 +1,13 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.ReportType;
-import com.golovko.backend.dto.ReportCreateDTO;
-import com.golovko.backend.dto.ReportPatchDTO;
-import com.golovko.backend.dto.ReportReadDTO;
+import com.golovko.backend.dto.ComplaintCreateDTO;
+import com.golovko.backend.dto.ComplaintPatchDTO;
+import com.golovko.backend.dto.ComplaintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.service.ReportService;
+import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -26,8 +26,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(ReportController.class)
-public class ReportControllerTest {
+@WebMvcTest(ComplaintController.class)
+public class ComplaintControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -36,22 +36,22 @@ public class ReportControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private ReportService reportService;
+    private ComplaintService complaintService;
 
-    private ReportReadDTO createReportReadDTO() {
-        ReportReadDTO readDTO = new ReportReadDTO();
+    private ComplaintReadDTO createReportReadDTO() {
+        ComplaintReadDTO readDTO = new ComplaintReadDTO();
         readDTO.setId(UUID.randomUUID());
-        readDTO.setReportTitle("Report 1");
-        readDTO.setReportText("I have noticed a spoiler");
-        readDTO.setReportType(ReportType.SPOILER);
+        readDTO.setComplaintTitle("Report 1");
+        readDTO.setComplaintText("I have noticed a spoiler");
+        readDTO.setComplaintType(ComplaintType.SPOILER);
         return readDTO;
     }
 
     @Test
     public void getReportByIdTest() throws Exception {
-        ReportReadDTO readDTO = createReportReadDTO();
+        ComplaintReadDTO readDTO = createReportReadDTO();
 
-        Mockito.when(reportService.getReport(readDTO.getId())).thenReturn(readDTO);
+        Mockito.when(complaintService.getReport(readDTO.getId())).thenReturn(readDTO);
 
         String resultJson = mockMvc.perform(get("/api/v1/reports/{id}", readDTO.getId()))
                 .andExpect(status().isOk())
@@ -59,10 +59,10 @@ public class ReportControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        ReportReadDTO actualReport = objectMapper.readValue(resultJson, ReportReadDTO.class);
+        ComplaintReadDTO actualReport = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assertions.assertThat(actualReport).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(reportService).getReport(readDTO.getId());
+        Mockito.verify(complaintService).getReport(readDTO.getId());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ReportControllerTest {
         UUID wrongId = UUID.randomUUID();
 
         EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
-        Mockito.when(reportService.getReport(wrongId)).thenThrow(exception);
+        Mockito.when(complaintService.getReport(wrongId)).thenThrow(exception);
 
         String result = mockMvc.perform(get("/api/v1/reports/{id}", wrongId))
                 .andExpect(status().isNotFound())
@@ -81,14 +81,14 @@ public class ReportControllerTest {
 
     @Test
     public void createReportTest() throws Exception {
-        ReportCreateDTO createDTO = new ReportCreateDTO();
-        createDTO.setReportTitle("Report 1");
-        createDTO.setReportText("I have noticed a spoiler");
-        createDTO.setReportType(ReportType.SPOILER);
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Report 1");
+        createDTO.setComplaintText("I have noticed a spoiler");
+        createDTO.setComplaintType(ComplaintType.SPOILER);
 
-        ReportReadDTO readDTO = createReportReadDTO();
+        ComplaintReadDTO readDTO = createReportReadDTO();
 
-        Mockito.when(reportService.createReport(createDTO)).thenReturn(readDTO);
+        Mockito.when(complaintService.createReport(createDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc.perform(post("/api/v1/reports")
                 .content(objectMapper.writeValueAsString(createDTO))
@@ -96,20 +96,20 @@ public class ReportControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        ReportReadDTO actualReport = objectMapper.readValue(resultJson, ReportReadDTO.class);
+        ComplaintReadDTO actualReport = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assertions.assertThat(actualReport).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test
     public void patchReportTest() throws Exception {
-        ReportReadDTO readDTO = createReportReadDTO();
+        ComplaintReadDTO readDTO = createReportReadDTO();
 
-        ReportPatchDTO patchDTO = new ReportPatchDTO();
-        patchDTO.setReportTitle("another title");
-        patchDTO.setReportText("another text");
-        patchDTO.setReportType(ReportType.CHILD_ABUSE);
+        ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
+        patchDTO.setComplaintTitle("another title");
+        patchDTO.setComplaintText("another text");
+        patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
 
-        Mockito.when(reportService.patchReport(readDTO.getId(), patchDTO)).thenReturn(readDTO);
+        Mockito.when(complaintService.patchReport(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc.perform(patch("/api/v1/reports/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
@@ -117,7 +117,7 @@ public class ReportControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        ReportReadDTO actualReport = objectMapper.readValue(resultJson, ReportReadDTO.class);
+        ComplaintReadDTO actualReport = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assert.assertEquals(readDTO, actualReport);
     }
 
@@ -128,6 +128,6 @@ public class ReportControllerTest {
         mockMvc.perform(delete("/api/v1/reports/{id}", id.toString()))
                 .andExpect(status().isOk());
 
-        Mockito.verify(reportService).deleteReport(id);
+        Mockito.verify(complaintService).deleteReport(id);
     }
 }

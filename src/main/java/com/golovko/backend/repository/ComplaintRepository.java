@@ -1,11 +1,11 @@
 package com.golovko.backend.repository;
 
-import com.golovko.backend.domain.Report;
+import com.golovko.backend.domain.Complaint;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.UUID;
 
 @Repository
-public interface ReportRepository extends CrudRepository<Report, UUID> {
+public interface ComplaintRepository extends CrudRepository<Complaint, UUID> {
 }

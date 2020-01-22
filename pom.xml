@@ -69,10 +69,10 @@
 						</goals>
 					</execution>
 					<execution>
-						<id>report</id>
+						<id>complaint</id>
 						<phase>prepare-package</phase>
 						<goals>
-							<goal>report</goal>
+							<goal>complaint</goal>
 						</goals>
 					</execution>
 				</executions>

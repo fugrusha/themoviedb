@@ -1,8 +1,8 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.Report;
 import com.golovko.backend.dto.*;
 import org.springframework.stereotype.Service;
 
@@ -16,8 +16,16 @@ public class TranslationService {
         UserReadDTO dto = new UserReadDTO();
         dto.setId(applicationUser.getId());
         dto.setUsername(applicationUser.getUsername());
-        dto.setPassword(applicationUser.getPassword());
         dto.setEmail(applicationUser.getEmail());
+        return dto;
+    }
+
+    public UserReadExtendedDTO toReadExtended(ApplicationUser user) {
+        UserReadExtendedDTO dto = new UserReadExtendedDTO();
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setEmail(user.getEmail());
+        dto.setComplaint(toRead(user.getComplaint()));
         return dto;
     }
 
@@ -85,34 +93,34 @@ public class TranslationService {
     }
 
     /*
-        Report translations
+        Complaint translations
     */
-    public ReportReadDTO toRead(Report report) {
-        ReportReadDTO dto = new ReportReadDTO();
-        dto.setId(report.getId());
-        dto.setReportTitle(report.getReportTitle());
-        dto.setReportText(report.getReportText());
-        dto.setReportType(report.getReportType());
+    public ComplaintReadDTO toRead(Complaint complaint) {
+        ComplaintReadDTO dto = new ComplaintReadDTO();
+        dto.setId(complaint.getId());
+        dto.setComplaintTitle(complaint.getComplaintTitle());
+        dto.setComplaintText(complaint.getComplaintText());
+        dto.setComplaintType(complaint.getComplaintType());
         return dto;
     }
 
-    public Report toEntity(ReportCreateDTO createDTO) {
-        Report report = new Report();
-        report.setReportTitle(createDTO.getReportTitle());
-        report.setReportText(createDTO.getReportText());
-        report.setReportType(createDTO.getReportType());
-        return report;
+    public Complaint toEntity(ComplaintCreateDTO createDTO) {
+        Complaint complaint = new Complaint();
+        complaint.setComplaintTitle(createDTO.getComplaintTitle());
+        complaint.setComplaintText(createDTO.getComplaintText());
+        complaint.setComplaintType(createDTO.getComplaintType());
+        return complaint;
     }
 
-    public void patchEntity(ReportPatchDTO patchDTO, Report report) {
-        if (patchDTO.getReportTitle() != null) {
-            report.setReportTitle(patchDTO.getReportTitle());
+    public void patchEntity(ComplaintPatchDTO patchDTO, Complaint complaint) {
+        if (patchDTO.getComplaintTitle() != null) {
+            complaint.setComplaintTitle(patchDTO.getComplaintTitle());
         }
-        if (patchDTO.getReportText() != null) {
-            report.setReportText(patchDTO.getReportText());
+        if (patchDTO.getComplaintText() != null) {
+            complaint.setComplaintText(patchDTO.getComplaintText());
         }
-        if (patchDTO.getReportType() != null) {
-            report.setReportType(patchDTO.getReportType());
+        if (patchDTO.getComplaintType() != null) {
+            complaint.setComplaintType(patchDTO.getComplaintType());
         }
     }
 }

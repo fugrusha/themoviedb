@@ -1,6 +1,6 @@
 package com.golovko.backend.domain;
 
-public enum ReportType {
+public enum ComplaintType {
     SPAM,
     SPOILER,
     MISPRINT,

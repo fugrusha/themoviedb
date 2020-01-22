@@ -3,6 +3,7 @@ package com.golovko.backend.controller;
 import com.golovko.backend.dto.UserCreateDTO;
 import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
+import com.golovko.backend.dto.UserReadExtendedDTO;
 import com.golovko.backend.service.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users")
-public class UserController {
+public class ApplicationUserController {
 
     @Autowired
     private ApplicationUserService applicationUserService;
@@ -19,6 +20,11 @@ public class UserController {
     @GetMapping("/{id}")
     public UserReadDTO getUser(@PathVariable UUID id) {
         return applicationUserService.getUser(id);
+    }
+
+    @GetMapping("/{id}/extended")
+    public UserReadExtendedDTO getExtendedUser(@PathVariable UUID id){
+        return applicationUserService.getExtendedUser(id);
     }
 
     @PostMapping

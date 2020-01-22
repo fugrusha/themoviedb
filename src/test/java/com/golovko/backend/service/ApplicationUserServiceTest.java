@@ -1,11 +1,15 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.Complaint;
+import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.dto.UserCreateDTO;
 import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
+import com.golovko.backend.dto.UserReadExtendedDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
+import com.golovko.backend.repository.ComplaintRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,14 +25,28 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = "delete from application_user", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class UserServiceTest {
+//@Sql(statements = "delete from application_user", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {"delete from complaint", "delete from application_user"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+public class ApplicationUserServiceTest {
 
     @Autowired
     private ApplicationUserRepository applicationUserRepository;
 
     @Autowired
+    private ComplaintRepository complaintRepository;
+
+    @Autowired
     private ApplicationUserService applicationUserService;
+
+    private Complaint createComplaint(ApplicationUser user) {
+        Complaint complaint = new Complaint();
+        complaint.setComplaintText("Complaint text");
+        complaint.setComplaintTitle("Complaint Title");
+        complaint.setComplaintType(ComplaintType.CHILD_ABUSE);
+        complaint.setAuthor(user);
+        complaint = complaintRepository.save(complaint);
+        return complaint;
+    }
 
     private ApplicationUser createUser() {
         ApplicationUser applicationUser = new ApplicationUser();
@@ -37,6 +55,18 @@ public class UserServiceTest {
         applicationUser.setEmail("vetal@gmail.com");
         applicationUser = applicationUserRepository.save(applicationUser);
         return applicationUser;
+    }
+
+    @Test
+    public void getGetUserExtended() {
+        ApplicationUser user = createUser();
+        Complaint complaint = createComplaint(user);
+        user.setComplaint(complaint);
+
+        UserReadExtendedDTO readExtendedDTO = applicationUserService.getExtendedUser(user.getId());
+
+        Assertions.assertThat(readExtendedDTO).isEqualToIgnoringGivenFields(user, "complaint");
+        Assertions.assertThat(readExtendedDTO.getComplaint()).isEqualToIgnoringGivenFields(complaint);
     }
 
     @Test

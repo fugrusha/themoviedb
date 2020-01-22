@@ -5,15 +5,13 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class UserReadDTO {
+public class UserReadExtendedDTO {
 
     private UUID id;
 
     private String username;
 
-    private String password;
-
     private String email;
 
-    private UUID complaint;
+    private ComplaintReadDTO complaint;
 }

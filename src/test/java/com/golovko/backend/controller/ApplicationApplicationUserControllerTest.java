@@ -28,8 +28,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(UserController.class)
-public class ApplicationUserControllerTest {
+@WebMvcTest(ApplicationUserController.class)
+public class ApplicationApplicationUserControllerTest {
 
     @Autowired
     private MockMvc mvc;

@@ -1,6 +1,5 @@
 package com.golovko.backend.domain;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,24 +9,23 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-public class Report {
+public class Complaint {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
     @Column(nullable = false)
-    private String reportTitle;
+    private String complaintTitle;
 
     @Column(nullable = false)
-    private String reportText;
+    private String complaintText;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    @JsonFormat(shape = JsonFormat.Shape.OBJECT)
-    private ReportType reportType;
+    private ComplaintType complaintType;
 
-//    @ManyToOne
-//    @JoinColumn(nullable = false)
-//    private User author;
+    @OneToOne
+    @JoinColumn(nullable = false)
+    private ApplicationUser author;
 }

@@ -37,19 +37,26 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create_report_table" author="andrew">
-        <createTable tableName="report">
+    <changeSet id="create_complaint_table" author="andrew">
+        <createTable tableName="complaint">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="report_title" type="varchar(128)">
+            <column name="complaint_title" type="varchar(128)">
                 <constraints nullable="false"/>
             </column>
-            <column name="report_text" type="varchar(1000)">
+            <column name="complaint_text" type="varchar(1000)">
                 <constraints nullable="false"/>
             </column>
-            <column name="report_type" type="varchar(30)">
+            <column name="complaint_type" type="varchar(30)">
                 <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_ai_aggregate_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="false"/>
             </column>
         </createTable>
     </changeSet>

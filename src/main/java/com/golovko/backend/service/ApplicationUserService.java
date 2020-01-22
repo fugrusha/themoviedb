@@ -4,6 +4,7 @@ import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.dto.UserCreateDTO;
 import com.golovko.backend.dto.UserPatchDTO;
 import com.golovko.backend.dto.UserReadDTO;
+import com.golovko.backend.dto.UserReadExtendedDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,6 +24,11 @@ public class ApplicationUserService {
     public UserReadDTO getUser(UUID id) {
         ApplicationUser applicationUser = getUserRequired(id);
         return translationService.toRead(applicationUser);
+    }
+
+    public UserReadExtendedDTO getExtendedUser(UUID id) {
+        ApplicationUser user = getUserRequired(id);
+        return translationService.toReadExtended(user);
     }
 
     public UserReadDTO createUser(UserCreateDTO createDTO) {
