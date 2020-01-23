@@ -9,23 +9,18 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-public class Complaint {
+public class Person {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
     @Column(nullable = false)
-    private String complaintTitle;
+    private String firstName;
 
     @Column(nullable = false)
-    private String complaintText;
+    private String lastName;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    private ComplaintType complaintType;
-
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "author_id")
-    private ApplicationUser author;
+    private Gender gender;
 }

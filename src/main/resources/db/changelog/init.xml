@@ -59,6 +59,19 @@
                         nullable="false"/>
             </column>
         </createTable>
+
+        <createTable tableName="person">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="first_name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="gender" type="varchar(10)"/>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>

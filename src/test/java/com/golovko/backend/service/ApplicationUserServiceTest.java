@@ -25,8 +25,8 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-//@Sql(statements = "delete from application_user", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-@Sql(statements = {"delete from complaint", "delete from application_user"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {"delete from complaint", "delete from application_user"},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ApplicationUserServiceTest {
 
     @Autowired
@@ -58,7 +58,7 @@ public class ApplicationUserServiceTest {
     }
 
     @Test
-    public void getGetUserExtended() {
+    public void testGetUserExtendedTest() {
         ApplicationUser user = createUser();
         Complaint complaint = createComplaint(user);
         user.setComplaint(complaint);
@@ -71,10 +71,10 @@ public class ApplicationUserServiceTest {
 
     @Test
     public void testGetUser() {
-        ApplicationUser applicationUser = createUser();
+        ApplicationUser user = createUser();
 
-        UserReadDTO readDTO = applicationUserService.getUser(applicationUser.getId());
-        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(applicationUser);
+        UserReadDTO readDTO = applicationUserService.getUser(user.getId());
+        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(user);
     }
 
     @Test(expected = EntityNotFoundException.class)

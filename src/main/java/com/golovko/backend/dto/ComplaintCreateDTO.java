@@ -11,5 +11,5 @@ public class ComplaintCreateDTO {
 
     private ComplaintType complaintType;
 
-//    private UUID userId;
+//    private UUID authorId;
 }

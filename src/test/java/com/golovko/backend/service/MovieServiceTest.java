@@ -102,7 +102,7 @@ public class MovieServiceTest {
         Assert.assertNotNull(readDTO.getMovieTitle());
         Assert.assertNotNull(readDTO.getDescription());
         Assert.assertNotNull(readDTO.getReleaseDate());
-        Assertions.assertThat(readDTO.isReleased()).isEqualTo(movie.getIsReleased());
+        Assert.assertNotNull(readDTO.isReleased());
         Assert.assertNotNull(readDTO.getAverageRating());
 
         Movie movieAfterUpdate = movieRepository.findById(readDTO.getId()).get();
@@ -110,7 +110,7 @@ public class MovieServiceTest {
         Assert.assertNotNull(movieAfterUpdate.getMovieTitle());
         Assert.assertNotNull(movieAfterUpdate.getDescription());
         Assert.assertNotNull(movieAfterUpdate.getReleaseDate());
-        Assertions.assertThat(readDTO.isReleased()).isEqualTo(movie.getIsReleased());
+        Assert.assertNotNull(movieAfterUpdate.getIsReleased());
         Assert.assertNotNull(movieAfterUpdate.getAverageRating());
 
         Assertions.assertThat(movie).isEqualToComparingFieldByField(movieAfterUpdate);

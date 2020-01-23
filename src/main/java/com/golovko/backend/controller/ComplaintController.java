@@ -18,22 +18,22 @@ public class ComplaintController {
 
     @GetMapping("/{id}")
     public ComplaintReadDTO getReport(@PathVariable UUID id) {
-        return complaintService.getReport(id);
+        return complaintService.getComplaint(id);
     }
 
     @PostMapping
     public ComplaintReadDTO createReport(@RequestBody ComplaintCreateDTO createDTO) {
-        return complaintService.createReport(createDTO);
+        return complaintService.createComplaint(createDTO);
     }
 //
     @PatchMapping("/{id}")
     public ComplaintReadDTO patchReport(@PathVariable UUID id, @RequestBody ComplaintPatchDTO patchDTO) {
-        return complaintService.patchReport(id, patchDTO);
+        return complaintService.patchComplaint(id, patchDTO);
     }
 
     @DeleteMapping("/{id}")
     public void deleteReport(@PathVariable UUID id) {
-        complaintService.deleteReport(id);
+        complaintService.deleteComplaint(id);
     }
 
 }

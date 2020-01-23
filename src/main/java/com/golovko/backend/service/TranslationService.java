@@ -3,6 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.*;
 import org.springframework.stereotype.Service;
 
@@ -12,11 +13,12 @@ public class TranslationService {
     /*
         ApplicationUser translations
     */
-    public UserReadDTO toRead(ApplicationUser applicationUser) {
+    public UserReadDTO toRead(ApplicationUser user) {
         UserReadDTO dto = new UserReadDTO();
-        dto.setId(applicationUser.getId());
-        dto.setUsername(applicationUser.getUsername());
-        dto.setEmail(applicationUser.getEmail());
+        dto.setId(user.getId());
+        dto.setUsername(user.getUsername());
+        dto.setPassword(user.getPassword());
+        dto.setEmail(user.getEmail());
         return dto;
     }
 
@@ -121,6 +123,38 @@ public class TranslationService {
         }
         if (patchDTO.getComplaintType() != null) {
             complaint.setComplaintType(patchDTO.getComplaintType());
+        }
+    }
+
+    /*
+        Person translations
+    */
+    public PersonReadDTO toRead(Person person) {
+        PersonReadDTO dto = new PersonReadDTO();
+        dto.setId(person.getId());
+        dto.setFirstName(person.getFirstName());
+        dto.setLastName(person.getLastName());
+        dto.setGender(person.getGender());
+        return dto;
+    }
+
+    public Person toEntity(PersonCreateDTO createDTO) {
+        Person person = new Person();
+        person.setFirstName(createDTO.getFirstName());
+        person.setLastName(createDTO.getLastName());
+        person.setGender(createDTO.getGender());
+        return person;
+    }
+
+    public void patchEntity(PersonPatchDTO patchDTO, Person person) {
+        if (patchDTO.getFirstName() != null) {
+            person.setFirstName(patchDTO.getFirstName());
+        }
+        if (patchDTO.getLastName() != null) {
+            person.setLastName(patchDTO.getLastName());
+        }
+        if (patchDTO.getGender() != null) {
+            person.setGender(patchDTO.getGender());
         }
     }
 }

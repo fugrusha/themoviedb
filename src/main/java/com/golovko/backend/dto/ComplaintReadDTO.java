@@ -15,5 +15,5 @@ public class ComplaintReadDTO {
 
     private ComplaintType complaintType;
 
-//    private UUID userId;
+//    private UUID authorId;
 }

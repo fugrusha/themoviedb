@@ -20,20 +20,20 @@ public class ComplaintService {
     @Autowired
     private TranslationService translationService;
 
-    public ComplaintReadDTO getReport(UUID id) {
-        Complaint complaint = getReportRequired(id);
+    public ComplaintReadDTO getComplaint(UUID id) {
+        Complaint complaint = getComplaintRequired(id);
         return translationService.toRead(complaint);
     }
 
-    public ComplaintReadDTO createReport(ComplaintCreateDTO createDTO) {
+    public ComplaintReadDTO createComplaint(ComplaintCreateDTO createDTO) {
         Complaint complaint = translationService.toEntity(createDTO);
 
         complaint = complaintRepository.save(complaint);
         return translationService.toRead(complaint);
     }
 
-    public ComplaintReadDTO patchReport(UUID id, ComplaintPatchDTO patchDTO) {
-        Complaint complaint = getReportRequired(id);
+    public ComplaintReadDTO patchComplaint(UUID id, ComplaintPatchDTO patchDTO) {
+        Complaint complaint = getComplaintRequired(id);
 
         translationService.patchEntity(patchDTO, complaint);
 
@@ -42,11 +42,11 @@ public class ComplaintService {
         return translationService.toRead(complaint);
     }
 
-    public void deleteReport(UUID id) {
-        complaintRepository.delete(getReportRequired(id));
+    public void deleteComplaint(UUID id) {
+        complaintRepository.delete(getComplaintRequired(id));
     }
 
-    private Complaint getReportRequired(UUID id) {
+    private Complaint getComplaintRequired(UUID id) {
         return complaintRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(Complaint.class, id)
         );

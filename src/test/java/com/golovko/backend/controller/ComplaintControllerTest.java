@@ -51,7 +51,7 @@ public class ComplaintControllerTest {
     public void getReportByIdTest() throws Exception {
         ComplaintReadDTO readDTO = createReportReadDTO();
 
-        Mockito.when(complaintService.getReport(readDTO.getId())).thenReturn(readDTO);
+        Mockito.when(complaintService.getComplaint(readDTO.getId())).thenReturn(readDTO);
 
         String resultJson = mockMvc.perform(get("/api/v1/reports/{id}", readDTO.getId()))
                 .andExpect(status().isOk())
@@ -62,7 +62,7 @@ public class ComplaintControllerTest {
         ComplaintReadDTO actualReport = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assertions.assertThat(actualReport).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(complaintService).getReport(readDTO.getId());
+        Mockito.verify(complaintService).getComplaint(readDTO.getId());
     }
 
     @Test
@@ -70,7 +70,7 @@ public class ComplaintControllerTest {
         UUID wrongId = UUID.randomUUID();
 
         EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
-        Mockito.when(complaintService.getReport(wrongId)).thenThrow(exception);
+        Mockito.when(complaintService.getComplaint(wrongId)).thenThrow(exception);
 
         String result = mockMvc.perform(get("/api/v1/reports/{id}", wrongId))
                 .andExpect(status().isNotFound())
@@ -88,7 +88,7 @@ public class ComplaintControllerTest {
 
         ComplaintReadDTO readDTO = createReportReadDTO();
 
-        Mockito.when(complaintService.createReport(createDTO)).thenReturn(readDTO);
+        Mockito.when(complaintService.createComplaint(createDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc.perform(post("/api/v1/reports")
                 .content(objectMapper.writeValueAsString(createDTO))
@@ -109,7 +109,7 @@ public class ComplaintControllerTest {
         patchDTO.setComplaintText("another text");
         patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
 
-        Mockito.when(complaintService.patchReport(readDTO.getId(), patchDTO)).thenReturn(readDTO);
+        Mockito.when(complaintService.patchComplaint(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc.perform(patch("/api/v1/reports/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
@@ -128,6 +128,6 @@ public class ComplaintControllerTest {
         mockMvc.perform(delete("/api/v1/reports/{id}", id.toString()))
                 .andExpect(status().isOk());
 
-        Mockito.verify(complaintService).deleteReport(id);
+        Mockito.verify(complaintService).deleteComplaint(id);
     }
 }
