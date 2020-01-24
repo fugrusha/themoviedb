@@ -1,9 +1,9 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.dto.PersonCreateDTO;
-import com.golovko.backend.dto.PersonPatchDTO;
-import com.golovko.backend.dto.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonCreateDTO;
+import com.golovko.backend.dto.person.PersonPatchDTO;
+import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;

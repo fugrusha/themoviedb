@@ -1,4 +1,4 @@
-package com.golovko.backend.dto;
+package com.golovko.backend.dto.movie;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;

@@ -1,4 +1,4 @@
-package com.golovko.backend.dto;
+package com.golovko.backend.dto.user;
 
 import lombok.Data;
 
@@ -14,6 +14,4 @@ public class UserReadDTO {
     private String password;
 
     private String email;
-
-    private UUID complaint;
 }

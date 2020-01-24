@@ -25,7 +25,7 @@ public class Complaint {
     @Enumerated(EnumType.STRING)
     private ComplaintType complaintType;
 
-    @OneToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "author_id")
     private ApplicationUser author;
 }

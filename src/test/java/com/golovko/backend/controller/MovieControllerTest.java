@@ -3,9 +3,9 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.dto.MovieCreateDTO;
-import com.golovko.backend.dto.MoviePatchDTO;
-import com.golovko.backend.dto.MovieReadDTO;
+import com.golovko.backend.dto.movie.MovieCreateDTO;
+import com.golovko.backend.dto.movie.MoviePatchDTO;
+import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieService;
 import org.assertj.core.api.Assertions;

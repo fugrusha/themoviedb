@@ -3,9 +3,9 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.dto.ComplaintCreateDTO;
-import com.golovko.backend.dto.ComplaintPatchDTO;
-import com.golovko.backend.dto.ComplaintReadDTO;
+import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
+import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
@@ -38,18 +38,19 @@ public class ComplaintControllerTest {
     @MockBean
     private ComplaintService complaintService;
 
-    private ComplaintReadDTO createReportReadDTO() {
+    private ComplaintReadDTO createComplaintReadDTO() {
         ComplaintReadDTO readDTO = new ComplaintReadDTO();
         readDTO.setId(UUID.randomUUID());
         readDTO.setComplaintTitle("Report 1");
         readDTO.setComplaintText("I have noticed a spoiler");
         readDTO.setComplaintType(ComplaintType.SPOILER);
+        readDTO.setAuthorId(UUID.randomUUID());
         return readDTO;
     }
 
     @Test
     public void getReportByIdTest() throws Exception {
-        ComplaintReadDTO readDTO = createReportReadDTO();
+        ComplaintReadDTO readDTO = createComplaintReadDTO();
 
         Mockito.when(complaintService.getComplaint(readDTO.getId())).thenReturn(readDTO);
 
@@ -59,8 +60,8 @@ public class ComplaintControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        ComplaintReadDTO actualReport = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
-        Assertions.assertThat(actualReport).isEqualToComparingFieldByField(readDTO);
+        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
+        Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
 
         Mockito.verify(complaintService).getComplaint(readDTO.getId());
     }
@@ -70,6 +71,7 @@ public class ComplaintControllerTest {
         UUID wrongId = UUID.randomUUID();
 
         EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
+
         Mockito.when(complaintService.getComplaint(wrongId)).thenThrow(exception);
 
         String result = mockMvc.perform(get("/api/v1/reports/{id}", wrongId))
@@ -86,7 +88,7 @@ public class ComplaintControllerTest {
         createDTO.setComplaintText("I have noticed a spoiler");
         createDTO.setComplaintType(ComplaintType.SPOILER);
 
-        ComplaintReadDTO readDTO = createReportReadDTO();
+        ComplaintReadDTO readDTO = createComplaintReadDTO();
 
         Mockito.when(complaintService.createComplaint(createDTO)).thenReturn(readDTO);
 
@@ -96,13 +98,13 @@ public class ComplaintControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        ComplaintReadDTO actualReport = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
-        Assertions.assertThat(actualReport).isEqualToComparingFieldByField(readDTO);
+        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
+        Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test
     public void patchReportTest() throws Exception {
-        ComplaintReadDTO readDTO = createReportReadDTO();
+        ComplaintReadDTO readDTO = createComplaintReadDTO();
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
@@ -117,8 +119,8 @@ public class ComplaintControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        ComplaintReadDTO actualReport = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
-        Assert.assertEquals(readDTO, actualReport);
+        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
+        Assert.assertEquals(readDTO, actualComplaint);
     }
 
     @Test

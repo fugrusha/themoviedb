@@ -1,7 +1,9 @@
-package com.golovko.backend.dto;
+package com.golovko.backend.dto.user;
 
+import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import lombok.Data;
 
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,5 +15,5 @@ public class UserReadExtendedDTO {
 
     private String email;
 
-    private ComplaintReadDTO complaint;
+    private List<ComplaintReadDTO> complaints;
 }

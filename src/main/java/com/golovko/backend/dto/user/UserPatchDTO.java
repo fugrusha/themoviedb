@@ -1,9 +1,9 @@
-package com.golovko.backend.dto;
+package com.golovko.backend.dto.user;
 
 import lombok.Data;
 
 @Data
-public class UserCreateDTO {
+public class UserPatchDTO {
 
     private String username;
     private String password;

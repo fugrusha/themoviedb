@@ -1,10 +1,10 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.dto.UserCreateDTO;
-import com.golovko.backend.dto.UserPatchDTO;
-import com.golovko.backend.dto.UserReadDTO;
-import com.golovko.backend.dto.UserReadExtendedDTO;
+import com.golovko.backend.dto.user.UserCreateDTO;
+import com.golovko.backend.dto.user.UserPatchDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.UserReadExtendedDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

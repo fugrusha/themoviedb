@@ -1,8 +1,8 @@
 package com.golovko.backend.controller;
 
-import com.golovko.backend.dto.ComplaintCreateDTO;
-import com.golovko.backend.dto.ComplaintPatchDTO;
-import com.golovko.backend.dto.ComplaintReadDTO;
+import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
+import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +25,7 @@ public class ComplaintController {
     public ComplaintReadDTO createReport(@RequestBody ComplaintCreateDTO createDTO) {
         return complaintService.createComplaint(createDTO);
     }
-//
+
     @PatchMapping("/{id}")
     public ComplaintReadDTO patchReport(@PathVariable UUID id, @RequestBody ComplaintPatchDTO patchDTO) {
         return complaintService.patchComplaint(id, patchDTO);

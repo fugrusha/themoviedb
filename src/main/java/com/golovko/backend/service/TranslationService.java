@@ -4,8 +4,23 @@ import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.dto.*;
+import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
+import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintReadDTO;
+import com.golovko.backend.dto.movie.MovieCreateDTO;
+import com.golovko.backend.dto.movie.MoviePatchDTO;
+import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.person.PersonCreateDTO;
+import com.golovko.backend.dto.person.PersonPatchDTO;
+import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.user.UserCreateDTO;
+import com.golovko.backend.dto.user.UserPatchDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.UserReadExtendedDTO;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class TranslationService {
@@ -27,7 +42,10 @@ public class TranslationService {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-        dto.setComplaint(toRead(user.getComplaint()));
+
+        List<ComplaintReadDTO> asDTO = user.getComplaints()
+                .stream().map(this::toRead).collect(Collectors.toList());
+        dto.setComplaints(asDTO);
         return dto;
     }
 
@@ -103,6 +121,7 @@ public class TranslationService {
         dto.setComplaintTitle(complaint.getComplaintTitle());
         dto.setComplaintText(complaint.getComplaintText());
         dto.setComplaintType(complaint.getComplaintType());
+        dto.setAuthorId(complaint.getAuthor().getId());
         return dto;
     }
 

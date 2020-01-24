@@ -1,8 +1,8 @@
 package com.golovko.backend.controller;
 
-import com.golovko.backend.dto.PersonCreateDTO;
-import com.golovko.backend.dto.PersonPatchDTO;
-import com.golovko.backend.dto.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonCreateDTO;
+import com.golovko.backend.dto.person.PersonPatchDTO;
+import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

@@ -1,4 +1,4 @@
-package com.golovko.backend.dto;
+package com.golovko.backend.dto.person;
 
 import com.golovko.backend.domain.Gender;
 import lombok.Data;

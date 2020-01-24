@@ -3,10 +3,10 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintType;
-import com.golovko.backend.dto.UserCreateDTO;
-import com.golovko.backend.dto.UserPatchDTO;
-import com.golovko.backend.dto.UserReadDTO;
-import com.golovko.backend.dto.UserReadExtendedDTO;
+import com.golovko.backend.dto.user.UserCreateDTO;
+import com.golovko.backend.dto.user.UserPatchDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.UserReadExtendedDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.ComplaintRepository;
@@ -19,7 +19,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -57,16 +60,22 @@ public class ApplicationUserServiceTest {
         return applicationUser;
     }
 
+    @Transactional
     @Test
     public void testGetUserExtendedTest() {
         ApplicationUser user = createUser();
         Complaint complaint = createComplaint(user);
-        user.setComplaint(complaint);
+
+        List<Complaint> complaints = new ArrayList<>();
+        complaints.add(complaint);
+        user.setComplaints(complaints);
 
         UserReadExtendedDTO readExtendedDTO = applicationUserService.getExtendedUser(user.getId());
 
-        Assertions.assertThat(readExtendedDTO).isEqualToIgnoringGivenFields(user, "complaint");
-        Assertions.assertThat(readExtendedDTO.getComplaint()).isEqualToIgnoringGivenFields(complaint);
+        Assertions.assertThat(readExtendedDTO).isEqualToIgnoringGivenFields(user, "complaints");
+
+        Assert.assertEquals(readExtendedDTO.getComplaints().get(0).getAuthorId(), complaint.getAuthor().getId());
+        Assertions.assertThat(readExtendedDTO.getComplaints().get(0)).isEqualToIgnoringGivenFields(complaint, "authorId");
     }
 
     @Test
@@ -74,6 +83,7 @@ public class ApplicationUserServiceTest {
         ApplicationUser user = createUser();
 
         UserReadDTO readDTO = applicationUserService.getUser(user.getId());
+
         Assertions.assertThat(readDTO).isEqualToComparingFieldByField(user);
     }
 
@@ -112,9 +122,10 @@ public class ApplicationUserServiceTest {
         Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(readDTO);
+        Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO, "complaints");
     }
 
+    @Transactional
     @Test
     public void testPatchUserEmptyPatch() {
         ApplicationUser applicationUser = createUser();
