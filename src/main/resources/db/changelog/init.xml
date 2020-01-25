@@ -108,6 +108,11 @@
                              foreignKeyName="fk_movie_participation_id"/>
             </column>
         </createTable>
+
+        <addUniqueConstraint
+                tableName="part_type"
+                columnNames="part_types, movie_participation_id"
+                constraintName="composite_unique_constraint"/>
     </changeSet>
 
 </databaseChangeLog>
