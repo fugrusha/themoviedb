@@ -79,7 +79,7 @@ public class PersonServiceTest {
         Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
 
         person = personRepository.findById(person.getId()).get();
-        Assertions.assertThat(person).isEqualToComparingFieldByField(readDTO);
+        Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO, "movieParticipations");
     }
 
     @Test
@@ -99,7 +99,7 @@ public class PersonServiceTest {
         Assert.assertNotNull(personAfterUpdate.getLastName());
         Assert.assertNotNull(personAfterUpdate.getGender());
 
-        Assertions.assertThat(person).isEqualToComparingFieldByField(personAfterUpdate);
+        Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate, "movieParticipations");
     }
 
     @Test
