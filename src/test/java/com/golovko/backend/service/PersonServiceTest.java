@@ -7,6 +7,7 @@ import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
+import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -31,18 +32,12 @@ public class PersonServiceTest {
     @Autowired
     private PersonRepository personRepository;
 
-    private Person createPerson() {
-        Person person = new Person();
-        person.setFirstName("Anna");
-        person.setLastName("Popova");
-        person.setGender(Gender.FEMALE);
-        person = personRepository.save(person);
-        return person;
-    }
+    @Autowired
+    private TestObjectFactory testObjectFactory;
 
     @Test
     public void getPersonTest() {
-        Person person = createPerson();
+        Person person = testObjectFactory.createPerson();
 
         PersonReadDTO readDTO = personService.getPerson(person.getId());
 
@@ -72,7 +67,7 @@ public class PersonServiceTest {
 
     @Test
     public void patchPersonTest() {
-        Person person = createPerson();
+        Person person = testObjectFactory.createPerson();
 
         PersonPatchDTO patchDTO = new PersonPatchDTO();
         patchDTO.setFirstName("Lolita");
@@ -89,7 +84,7 @@ public class PersonServiceTest {
 
     @Test
     public void patchPersonEmptyPatchTest() {
-        Person person = createPerson();
+        Person person = testObjectFactory.createPerson();
         PersonPatchDTO patchDTO = new PersonPatchDTO();
 
         PersonReadDTO readDTO = personService.patchPerson(person.getId(), patchDTO);
@@ -109,7 +104,7 @@ public class PersonServiceTest {
 
     @Test
     public void deletePersonTest() {
-        Person person = createPerson();
+        Person person = testObjectFactory.createPerson();
         personService.deletePerson(person.getId());
 
         Assert.assertFalse(personRepository.existsById(person.getId()));
