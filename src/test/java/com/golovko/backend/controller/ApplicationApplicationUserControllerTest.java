@@ -2,9 +2,12 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.ComplaintType;
+import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.dto.user.UserCreateDTO;
 import com.golovko.backend.dto.user.UserPatchDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.UserReadExtendedDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ApplicationUserService;
@@ -22,6 +25,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -49,8 +54,27 @@ public class ApplicationApplicationUserControllerTest {
         return readDTO;
     }
 
+    private UserReadExtendedDTO createUserReadExtendedDTO(List<ComplaintReadDTO> complaints) {
+        UserReadExtendedDTO readDTO = new UserReadExtendedDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setUsername("david");
+        readDTO.setEmail("david101@email.com");
+        readDTO.setComplaints(complaints);
+        return readDTO;
+    }
+
+    private ComplaintReadDTO createComplaintReadDTO() {
+        ComplaintReadDTO readDTO = new ComplaintReadDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setComplaintTitle("Report 1");
+        readDTO.setComplaintText("I have noticed a spoiler");
+        readDTO.setComplaintType(ComplaintType.SPOILER);
+        readDTO.setAuthorId(UUID.randomUUID());
+        return readDTO;
+    }
+
     @Test
-    public void testGetUser() throws Exception {
+    public void testGetUserTest() throws Exception {
         UserReadDTO user = createUserReadDTO();
 
         Mockito.when(applicationUserService.getUser(user.getId())).thenReturn(user);
@@ -61,12 +85,32 @@ public class ApplicationApplicationUserControllerTest {
                 .getResponse()
                 .getContentAsString();
 
-        System.out.println(resultJson);
-
         UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
         Assertions.assertThat(actualUser).isEqualToComparingFieldByField(user);
 
         Mockito.verify(applicationUserService).getUser(user.getId());
+    }
+
+    @Test
+    public void testGetExtendedUser() throws Exception {
+        ComplaintReadDTO complaint = createComplaintReadDTO();
+        List<ComplaintReadDTO> complaints = new ArrayList<>();
+        complaints.add(complaint);
+
+        UserReadExtendedDTO userDTO = createUserReadExtendedDTO(complaints);
+
+        Mockito.when(applicationUserService.getExtendedUser(userDTO.getId())).thenReturn(userDTO);
+
+        String resultJson = mvc.perform(get("/api/v1/users/{id}/extended", userDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        UserReadExtendedDTO actualUser = objectMapper.readValue(resultJson, UserReadExtendedDTO.class);
+        Assertions.assertThat(actualUser).isEqualToComparingFieldByField(userDTO);
+
+        Mockito.verify(applicationUserService).getExtendedUser(userDTO.getId());
     }
 
     @Test
