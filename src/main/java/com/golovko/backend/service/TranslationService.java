@@ -12,10 +12,7 @@ import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
-import com.golovko.backend.dto.user.UserReadExtendedDTO;
+import com.golovko.backend.dto.user.*;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -66,6 +63,12 @@ public class TranslationService {
         if (patchDTO.getPassword() != null){
             applicationUser.setPassword(patchDTO.getPassword());
         }
+    }
+
+    public void updateUser(UserUpdateDTO update, ApplicationUser user) {
+        user.setUsername(update.getUsername());
+        user.setEmail(update.getEmail());
+        user.setPassword(update.getPassword());
     }
 
 

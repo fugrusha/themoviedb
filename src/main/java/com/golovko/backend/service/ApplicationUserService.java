@@ -1,10 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
-import com.golovko.backend.dto.user.UserReadExtendedDTO;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,13 +36,21 @@ public class ApplicationUserService {
     }
 
     public UserReadDTO patchUser(UUID id, UserPatchDTO patch) {
-
         ApplicationUser applicationUser = getUserRequired(id);
 
         translationService.patchEntity(patch, applicationUser);
 
         applicationUser = applicationUserRepository.save(applicationUser);
         return translationService.toRead(applicationUser);
+    }
+
+    public UserReadDTO updateUser(UUID id, UserUpdateDTO update) {
+        ApplicationUser user = getUserRequired(id);
+
+        translationService.updateUser(update, user);
+
+        user = applicationUserRepository.save(user);
+        return translationService.toRead(user);
     }
 
     public void deleteUser(UUID id) {

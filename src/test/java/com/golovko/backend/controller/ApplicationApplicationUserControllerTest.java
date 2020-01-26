@@ -4,10 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
-import com.golovko.backend.dto.user.UserReadExtendedDTO;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ApplicationUserService;
@@ -182,6 +179,27 @@ public class ApplicationApplicationUserControllerTest {
         String resultJson = mvc.perform(patch("/api/v1/users/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
                 .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
+        Assert.assertEquals(readDTO, actualUser);
+    }
+
+    @Test
+    public void testUpdateUser() throws Exception {
+        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        updateDTO.setUsername("new username");
+        updateDTO.setPassword("new password");
+        updateDTO.setEmail("new_user_email@gmail.com");
+
+        UserReadDTO readDTO = createUserReadDTO();
+
+        Mockito.when(applicationUserService.updateUser(readDTO.getId(), updateDTO)).thenReturn(readDTO);
+
+        String resultJson = mvc.perform(put("/api/v1/users/{id}", readDTO.getId().toString())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 

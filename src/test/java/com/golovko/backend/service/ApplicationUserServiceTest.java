@@ -3,10 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintType;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
-import com.golovko.backend.dto.user.UserReadExtendedDTO;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.ComplaintRepository;
@@ -144,6 +141,23 @@ public class ApplicationUserServiceTest {
         Assert.assertNotNull(applicationUserAfterUpdate.getPassword());
 
         Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(applicationUserAfterUpdate);
+    }
+
+    @Test
+    public void testUpdateUser() {
+        ApplicationUser user = createUser();
+
+        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        updateDTO.setUsername("new username");
+        updateDTO.setPassword("new password");
+        updateDTO.setEmail("new_email@gmail.com");
+
+        UserReadDTO readDTO = applicationUserService.updateUser(user.getId(), updateDTO);
+
+        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
+
+        user = applicationUserRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO, "complaints");
     }
 
     @Test

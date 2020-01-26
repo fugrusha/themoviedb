@@ -1,9 +1,6 @@
 package com.golovko.backend.controller;
 
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
-import com.golovko.backend.dto.user.UserReadExtendedDTO;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.service.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -35,6 +32,11 @@ public class ApplicationUserController {
     @PatchMapping("/{id}")
     public UserReadDTO patchUser(@PathVariable UUID id, @RequestBody UserPatchDTO patch) {
         return applicationUserService.patchUser(id, patch);
+    }
+
+    @PutMapping("/{id}")
+    public UserReadDTO updateUser(@PathVariable UUID id, @RequestBody UserUpdateDTO update) {
+        return applicationUserService.updateUser(id, update);
     }
 
     @DeleteMapping("/{id}")
