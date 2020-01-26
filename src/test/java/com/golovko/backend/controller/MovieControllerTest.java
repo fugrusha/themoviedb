@@ -3,9 +3,10 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.dto.MovieCreateDTO;
-import com.golovko.backend.dto.MoviePatchDTO;
-import com.golovko.backend.dto.MovieReadDTO;
+import com.golovko.backend.dto.movie.MovieCreateDTO;
+import com.golovko.backend.dto.movie.MoviePatchDTO;
+import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.movie.MovieUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieService;
 import org.assertj.core.api.Assertions;
@@ -119,6 +120,29 @@ public class MovieControllerTest {
 
         String resultJson = mockMvc.perform(patch("/api/v1/movies/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MovieReadDTO actualMovie = objectMapper.readValue(resultJson, MovieReadDTO.class);
+        Assert.assertEquals(readDTO, actualMovie);
+    }
+
+    @Test
+    public void updateMovieTest() throws Exception {
+        MovieUpdateDTO updateDTO = new MovieUpdateDTO();
+        updateDTO.setMovieTitle("new title");
+        updateDTO.setDescription("some NEW description");
+        updateDTO.setIsReleased(false);
+        updateDTO.setReleaseDate(LocalDate.parse("1900-07-10"));
+        updateDTO.setAverageRating(5.5);
+
+        MovieReadDTO readDTO = createMovieReadDTO();
+
+        Mockito.when(movieService.updateMovie(readDTO.getId(), updateDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(put("/api/v1/movies/{id}", readDTO.getId().toString())
+                .content(objectMapper.writeValueAsString(updateDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();

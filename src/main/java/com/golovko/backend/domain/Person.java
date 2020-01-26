@@ -4,31 +4,28 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
 @Entity
-@Setter
 @Getter
-public class Movie {
+@Setter
+public class Person {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
     @Column(nullable = false)
-    private String movieTitle;
+    private String firstName;
 
-    private LocalDate releaseDate;
+    @Column(nullable = false)
+    private String lastName;
 
-    private String description;
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
 
-    private Boolean isReleased;
-
-    private Double averageRating;
-
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MovieParticipation> movieParticipations = new HashSet<>();
 }

@@ -1,0 +1,141 @@
+package com.golovko.backend.controller;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.golovko.backend.domain.Gender;
+import com.golovko.backend.dto.person.PersonCreateDTO;
+import com.golovko.backend.dto.person.PersonPatchDTO;
+import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonUpdateDTO;
+import com.golovko.backend.service.PersonService;
+import org.assertj.core.api.Assertions;
+import org.junit.Assert;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.web.servlet.MockMvc;
+
+import java.util.UUID;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+@RunWith(SpringRunner.class)
+@WebMvcTest(PersonController.class)
+public class PersonControllerTest {
+
+    @Autowired
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
+
+    @MockBean
+    private PersonService personService;
+
+    private PersonReadDTO createPersonReadDTO() {
+        PersonReadDTO dto = new PersonReadDTO();
+        dto.setId(UUID.randomUUID());
+        dto.setFirstName("Max");
+        dto.setLastName("Popov");
+        dto.setGender(Gender.MALE);
+        return dto;
+    }
+
+    @Test
+    public void getPersonTest() throws Exception {
+        PersonReadDTO readDTO = createPersonReadDTO();
+
+        Mockito.when(personService.getPerson(readDTO.getId())).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(get("/api/v1/persons/{id}", readDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PersonReadDTO actualPerson = objectMapper.readValue(resultJson, PersonReadDTO.class);
+
+        Assertions.assertThat(actualPerson).isEqualToComparingFieldByField(readDTO);
+        Mockito.verify(personService).getPerson(readDTO.getId());
+    }
+
+    @Test
+    public void createPersonTest() throws Exception {
+        PersonCreateDTO createDTO = new PersonCreateDTO();
+        createDTO.setFirstName("Max");
+        createDTO.setLastName("Popov");
+        createDTO.setGender(Gender.MALE);
+
+        PersonReadDTO readDTO = createPersonReadDTO();
+
+        Mockito.when(personService.createPerson(createDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(post("/api/v1/persons")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PersonReadDTO actualPerson = objectMapper.readValue(resultJson, PersonReadDTO.class);
+
+        Assertions.assertThat(actualPerson).isEqualToComparingFieldByField(readDTO);
+        Mockito.verify(personService).createPerson(createDTO);
+    }
+
+    @Test
+    public void patchPersonTest() throws Exception {
+        PersonReadDTO readDTO = createPersonReadDTO();
+
+        PersonPatchDTO patchDTO = new PersonPatchDTO();
+        patchDTO.setFirstName("Lolita");
+        patchDTO.setLastName("Bulgakova");
+        patchDTO.setGender(Gender.FEMALE);
+
+        Mockito.when(personService.patchPerson(readDTO.getId(), patchDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(patch("/api/v1/persons/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PersonReadDTO actualPerson = objectMapper.readValue(resultJson, PersonReadDTO.class);
+
+        Assert.assertEquals(readDTO, actualPerson);
+    }
+
+    @Test
+    public void updatePersonTest() throws Exception {
+        PersonReadDTO readDTO = createPersonReadDTO();
+
+        PersonUpdateDTO updateDTO = new PersonUpdateDTO();
+        updateDTO.setFirstName("Lolita");
+        updateDTO.setLastName("Bulgakova");
+        updateDTO.setGender(Gender.FEMALE);
+
+        Mockito.when(personService.updatePerson(readDTO.getId(), updateDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(put("/api/v1/persons/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PersonReadDTO actualPerson = objectMapper.readValue(resultJson, PersonReadDTO.class);
+
+        Assert.assertEquals(readDTO, actualPerson);
+    }
+
+    @Test
+    public void deletePersonTest() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/persons/{id}", id.toString()))
+                .andExpect(status().is2xxSuccessful());
+
+        Mockito.verify(personService).deletePerson(id);
+    }
+}

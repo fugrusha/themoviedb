@@ -5,7 +5,7 @@
          http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
 
     <changeSet id="create_user_table" author="andrew">
-        <createTable tableName="usr">
+        <createTable tableName="application_user">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
@@ -37,21 +37,82 @@
         </createTable>
     </changeSet>
 
-    <changeSet id="create_report_table" author="andrew">
-        <createTable tableName="report">
+    <changeSet id="create_complaint_table" author="andrew">
+        <createTable tableName="complaint">
             <column name="id" type="uuid">
                 <constraints primaryKey="true"/>
             </column>
-            <column name="report_title" type="varchar(128)">
+            <column name="complaint_title" type="varchar(128)">
                 <constraints nullable="false"/>
             </column>
-            <column name="report_text" type="varchar(1000)">
+            <column name="complaint_text" type="varchar(1000)">
                 <constraints nullable="false"/>
             </column>
-            <column name="report_type" type="varchar(30)">
+            <column name="complaint_type" type="varchar(30)">
                 <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_ai_application_user_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="false"
+                />
             </column>
         </createTable>
+
+        <createTable tableName="person">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="first_name" type="varchar(128)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="last_name" type="varchar(128)">
+                <constraints nullable="true"/>
+            </column>
+            <column name="gender" type="varchar(10)"/>
+        </createTable>
+
+    </changeSet>
+
+    <changeSet id="create_movie_participation" author="andrew">
+        <createTable tableName="movie_participation">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="part_info" type="varchar(1000)" />
+
+            <column name="average_rating" type="double" />
+            <column name="movie_id" type="uuid">
+                <constraints referencedTableName="movie"
+                             referencedColumnNames="id"
+                             foreignKeyName="fk_ci_movie_id"
+                             deleteCascade="true"
+                             />
+            </column>
+            <column name="person_id" type="uuid">
+                <constraints referencedTableName="person"
+                             referencedColumnNames="id"
+                             foreignKeyName="fk_ci_person_id"
+                             deleteCascade="true"
+                />
+            </column>
+        </createTable>
+
+        <createTable tableName="part_type">
+            <column name="part_types" type="varchar(20)"/>
+            <column name="movie_participation_id" type="uuid">
+                <constraints referencedTableName="movie_participation"
+                             referencedColumnNames="id"
+                             foreignKeyName="fk_movie_participation_id"/>
+            </column>
+        </createTable>
+
+        <addUniqueConstraint
+                tableName="part_type"
+                columnNames="part_types, movie_participation_id"
+                constraintName="composite_unique_constraint"/>
     </changeSet>
 
 </databaseChangeLog>

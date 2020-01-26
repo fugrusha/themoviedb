@@ -1,9 +1,10 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.dto.MovieCreateDTO;
-import com.golovko.backend.dto.MoviePatchDTO;
-import com.golovko.backend.dto.MovieReadDTO;
+import com.golovko.backend.dto.movie.MovieCreateDTO;
+import com.golovko.backend.dto.movie.MoviePatchDTO;
+import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.movie.MovieUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,67 +18,49 @@ public class MovieService {
     @Autowired
     private MovieRepository movieRepository;
 
-    private Movie getMovieRequired(UUID id) {
-        return movieRepository.findById(id).orElseThrow(() ->
-            new EntityNotFoundException(Movie.class, id)
-        );
-    }
+    @Autowired
+    TranslationService translationService;
 
     public MovieReadDTO getMovie(UUID id) {
         Movie movie = getMovieRequired(id);
-        return toRead(movie);
-    }
-
-    private MovieReadDTO toRead(Movie movie) {
-        MovieReadDTO dto = new MovieReadDTO();
-        dto.setId(movie.getId());
-        dto.setMovieTitle(movie.getMovieTitle());
-        dto.setDescription(movie.getDescription());
-        dto.setReleaseDate(movie.getReleaseDate());
-        dto.setReleased(movie.getIsReleased());
-        dto.setAverageRating(movie.getAverageRating());
-
-        return dto;
+        return translationService.toRead(movie);
     }
 
     public MovieReadDTO createMovie(MovieCreateDTO createDTO) {
-        Movie movie = new Movie();
-        movie.setMovieTitle(createDTO.getMovieTitle());
-        movie.setDescription(createDTO.getDescription());
-        movie.setReleaseDate(createDTO.getReleaseDate());
-        movie.setIsReleased(createDTO.isReleased());
-        movie.setAverageRating(createDTO.getAverageRating());
+        Movie movie = translationService.toEntity(createDTO);
 
         movie = movieRepository.save(movie);
 
-        return toRead(movie);
+        return translationService.toRead(movie);
     }
 
     public MovieReadDTO patchMovie(UUID id, MoviePatchDTO patchDTO) {
         Movie movie = getMovieRequired(id);
 
-        if (patchDTO.getMovieTitle() != null){
-            movie.setMovieTitle(patchDTO.getMovieTitle());
-        }
-        if (patchDTO.getDescription() != null) {
-            movie.setDescription(patchDTO.getDescription());
-        }
-        if (patchDTO.getAverageRating() != null){
-            movie.setAverageRating(patchDTO.getAverageRating());
-        }
-        if (patchDTO.getReleaseDate() != null){
-            movie.setReleaseDate(patchDTO.getReleaseDate());
-        }
-        if (patchDTO.getIsReleased() != null){
-            movie.setIsReleased(patchDTO.getIsReleased());
-        }
+        translationService.patchEntity(patchDTO, movie);
 
         movie = movieRepository.save(movie);
 
-        return toRead(movie);
+        return translationService.toRead(movie);
+    }
+
+    public MovieReadDTO updateMovie(UUID id, MovieUpdateDTO updateDTO) {
+        Movie movie = getMovieRequired(id);
+
+        translationService.updateEntity(updateDTO, movie);
+
+        movie = movieRepository.save(movie);
+
+        return translationService.toRead(movie);
     }
 
     public void deleteMovie(UUID id) {
         movieRepository.delete(getMovieRequired(id));
+    }
+
+    private Movie getMovieRequired(UUID id) {
+        return movieRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(Movie.class, id)
+        );
     }
 }
