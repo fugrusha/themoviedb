@@ -8,6 +8,7 @@ import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.movie.MovieUpdateDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonCreateDTO;
@@ -113,6 +114,14 @@ public class TranslationService {
         if (patchDTO.getIsReleased() != null){
             movie.setIsReleased(patchDTO.getIsReleased());
         }
+    }
+
+    public void updateEntity(MovieUpdateDTO updateDTO, Movie movie) {
+        movie.setMovieTitle(updateDTO.getMovieTitle());
+        movie.setReleaseDate(updateDTO.getReleaseDate());
+        movie.setDescription(updateDTO.getDescription());
+        movie.setIsReleased(updateDTO.getIsReleased());
+        movie.setAverageRating(updateDTO.getAverageRating());
     }
 
     /*

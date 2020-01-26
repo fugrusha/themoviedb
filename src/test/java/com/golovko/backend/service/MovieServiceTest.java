@@ -4,6 +4,7 @@ import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.movie.MovieUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -107,6 +108,25 @@ public class MovieServiceTest {
         Assert.assertNotNull(movieAfterUpdate.getAverageRating());
 
         Assertions.assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate, "movieParticipations");
+    }
+
+    @Test
+    public void updateMovieTest() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieUpdateDTO updateDTO = new MovieUpdateDTO();
+        updateDTO.setMovieTitle("new title");
+        updateDTO.setDescription("some NEW description");
+        updateDTO.setIsReleased(false);
+        updateDTO.setReleaseDate(LocalDate.parse("1900-07-10"));
+        updateDTO.setAverageRating(5.5);
+
+        MovieReadDTO readDTO = movieService.updateMovie(movie.getId(), updateDTO);
+
+        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
+
+        movie = movieRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO, "movieParticipations");
     }
 
     @Test
