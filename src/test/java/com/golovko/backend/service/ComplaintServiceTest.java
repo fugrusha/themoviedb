@@ -5,6 +5,7 @@ import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
+import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.ComplaintRepository;
@@ -126,6 +127,24 @@ public class ComplaintServiceTest {
         Assert.assertNotNull(complaintAfterUpdate.getComplaintType());
 
         Assertions.assertThat(complaint).isEqualToComparingFieldByField(complaintAfterUpdate);
+    }
+
+    @Test
+    public void updateComplaintTest() {
+        Complaint complaint = createComplaint();
+
+        ComplaintUpdateDTO updateDTO = new ComplaintUpdateDTO();
+        updateDTO.setComplaintText("new text");
+        updateDTO.setComplaintTitle("new title");
+        updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+
+        ComplaintReadDTO readDTO = complaintService.updateComplaint(complaint.getId(), updateDTO);
+
+        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+
+        complaint = complaintRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(complaint).isEqualToIgnoringGivenFields(readDTO, "author");
+        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
     }
 
     @Test

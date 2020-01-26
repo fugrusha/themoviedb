@@ -4,6 +4,7 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
+import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
@@ -65,7 +66,7 @@ public class TranslationService {
         }
     }
 
-    public void updateUser(UserUpdateDTO update, ApplicationUser user) {
+    public void updateEntity(UserUpdateDTO update, ApplicationUser user) {
         user.setUsername(update.getUsername());
         user.setEmail(update.getEmail());
         user.setPassword(update.getPassword());
@@ -147,6 +148,12 @@ public class TranslationService {
         }
     }
 
+    public void updateEntity(ComplaintUpdateDTO updateDTO, Complaint complaint) {
+        complaint.setComplaintTitle(updateDTO.getComplaintTitle());
+        complaint.setComplaintText(updateDTO.getComplaintText());
+        complaint.setComplaintType(updateDTO.getComplaintType());
+    }
+
     /*
         Person translations
     */
@@ -203,5 +210,4 @@ public class TranslationService {
         dto.setPerson(toRead(movieParticipation.getPerson()));
         return dto;
     }
-
 }

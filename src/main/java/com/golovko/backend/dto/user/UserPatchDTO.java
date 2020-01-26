@@ -6,6 +6,8 @@ import lombok.Data;
 public class UserPatchDTO {
 
     private String username;
+
     private String password;
+
     private String email;
 }

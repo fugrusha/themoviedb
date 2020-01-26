@@ -6,6 +6,7 @@ import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
+import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
@@ -115,6 +116,27 @@ public class ComplaintControllerTest {
 
         String resultJson = mockMvc.perform(patch("/api/v1/reports/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
+        Assert.assertEquals(readDTO, actualComplaint);
+    }
+
+    @Test
+    public void updateComplaintTest() throws Exception {
+        ComplaintReadDTO readDTO = createComplaintReadDTO();
+
+        ComplaintUpdateDTO updateDTO = new ComplaintUpdateDTO();
+        updateDTO.setComplaintText("new text");
+        updateDTO.setComplaintTitle("new title");
+        updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+
+        Mockito.when(complaintService.updateComplaint(readDTO.getId(), updateDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(put("/api/v1/reports/{id}", readDTO.getId().toString())
+                .content(objectMapper.writeValueAsString(updateDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
