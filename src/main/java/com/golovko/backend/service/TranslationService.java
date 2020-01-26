@@ -14,6 +14,7 @@ import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.dto.user.*;
 import org.springframework.stereotype.Service;
 
@@ -193,6 +194,12 @@ public class TranslationService {
         if (patchDTO.getGender() != null) {
             person.setGender(patchDTO.getGender());
         }
+    }
+
+    public void updateEntity(PersonUpdateDTO updateDTO, Person person) {
+        person.setFirstName(updateDTO.getFirstName());
+        person.setLastName(updateDTO.getLastName());
+        person.setGender(updateDTO.getGender());
     }
 
     /*

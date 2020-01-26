@@ -5,6 +5,7 @@ import com.golovko.backend.domain.Gender;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.service.PersonService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -98,6 +99,28 @@ public class PersonControllerTest {
         String resultJson = mockMvc.perform(patch("/api/v1/persons/{id}", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PersonReadDTO actualPerson = objectMapper.readValue(resultJson, PersonReadDTO.class);
+
+        Assert.assertEquals(readDTO, actualPerson);
+    }
+
+    @Test
+    public void updatePersonTest() throws Exception {
+        PersonReadDTO readDTO = createPersonReadDTO();
+
+        PersonUpdateDTO updateDTO = new PersonUpdateDTO();
+        updateDTO.setFirstName("Lolita");
+        updateDTO.setLastName("Bulgakova");
+        updateDTO.setGender(Gender.FEMALE);
+
+        Mockito.when(personService.updatePerson(readDTO.getId(), updateDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(put("/api/v1/persons/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 

@@ -2,13 +2,16 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
+import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieParticipationService;
 import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -23,6 +26,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -76,6 +80,29 @@ public class MovieParticipationControllerTest {
         Mockito.verify(movieParticipationService).getExtendedMovieParticipation(readDTO.getId());
     }
 
+    @Test
+    public void getMovieParticipationWrongIdTest() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        EntityNotFoundException exception = new EntityNotFoundException(MovieParticipation.class, id);
+        Mockito.when(movieParticipationService.getMovieParticipation(id)).thenThrow(exception);
+
+        String resultJson = mockMvc.perform(get("/api/v1/movie-participations/{id}", id))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Assert.assertTrue(resultJson.contains(exception.getMessage()));
+    }
+
+    @Test
+    public void deleteMovieParticipationTest() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/movie-participations/{id}", id.toString()))
+                .andExpect(status().is2xxSuccessful());
+
+        Mockito.verify(movieParticipationService).deleteMovieParticipation(id);
+    }
 
 
     public PersonReadDTO createPersonReadDTO() {

@@ -5,6 +5,7 @@ import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -100,6 +101,23 @@ public class PersonServiceTest {
         Assert.assertNotNull(personAfterUpdate.getGender());
 
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate, "movieParticipations");
+    }
+
+    @Test
+    public void updatePersonTest() {
+        Person person = testObjectFactory.createPerson();
+
+        PersonUpdateDTO updateDTO = new PersonUpdateDTO();
+        updateDTO.setFirstName("Lolita");
+        updateDTO.setLastName("Bulgakova");
+        updateDTO.setGender(Gender.FEMALE);
+
+        PersonReadDTO readDTO = personService.updatePerson(person.getId(), updateDTO);
+
+        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
+
+        person = personRepository.findById(person.getId()).get();
+        Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO, "movieParticipations");
     }
 
     @Test

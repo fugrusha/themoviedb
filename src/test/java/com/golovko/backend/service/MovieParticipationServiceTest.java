@@ -6,9 +6,11 @@ import com.golovko.backend.domain.PartType;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieParticipationRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -50,7 +53,6 @@ public class MovieParticipationServiceTest {
                 "movieId", "personId");
         Assertions.assertThat(readDTO.getMovieId()).isEqualToComparingFieldByField(movie.getId());
         Assertions.assertThat(readDTO.getPersonId()).isEqualToComparingFieldByField(person.getId());
-
     }
 
     @Transactional
@@ -67,6 +69,22 @@ public class MovieParticipationServiceTest {
                 "movie", "person");
         Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
         Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
+    }
+
+    @Test
+    public void deleteMovieParticipationTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieParticipation movieParticipation = createMovieParticipation(person, movie);
+
+        movieParticipationService.deleteMovieParticipation(movieParticipation.getId());
+
+        Assert.assertFalse(movieParticipationRepository.existsById(movieParticipation.getId()));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void deleteMovieNotFound() {
+        movieParticipationService.deleteMovieParticipation(UUID.randomUUID());
     }
 
     private MovieParticipation createMovieParticipation(Person person, Movie movie) {

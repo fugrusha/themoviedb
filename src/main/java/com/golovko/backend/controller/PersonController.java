@@ -3,6 +3,7 @@ package com.golovko.backend.controller;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -30,12 +31,12 @@ public class PersonController {
     public PersonReadDTO patchPerson(@RequestBody PersonPatchDTO patchDTO, @PathVariable UUID id) {
         return personService.patchPerson(id, patchDTO);
     }
-//
-//    @PutMapping
-//    public PersonReadDTO updatePerson(@RequestBody PersonPatchDTO patchDTO, @PathVariable UUID id) {
-//        return personService.updatePerson(id, patchDTO);
-//    }
-//
+
+    @PutMapping("/{id}")
+    public PersonReadDTO updatePerson(@RequestBody PersonUpdateDTO updateDTO, @PathVariable UUID id) {
+        return personService.updatePerson(id, updateDTO);
+    }
+
     @DeleteMapping("/{id}")
     public void deletePerson(@PathVariable UUID id) {
          personService.deletePerson(id);

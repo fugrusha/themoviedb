@@ -4,6 +4,7 @@ import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,17 @@ public class PersonService {
         Person person = getRequiredPerson(id);
 
         translationService.patchEntity(patchDTO, person);
+
+        person = personRepository.save(person);
+
+        return translationService.toRead(person);
+    }
+
+
+    public PersonReadDTO updatePerson(UUID id, PersonUpdateDTO updateDTO) {
+        Person person = getRequiredPerson(id);
+
+        translationService.updateEntity(updateDTO, person);
 
         person = personRepository.save(person);
 

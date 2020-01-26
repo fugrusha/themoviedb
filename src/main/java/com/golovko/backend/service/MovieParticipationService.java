@@ -39,9 +39,8 @@ public class MovieParticipationService {
         return null;
     }
 
-
     public void deleteMovieParticipation(UUID id) {
-        // TO-DO
+        movieParticipationRepository.delete(getMovieParticipationRequired(id));
     }
 
     public MovieParticipation getMovieParticipationRequired(UUID id) {
