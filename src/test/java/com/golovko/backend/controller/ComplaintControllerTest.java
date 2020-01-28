@@ -5,8 +5,8 @@ import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
@@ -128,7 +128,7 @@ public class ComplaintControllerTest {
     public void updateComplaintTest() throws Exception {
         ComplaintReadDTO readDTO = createComplaintReadDTO();
 
-        ComplaintUpdateDTO updateDTO = new ComplaintUpdateDTO();
+        ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
         updateDTO.setComplaintTitle("new title");
         updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);

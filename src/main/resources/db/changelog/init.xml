@@ -82,7 +82,6 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="part_info" type="varchar(1000)" />
-
             <column name="average_rating" type="double" />
             <column name="movie_id" type="uuid">
                 <constraints referencedTableName="movie"
@@ -113,6 +112,30 @@
                 tableName="part_type"
                 columnNames="part_types, movie_participation_id"
                 constraintName="composite_unique_constraint"/>
+
+        <createTable tableName="movie_cast">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="part_info" type="varchar(10)" />
+            <column name="part_type" type="varchar(10)" />
+            <column name="character" type="varchar(50)" />
+            <column name="average_rating" type="double" />
+            <column name="movie_id" type="uuid">
+                <constraints referencedTableName="movie"
+                             referencedColumnNames="id"
+                             foreignKeyName="fk_ci2_movie_id"
+                             deleteCascade="true"
+                />
+            </column>
+            <column name="person_id" type="uuid">
+                <constraints referencedTableName="person"
+                             referencedColumnNames="id"
+                             foreignKeyName="fk_ci2_person_id"
+                             deleteCascade="true"
+                />
+            </column>
+        </createTable>
     </changeSet>
 
 </databaseChangeLog>

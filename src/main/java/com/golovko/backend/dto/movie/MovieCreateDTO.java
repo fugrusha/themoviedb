@@ -7,6 +7,7 @@ import java.time.LocalDate;
 
 @Data
 public class MovieCreateDTO {
+
     private String movieTitle;
 
     @JsonFormat(pattern = "yyyy-MM-dd", shape = JsonFormat.Shape.STRING)
@@ -15,6 +16,4 @@ public class MovieCreateDTO {
     private String description;
 
     private boolean isReleased;
-
-    private Double averageRating;
 }

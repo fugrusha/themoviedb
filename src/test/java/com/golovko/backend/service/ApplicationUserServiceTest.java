@@ -127,7 +127,7 @@ public class ApplicationUserServiceTest {
     public void testUpdateUser() {
         ApplicationUser user = testObjectFactory.createUser();
 
-        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        UserPutDTO updateDTO = new UserPutDTO();
         updateDTO.setUsername("new username");
         updateDTO.setPassword("new password");
         updateDTO.setEmail("new_email@gmail.com");

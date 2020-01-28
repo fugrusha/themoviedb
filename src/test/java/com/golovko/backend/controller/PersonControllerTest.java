@@ -4,8 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
+import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
-import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.service.PersonService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -111,7 +111,7 @@ public class PersonControllerTest {
     public void updatePersonTest() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
 
-        PersonUpdateDTO updateDTO = new PersonUpdateDTO();
+        PersonPutDTO updateDTO = new PersonPutDTO();
         updateDTO.setFirstName("Lolita");
         updateDTO.setLastName("Bulgakova");
         updateDTO.setGender(Gender.FEMALE);

@@ -1,4 +1,4 @@
-package com.golovko.backend.dto.movieParticipation;
+package com.golovko.backend.dto.movieparticipation;
 
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.dto.movie.MovieReadDTO;

@@ -4,7 +4,7 @@ import com.golovko.backend.domain.ComplaintType;
 import lombok.Data;
 
 @Data
-public class ComplaintUpdateDTO {
+public class ComplaintPutDTO {
 
     private String complaintTitle;
 

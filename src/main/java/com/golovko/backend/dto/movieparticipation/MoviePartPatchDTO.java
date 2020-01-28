@@ -1,4 +1,4 @@
-package com.golovko.backend.dto.movieParticipation;
+package com.golovko.backend.dto.movieparticipation;
 
 import com.golovko.backend.domain.PartType;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.util.Set;
 import java.util.UUID;
 
 @Data
-public class MoviePartUpdateDTO {
+public class MoviePartPatchDTO {
 
     private String partInfo;
 

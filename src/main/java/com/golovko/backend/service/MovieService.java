@@ -3,8 +3,8 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
+import com.golovko.backend.dto.movie.MoviePutDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.movie.MovieUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +44,7 @@ public class MovieService {
         return translationService.toRead(movie);
     }
 
-    public MovieReadDTO updateMovie(UUID id, MovieUpdateDTO updateDTO) {
+    public MovieReadDTO updateMovie(UUID id, MoviePutDTO updateDTO) {
         Movie movie = getMovieRequired(id);
 
         translationService.updateEntity(updateDTO, movie);

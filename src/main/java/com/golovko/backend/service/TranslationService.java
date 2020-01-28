@@ -3,19 +3,20 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
+import com.golovko.backend.dto.movie.MoviePutDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.movie.MovieUpdateDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartCreateDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
+import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
-import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.dto.user.*;
 import org.springframework.stereotype.Service;
 
@@ -69,7 +70,7 @@ public class TranslationService {
         }
     }
 
-    public void updateEntity(UserUpdateDTO update, ApplicationUser user) {
+    public void updateEntity(UserPutDTO update, ApplicationUser user) {
         user.setUsername(update.getUsername());
         user.setEmail(update.getEmail());
         user.setPassword(update.getPassword());
@@ -96,7 +97,6 @@ public class TranslationService {
         movie.setDescription(createDTO.getDescription());
         movie.setReleaseDate(createDTO.getReleaseDate());
         movie.setIsReleased(createDTO.isReleased());
-        movie.setAverageRating(createDTO.getAverageRating());
         return movie;
     }
 
@@ -107,9 +107,6 @@ public class TranslationService {
         if (patchDTO.getDescription() != null) {
             movie.setDescription(patchDTO.getDescription());
         }
-        if (patchDTO.getAverageRating() != null){
-            movie.setAverageRating(patchDTO.getAverageRating());
-        }
         if (patchDTO.getReleaseDate() != null){
             movie.setReleaseDate(patchDTO.getReleaseDate());
         }
@@ -118,7 +115,7 @@ public class TranslationService {
         }
     }
 
-    public void updateEntity(MovieUpdateDTO updateDTO, Movie movie) {
+    public void updateEntity(MoviePutDTO updateDTO, Movie movie) {
         movie.setMovieTitle(updateDTO.getMovieTitle());
         movie.setReleaseDate(updateDTO.getReleaseDate());
         movie.setDescription(updateDTO.getDescription());
@@ -159,7 +156,7 @@ public class TranslationService {
         }
     }
 
-    public void updateEntity(ComplaintUpdateDTO updateDTO, Complaint complaint) {
+    public void updateEntity(ComplaintPutDTO updateDTO, Complaint complaint) {
         complaint.setComplaintTitle(updateDTO.getComplaintTitle());
         complaint.setComplaintText(updateDTO.getComplaintText());
         complaint.setComplaintType(updateDTO.getComplaintType());
@@ -197,7 +194,7 @@ public class TranslationService {
         }
     }
 
-    public void updateEntity(PersonUpdateDTO updateDTO, Person person) {
+    public void updateEntity(PersonPutDTO updateDTO, Person person) {
         person.setFirstName(updateDTO.getFirstName());
         person.setLastName(updateDTO.getLastName());
         person.setGender(updateDTO.getGender());
@@ -233,5 +230,20 @@ public class TranslationService {
         movieParticipation.setPartInfo(createDTO.getPartInfo());
         movieParticipation.setPartTypes(createDTO.getPartTypes());
         return movieParticipation;
+    }
+
+    /*
+        MovieCast translations
+    */
+    public MovieCastReadDTO toRead(MovieCast movieCast) {
+        MovieCastReadDTO dto = new MovieCastReadDTO();
+        dto.setId(movieCast.getId());
+        dto.setPartInfo(movieCast.getPartInfo());
+        dto.setAverageRating(movieCast.getAverageRating());
+        dto.setPartType(movieCast.getPartType());
+        dto.setMovieId(movieCast.getMovie().getId());
+        dto.setPersonId(movieCast.getPerson().getId());
+        dto.setCharacter(movieCast.getCharacter());
+        return dto;
     }
 }

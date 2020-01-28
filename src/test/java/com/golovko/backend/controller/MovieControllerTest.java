@@ -5,8 +5,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
+import com.golovko.backend.dto.movie.MoviePutDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.movie.MovieUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieService;
 import org.assertj.core.api.Assertions;
@@ -112,7 +112,6 @@ public class MovieControllerTest {
         patchDTO.setDescription("some description");
         patchDTO.setIsReleased(true);
         patchDTO.setReleaseDate(LocalDate.parse("1800-07-10"));
-        patchDTO.setAverageRating(0.1);
 
         MovieReadDTO readDTO = createMovieReadDTO();
 
@@ -130,7 +129,7 @@ public class MovieControllerTest {
 
     @Test
     public void updateMovieTest() throws Exception {
-        MovieUpdateDTO updateDTO = new MovieUpdateDTO();
+        MoviePutDTO updateDTO = new MoviePutDTO();
         updateDTO.setMovieTitle("new title");
         updateDTO.setDescription("some NEW description");
         updateDTO.setIsReleased(false);

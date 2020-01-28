@@ -1,8 +1,8 @@
 package com.golovko.backend.controller;
 
-import com.golovko.backend.dto.movieParticipation.MoviePartCreateDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.service.MovieParticipationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;

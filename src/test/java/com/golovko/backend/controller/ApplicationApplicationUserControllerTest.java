@@ -188,7 +188,7 @@ public class ApplicationApplicationUserControllerTest {
 
     @Test
     public void testUpdateUser() throws Exception {
-        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        UserPutDTO updateDTO = new UserPutDTO();
         updateDTO.setUsername("new username");
         updateDTO.setPassword("new password");
         updateDTO.setEmail("new_user_email@gmail.com");

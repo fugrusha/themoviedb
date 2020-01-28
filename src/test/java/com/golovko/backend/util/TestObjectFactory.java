@@ -2,8 +2,8 @@ package com.golovko.backend.util;
 
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.ComplaintRepository;

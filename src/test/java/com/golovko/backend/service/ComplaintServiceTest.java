@@ -5,8 +5,8 @@ import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -121,7 +121,7 @@ public class ComplaintServiceTest {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user);
 
-        ComplaintUpdateDTO updateDTO = new ComplaintUpdateDTO();
+        ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
         updateDTO.setComplaintTitle("new title");
         updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);

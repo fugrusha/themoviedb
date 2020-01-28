@@ -3,7 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.dto.movieParticipation.*;
+import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieParticipationRepository;
 import com.golovko.backend.repository.MovieRepository;
@@ -56,7 +56,7 @@ public class MovieParticipationService {
     }
 
 
-    public MoviePartReadDTO updateMovieParticipation(UUID id, MoviePartUpdateDTO updateDTO) {
+    public MoviePartReadDTO updateMovieParticipation(UUID id, MoviePartPutDTO updateDTO) {
         return null;
     }
 

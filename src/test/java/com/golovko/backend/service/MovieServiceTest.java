@@ -3,8 +3,8 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
+import com.golovko.backend.dto.movie.MoviePutDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.movie.MovieUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -56,7 +56,6 @@ public class MovieServiceTest {
         createDTO.setDescription("description");
         createDTO.setReleased(true);
         createDTO.setReleaseDate(LocalDate.parse("1900-01-01"));
-        createDTO.setAverageRating(0.0);
 
         MovieReadDTO readDTO = movieService.createMovie(createDTO);
 
@@ -76,14 +75,13 @@ public class MovieServiceTest {
         patchDTO.setDescription("another description");
         patchDTO.setIsReleased(true);
         patchDTO.setReleaseDate(LocalDate.parse("2002-02-03"));
-        patchDTO.setAverageRating(10.0);
 
         MovieReadDTO readDTO = movieService.patchMovie(movie.getId(), patchDTO);
 
         Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
 
         movie = movieRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO, "movieParticipations");
+        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
     }
 
     @Test
@@ -107,14 +105,14 @@ public class MovieServiceTest {
         Assert.assertNotNull(movieAfterUpdate.getIsReleased());
         Assert.assertNotNull(movieAfterUpdate.getAverageRating());
 
-        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate, "movieParticipations");
+        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate, "movieParticipations", "movieCast");
     }
 
     @Test
     public void updateMovieTest() {
         Movie movie = testObjectFactory.createMovie();
 
-        MovieUpdateDTO updateDTO = new MovieUpdateDTO();
+        MoviePutDTO updateDTO = new MoviePutDTO();
         updateDTO.setMovieTitle("new title");
         updateDTO.setDescription("some NEW description");
         updateDTO.setIsReleased(false);
@@ -126,7 +124,7 @@ public class MovieServiceTest {
         Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
 
         movie = movieRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO, "movieParticipations");
+        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
     }
 
     @Test
