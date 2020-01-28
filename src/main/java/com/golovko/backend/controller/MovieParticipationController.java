@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.movieParticipation.MoviePartCreateDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.service.MovieParticipationService;
@@ -25,10 +26,14 @@ public class MovieParticipationController {
         return movieParticipationService.getExtendedMovieParticipation(id);
     }
 
-//    @PostMapping
-//    public MoviePartReadDTO createMovieParticipation(@RequestBody MoviePartCreateDTO createDTO){
-//        return movieParticipationService.createMovieParticipation(createDTO);
-//    }
+    @PostMapping
+    public MoviePartReadDTO createMovieParticipation(
+            @RequestBody MoviePartCreateDTO createDTO,
+            @RequestParam("movieId") UUID movieId,
+            @RequestParam("personId") UUID personId
+    ){
+        return movieParticipationService.createMovieParticipation(createDTO, movieId, personId);
+    }
 //
 //    @PatchMapping("/{id}")
 //    public MoviePartReadDTO patchMovieParticipation(

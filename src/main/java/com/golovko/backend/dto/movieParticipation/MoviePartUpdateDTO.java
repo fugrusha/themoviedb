@@ -13,8 +13,6 @@ public class MoviePartUpdateDTO {
 
     private Set<PartType> partTypes;
 
-    private Double averageRating;
-
     private UUID movieId;
 
     private UUID personId;

@@ -5,6 +5,7 @@ import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.movieParticipation.MoviePartCreateDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
@@ -18,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -26,8 +28,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -92,6 +93,35 @@ public class MovieParticipationControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
+    }
+
+    @Test
+    public void createMovieParticipationTest() throws Exception {
+        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+        UUID personId = readDTO.getPersonId();
+        UUID movieId = readDTO.getMovieId();
+
+        MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
+        createDTO.setPartInfo("some text");
+        Set<PartType> types = new HashSet<>();
+        types.add(PartType.WRITER);
+        types.add(PartType.COSTUME_DESIGNER);
+        createDTO.setPartTypes(types);
+
+        Mockito
+                .when(movieParticipationService.createMovieParticipation(createDTO, movieId, personId))
+                .thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(post("/api/v1/movie-participations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO))
+                .param("personId", personId.toString())
+                .param("movieId", movieId.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MoviePartReadDTO actualReadDTO = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
+        Assertions.assertThat(actualReadDTO).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test

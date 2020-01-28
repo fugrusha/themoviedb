@@ -9,6 +9,7 @@ import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.movie.MovieUpdateDTO;
+import com.golovko.backend.dto.movieParticipation.MoviePartCreateDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonCreateDTO;
@@ -225,5 +226,12 @@ public class TranslationService {
         dto.setMovie(toRead(movieParticipation.getMovie()));
         dto.setPerson(toRead(movieParticipation.getPerson()));
         return dto;
+    }
+
+    public MovieParticipation toEntity(MoviePartCreateDTO createDTO) {
+        MovieParticipation movieParticipation = new MovieParticipation();
+        movieParticipation.setPartInfo(createDTO.getPartInfo());
+        movieParticipation.setPartTypes(createDTO.getPartTypes());
+        return movieParticipation;
     }
 }

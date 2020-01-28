@@ -4,6 +4,7 @@ import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.domain.Person;
+import com.golovko.backend.dto.movieParticipation.MoviePartCreateDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -69,6 +70,32 @@ public class MovieParticipationServiceTest {
                 "movie", "person");
         Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
         Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
+    }
+
+    @Transactional
+    @Test
+    public void createMovieParticipationTest() {
+        MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
+        createDTO.setPartInfo("some text");
+        Set<PartType> types = new HashSet<>();
+        types.add(PartType.WRITER);
+        types.add(PartType.COSTUME_DESIGNER);
+        createDTO.setPartTypes(types);
+
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+
+        MoviePartReadDTO readDTO =
+                movieParticipationService.createMovieParticipation(createDTO, movie.getId(), person.getId());
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        MovieParticipation movieParticipation = movieParticipationRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation, "movieId", "personId");
+        Assert.assertEquals(readDTO.getMovieId(), movieParticipation.getMovie().getId());
+        Assert.assertEquals(readDTO.getPersonId(), movieParticipation.getPerson().getId());
     }
 
     @Test
