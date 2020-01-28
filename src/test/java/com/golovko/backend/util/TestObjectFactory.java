@@ -1,13 +1,12 @@
 package com.golovko.backend.util;
 
-import com.golovko.backend.domain.Gender;
-import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.PartType;
-import com.golovko.backend.domain.Person;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.repository.ApplicationUserRepository;
+import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +26,12 @@ public class TestObjectFactory {
     @Autowired
     private PersonRepository personRepository;
 
+    @Autowired
+    private ApplicationUserRepository applicationUserRepository;
+
+    @Autowired
+    private ComplaintRepository complaintRepository;
+
     public Movie createMovie() {
         Movie movie = new Movie();
         movie.setMovieTitle("Title of the Movie");
@@ -45,6 +50,25 @@ public class TestObjectFactory {
         person.setGender(Gender.FEMALE);
         person = personRepository.save(person);
         return person;
+    }
+
+    public ApplicationUser createUser() {
+        ApplicationUser applicationUser = new ApplicationUser();
+        applicationUser.setUsername("Vitalka");
+        applicationUser.setPassword("123456");
+        applicationUser.setEmail("vetal@gmail.com");
+        applicationUser = applicationUserRepository.save(applicationUser);
+        return applicationUser;
+    }
+
+    public Complaint createComplaint(ApplicationUser user) {
+        Complaint complaint = new Complaint();
+        complaint.setComplaintTitle("Some title");
+        complaint.setComplaintText("Some report text");
+        complaint.setComplaintType(ComplaintType.SPOILER);
+        complaint.setAuthor(user);
+        complaint = complaintRepository.save(complaint);
+        return complaint;
     }
 
     public PersonReadDTO createPersonReadDTO() {
