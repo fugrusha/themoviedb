@@ -1,9 +1,6 @@
 package com.golovko.backend.controller;
 
-import com.golovko.backend.dto.moviecast.MovieCastCreateDTO;
-import com.golovko.backend.dto.moviecast.MovieCastPatchDTO;
-import com.golovko.backend.dto.moviecast.MovieCastPutDTO;
-import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
+import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.service.MovieCastService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -22,11 +19,16 @@ public class MovieCastController {
         return movieCastService.getMovieCast(id);
     }
 
+    @GetMapping("/{id}/extended")
+    public MovieCastReadExtendedDTO getMovieCastExtended(@PathVariable UUID id) {
+        return movieCastService.getMovieCastExtended(id);
+    }
+
     @PostMapping
     public MovieCastReadDTO createMovieCast(
             @RequestBody MovieCastCreateDTO createDTO,
-            @PathVariable UUID movieId,
-            @PathVariable UUID personId) {
+            @RequestParam UUID movieId,
+            @RequestParam UUID personId) {
         return movieCastService.createMovieCast(createDTO, movieId, personId);
     }
 

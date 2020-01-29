@@ -9,7 +9,9 @@ import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MoviePutDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.moviecast.MovieCastCreateDTO;
 import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
+import com.golovko.backend.dto.moviecast.MovieCastReadExtendedDTO;
 import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
 import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
@@ -244,6 +246,24 @@ public class TranslationService {
         dto.setMovieId(movieCast.getMovie().getId());
         dto.setPersonId(movieCast.getPerson().getId());
         dto.setCharacter(movieCast.getCharacter());
+        return dto;
+    }
+
+    public MovieCast toEntity(MovieCastCreateDTO createDTO) {
+        MovieCast movieCast = new MovieCast();
+        movieCast.setPartInfo(createDTO.getPartInfo());
+        movieCast.setCharacter(createDTO.getCharacter());
+        return movieCast;
+    }
+
+    public MovieCastReadExtendedDTO toReadExtended(MovieCast movieCast) {
+        MovieCastReadExtendedDTO dto = new MovieCastReadExtendedDTO();
+        dto.setId(movieCast.getId());
+        dto.setPartInfo(movieCast.getPartInfo());
+        dto.setPartType(movieCast.getPartType());
+        dto.setAverageRating(movieCast.getAverageRating());
+        dto.setMovie(toRead(movieCast.getMovie()));
+        dto.setPerson(toRead(movieCast.getPerson()));
         return dto;
     }
 }
