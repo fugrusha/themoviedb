@@ -90,16 +90,11 @@ public class PersonServiceTest {
 
         PersonReadDTO readDTO = personService.patchPerson(person.getId(), patchDTO);
 
-        Assert.assertNotNull(readDTO.getFirstName());
-        Assert.assertNotNull(readDTO.getLastName());
-        Assert.assertNotNull(readDTO.getGender());
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
         Person personAfterUpdate = personRepository.findById(readDTO.getId()).get();
 
-        Assert.assertNotNull(personAfterUpdate.getFirstName());
-        Assert.assertNotNull(personAfterUpdate.getLastName());
-        Assert.assertNotNull(personAfterUpdate.getGender());
-
+        Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate, "movieParticipations", "movieCast");
     }
 

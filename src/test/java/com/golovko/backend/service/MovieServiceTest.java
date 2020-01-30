@@ -91,20 +91,11 @@ public class MovieServiceTest {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         MovieReadDTO readDTO = movieService.patchMovie(movie.getId(), patchDTO);
 
-        Assert.assertNotNull(readDTO.getMovieTitle());
-        Assert.assertNotNull(readDTO.getDescription());
-        Assert.assertNotNull(readDTO.getReleaseDate());
-        Assert.assertNotNull(readDTO.isReleased());
-        Assert.assertNotNull(readDTO.getAverageRating());
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
         Movie movieAfterUpdate = movieRepository.findById(readDTO.getId()).get();
 
-        Assert.assertNotNull(movieAfterUpdate.getMovieTitle());
-        Assert.assertNotNull(movieAfterUpdate.getDescription());
-        Assert.assertNotNull(movieAfterUpdate.getReleaseDate());
-        Assert.assertNotNull(movieAfterUpdate.getIsReleased());
-        Assert.assertNotNull(movieAfterUpdate.getAverageRating());
-
+        Assertions.assertThat(movieAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate, "movieParticipations", "movieCast");
     }
 

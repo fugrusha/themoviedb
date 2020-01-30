@@ -168,8 +168,8 @@
             </column>
             <column name="text" type="varchar(10000)"/>
             <column name="status" type="varchar(30)" />
-            <column name="likes_count" type="int8" />
-            <column name="dislikes_count" type="int8" />
+            <column name="likes_count" type="int4" />
+            <column name="dislikes_count" type="int4" />
             <column name="author_id" type="uuid">
                 <constraints
                         foreignKeyName="fk_article_application_user_id"

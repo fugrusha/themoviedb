@@ -103,16 +103,11 @@ public class ComplaintServiceTest {
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         ComplaintReadDTO readDTO = complaintService.patchComplaint(complaint.getId(), patchDTO);
 
-        Assert.assertNotNull(readDTO.getComplaintTitle());
-        Assert.assertNotNull(readDTO.getComplaintText());
-        Assert.assertNotNull(readDTO.getComplaintType());
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
         Complaint complaintAfterUpdate = complaintRepository.findById(readDTO.getId()).get();
 
-        Assert.assertNotNull(complaintAfterUpdate.getComplaintTitle());
-        Assert.assertNotNull(complaintAfterUpdate.getComplaintText());
-        Assert.assertNotNull(complaintAfterUpdate.getComplaintType());
-
+        Assertions.assertThat(complaintAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(complaint).isEqualToComparingFieldByField(complaintAfterUpdate);
     }
 
