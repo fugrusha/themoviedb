@@ -162,11 +162,7 @@ public class MovieParticipationControllerTest {
         dto.setAverageRating(9.2);
         dto.setPersonId(UUID.randomUUID());
         dto.setMovieId(UUID.randomUUID());
-
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        dto.setPartTypes(types);
+        dto.setPartTypes(Set.of(PartType.WRITER, PartType.COSTUME_DESIGNER));
         return dto;
     }
 
@@ -177,11 +173,7 @@ public class MovieParticipationControllerTest {
         dto.setAverageRating(9.2);
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
-
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        dto.setPartTypes(types);
+        dto.setPartTypes(Set.of(PartType.WRITER, PartType.COSTUME_DESIGNER));
         return dto;
     }
 }

@@ -35,6 +35,23 @@
             <column name="is_released" type="boolean"/>
             <column name="average_rating" type="double"/>
         </createTable>
+
+<!--        <createTable tableName="genre">-->
+<!--            <column name="id" type="uuid">-->
+<!--                <constraints primaryKey="true"/>-->
+<!--            </column>-->
+<!--            <column name="genre_title" type="varchar(128)">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="movie" type="uuid">-->
+<!--                <constraints-->
+<!--                        foreignKeyName="fk_ai_application_movie_id"-->
+<!--                        referencedTableName="movie"-->
+<!--                        referencedColumnNames="id"-->
+<!--                        nullable="false"-->
+<!--                />-->
+<!--            </column>-->
+<!--        </createTable>-->
     </changeSet>
 
     <changeSet id="create_complaint_table" author="andrew">
@@ -136,6 +153,33 @@
                 />
             </column>
         </createTable>
+    </changeSet>
+
+    <changeSet id="create_article_table" author="andrew">
+        <createTable tableName="article">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="varchar(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_date" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+            <column name="text" type="varchar(10000)"/>
+            <column name="status" type="varchar(30)" />
+            <column name="likes_count" type="int8" />
+            <column name="dislikes_count" type="int8" />
+            <column name="author_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_article_application_user_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="false"
+                />
+            </column>
+        </createTable>
+
     </changeSet>
 
 </databaseChangeLog>

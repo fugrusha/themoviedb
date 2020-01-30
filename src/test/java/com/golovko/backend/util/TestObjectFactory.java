@@ -5,15 +5,12 @@ import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
 import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
-import com.golovko.backend.repository.ApplicationUserRepository;
-import com.golovko.backend.repository.ComplaintRepository;
-import com.golovko.backend.repository.MovieRepository;
-import com.golovko.backend.repository.PersonRepository;
+import com.golovko.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
@@ -31,6 +28,9 @@ public class TestObjectFactory {
 
     @Autowired
     private ComplaintRepository complaintRepository;
+
+    @Autowired
+    private ArticleRepository articleRepository;
 
     public Movie createMovie() {
         Movie movie = new Movie();
@@ -98,11 +98,7 @@ public class TestObjectFactory {
         dto.setAverageRating(9.2);
         dto.setPersonId(UUID.randomUUID());
         dto.setMovieId(UUID.randomUUID());
-
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        dto.setPartTypes(types);
+        dto.setPartTypes(Set.of(PartType.WRITER, PartType.COSTUME_DESIGNER));
         return dto;
     }
 
@@ -113,11 +109,18 @@ public class TestObjectFactory {
         dto.setAverageRating(9.2);
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
-
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        dto.setPartTypes(types);
+        dto.setPartTypes(Set.of(PartType.WRITER, PartType.COSTUME_DESIGNER));
         return dto;
+    }
+
+    public Article createArticle(ApplicationUser author, Instant time) {
+        Article article = new Article();
+        article.setTitle("Some title");
+        article.setText("Some text");
+        article.setDislikesCount(444);
+        article.setLikesCount(111);
+        article.setAuthor(author);
+        article.setPublishedDate(time);
+        return articleRepository.save(article);
     }
 }

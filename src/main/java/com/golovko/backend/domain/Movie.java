@@ -34,4 +34,10 @@ public class Movie {
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MovieCast> movieCast = new HashSet<>();
+
+//    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private Set<Genre> genres = new HashSet<>();
+
+//    @OneToMany(mappedBy = "")
+//    private List<Article> relatedArticles = new ArrayList<>();
 }

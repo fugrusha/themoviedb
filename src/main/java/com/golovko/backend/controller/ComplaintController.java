@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/reports")
+@RequestMapping("/api/v1/complaints")
 public class ComplaintController {
 
     @Autowired

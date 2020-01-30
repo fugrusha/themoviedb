@@ -1,6 +1,8 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.article.ArticleReadDTO;
+import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -64,10 +66,10 @@ public class TranslationService {
         if (patchDTO.getUsername() != null) {
             applicationUser.setUsername(patchDTO.getUsername()); // username cannot be editable
         }
-        if (patchDTO.getEmail() != null){
+        if (patchDTO.getEmail() != null) {
             applicationUser.setEmail(patchDTO.getEmail());
         }
-        if (patchDTO.getPassword() != null){
+        if (patchDTO.getPassword() != null) {
             applicationUser.setPassword(patchDTO.getPassword());
         }
     }
@@ -103,16 +105,16 @@ public class TranslationService {
     }
 
     public void patchEntity(MoviePatchDTO patchDTO, Movie movie) {
-        if (patchDTO.getMovieTitle() != null){
+        if (patchDTO.getMovieTitle() != null) {
             movie.setMovieTitle(patchDTO.getMovieTitle());
         }
         if (patchDTO.getDescription() != null) {
             movie.setDescription(patchDTO.getDescription());
         }
-        if (patchDTO.getReleaseDate() != null){
+        if (patchDTO.getReleaseDate() != null) {
             movie.setReleaseDate(patchDTO.getReleaseDate());
         }
-        if (patchDTO.getIsReleased() != null){
+        if (patchDTO.getIsReleased() != null) {
             movie.setIsReleased(patchDTO.getIsReleased());
         }
     }
@@ -264,6 +266,35 @@ public class TranslationService {
         dto.setAverageRating(movieCast.getAverageRating());
         dto.setMovie(toRead(movieCast.getMovie()));
         dto.setPerson(toRead(movieCast.getPerson()));
+        return dto;
+    }
+
+    /*
+        Article translations
+    */
+    public ArticleReadDTO toRead(Article article) {
+        ArticleReadDTO dto = new ArticleReadDTO();
+        dto.setId(article.getId());
+        dto.setTitle(article.getTitle());
+        dto.setText(article.getText());
+        dto.setPublishedDate(article.getPublishedDate());
+        dto.setStatus(article.getStatus());
+        dto.setDislikesCount(article.getDislikesCount());
+        dto.setLikesCount(article.getLikesCount());
+        dto.setAuthorId(article.getAuthor().getId());
+        return dto;
+    }
+
+    public ArticleReadExtendedDTO toReadExtended(Article article) {
+        ArticleReadExtendedDTO dto = new ArticleReadExtendedDTO();
+        dto.setId(article.getId());
+        dto.setTitle(article.getTitle());
+        dto.setText(article.getText());
+        dto.setPublishedDate(article.getPublishedDate());
+        dto.setStatus(article.getStatus());
+        dto.setDislikesCount(article.getDislikesCount());
+        dto.setLikesCount(article.getLikesCount());
+        dto.setAuthor(toRead(article.getAuthor()));
         return dto;
     }
 }

@@ -110,17 +110,13 @@ public class ApplicationUserServiceTest {
         UserPatchDTO patchDTO = new UserPatchDTO();
         UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patchDTO);
 
-        Assert.assertNotNull(readDTO.getEmail());
-        Assert.assertNotNull(readDTO.getUsername());
-        Assert.assertNotNull(readDTO.getPassword());
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        ApplicationUser applicationUserAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
+        ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
 
-        Assert.assertNotNull(applicationUserAfterUpdate.getEmail());
-        Assert.assertNotNull(applicationUserAfterUpdate.getUsername());
-        Assert.assertNotNull(applicationUserAfterUpdate.getPassword());
+        Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
 
-        Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(applicationUserAfterUpdate);
+        Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(userAfterUpdate);
     }
 
     @Test
