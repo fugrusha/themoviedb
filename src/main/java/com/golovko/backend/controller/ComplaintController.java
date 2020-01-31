@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -23,8 +24,8 @@ public class ComplaintController {
     }
 
     @PostMapping
-    public ComplaintReadDTO createComplaint(@RequestBody ComplaintCreateDTO createDTO) {
-        return complaintService.createComplaint(createDTO);
+    public ComplaintReadDTO createComplaint(@RequestBody ComplaintCreateDTO createDTO, ApplicationUser author) {
+        return complaintService.createComplaint(createDTO, author);
     }
 
     @PatchMapping("/{id}")

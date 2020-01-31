@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Article;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -8,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Service
@@ -29,9 +31,14 @@ public class ArticleService {
         return translationService.toReadExtended(article);
     }
 
-    public ArticleReadDTO createArticle(ArticleCreateDTO createDTO) {
-        Instant now = Instant.now();
-        return null;
+    public ArticleReadDTO createArticle(ArticleCreateDTO createDTO, ApplicationUser author) {
+        Article article = translationService.toEntity(createDTO);
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        article.setPublishedDate(now);
+        article.setAuthor(author);
+
+        article = articleRepository.save(article);
+        return translationService.toRead(article);
     }
 
     public ArticleReadDTO updateArticle(UUID id, ArticlePutDTO putDTO) {

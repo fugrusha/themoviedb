@@ -1,6 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.article.ArticleCreateDTO;
 import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
@@ -296,5 +297,13 @@ public class TranslationService {
         dto.setLikesCount(article.getLikesCount());
         dto.setAuthor(toRead(article.getAuthor()));
         return dto;
+    }
+
+    public Article toEntity(ArticleCreateDTO createDTO) {
+        Article article = new Article();
+        article.setTitle(createDTO.getTitle());
+        article.setText(createDTO.getText());
+        article.setStatus(createDTO.getStatus());
+        return article;
     }
 }

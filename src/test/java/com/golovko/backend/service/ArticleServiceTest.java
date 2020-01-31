@@ -2,6 +2,8 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Article;
+import com.golovko.backend.domain.ArticleStatus;
+import com.golovko.backend.dto.article.ArticleCreateDTO;
 import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
@@ -49,7 +51,26 @@ public class ArticleServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getComplaintWrongIdTest() {
+    public void getArticleWrongIdTest() {
         articleService.getArticle(UUID.randomUUID());
+    }
+
+    @Test
+    public void createArticleTest() {
+        ArticleCreateDTO createDTO = new ArticleCreateDTO();
+        createDTO.setTitle("Text title");
+        createDTO.setText("Some text");
+        createDTO.setStatus(ArticleStatus.DRAFT);
+
+        ApplicationUser author = testObjectFactory.createUser();
+
+        ArticleReadDTO readDTO = articleService.createArticle(createDTO, author);
+
+        Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assert.assertNotNull(readDTO.getId());
+
+        Article article = articleRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(article, "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), article.getAuthor().getId());
     }
 }

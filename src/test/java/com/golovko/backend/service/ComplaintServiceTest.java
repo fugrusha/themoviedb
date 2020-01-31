@@ -12,7 +12,6 @@ import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,7 +54,6 @@ public class ComplaintServiceTest {
         complaintService.getComplaint(UUID.randomUUID());
     }
 
-    @Ignore // cause need userAuthentication
     @Test
     public void createComplaintTest() {
         ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
@@ -63,9 +61,9 @@ public class ComplaintServiceTest {
         createDTO.setComplaintText("some text");
         createDTO.setComplaintType(ComplaintType.SPOILER);
 
-        ApplicationUser user = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
 
-        ComplaintReadDTO readDTO = complaintService.createComplaint(createDTO);
+        ComplaintReadDTO readDTO = complaintService.createComplaint(createDTO, author);
 
         Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
         Assert.assertNotNull(readDTO.getId());

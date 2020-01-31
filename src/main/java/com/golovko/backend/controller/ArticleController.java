@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,8 +26,8 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ArticleReadDTO createArticle(@RequestBody ArticleCreateDTO createDTO) {
-        return articleService.createArticle(createDTO);
+    public ArticleReadDTO createArticle(@RequestBody ArticleCreateDTO createDTO, ApplicationUser author) {
+        return articleService.createArticle(createDTO, author);
     }
 
     @PutMapping("/{id}")
