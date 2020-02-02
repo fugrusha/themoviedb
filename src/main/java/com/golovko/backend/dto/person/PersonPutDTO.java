@@ -4,7 +4,7 @@ import com.golovko.backend.domain.Gender;
 import lombok.Data;
 
 @Data
-public class PersonUpdateDTO {
+public class PersonPutDTO {
 
     private String firstName;
 

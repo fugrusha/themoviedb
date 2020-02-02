@@ -5,8 +5,9 @@ import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieParticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieParticipationService;
@@ -18,16 +19,14 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -95,6 +94,32 @@ public class MovieParticipationControllerTest {
     }
 
     @Test
+    public void createMovieParticipationTest() throws Exception {
+        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+        UUID personId = readDTO.getPersonId();
+        UUID movieId = readDTO.getMovieId();
+
+        MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
+        createDTO.setPartInfo("some text");
+        createDTO.setPartType(PartType.COSTUME_DESIGNER);
+
+        Mockito
+                .when(movieParticipationService.createMovieParticipation(createDTO, movieId, personId))
+                .thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(post("/api/v1/movie-participations/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO))
+                .param("personId", personId.toString())
+                .param("movieId", movieId.toString()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MoviePartReadDTO actualReadDTO = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
+        Assertions.assertThat(actualReadDTO).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
     public void deleteMovieParticipationTest() throws Exception {
         UUID id = UUID.randomUUID();
 
@@ -105,7 +130,7 @@ public class MovieParticipationControllerTest {
     }
 
 
-    public PersonReadDTO createPersonReadDTO() {
+    private PersonReadDTO createPersonReadDTO() {
         PersonReadDTO dto = new PersonReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setFirstName("Max");
@@ -114,7 +139,7 @@ public class MovieParticipationControllerTest {
         return dto;
     }
 
-    public MovieReadDTO createMovieReadDTO() {
+    private MovieReadDTO createMovieReadDTO() {
         MovieReadDTO readDTO = new MovieReadDTO();
         readDTO.setId(UUID.randomUUID());
         readDTO.setMovieTitle("Guess Who");
@@ -125,33 +150,25 @@ public class MovieParticipationControllerTest {
         return readDTO;
     }
 
-    public MoviePartReadDTO createMoviePartReadDTO() {
+    private MoviePartReadDTO createMoviePartReadDTO() {
         MoviePartReadDTO dto = new MoviePartReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setPartInfo("Some text");
         dto.setAverageRating(9.2);
         dto.setPersonId(UUID.randomUUID());
         dto.setMovieId(UUID.randomUUID());
-
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        dto.setPartTypes(types);
+        dto.setPartType(PartType.COSTUME_DESIGNER);
         return dto;
     }
 
-    public MoviePartReadExtendedDTO createMoviePartReadExtendedDTO(PersonReadDTO personDTO, MovieReadDTO movieDTO) {
+    private MoviePartReadExtendedDTO createMoviePartReadExtendedDTO(PersonReadDTO personDTO, MovieReadDTO movieDTO) {
         MoviePartReadExtendedDTO dto = new MoviePartReadExtendedDTO();
         dto.setId(UUID.randomUUID());
         dto.setPartInfo("Some text");
         dto.setAverageRating(9.2);
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
-
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        dto.setPartTypes(types);
+        dto.setPartType(PartType.COSTUME_DESIGNER);
         return dto;
     }
 }

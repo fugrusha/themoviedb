@@ -1,10 +1,11 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +27,9 @@ public class ComplaintService {
         return translationService.toRead(complaint);
     }
 
-    public ComplaintReadDTO createComplaint(ComplaintCreateDTO createDTO) {
+    public ComplaintReadDTO createComplaint(ComplaintCreateDTO createDTO, ApplicationUser author) {
         Complaint complaint = translationService.toEntity(createDTO);
-//        complaint.setAuthor(user);
+        complaint.setAuthor(author);
 
         complaint = complaintRepository.save(complaint);
         return translationService.toRead(complaint);
@@ -44,7 +45,7 @@ public class ComplaintService {
         return translationService.toRead(complaint);
     }
 
-    public ComplaintReadDTO updateComplaint(UUID id, ComplaintUpdateDTO updateDTO) {
+    public ComplaintReadDTO updateComplaint(UUID id, ComplaintPutDTO updateDTO) {
         Complaint complaint = getComplaintRequired(id);
 
         translationService.updateEntity(updateDTO, complaint);

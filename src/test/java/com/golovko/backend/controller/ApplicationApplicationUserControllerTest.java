@@ -42,34 +42,6 @@ public class ApplicationApplicationUserControllerTest {
     @MockBean
     private ApplicationUserService applicationUserService;
 
-    private UserReadDTO createUserReadDTO() {
-        UserReadDTO readDTO = new UserReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setUsername("david");
-        readDTO.setEmail("david101@email.com");
-        readDTO.setPassword("12345");
-        return readDTO;
-    }
-
-    private UserReadExtendedDTO createUserReadExtendedDTO(List<ComplaintReadDTO> complaints) {
-        UserReadExtendedDTO readDTO = new UserReadExtendedDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setUsername("david");
-        readDTO.setEmail("david101@email.com");
-        readDTO.setComplaints(complaints);
-        return readDTO;
-    }
-
-    private ComplaintReadDTO createComplaintReadDTO() {
-        ComplaintReadDTO readDTO = new ComplaintReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setComplaintTitle("Report 1");
-        readDTO.setComplaintText("I have noticed a spoiler");
-        readDTO.setComplaintType(ComplaintType.SPOILER);
-        readDTO.setAuthorId(UUID.randomUUID());
-        return readDTO;
-    }
-
     @Test
     public void testGetUserTest() throws Exception {
         UserReadDTO user = createUserReadDTO();
@@ -188,7 +160,7 @@ public class ApplicationApplicationUserControllerTest {
 
     @Test
     public void testUpdateUser() throws Exception {
-        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        UserPutDTO updateDTO = new UserPutDTO();
         updateDTO.setUsername("new username");
         updateDTO.setPassword("new password");
         updateDTO.setEmail("new_user_email@gmail.com");
@@ -215,6 +187,34 @@ public class ApplicationApplicationUserControllerTest {
                 .andExpect(status().isOk());
 
         Mockito.verify(applicationUserService).deleteUser(id);
+    }
+
+    private UserReadDTO createUserReadDTO() {
+        UserReadDTO readDTO = new UserReadDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setUsername("david");
+        readDTO.setEmail("david101@email.com");
+        readDTO.setPassword("12345");
+        return readDTO;
+    }
+
+    private UserReadExtendedDTO createUserReadExtendedDTO(List<ComplaintReadDTO> complaints) {
+        UserReadExtendedDTO readDTO = new UserReadExtendedDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setUsername("david");
+        readDTO.setEmail("david101@email.com");
+        readDTO.setComplaints(complaints);
+        return readDTO;
+    }
+
+    private ComplaintReadDTO createComplaintReadDTO() {
+        ComplaintReadDTO readDTO = new ComplaintReadDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setComplaintTitle("Report 1");
+        readDTO.setComplaintText("I have noticed a spoiler");
+        readDTO.setComplaintType(ComplaintType.SPOILER);
+        readDTO.setAuthorId(UUID.randomUUID());
+        return readDTO;
     }
 
 }

@@ -44,7 +44,7 @@ public class ApplicationUserService {
         return translationService.toRead(applicationUser);
     }
 
-    public UserReadDTO updateUser(UUID id, UserUpdateDTO update) {
+    public UserReadDTO updateUser(UUID id, UserPutDTO update) {
         ApplicationUser user = getUserRequired(id);
 
         translationService.updateEntity(update, user);

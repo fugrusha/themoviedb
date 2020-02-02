@@ -2,8 +2,8 @@ package com.golovko.backend.controller;
 
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
+import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
-import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -33,7 +33,7 @@ public class PersonController {
     }
 
     @PutMapping("/{id}")
-    public PersonReadDTO updatePerson(@RequestBody PersonUpdateDTO updateDTO, @PathVariable UUID id) {
+    public PersonReadDTO updatePerson(@RequestBody PersonPutDTO updateDTO, @PathVariable UUID id) {
         return personService.updatePerson(id, updateDTO);
     }
 

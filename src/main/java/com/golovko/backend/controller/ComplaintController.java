@@ -1,9 +1,10 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.dto.complaint.ComplaintUpdateDTO;
 import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/reports")
+@RequestMapping("/api/v1/complaints")
 public class ComplaintController {
 
     @Autowired
@@ -23,8 +24,8 @@ public class ComplaintController {
     }
 
     @PostMapping
-    public ComplaintReadDTO createComplaint(@RequestBody ComplaintCreateDTO createDTO) {
-        return complaintService.createComplaint(createDTO);
+    public ComplaintReadDTO createComplaint(@RequestBody ComplaintCreateDTO createDTO, ApplicationUser author) {
+        return complaintService.createComplaint(createDTO, author);
     }
 
     @PatchMapping("/{id}")
@@ -33,7 +34,7 @@ public class ComplaintController {
     }
 
     @PutMapping("/{id}")
-    public ComplaintReadDTO updateComplaint(@PathVariable UUID id, @RequestBody ComplaintUpdateDTO updateDTO) {
+    public ComplaintReadDTO updateComplaint(@PathVariable UUID id, @RequestBody ComplaintPutDTO updateDTO) {
         return complaintService.updateComplaint(id, updateDTO);
     }
 

@@ -35,6 +35,23 @@
             <column name="is_released" type="boolean"/>
             <column name="average_rating" type="double"/>
         </createTable>
+
+<!--        <createTable tableName="genre">-->
+<!--            <column name="id" type="uuid">-->
+<!--                <constraints primaryKey="true"/>-->
+<!--            </column>-->
+<!--            <column name="genre_title" type="varchar(128)">-->
+<!--                <constraints nullable="false"/>-->
+<!--            </column>-->
+<!--            <column name="movie" type="uuid">-->
+<!--                <constraints-->
+<!--                        foreignKeyName="fk_ai_application_movie_id"-->
+<!--                        referencedTableName="movie"-->
+<!--                        referencedColumnNames="id"-->
+<!--                        nullable="false"-->
+<!--                />-->
+<!--            </column>-->
+<!--        </createTable>-->
     </changeSet>
 
     <changeSet id="create_complaint_table" author="andrew">
@@ -82,7 +99,7 @@
                 <constraints primaryKey="true"/>
             </column>
             <column name="part_info" type="varchar(1000)" />
-
+            <column name="part_type" type="varchar(30)" />
             <column name="average_rating" type="double" />
             <column name="movie_id" type="uuid">
                 <constraints referencedTableName="movie"
@@ -100,19 +117,56 @@
             </column>
         </createTable>
 
-        <createTable tableName="part_type">
-            <column name="part_types" type="varchar(20)"/>
-            <column name="movie_participation_id" type="uuid">
-                <constraints referencedTableName="movie_participation"
+        <createTable tableName="movie_cast">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="part_info" type="varchar(1000)" />
+            <column name="part_type" type="varchar(10)" />
+            <column name="character" type="varchar(50)" />
+            <column name="average_rating" type="double" />
+            <column name="movie_id" type="uuid">
+                <constraints referencedTableName="movie"
                              referencedColumnNames="id"
-                             foreignKeyName="fk_movie_participation_id"/>
+                             foreignKeyName="fk_ci2_movie_id"
+                             deleteCascade="true"
+                />
+            </column>
+            <column name="person_id" type="uuid">
+                <constraints referencedTableName="person"
+                             referencedColumnNames="id"
+                             foreignKeyName="fk_ci2_person_id"
+                             deleteCascade="true"
+                />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create_article_table" author="andrew">
+        <createTable tableName="article">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="title" type="varchar(300)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="published_date" type="timestamp">
+                <constraints nullable="true"/>
+            </column>
+            <column name="text" type="varchar(10000)"/>
+            <column name="status" type="varchar(30)" />
+            <column name="likes_count" type="int4" />
+            <column name="dislikes_count" type="int4" />
+            <column name="author_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_article_application_user_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="false"
+                />
             </column>
         </createTable>
 
-        <addUniqueConstraint
-                tableName="part_type"
-                columnNames="part_types, movie_participation_id"
-                constraintName="composite_unique_constraint"/>
     </changeSet>
 
 </databaseChangeLog>

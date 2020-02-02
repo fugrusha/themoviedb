@@ -35,7 +35,7 @@ public class ApplicationUserController {
     }
 
     @PutMapping("/{id}")
-    public UserReadDTO updateUser(@PathVariable UUID id, @RequestBody UserUpdateDTO update) {
+    public UserReadDTO updateUser(@PathVariable UUID id, @RequestBody UserPutDTO update) {
         return applicationUserService.updateUser(id, update);
     }
 

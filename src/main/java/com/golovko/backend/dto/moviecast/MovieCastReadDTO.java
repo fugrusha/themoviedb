@@ -1,17 +1,20 @@
-package com.golovko.backend.dto.movieParticipation;
+package com.golovko.backend.dto.moviecast;
 
 import com.golovko.backend.domain.PartType;
 import lombok.Data;
 
-import java.util.Set;
 import java.util.UUID;
 
 @Data
-public class MoviePartUpdateDTO {
+public class MovieCastReadDTO {
+
+    private UUID id;
 
     private String partInfo;
 
-    private Set<PartType> partTypes;
+    private String character;
+
+    private PartType partType;
 
     private Double averageRating;
 

@@ -4,8 +4,8 @@ import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
+import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
-import com.golovko.backend.dto.person.PersonUpdateDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -80,7 +80,7 @@ public class PersonServiceTest {
         Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
 
         person = personRepository.findById(person.getId()).get();
-        Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO, "movieParticipations");
+        Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
     }
 
     @Test
@@ -90,24 +90,19 @@ public class PersonServiceTest {
 
         PersonReadDTO readDTO = personService.patchPerson(person.getId(), patchDTO);
 
-        Assert.assertNotNull(readDTO.getFirstName());
-        Assert.assertNotNull(readDTO.getLastName());
-        Assert.assertNotNull(readDTO.getGender());
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
         Person personAfterUpdate = personRepository.findById(readDTO.getId()).get();
 
-        Assert.assertNotNull(personAfterUpdate.getFirstName());
-        Assert.assertNotNull(personAfterUpdate.getLastName());
-        Assert.assertNotNull(personAfterUpdate.getGender());
-
-        Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate, "movieParticipations");
+        Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate, "movieParticipations", "movieCast");
     }
 
     @Test
     public void updatePersonTest() {
         Person person = testObjectFactory.createPerson();
 
-        PersonUpdateDTO updateDTO = new PersonUpdateDTO();
+        PersonPutDTO updateDTO = new PersonPutDTO();
         updateDTO.setFirstName("Lolita");
         updateDTO.setLastName("Bulgakova");
         updateDTO.setGender(Gender.FEMALE);
@@ -117,7 +112,7 @@ public class PersonServiceTest {
         Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
 
         person = personRepository.findById(person.getId()).get();
-        Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO, "movieParticipations");
+        Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
     }
 
     @Test

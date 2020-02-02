@@ -3,7 +3,7 @@ package com.golovko.backend.dto.user;
 import lombok.Data;
 
 @Data
-public class UserUpdateDTO {
+public class UserPutDTO {
 
     private String username;
 

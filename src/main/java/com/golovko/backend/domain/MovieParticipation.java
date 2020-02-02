@@ -4,8 +4,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @Entity
@@ -19,10 +17,8 @@ public class MovieParticipation {
 
     private String partInfo;
 
-    @ElementCollection(targetClass = PartType.class)
-    @CollectionTable(name = "part_type", joinColumns = @JoinColumn(name = "movie_participation_id"))
     @Enumerated(EnumType.STRING)
-    private Set<PartType> partTypes = new HashSet<>();
+    private PartType partType;
 
     private Double averageRating;
 

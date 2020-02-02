@@ -6,7 +6,7 @@ import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
-import com.golovko.backend.repository.ComplaintRepository;
+import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -33,35 +33,16 @@ public class ApplicationUserServiceTest {
     private ApplicationUserRepository applicationUserRepository;
 
     @Autowired
-    private ComplaintRepository complaintRepository;
-
-    @Autowired
     private ApplicationUserService applicationUserService;
 
-    private Complaint createComplaint(ApplicationUser user) {
-        Complaint complaint = new Complaint();
-        complaint.setComplaintText("Complaint text");
-        complaint.setComplaintTitle("Complaint Title");
-        complaint.setComplaintType(ComplaintType.CHILD_ABUSE);
-        complaint.setAuthor(user);
-        complaint = complaintRepository.save(complaint);
-        return complaint;
-    }
-
-    private ApplicationUser createUser() {
-        ApplicationUser applicationUser = new ApplicationUser();
-        applicationUser.setUsername("Vitalka");
-        applicationUser.setPassword("123456");
-        applicationUser.setEmail("vetal@gmail.com");
-        applicationUser = applicationUserRepository.save(applicationUser);
-        return applicationUser;
-    }
+    @Autowired
+    private TestObjectFactory testObjectFactory;
 
     @Transactional
     @Test
     public void testGetUserExtendedTest() {
-        ApplicationUser user = createUser();
-        Complaint complaint = createComplaint(user);
+        ApplicationUser user = testObjectFactory.createUser();
+        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.MISPRINT);
 
         List<Complaint> complaints = new ArrayList<>();
         complaints.add(complaint);
@@ -77,7 +58,7 @@ public class ApplicationUserServiceTest {
 
     @Test
     public void testGetUser() {
-        ApplicationUser user = createUser();
+        ApplicationUser user = testObjectFactory.createUser();
 
         UserReadDTO readDTO = applicationUserService.getUser(user.getId());
 
@@ -107,7 +88,7 @@ public class ApplicationUserServiceTest {
 
     @Test
     public void testPatchUser() {
-        ApplicationUser applicationUser = createUser();
+        ApplicationUser applicationUser = testObjectFactory.createUser();
 
         UserPatchDTO patch = new UserPatchDTO();
         patch.setUsername("Volodya");
@@ -119,35 +100,32 @@ public class ApplicationUserServiceTest {
         Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO, "complaints");
+        Assertions.assertThat(applicationUser)
+                .isEqualToIgnoringGivenFields(readDTO, "complaints", "articles");
     }
 
     @Transactional
     @Test
     public void testPatchUserEmptyPatch() {
-        ApplicationUser applicationUser = createUser();
+        ApplicationUser applicationUser = testObjectFactory.createUser();
 
         UserPatchDTO patchDTO = new UserPatchDTO();
         UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patchDTO);
 
-        Assert.assertNotNull(readDTO.getEmail());
-        Assert.assertNotNull(readDTO.getUsername());
-        Assert.assertNotNull(readDTO.getPassword());
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        ApplicationUser applicationUserAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
+        ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
 
-        Assert.assertNotNull(applicationUserAfterUpdate.getEmail());
-        Assert.assertNotNull(applicationUserAfterUpdate.getUsername());
-        Assert.assertNotNull(applicationUserAfterUpdate.getPassword());
+        Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
 
-        Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(applicationUserAfterUpdate);
+        Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(userAfterUpdate);
     }
 
     @Test
     public void testUpdateUser() {
-        ApplicationUser user = createUser();
+        ApplicationUser user = testObjectFactory.createUser();
 
-        UserUpdateDTO updateDTO = new UserUpdateDTO();
+        UserPutDTO updateDTO = new UserPutDTO();
         updateDTO.setUsername("new username");
         updateDTO.setPassword("new password");
         updateDTO.setEmail("new_email@gmail.com");
@@ -157,12 +135,13 @@ public class ApplicationUserServiceTest {
         Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO, "complaints");
+        Assertions.assertThat(user)
+                .isEqualToIgnoringGivenFields(readDTO, "complaints", "articles");
     }
 
     @Test
     public void testDeleteUser() {
-        ApplicationUser applicationUser = createUser();
+        ApplicationUser applicationUser = testObjectFactory.createUser();
         applicationUserService.deleteUser(applicationUser.getId());
 
         Assert.assertFalse(applicationUserRepository.existsById(applicationUser.getId()));
