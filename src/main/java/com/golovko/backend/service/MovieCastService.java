@@ -52,11 +52,42 @@ public class MovieCastService {
     }
 
     public MovieCastReadDTO updateMovieCast(MovieCastPutDTO updateDTO, UUID id) {
-        return null;
+        Movie movie = movieRepository.findById(updateDTO.getMovieId())
+                .orElseThrow(() -> new EntityNotFoundException(Movie.class, updateDTO.getMovieId()));
+        Person person = personRepository.findById(updateDTO.getPersonId())
+                .orElseThrow(() -> new EntityNotFoundException(Person.class, updateDTO.getPersonId()));
+
+        MovieCast movieCast = getMovieCastRequired(id);
+
+        translationService.updateEntity(updateDTO, movieCast);
+
+        movieCast.setMovie(movie);
+        movieCast.setPerson(person);
+
+        movieCast = movieCastRepository.save(movieCast);
+        return translationService.toRead(movieCast);
     }
 
     public MovieCastReadDTO patchMovieCast(MovieCastPatchDTO patchDTO, UUID id) {
-        return null;
+        MovieCast movieCast = getMovieCastRequired(id);
+
+        translationService.patchEntity(patchDTO, movieCast);
+
+        // TODO How can I remove this branches?
+        if (patchDTO.getMovieId() != null) {
+            Movie movie = movieRepository.findById(patchDTO.getMovieId())
+                    .orElseThrow(() -> new EntityNotFoundException(Movie.class, patchDTO.getMovieId()));
+            movieCast.setMovie(movie);
+        }
+
+        if (patchDTO.getPersonId() != null) {
+            Person person = personRepository.findById(patchDTO.getPersonId())
+                    .orElseThrow(() -> new EntityNotFoundException(Person.class, patchDTO.getPersonId()));
+            movieCast.setPerson(person);
+        }
+
+        movieCast = movieCastRepository.save(movieCast);
+        return translationService.toRead(movieCast);
     }
 
     public void deleteMovieCast(UUID id) {

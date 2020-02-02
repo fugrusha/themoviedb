@@ -85,7 +85,8 @@ public class MovieServiceTest {
         Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
 
         movie = movieRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
+        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO,
+                "movieParticipations", "movieCast");
     }
 
     @Test

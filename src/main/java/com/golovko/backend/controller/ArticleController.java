@@ -15,10 +15,14 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
+    // TODO add list of articles
+
     @GetMapping("/{id}")
     public ArticleReadDTO getArticle(@PathVariable UUID id) {
         return articleService.getArticle(id);
     }
+
+    // TODO add list of articles
 
     @GetMapping("/{id}/extended")
     public ArticleReadExtendedDTO getArticleExtended(@PathVariable UUID id) {

@@ -16,4 +16,6 @@ public class UserReadExtendedDTO {
     private String email;
 
     private List<ComplaintReadDTO> complaints;
+
+    // TODO add list of articles
 }

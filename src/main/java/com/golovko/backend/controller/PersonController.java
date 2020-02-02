@@ -22,6 +22,8 @@ public class PersonController {
         return personService.getPerson(id);
     }
 
+    // TODO list of persons
+
     @PostMapping
     public PersonReadDTO createPerson(@RequestBody PersonCreateDTO createDTO) {
         return personService.createPerson(createDTO);

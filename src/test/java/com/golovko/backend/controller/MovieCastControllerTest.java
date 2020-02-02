@@ -5,9 +5,7 @@ import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieCast;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.moviecast.MovieCastCreateDTO;
-import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
-import com.golovko.backend.dto.moviecast.MovieCastReadExtendedDTO;
+import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieCastService;
@@ -126,6 +124,50 @@ public class MovieCastControllerTest {
         Assertions.assertThat(actualMovieCast).isEqualToComparingFieldByField(readDTO);
     }
 
+    @Test
+    public void updateMovieCastTest() throws Exception {
+        MovieCastPutDTO updateDTO = new MovieCastPutDTO();
+        updateDTO.setCharacter("New Character");
+        updateDTO.setPartInfo("New text");
+        updateDTO.setMovieId(UUID.randomUUID());
+        updateDTO.setPersonId(UUID.randomUUID());
+
+        MovieCastReadDTO readDTO = createMovieCastDTO(updateDTO.getMovieId(), updateDTO.getPersonId());
+
+        Mockito.when(movieCastService.updateMovieCast(updateDTO, readDTO.getId())).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(put("/api/v1/movie-cast/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MovieCastReadDTO actualMovieCast = objectMapper.readValue(resultJson, MovieCastReadDTO.class);
+        Assertions.assertThat(actualMovieCast).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void patchMovieCastTest() throws Exception {
+        MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
+        patchDTO.setCharacter("New Character");
+        patchDTO.setPartInfo("New text");
+        patchDTO.setMovieId(UUID.randomUUID());
+        patchDTO.setPersonId(UUID.randomUUID());
+
+        MovieCastReadDTO readDTO = createMovieCastDTO(patchDTO.getMovieId(), patchDTO.getPersonId());
+
+        Mockito.when(movieCastService.patchMovieCast(patchDTO, readDTO.getId())).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(patch("/api/v1/movie-cast/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MovieCastReadDTO actualMovieCast = objectMapper.readValue(resultJson, MovieCastReadDTO.class);
+        Assertions.assertThat(actualMovieCast).isEqualToComparingFieldByField(readDTO);
+    }
+
     private MovieCastReadDTO createMovieCastDTO(UUID movieId, UUID personId) {
         MovieCastReadDTO dto = new MovieCastReadDTO();
         dto.setId(UUID.randomUUID());
@@ -138,7 +180,7 @@ public class MovieCastControllerTest {
         return dto;
     }
 
-    public PersonReadDTO createPersonReadDTO() {
+    private PersonReadDTO createPersonReadDTO() {
         PersonReadDTO dto = new PersonReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setFirstName("Max");
@@ -147,7 +189,7 @@ public class MovieCastControllerTest {
         return dto;
     }
 
-    public MovieReadDTO createMovieReadDTO() {
+    private MovieReadDTO createMovieReadDTO() {
         MovieReadDTO readDTO = new MovieReadDTO();
         readDTO.setId(UUID.randomUUID());
         readDTO.setMovieTitle("Guess Who");
@@ -158,7 +200,7 @@ public class MovieCastControllerTest {
         return readDTO;
     }
 
-    public MovieCastReadExtendedDTO createMovieCastReadExtendedDTO(PersonReadDTO personDTO, MovieReadDTO movieDTO) {
+    private MovieCastReadExtendedDTO createMovieCastReadExtendedDTO(PersonReadDTO personDTO, MovieReadDTO movieDTO) {
         MovieCastReadExtendedDTO dto = new MovieCastReadExtendedDTO();
         dto.setId(UUID.randomUUID());
         dto.setPartInfo("Some text");

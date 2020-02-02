@@ -29,10 +29,11 @@ public class Article {
     @JoinColumn(nullable = false, name = "author_id")
     private ApplicationUser author;
 
+    // TODO comments for articles
 //    private List<Comment> comments;
-
+    // TODO relatedPersons for articles
 //    private List<Person> relatedPeople;
-//
+    // TODO relatedMovies for articles
 //    private List<Movie> relatedMovies;
 
     private Integer likesCount;

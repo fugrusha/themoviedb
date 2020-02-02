@@ -20,6 +20,8 @@ public class MovieController {
         return movieService.getMovies(filter);
     }
 
+    // TODO list of movies
+
     @GetMapping("/{id}")
     public MovieReadDTO getMovieById(@PathVariable UUID id) {
         return movieService.getMovie(id);

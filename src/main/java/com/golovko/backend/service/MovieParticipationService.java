@@ -52,11 +52,13 @@ public class MovieParticipationService {
     }
 
     public MoviePartReadDTO patchMovieParticipation(UUID id, MoviePartPatchDTO patchDTO) {
+        // TODO
         return null;
     }
 
 
     public MoviePartReadDTO updateMovieParticipation(UUID id, MoviePartPutDTO updateDTO) {
+        // TODO
         return null;
     }
 

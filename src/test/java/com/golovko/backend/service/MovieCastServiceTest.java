@@ -3,9 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCast;
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.dto.moviecast.MovieCastCreateDTO;
-import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
-import com.golovko.backend.dto.moviecast.MovieCastReadExtendedDTO;
+import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieCastRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -101,8 +99,67 @@ public class MovieCastServiceTest {
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCast, "movieId", "personId");
         Assert.assertEquals(readDTO.getMovieId(), movie.getId());
         Assert.assertEquals(readDTO.getPersonId(), person.getId());
-
     }
 
+    @Test
+    public void updateMovieCastTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
 
+        MovieCastPutDTO updateDTO = new MovieCastPutDTO();
+        updateDTO.setCharacter("New Character");
+        updateDTO.setPartInfo("New text");
+        updateDTO.setMovieId(movie.getId());
+        updateDTO.setPersonId(person.getId());
+
+        MovieCastReadDTO readDTO = movieCastService.updateMovieCast(updateDTO, movieCast.getId());
+
+        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
+
+        movieCast = movieCastRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCast, "movieId", "personId");
+        Assert.assertEquals(movieCast.getMovie().getId(), readDTO.getMovieId());
+        Assert.assertEquals(movieCast.getPerson().getId(), readDTO.getPersonId());
+    }
+
+    @Test
+    public void patchMovieCastTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
+
+        MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
+        patchDTO.setCharacter("New Character");
+        patchDTO.setPartInfo("New text");
+        patchDTO.setMovieId(movie.getId());
+        patchDTO.setPersonId(person.getId());;
+
+        MovieCastReadDTO readDTO = movieCastService.patchMovieCast(patchDTO, movieCast.getId());
+
+        Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
+
+        movieCast = movieCastRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCast, "movieId", "personId");
+        Assert.assertEquals(movieCast.getMovie().getId(), readDTO.getMovieId());
+        Assert.assertEquals(movieCast.getPerson().getId(), readDTO.getPersonId());
+    }
+
+    @Test
+    public void patchMovieCastEmptyPatchTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
+
+        MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
+
+        MovieCastReadDTO readDTO = movieCastService.patchMovieCast(patchDTO, movieCast.getId());
+
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
+
+        movieCast = movieCastRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCast, "movieId", "personId");
+        Assert.assertEquals(movieCast.getMovie().getId(), readDTO.getMovieId());
+        Assert.assertEquals(movieCast.getPerson().getId(), readDTO.getPersonId());
+    }
 }
