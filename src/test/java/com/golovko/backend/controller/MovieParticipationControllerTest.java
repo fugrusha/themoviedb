@@ -5,9 +5,7 @@ import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieParticipationService;
@@ -117,6 +115,50 @@ public class MovieParticipationControllerTest {
 
         MoviePartReadDTO actualReadDTO = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
         Assertions.assertThat(actualReadDTO).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void updateMovieParticipationTest() throws Exception {
+        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+
+        MoviePartPutDTO updateDTO = new MoviePartPutDTO();
+        updateDTO.setPartType(PartType.COMPOSER);
+        updateDTO.setPartInfo("New text");
+        updateDTO.setMovieId(UUID.randomUUID());
+        updateDTO.setPersonId(UUID.randomUUID());
+
+        Mockito.when(movieParticipationService.updateMovieParticipation(readDTO.getId(), updateDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(put("/api/v1/movie-participations/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MoviePartReadDTO actualMovieParticipation = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
+        Assertions.assertThat(actualMovieParticipation).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void patchMovieParticipationTest() throws Exception {
+        MoviePartPatchDTO patchDTO = new MoviePartPatchDTO();
+        patchDTO.setPartType(PartType.COMPOSER);
+        patchDTO.setPartInfo("New text");
+        patchDTO.setMovieId(UUID.randomUUID());
+        patchDTO.setPersonId(UUID.randomUUID());
+
+        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+
+        Mockito.when(movieParticipationService.patchMovieParticipation(readDTO.getId(), patchDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(patch("/api/v1/movie-participations/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MoviePartReadDTO actualMovieParticipation = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
+        Assertions.assertThat(actualMovieParticipation).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test

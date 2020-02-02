@@ -40,7 +40,7 @@ public class MovieParticipationController {
         return movieParticipationService.patchMovieParticipation(id, patchDTO);
     }
 
-    @PutMapping("/id")
+    @PutMapping("/{id}")
     public MoviePartReadDTO updateMovieParticipation(
             @PathVariable UUID id, @RequestBody MoviePartPutDTO updateDTO
     ) {

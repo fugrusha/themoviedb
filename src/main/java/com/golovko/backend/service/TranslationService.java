@@ -13,9 +13,7 @@ import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MoviePutDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.moviecast.*;
-import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
@@ -233,6 +231,20 @@ public class TranslationService {
         movieParticipation.setPartInfo(createDTO.getPartInfo());
         movieParticipation.setPartType(createDTO.getPartType());
         return movieParticipation;
+    }
+
+    public void updateEntity(MoviePartPutDTO updateDTO, MovieParticipation movieParticipation) {
+        movieParticipation.setPartType(updateDTO.getPartType());
+        movieParticipation.setPartInfo(updateDTO.getPartInfo());
+    }
+
+    public void patchEntity(MoviePartPatchDTO patchDTO, MovieParticipation movieParticipation) {
+        if (patchDTO.getPartType() != null) {
+            movieParticipation.setPartType(patchDTO.getPartType());
+        }
+        if (patchDTO.getPartInfo() != null) {
+            movieParticipation.setPartInfo(patchDTO.getPartInfo());
+        }
     }
 
     /*

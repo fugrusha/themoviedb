@@ -52,14 +52,43 @@ public class MovieParticipationService {
     }
 
     public MoviePartReadDTO patchMovieParticipation(UUID id, MoviePartPatchDTO patchDTO) {
-        // TODO
-        return null;
+        MovieParticipation movieParticipation = getMovieParticipationRequired(id);
+
+        translationService.patchEntity(patchDTO, movieParticipation);
+
+        // TODO How can I remove this branches?
+        if (patchDTO.getMovieId() != null) {
+            Movie movie = movieRepository.findById(patchDTO.getMovieId())
+                    .orElseThrow(() -> new EntityNotFoundException(Movie.class, patchDTO.getMovieId()));
+            movieParticipation.setMovie(movie);
+        }
+
+        if (patchDTO.getPersonId() != null) {
+            Person person = personRepository.findById(patchDTO.getPersonId())
+                    .orElseThrow(() -> new EntityNotFoundException(Person.class, patchDTO.getPersonId()));
+            movieParticipation.setPerson(person);
+        }
+
+        movieParticipation = movieParticipationRepository.save(movieParticipation);
+        return translationService.toRead(movieParticipation);
     }
 
 
     public MoviePartReadDTO updateMovieParticipation(UUID id, MoviePartPutDTO updateDTO) {
-        // TODO
-        return null;
+        Movie movie = movieRepository.findById(updateDTO.getMovieId())
+                .orElseThrow(() -> new EntityNotFoundException(Movie.class, updateDTO.getMovieId()));
+        Person person = personRepository.findById(updateDTO.getPersonId())
+                .orElseThrow(() -> new EntityNotFoundException(Person.class, updateDTO.getPersonId()));
+
+        MovieParticipation movieParticipation = getMovieParticipationRequired(id);
+
+        translationService.updateEntity(updateDTO, movieParticipation);
+
+        movieParticipation.setMovie(movie);
+        movieParticipation.setPerson(person);
+
+        movieParticipation = movieParticipationRepository.save(movieParticipation);
+        return translationService.toRead(movieParticipation);
     }
 
     public void deleteMovieParticipation(UUID id) {
