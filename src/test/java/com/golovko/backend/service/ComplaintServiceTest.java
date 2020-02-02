@@ -42,7 +42,7 @@ public class ComplaintServiceTest {
     @Test
     public void getComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user);
+        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
         ComplaintReadDTO readDTO = complaintService.getComplaint(complaint.getId());
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint, "authorId");
@@ -76,7 +76,7 @@ public class ComplaintServiceTest {
     @Test
     public void patchComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user);
+        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
@@ -96,7 +96,7 @@ public class ComplaintServiceTest {
     @Test
     public void patchComplaintEmptyPatchTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user);
+        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         ComplaintReadDTO readDTO = complaintService.patchComplaint(complaint.getId(), patchDTO);
@@ -112,7 +112,7 @@ public class ComplaintServiceTest {
     @Test
     public void updateComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user);
+        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
 
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
@@ -131,7 +131,7 @@ public class ComplaintServiceTest {
     @Test
     public void deleteComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user);
+        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
         complaintService.deleteComplaint(complaint.getId());
 
         Assert.assertFalse(complaintRepository.existsById(complaint.getId()));

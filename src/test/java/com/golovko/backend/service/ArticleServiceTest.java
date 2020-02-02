@@ -5,6 +5,7 @@ import com.golovko.backend.domain.Article;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.dto.article.ArticleCreateDTO;
 import com.golovko.backend.dto.article.ArticleReadDTO;
+import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -17,6 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -48,6 +50,19 @@ public class ArticleServiceTest {
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(article, "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), article.getAuthor().getId());
+    }
+
+    @Transactional
+    @Test
+    public void getArticleExtendedTest() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
+        Article article = testObjectFactory.createArticle(user, now);
+
+        ArticleReadExtendedDTO readDTO = articleService.getArticleExtended(article.getId());
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(article, "author");
+        Assertions.assertThat(readDTO.getAuthor()).isEqualToComparingFieldByField(article.getAuthor());
     }
 
     @Test(expected = EntityNotFoundException.class)

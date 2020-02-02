@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
+import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
@@ -41,7 +42,7 @@ public class ApplicationUserServiceTest {
     @Test
     public void testGetUserExtendedTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user);
+        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.MISPRINT);
 
         List<Complaint> complaints = new ArrayList<>();
         complaints.add(complaint);

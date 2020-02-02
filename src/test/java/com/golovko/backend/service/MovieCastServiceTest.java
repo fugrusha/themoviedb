@@ -2,7 +2,6 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCast;
-import com.golovko.backend.domain.PartType;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.moviecast.MovieCastCreateDTO;
 import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
@@ -41,7 +40,7 @@ public class MovieCastServiceTest {
     public void getMovieCastTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
-        MovieCast movieCast = createMovieCast(person, movie);
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
 
         MovieCastReadDTO readDTO = movieCastService.getMovieCast(movieCast.getId());
 
@@ -56,7 +55,7 @@ public class MovieCastServiceTest {
     public void getMovieCastExtendedTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
-        MovieCast movieCast = createMovieCast(person, movie);
+        MovieCast movieCast =  testObjectFactory.createMovieCast(person, movie);
 
         MovieCastReadExtendedDTO extendedDTO = movieCastService.getMovieCastExtended(movieCast.getId());
 
@@ -70,7 +69,7 @@ public class MovieCastServiceTest {
     public void deleteMovieCastTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
-        MovieCast movieCast = createMovieCast(person, movie);
+        MovieCast movieCast =  testObjectFactory.createMovieCast(person, movie);
 
         movieCastService.deleteMovieCast(movieCast.getId());
 
@@ -103,17 +102,5 @@ public class MovieCastServiceTest {
 
     }
 
-    private MovieCast createMovieCast(Person person, Movie movie) {
-        MovieCast movieCast = new MovieCast();
-        movieCast.setPartInfo("Some text");
-        movieCast.setAverageRating(5.0);
-        movieCast.setPerson(person);
-        movieCast.setMovie(movie);
-        movieCast.setPartType(PartType.CAST);
-        movieCast.setCharacter("Leon");
-
-        movieCast = movieCastRepository.save(movieCast);
-        return movieCast;
-    }
 
 }

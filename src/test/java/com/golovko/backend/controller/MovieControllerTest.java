@@ -1,16 +1,17 @@
 package com.golovko.backend.controller;
 
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.dto.movie.MovieCreateDTO;
-import com.golovko.backend.dto.movie.MoviePatchDTO;
-import com.golovko.backend.dto.movie.MoviePutDTO;
-import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.domain.PartType;
+import com.golovko.backend.dto.movie.*;
+import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -22,6 +23,8 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -39,17 +42,6 @@ public class MovieControllerTest {
 
     @MockBean
     private MovieService movieService;
-
-    private MovieReadDTO createMovieReadDTO() {
-        MovieReadDTO readDTO = new MovieReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setMovieTitle("Guess Who");
-        readDTO.setDescription("12345");
-        readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        readDTO.setReleased(false);
-        readDTO.setAverageRating(8.3);
-        return readDTO;
-    }
 
     @Test
     public void getMovieByIdTest() throws Exception {
@@ -158,5 +150,57 @@ public class MovieControllerTest {
                 .andExpect(status().isOk());
 
         Mockito.verify(movieService).deleteMovie(id);
+    }
+
+    @Ignore // TODO need to treat badRequest
+    @Test
+    public void getMoviesWithFilter() throws Exception {
+        MovieFilter filter = new MovieFilter();
+        filter.setPersonId(UUID.randomUUID());
+        filter.setPartTypes(Set.of(PartType.COMPOSER, PartType.WRITER));
+        filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
+        filter.setReleasedTo(LocalDate.of(1992, 5, 4));
+
+        MovieReadDTO movieReadDTO = new MovieReadDTO();
+        movieReadDTO.setId(UUID.randomUUID());
+        movieReadDTO.setMovieTitle("Title text");
+        movieReadDTO.setDescription("Some text");
+        movieReadDTO.setAverageRating(5.4);
+        movieReadDTO.setReleaseDate(LocalDate.of(1985, 5, 4));
+        movieReadDTO.setReleased(true);
+
+        MoviePartReadDTO moviePartReadDTO = new MoviePartReadDTO();
+        moviePartReadDTO.setMovieId(movieReadDTO.getId());
+        moviePartReadDTO.setPersonId(filter.getPersonId());
+        moviePartReadDTO.setPartType(PartType.WRITER);
+        moviePartReadDTO.setId(UUID.randomUUID());
+        moviePartReadDTO.setAverageRating(5.4);
+        moviePartReadDTO.setPartInfo("Some text");
+
+        List<MovieReadDTO> expectedResult = List.of(movieReadDTO);
+
+        Mockito.when(movieService.getMovies(filter)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc.perform(get("/api/v1/movies")
+            .param("personId", filter.getPersonId().toString())
+            .param("partTypes", "COMPOSER, WRITER")
+            .param("releasedFrom", filter.getReleasedFrom().toString())
+            .param("releasedTo", filter.getReleasedTo().toString()))
+            .andExpect(status().isOk())
+            .andReturn().getResponse().getContentAsString();
+
+        List<MovieReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+    }
+
+    private MovieReadDTO createMovieReadDTO() {
+        MovieReadDTO readDTO = new MovieReadDTO();
+        readDTO.setId(UUID.randomUUID());
+        readDTO.setMovieTitle("Guess Who");
+        readDTO.setDescription("12345");
+        readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
+        readDTO.setReleased(false);
+        readDTO.setAverageRating(8.3);
+        return readDTO;
     }
 }

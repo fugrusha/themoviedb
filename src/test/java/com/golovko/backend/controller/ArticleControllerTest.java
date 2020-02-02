@@ -1,34 +1,29 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.dto.article.ArticleCreateDTO;
 import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.ArticleService;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -41,9 +36,6 @@ public class ArticleControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @MockBean
     private ArticleService articleService;
@@ -98,54 +90,63 @@ public class ArticleControllerTest {
         Mockito.verify(articleService).getArticleExtended(extendedDTO.getId());
     }
 
-    @Ignore
-    @Test
-    public void createArticleTest() throws Exception {
-        ApplicationUser author = testObjectFactory.createUser();
-        ArticleReadDTO readDTO = createArticleReadDTO(author.getId());
+//    @Ignore
+//    @Test
+//    public void createArticleTest() throws Exception {
+//        ApplicationUser author = createUser();
+//        ArticleReadDTO readDTO = createArticleReadDTO(author.getId());
+//
+//        ArticleCreateDTO createDTO = new ArticleCreateDTO();
+//        createDTO.setTitle("Text title");
+//        createDTO.setText("Some text");
+//        createDTO.setStatus(ArticleStatus.DRAFT);
+//
+//        Mockito.when(articleService.createArticle(createDTO, author)).thenReturn(readDTO);
+//
+//        String resultJson = mockMvc.perform(post("/api/v1/articles/")
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(objectMapper.writeValueAsString(createDTO)))
+//                .andExpect(status().isOk())
+//                .andReturn().getResponse().getContentAsString();
+//
+//        ArticleReadDTO actualDTO = objectMapper.readValue(resultJson, ArticleReadDTO.class);
+//        Assertions.assertThat(actualDTO).isEqualToComparingFieldByField(readDTO);
+//
+//        Mockito.verify(articleService).createArticle(createDTO, author);
+//    }
 
-        ArticleCreateDTO createDTO = new ArticleCreateDTO();
-        createDTO.setTitle("Text title");
-        createDTO.setText("Some text");
-        createDTO.setStatus(ArticleStatus.DRAFT);
-
-        Mockito.when(articleService.createArticle(createDTO, author)).thenReturn(readDTO);
-
-        String resultJson = mockMvc.perform(post("/api/v1/articles/")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createDTO)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        ArticleReadDTO actualDTO = objectMapper.readValue(resultJson, ArticleReadDTO.class);
-        Assertions.assertThat(actualDTO).isEqualToComparingFieldByField(readDTO);
-
-        Mockito.verify(articleService).createArticle(createDTO, author);
-    }
+//    private ApplicationUser createUser() {
+//        ApplicationUser applicationUser = new ApplicationUser();
+//        applicationUser.setUsername("Vitalka");
+//        applicationUser.setPassword("123456");
+//        applicationUser.setEmail("vetal@gmail.com");
+//        applicationUser = applicationUserRepository.save(applicationUser);
+//        return applicationUser;
+//    }
 
     private ArticleReadDTO createArticleReadDTO(UUID authorId) {
         ArticleReadDTO dto = new ArticleReadDTO();
         dto.setId(UUID.randomUUID());
-        dto.setTitle("BREAKING NEWS");
-        dto.setText("Some text");
-        dto.setPublishedDate(Instant.now());
+        dto.setTitle("Title");
+        dto.setText("Some Text");
         dto.setStatus(ArticleStatus.PUBLISHED);
-        dto.setDislikesCount(5656);
-        dto.setLikesCount(100000);
         dto.setAuthorId(authorId);
+        dto.setPublishedDate(Instant.now().truncatedTo(ChronoUnit.MILLIS));
+        dto.setDislikesCount(555);
+        dto.setLikesCount(333);
         return dto;
     }
 
-    public ArticleReadExtendedDTO createArticleReadExtendedDTO(UserReadDTO authorDTO) {
+    private ArticleReadExtendedDTO createArticleReadExtendedDTO(UserReadDTO author) {
         ArticleReadExtendedDTO dto = new ArticleReadExtendedDTO();
         dto.setId(UUID.randomUUID());
-        dto.setTitle("BREAKING NEWS");
-        dto.setText("Some text");
-        dto.setPublishedDate(Instant.now());
+        dto.setTitle("Title");
+        dto.setText("Some Text");
         dto.setStatus(ArticleStatus.PUBLISHED);
-        dto.setDislikesCount(5656);
-        dto.setLikesCount(100000);
-        dto.setAuthor(authorDTO);
+        dto.setAuthor(author);
+        dto.setPublishedDate(Instant.now().truncatedTo(ChronoUnit.MILLIS));
+        dto.setDislikesCount(555);
+        dto.setLikesCount(333);
         return dto;
     }
 
@@ -157,4 +158,5 @@ public class ArticleControllerTest {
         readDTO.setPassword("12345");
         return readDTO;
     }
+
 }

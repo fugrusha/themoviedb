@@ -21,8 +21,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -46,7 +44,7 @@ public class MovieParticipationServiceTest {
     public void getMovieParticipationTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
-        MovieParticipation movieParticipation = createMovieParticipation(person, movie);
+        MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
         MoviePartReadDTO readDTO = movieParticipationService.getMovieParticipation(movieParticipation.getId());
 
@@ -61,7 +59,7 @@ public class MovieParticipationServiceTest {
     public void getMovieParticipationExtendedTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
-        MovieParticipation movieParticipation = createMovieParticipation(person, movie);
+        MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
         MoviePartReadExtendedDTO readDTO = movieParticipationService
                 .getExtendedMovieParticipation(movieParticipation.getId());
@@ -77,10 +75,7 @@ public class MovieParticipationServiceTest {
     public void createMovieParticipationTest() {
         MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
         createDTO.setPartInfo("some text");
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        createDTO.setPartTypes(types);
+        createDTO.setPartType(PartType.COSTUME_DESIGNER);
 
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
@@ -102,7 +97,7 @@ public class MovieParticipationServiceTest {
     public void deleteMovieParticipationTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
-        MovieParticipation movieParticipation = createMovieParticipation(person, movie);
+        MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
         movieParticipationService.deleteMovieParticipation(movieParticipation.getId());
 
@@ -114,19 +109,5 @@ public class MovieParticipationServiceTest {
         movieParticipationService.deleteMovieParticipation(UUID.randomUUID());
     }
 
-    private MovieParticipation createMovieParticipation(Person person, Movie movie) {
-        MovieParticipation movieParticipation = new MovieParticipation();
-        movieParticipation.setPartInfo("Some text");
-        movieParticipation.setAverageRating(5.0);
-        movieParticipation.setPerson(person);
-        movieParticipation.setMovie(movie);
 
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        movieParticipation.setPartTypes(types);
-
-        movieParticipation = movieParticipationRepository.save(movieParticipation);
-        return movieParticipation;
-    }
 }

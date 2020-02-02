@@ -213,7 +213,7 @@ public class TranslationService {
         dto.setId(movieParticipation.getId());
         dto.setPartInfo(movieParticipation.getPartInfo());
         dto.setAverageRating(movieParticipation.getAverageRating());
-        dto.setPartTypes(movieParticipation.getPartTypes());
+        dto.setPartType(movieParticipation.getPartType());
         dto.setMovieId(movieParticipation.getMovie().getId());
         dto.setPersonId(movieParticipation.getPerson().getId());
         return dto;
@@ -223,7 +223,7 @@ public class TranslationService {
         MoviePartReadExtendedDTO dto = new MoviePartReadExtendedDTO();
         dto.setId(movieParticipation.getId());
         dto.setPartInfo(movieParticipation.getPartInfo());
-        dto.setPartTypes(movieParticipation.getPartTypes());
+        dto.setPartType(movieParticipation.getPartType());
         dto.setAverageRating(movieParticipation.getAverageRating());
         dto.setMovie(toRead(movieParticipation.getMovie()));
         dto.setPerson(toRead(movieParticipation.getPerson()));
@@ -233,7 +233,7 @@ public class TranslationService {
     public MovieParticipation toEntity(MoviePartCreateDTO createDTO) {
         MovieParticipation movieParticipation = new MovieParticipation();
         movieParticipation.setPartInfo(createDTO.getPartInfo());
-        movieParticipation.setPartTypes(createDTO.getPartTypes());
+        movieParticipation.setPartType(createDTO.getPartType());
         return movieParticipation;
     }
 

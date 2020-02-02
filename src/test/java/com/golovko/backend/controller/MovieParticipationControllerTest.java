@@ -24,8 +24,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -103,10 +101,7 @@ public class MovieParticipationControllerTest {
 
         MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
         createDTO.setPartInfo("some text");
-        Set<PartType> types = new HashSet<>();
-        types.add(PartType.WRITER);
-        types.add(PartType.COSTUME_DESIGNER);
-        createDTO.setPartTypes(types);
+        createDTO.setPartType(PartType.COSTUME_DESIGNER);
 
         Mockito
                 .when(movieParticipationService.createMovieParticipation(createDTO, movieId, personId))
@@ -135,7 +130,7 @@ public class MovieParticipationControllerTest {
     }
 
 
-    public PersonReadDTO createPersonReadDTO() {
+    private PersonReadDTO createPersonReadDTO() {
         PersonReadDTO dto = new PersonReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setFirstName("Max");
@@ -144,7 +139,7 @@ public class MovieParticipationControllerTest {
         return dto;
     }
 
-    public MovieReadDTO createMovieReadDTO() {
+    private MovieReadDTO createMovieReadDTO() {
         MovieReadDTO readDTO = new MovieReadDTO();
         readDTO.setId(UUID.randomUUID());
         readDTO.setMovieTitle("Guess Who");
@@ -155,25 +150,25 @@ public class MovieParticipationControllerTest {
         return readDTO;
     }
 
-    public MoviePartReadDTO createMoviePartReadDTO() {
+    private MoviePartReadDTO createMoviePartReadDTO() {
         MoviePartReadDTO dto = new MoviePartReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setPartInfo("Some text");
         dto.setAverageRating(9.2);
         dto.setPersonId(UUID.randomUUID());
         dto.setMovieId(UUID.randomUUID());
-        dto.setPartTypes(Set.of(PartType.WRITER, PartType.COSTUME_DESIGNER));
+        dto.setPartType(PartType.COSTUME_DESIGNER);
         return dto;
     }
 
-    public MoviePartReadExtendedDTO createMoviePartReadExtendedDTO(PersonReadDTO personDTO, MovieReadDTO movieDTO) {
+    private MoviePartReadExtendedDTO createMoviePartReadExtendedDTO(PersonReadDTO personDTO, MovieReadDTO movieDTO) {
         MoviePartReadExtendedDTO dto = new MoviePartReadExtendedDTO();
         dto.setId(UUID.randomUUID());
         dto.setPartInfo("Some text");
         dto.setAverageRating(9.2);
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
-        dto.setPartTypes(Set.of(PartType.WRITER, PartType.COSTUME_DESIGNER));
+        dto.setPartType(PartType.COSTUME_DESIGNER);
         return dto;
     }
 }

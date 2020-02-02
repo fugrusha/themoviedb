@@ -1,16 +1,15 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.dto.movie.MovieCreateDTO;
-import com.golovko.backend.dto.movie.MoviePatchDTO;
-import com.golovko.backend.dto.movie.MoviePutDTO;
-import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieService {
@@ -24,6 +23,11 @@ public class MovieService {
     public MovieReadDTO getMovie(UUID id) {
         Movie movie = getMovieRequired(id);
         return translationService.toRead(movie);
+    }
+
+    public List<MovieReadDTO> getMovies(MovieFilter filter) {
+        List<Movie> movies = movieRepository.findByFilter(filter);
+        return movies.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
     public MovieReadDTO createMovie(MovieCreateDTO createDTO) {
