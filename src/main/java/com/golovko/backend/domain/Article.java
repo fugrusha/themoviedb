@@ -30,11 +30,11 @@ public class Article {
     private ApplicationUser author;
 
     // TODO comments for articles
-//    private List<Comment> comments;
+    // private List<Comment> comments;
     // TODO relatedPersons for articles
-//    private List<Person> relatedPeople;
+    //private List<Person> relatedPeople;
     // TODO relatedMovies for articles
-//    private List<Movie> relatedMovies;
+    //private List<Movie> relatedMovies;
 
     private Integer likesCount;
 

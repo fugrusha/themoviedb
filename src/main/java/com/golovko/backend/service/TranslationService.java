@@ -44,10 +44,7 @@ public class TranslationService {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-
-        List<ComplaintReadDTO> asDTO = user.getComplaints()
-                .stream().map(this::toRead).collect(Collectors.toList());
-        dto.setComplaints(asDTO);
+        dto.setComplaints(user.getComplaints().stream().map(this::toRead).collect(Collectors.toList()));
         return dto;
     }
 
@@ -247,6 +244,10 @@ public class TranslationService {
         }
     }
 
+    public List<MoviePartReadDTO> toReadListOfMoviePart(List<MovieParticipation> listOfMoviePart) {
+        return listOfMoviePart.stream().map(this::toRead).collect(Collectors.toList());
+    }
+
     /*
         MovieCast translations
     */
@@ -292,6 +293,10 @@ public class TranslationService {
         if (patchDTO.getPartInfo() != null) {
             movieCast.setPartInfo(patchDTO.getPartInfo());
         }
+    }
+
+    public List<MovieCastReadDTO> toReadList(List<MovieCast> listOfMovieCast) {
+        return listOfMovieCast.stream().map(this::toRead).collect(Collectors.toList());
     }
 
     /*

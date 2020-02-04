@@ -11,7 +11,5 @@ public class MovieCastPutDTO {
 
     private String character;
 
-    private UUID movieId;
-
     private UUID personId;
 }

@@ -16,4 +16,8 @@ public interface MovieCastRepository extends CrudRepository<MovieCast, UUID> {
             " mc.movie.releaseDate >= :releasedFrom and mc.movie.releaseDate < :releasedTo" +
             " order by mc.movie.releaseDate asc")
     List<MovieCast> findMovieCastsWithActorInGivenInterval(UUID personId, LocalDate releasedFrom, LocalDate releasedTo);
+
+    List<MovieCast> findByMovieId(UUID movieId);
+
+    MovieCast findByIdAndMovieId(UUID id, UUID movieId);
 }

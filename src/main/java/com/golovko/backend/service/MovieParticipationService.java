@@ -11,6 +11,7 @@ import com.golovko.backend.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,12 +29,17 @@ public class MovieParticipationService {
     @Autowired
     private TranslationService translationService;
 
-    public MoviePartReadDTO getMovieParticipation(UUID id) {
-        return translationService.toRead(getMovieParticipationRequired(id));
+    public List<MoviePartReadDTO> getListOfMovieParticipation(UUID movieId) {
+        List<MovieParticipation> listOfMoviePart = movieParticipationRepository.findByMovieId(movieId);
+        return translationService.toReadListOfMoviePart(listOfMoviePart);
     }
 
-    public MoviePartReadExtendedDTO getExtendedMovieParticipation(UUID id) {
-        return translationService.toReadExtended(getMovieParticipationRequired(id));
+    public MoviePartReadDTO getMovieParticipation(UUID movieId, UUID id) {
+        return translationService.toRead(getMovieParticipationByMovieIdRequired(id, movieId));
+    }
+
+    public MoviePartReadExtendedDTO getExtendedMovieParticipation(UUID movieId, UUID id) {
+        return translationService.toReadExtended(getMovieParticipationByMovieIdRequired(id, movieId));
     }
 
     public MoviePartReadDTO createMovieParticipation(MoviePartCreateDTO createDTO, UUID movieId, UUID personId) {
@@ -51,18 +57,16 @@ public class MovieParticipationService {
         return translationService.toRead(movieParticipation);
     }
 
-    public MoviePartReadDTO patchMovieParticipation(UUID id, MoviePartPatchDTO patchDTO) {
-        MovieParticipation movieParticipation = getMovieParticipationRequired(id);
+    public MoviePartReadDTO patchMovieParticipation(UUID movieId, UUID id, MoviePartPatchDTO patchDTO) {
+        MovieParticipation movieParticipation = getMovieParticipationByMovieIdRequired(id, movieId);
 
         translationService.patchEntity(patchDTO, movieParticipation);
 
-        // TODO How can I remove this branches?
-        if (patchDTO.getMovieId() != null) {
-            Movie movie = movieRepository.findById(patchDTO.getMovieId())
-                    .orElseThrow(() -> new EntityNotFoundException(Movie.class, patchDTO.getMovieId()));
-            movieParticipation.setMovie(movie);
-        }
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));
+        movieParticipation.setMovie(movie);
 
+        // TODO How can I remove this branches?
         if (patchDTO.getPersonId() != null) {
             Person person = personRepository.findById(patchDTO.getPersonId())
                     .orElseThrow(() -> new EntityNotFoundException(Person.class, patchDTO.getPersonId()));
@@ -74,9 +78,9 @@ public class MovieParticipationService {
     }
 
 
-    public MoviePartReadDTO updateMovieParticipation(UUID id, MoviePartPutDTO updateDTO) {
-        Movie movie = movieRepository.findById(updateDTO.getMovieId())
-                .orElseThrow(() -> new EntityNotFoundException(Movie.class, updateDTO.getMovieId()));
+    public MoviePartReadDTO updateMovieParticipation(UUID movieId, UUID id, MoviePartPutDTO updateDTO) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));
         Person person = personRepository.findById(updateDTO.getPersonId())
                 .orElseThrow(() -> new EntityNotFoundException(Person.class, updateDTO.getPersonId()));
 
@@ -91,12 +95,20 @@ public class MovieParticipationService {
         return translationService.toRead(movieParticipation);
     }
 
-    public void deleteMovieParticipation(UUID id) {
-        movieParticipationRepository.delete(getMovieParticipationRequired(id));
+    public void deleteMovieParticipation(UUID movieId, UUID id) {
+        movieParticipationRepository.delete(getMovieParticipationByMovieIdRequired(id, movieId));
     }
 
-    public MovieParticipation getMovieParticipationRequired(UUID id) {
+    private MovieParticipation getMovieParticipationRequired(UUID id) {
         return movieParticipationRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(MovieParticipation.class, id));
+    }
+
+    private MovieParticipation getMovieParticipationByMovieIdRequired(UUID id, UUID movieId) {
+        if (movieParticipationRepository.findByIdAndMovieId(id, movieId) != null) {
+            return movieParticipationRepository.findByIdAndMovieId(id, movieId);
+        } else {
+            throw new EntityNotFoundException(MovieParticipation.class, id);
+        }
     }
 }

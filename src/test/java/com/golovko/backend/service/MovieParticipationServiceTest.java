@@ -22,6 +22,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -47,7 +48,8 @@ public class MovieParticipationServiceTest {
         Movie movie = testObjectFactory.createMovie();
         MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
-        MoviePartReadDTO readDTO = movieParticipationService.getMovieParticipation(movieParticipation.getId());
+        MoviePartReadDTO readDTO = movieParticipationService
+                .getMovieParticipation(movie.getId(), movieParticipation.getId());
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
                 "movieId", "personId");
@@ -63,12 +65,24 @@ public class MovieParticipationServiceTest {
         MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
         MoviePartReadExtendedDTO readDTO = movieParticipationService
-                .getExtendedMovieParticipation(movieParticipation.getId());
+                .getExtendedMovieParticipation(movie.getId(), movieParticipation.getId());
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
                 "movie", "person");
         Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
         Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
+    }
+
+    @Test
+    public void getListOfMovieParticipationTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieParticipation moviePart = testObjectFactory.createMovieParticipation(person, movie);
+
+        List<MoviePartReadDTO> resultList = movieParticipationService.getListOfMovieParticipation(movie.getId());
+
+        Assertions.assertThat(resultList).extracting(MoviePartReadDTO::getId)
+                .containsExactlyInAnyOrder(moviePart.getId());
     }
 
     @Transactional
@@ -103,10 +117,10 @@ public class MovieParticipationServiceTest {
         MoviePartPatchDTO patchDTO = new MoviePartPatchDTO();
         patchDTO.setPartType(PartType.COMPOSER);
         patchDTO.setPartInfo("New text");
-        patchDTO.setMovieId(movie.getId());
         patchDTO.setPersonId(person.getId());;
 
-        MoviePartReadDTO readDTO = movieParticipationService.patchMovieParticipation(moviePart.getId(), patchDTO);
+        MoviePartReadDTO readDTO = movieParticipationService
+                .patchMovieParticipation(movie.getId(), moviePart.getId(), patchDTO);
 
         Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
 
@@ -124,7 +138,8 @@ public class MovieParticipationServiceTest {
 
         MoviePartPatchDTO patchDTO = new MoviePartPatchDTO();
 
-        MoviePartReadDTO readDTO = movieParticipationService.patchMovieParticipation(moviePart.getId(), patchDTO);
+        MoviePartReadDTO readDTO = movieParticipationService
+                .patchMovieParticipation(movie.getId(), moviePart.getId(), patchDTO);
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
@@ -140,14 +155,14 @@ public class MovieParticipationServiceTest {
         Movie movie = testObjectFactory.createMovie();
         MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
-        movieParticipationService.deleteMovieParticipation(movieParticipation.getId());
+        movieParticipationService.deleteMovieParticipation(movie.getId(), movieParticipation.getId());
 
         Assert.assertFalse(movieParticipationRepository.existsById(movieParticipation.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void deleteMovieNotFound() {
-        movieParticipationService.deleteMovieParticipation(UUID.randomUUID());
+        movieParticipationService.deleteMovieParticipation(UUID.randomUUID(), UUID.randomUUID());
     }
 
 

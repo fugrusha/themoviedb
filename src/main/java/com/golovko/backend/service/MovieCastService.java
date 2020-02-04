@@ -11,6 +11,7 @@ import com.golovko.backend.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,15 +29,21 @@ public class MovieCastService {
     @Autowired
     private TranslationService translationService;
 
-    public MovieCastReadDTO getMovieCast(UUID id) {
-        return translationService.toRead(getMovieCastRequired(id));
+
+    public List<MovieCastReadDTO> getListOfMovieCast(UUID movieId) {
+        List<MovieCast> listOfMovieCast = movieCastRepository.findByMovieId(movieId);
+        return translationService.toReadList(listOfMovieCast);
     }
 
-    public MovieCastReadExtendedDTO getMovieCastExtended(UUID id) {
-        return translationService.toReadExtended(getMovieCastRequired(id));
+    public MovieCastReadDTO getMovieCast(UUID id, UUID movieId) {
+        return translationService.toRead(getMovieCastByMovieIdRequired(id, movieId));
     }
 
-    public MovieCastReadDTO createMovieCast(MovieCastCreateDTO createDTO, UUID movieId, UUID personId) {
+    public MovieCastReadExtendedDTO getMovieCastExtended(UUID id, UUID movieId) {
+        return translationService.toReadExtended(getMovieCastByMovieIdRequired(id, movieId));
+    }
+
+    public MovieCastReadDTO createMovieCast(MovieCastCreateDTO createDTO, UUID personId, UUID movieId) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));
         Person person = personRepository.findById(personId)
@@ -51,13 +58,13 @@ public class MovieCastService {
         return translationService.toRead(movieCast);
     }
 
-    public MovieCastReadDTO updateMovieCast(MovieCastPutDTO updateDTO, UUID id) {
-        Movie movie = movieRepository.findById(updateDTO.getMovieId())
-                .orElseThrow(() -> new EntityNotFoundException(Movie.class, updateDTO.getMovieId()));
+    public MovieCastReadDTO updateMovieCast(MovieCastPutDTO updateDTO, UUID id, UUID movieId) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));
         Person person = personRepository.findById(updateDTO.getPersonId())
                 .orElseThrow(() -> new EntityNotFoundException(Person.class, updateDTO.getPersonId()));
 
-        MovieCast movieCast = getMovieCastRequired(id);
+        MovieCast movieCast = getMovieCastByMovieIdRequired(id, movieId);
 
         translationService.updateEntity(updateDTO, movieCast);
 
@@ -68,17 +75,11 @@ public class MovieCastService {
         return translationService.toRead(movieCast);
     }
 
-    public MovieCastReadDTO patchMovieCast(MovieCastPatchDTO patchDTO, UUID id) {
-        MovieCast movieCast = getMovieCastRequired(id);
+    public MovieCastReadDTO patchMovieCast(MovieCastPatchDTO patchDTO, UUID id, UUID movieId) {
+        Movie movie = movieRepository.findById(movieId)
+                .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));
 
-        translationService.patchEntity(patchDTO, movieCast);
-
-        // TODO How can I remove this branches?
-        if (patchDTO.getMovieId() != null) {
-            Movie movie = movieRepository.findById(patchDTO.getMovieId())
-                    .orElseThrow(() -> new EntityNotFoundException(Movie.class, patchDTO.getMovieId()));
-            movieCast.setMovie(movie);
-        }
+        MovieCast movieCast = getMovieCastByMovieIdRequired(id, movieId);
 
         if (patchDTO.getPersonId() != null) {
             Person person = personRepository.findById(patchDTO.getPersonId())
@@ -86,16 +87,28 @@ public class MovieCastService {
             movieCast.setPerson(person);
         }
 
+        translationService.patchEntity(patchDTO, movieCast);
+
+        movieCast.setMovie(movie);
+
         movieCast = movieCastRepository.save(movieCast);
         return translationService.toRead(movieCast);
     }
 
-    public void deleteMovieCast(UUID id) {
-        movieCastRepository.delete(getMovieCastRequired(id));
+    public void deleteMovieCast(UUID id, UUID movieId) {
+        movieCastRepository.delete(getMovieCastByMovieIdRequired(id, movieId));
     }
 
     private MovieCast getMovieCastRequired(UUID id) {
         return movieCastRepository.findById(id).orElseThrow(() ->
                 new EntityNotFoundException(MovieCast.class, id));
+    }
+
+    private MovieCast getMovieCastByMovieIdRequired(UUID id, UUID movieId) {
+        if (movieCastRepository.findByIdAndMovieId(id, movieId) != null) {
+            return movieCastRepository.findByIdAndMovieId(id, movieId);
+        } else {
+            throw new EntityNotFoundException(MovieCast.class, id);
+        }
     }
 }

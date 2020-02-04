@@ -3,6 +3,7 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
@@ -10,6 +11,7 @@ import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -71,28 +73,27 @@ public class ComplaintControllerTest {
         Assert.assertTrue(result.contains(exception.getMessage()));
     }
 
-//    @Ignore
-//    @Test
-//    public void createComplaintTest() throws Exception {
-//        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
-//        createDTO.setComplaintTitle("Report 1");
-//        createDTO.setComplaintText("I have noticed a spoiler");
-//        createDTO.setComplaintType(ComplaintType.SPOILER);
-//
-//        ApplicationUser author = createUser();
-//        ComplaintReadDTO readDTO = createComplaintReadDTO();
-//
-//        Mockito.when(complaintService.createComplaint(createDTO, author)).thenReturn(readDTO);
-//
-//        String resultJson = mockMvc.perform(post("/api/v1/complaints")
-//                .content(objectMapper.writeValueAsString(createDTO))
-//                .contentType(MediaType.APPLICATION_JSON))
-//                .andExpect(status().isOk())
-//                .andReturn().getResponse().getContentAsString();
-//
-//        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
-//        Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
-//    }
+    @Ignore // TODO add user authentication
+    @Test
+    public void createComplaintTest() throws Exception {
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Report 1");
+        createDTO.setComplaintText("I have noticed a spoiler");
+        createDTO.setComplaintType(ComplaintType.SPOILER);
+
+        ComplaintReadDTO readDTO = createComplaintReadDTO();
+        // add user authentication
+        // Mockito.when(complaintService.createComplaint(createDTO, author)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(post("/api/v1/complaints")
+                .content(objectMapper.writeValueAsString(createDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
+        Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
+    }
 
     @Test
     public void patchComplaintTest() throws Exception {
@@ -145,15 +146,6 @@ public class ComplaintControllerTest {
 
         Mockito.verify(complaintService).deleteComplaint(id);
     }
-
-//    private ApplicationUser createUser() {
-//        ApplicationUser applicationUser = new ApplicationUser();
-//        applicationUser.setUsername("Vitalka");
-//        applicationUser.setPassword("123456");
-//        applicationUser.setEmail("vetal@gmail.com");
-//        applicationUser = applicationUserRepository.save(applicationUser);
-//        return applicationUser;
-//    }
 
     private ComplaintReadDTO createComplaintReadDTO() {
         ComplaintReadDTO readDTO = new ComplaintReadDTO();

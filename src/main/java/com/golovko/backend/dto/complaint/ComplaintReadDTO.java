@@ -7,6 +7,7 @@ import java.util.UUID;
 
 @Data
 public class ComplaintReadDTO {
+
     private UUID id;
 
     private String complaintTitle;

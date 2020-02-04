@@ -18,4 +18,6 @@ public class UserReadExtendedDTO {
     private List<ComplaintReadDTO> complaints;
 
     // TODO add list of articles
+    // TODO add list of comments
+    // TODO add list of likedMovies
 }
