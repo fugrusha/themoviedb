@@ -1,0 +1,4 @@
+id;part_info;part_type;character;average_rating;movie_id;person_id
+4ad33bd9-3c48-4583-ac73-070d7b5c7d0c;Some text;CAST;Don Juan;5.7;a14e15fd-aafd-4a3c-9620-3ac87f360ae6;4308661f-1a51-4b25-8ac2-abbd21ac2487
+98086ea4-5e55-42e8-9e75-9a3de0af2bf1;Some text;CAST;James Bond;9.0;536adcbf-8cd7-48be-9530-d0d1b0646bef;2c79abee-759b-460b-b831-abc69aca874f
+cd2c7295-d110-4d82-a183-167b8abce426;Some text;CAST;Leon Killer;2.1;950b4f87-7afc-40f4-bda8-cbb091a30206;07354809-4fe9-454e-8a51-e2bf01c13e47

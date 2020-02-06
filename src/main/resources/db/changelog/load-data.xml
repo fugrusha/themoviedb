@@ -1,0 +1,78 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="load users and complaints" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="application_user" file="db/data/users.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="username" type="string"/>
+            <column name="password" type="string"/>
+            <column name="email" type="string"/>
+        </loadUpdateData>
+
+        <loadUpdateData tableName="complaint" file="db/data/complaints.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="complaint_title" type="string"/>
+            <column name="complaint_text" type="string"/>
+            <column name="complaint_type" type="string"/>
+            <column name="author_id" type="uuid"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load movies and persons" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="person" file="db/data/person.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="first_name" type="string"/>
+            <column name="last_name" type="string"/>
+            <column name="gender" type="string"/>
+        </loadUpdateData>
+
+        <loadUpdateData tableName="movie" file="db/data/movies.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="movie_title" type="string"/>
+            <column name="release_date" type="date"/>
+            <column name="description" type="string"/>
+            <column name="is_released" type="boolean"/>
+            <column name="average_rating" type="numeric"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load movie participations" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="movie_participation" file="db/data/movie-part.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="part_info" type="string"/>
+            <column name="part_type" type="string"/>
+            <column name="movie_id" type="uuid"/>
+            <column name="person_id" type="uuid"/>
+            <column name="average_rating" type="numeric"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load movie casts" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="movie_cast" file="db/data/movie-cast.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="part_info" type="string"/>
+            <column name="part_type" type="string"/>
+            <column name="character" type="string"/>
+            <column name="movie_id" type="uuid"/>
+            <column name="person_id" type="uuid"/>
+            <column name="average_rating" type="numeric"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load articles" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="article" file="db/data/articles.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="title" type="string"/>
+            <column name="published_date" type="date"/>
+            <column name="text" type="string"/>
+            <column name="status" type="string" />
+            <column name="likes_count" type="numeric" />
+            <column name="dislikes_count" type="numeric" />
+            <column name="author_id" type="uuid"/>
+        </loadUpdateData>
+    </changeSet>
+
+</databaseChangeLog>
