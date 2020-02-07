@@ -11,7 +11,6 @@ import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -21,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -152,21 +152,20 @@ public class MovieControllerTest {
         Mockito.verify(movieService).deleteMovie(id);
     }
 
-    @Ignore // TODO need to treat badRequest
     @Test
     public void getMoviesWithFilter() throws Exception {
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(UUID.randomUUID());
         filter.setPartTypes(Set.of(PartType.COMPOSER, PartType.WRITER));
-        filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
-        filter.setReleasedTo(LocalDate.of(1992, 5, 4));
+        filter.setReleasedFrom(LocalDate.parse("1980-07-10"));
+        filter.setReleasedTo(LocalDate.parse("1992-07-10"));
 
         MovieReadDTO movieReadDTO = new MovieReadDTO();
         movieReadDTO.setId(UUID.randomUUID());
         movieReadDTO.setMovieTitle("Title text");
         movieReadDTO.setDescription("Some text");
         movieReadDTO.setAverageRating(5.4);
-        movieReadDTO.setReleaseDate(LocalDate.of(1985, 5, 4));
+        movieReadDTO.setReleaseDate(LocalDate.parse("1985-01-10"));
         movieReadDTO.setReleased(true);
 
         MoviePartReadDTO moviePartReadDTO = new MoviePartReadDTO();
@@ -186,6 +185,7 @@ public class MovieControllerTest {
             .param("partTypes", "COMPOSER, WRITER")
             .param("releasedFrom", filter.getReleasedFrom().toString())
             .param("releasedTo", filter.getReleasedTo().toString()))
+            .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 

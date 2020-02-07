@@ -18,7 +18,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -40,6 +40,9 @@ public class ArticleServiceTest {
     @Autowired
     private TestObjectFactory testObjectFactory;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Test
     public void getArticleTest() {
         ApplicationUser user = testObjectFactory.createUser();
@@ -52,17 +55,19 @@ public class ArticleServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), article.getAuthor().getId());
     }
 
-    @Transactional
     @Test
     public void getArticleExtendedTest() {
         ApplicationUser user = testObjectFactory.createUser();
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Article article = testObjectFactory.createArticle(user, now);
 
-        ArticleReadExtendedDTO readDTO = articleService.getArticleExtended(article.getId());
+        inTransaction(() -> {
+            ArticleReadExtendedDTO readDTO = articleService.getArticleExtended(article.getId());
 
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(article, "author");
-        Assertions.assertThat(readDTO.getAuthor()).isEqualToComparingFieldByField(article.getAuthor());
+            Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(article, "author");
+            Assertions.assertThat(readDTO.getAuthor()).isEqualToComparingFieldByField(article.getAuthor());
+        });
+
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -87,5 +92,11 @@ public class ArticleServiceTest {
         Article article = articleRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(article, "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), article.getAuthor().getId());
+    }
+
+    private void inTransaction(Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
     }
 }

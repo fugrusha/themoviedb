@@ -96,6 +96,19 @@ public class TestObjectFactory {
         return movieParticipation;
     }
 
+    public MovieParticipation createMovieParticipationForFilter(Person person, Movie movie, PartType partType) {
+        MovieParticipation movieParticipation = new MovieParticipation();
+        movieParticipation.setPartInfo("Some text");
+        movieParticipation.setAverageRating(5.0);
+        movieParticipation.setPerson(person);
+        movieParticipation.setMovie(movie);
+        movieParticipation.setPartType(partType);
+
+        movieParticipation = movieParticipationRepository.save(movieParticipation);
+        return movieParticipation;
+    }
+
+
     public Article createArticle(ApplicationUser author, Instant time) {
         Article article = new Article();
         article.setTitle("Some title");

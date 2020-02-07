@@ -20,7 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -41,7 +41,9 @@ public class MovieParticipationServiceTest {
     @Autowired
     private TestObjectFactory testObjectFactory;
 
-    @Transactional
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Test
     public void getMovieParticipationTest() {
         Person person = testObjectFactory.createPerson();
@@ -57,20 +59,21 @@ public class MovieParticipationServiceTest {
         Assertions.assertThat(readDTO.getPersonId()).isEqualToComparingFieldByField(person.getId());
     }
 
-    @Transactional
     @Test
     public void getMovieParticipationExtendedTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
-        MoviePartReadExtendedDTO readDTO = movieParticipationService
-                .getExtendedMovieParticipation(movie.getId(), movieParticipation.getId());
+        inTransaction(() -> {
+            MoviePartReadExtendedDTO readDTO = movieParticipationService
+                    .getExtendedMovieParticipation(movie.getId(), movieParticipation.getId());
 
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
-                "movie", "person");
-        Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
-        Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
+            Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
+                    "movie", "person");
+            Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
+            Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
+        });
     }
 
     @Test
@@ -85,7 +88,6 @@ public class MovieParticipationServiceTest {
                 .containsExactlyInAnyOrder(moviePart.getId());
     }
 
-    @Transactional
     @Test
     public void createMovieParticipationTest() {
         MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
@@ -165,5 +167,9 @@ public class MovieParticipationServiceTest {
         movieParticipationService.deleteMovieParticipation(UUID.randomUUID(), UUID.randomUUID());
     }
 
-
+    private void inTransaction(Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
+    }
 }

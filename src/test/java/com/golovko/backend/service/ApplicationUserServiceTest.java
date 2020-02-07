@@ -18,7 +18,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -43,10 +42,7 @@ public class ApplicationUserServiceTest {
     public void testGetUserExtendedTest() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.MISPRINT);
-
-        List<Complaint> complaints = new ArrayList<>();
-        complaints.add(complaint);
-        user.setComplaints(complaints);
+        user.setComplaints(List.of(complaint));
 
         UserReadExtendedDTO readExtendedDTO = applicationUserService.getExtendedUser(user.getId());
 

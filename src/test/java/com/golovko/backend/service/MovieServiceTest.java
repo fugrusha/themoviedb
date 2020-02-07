@@ -1,7 +1,6 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.movie.*;
@@ -10,7 +9,6 @@ import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -140,14 +138,14 @@ public class MovieServiceTest {
     public void getMoviesWithEmptyFilter() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();        Person person3 = testObjectFactory.createPerson();
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
-        Movie m4 = createMovie(LocalDate.of(1944, 5, 4));
+        Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
+        Movie m2 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
+        Movie m3 = createMovieFilterTest(LocalDate.of(1980, 5, 4));
+        Movie m4 = createMovieFilterTest(LocalDate.of(1944, 5, 4));
 
-        MovieParticipation mp1 = testObjectFactory.createMovieParticipation(person2, m1);
-        MovieParticipation mp2 = testObjectFactory.createMovieParticipation(person2, m2);
-        MovieParticipation mp3 = testObjectFactory.createMovieParticipation(person1, m3);
+        testObjectFactory.createMovieParticipation(person2, m1);
+        testObjectFactory.createMovieParticipation(person2, m2);
+        testObjectFactory.createMovieParticipation(person1, m3);
 
         MovieFilter filter = new MovieFilter();
         Assertions.assertThat(movieService.getMovies(filter)).extracting("id")
@@ -159,14 +157,14 @@ public class MovieServiceTest {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Person person3 = testObjectFactory.createPerson();
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
-        Movie m4 = createMovie(LocalDate.of(1944, 5, 4));
+        Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
+        Movie m2 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
+        Movie m3 = createMovieFilterTest(LocalDate.of(1980, 5, 4));
+        Movie m4 = createMovieFilterTest(LocalDate.of(1944, 5, 4));
 
-        MovieParticipation mp1 = testObjectFactory.createMovieParticipation(person2, m1);
-        MovieParticipation mp2 = testObjectFactory.createMovieParticipation(person2, m2);
-        MovieParticipation mp3 = testObjectFactory.createMovieParticipation(person1, m3);
+        testObjectFactory.createMovieParticipation(person2, m1);
+        testObjectFactory.createMovieParticipation(person2, m2);
+        testObjectFactory.createMovieParticipation(person1, m3);
 
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(person2.getId());
@@ -174,24 +172,19 @@ public class MovieServiceTest {
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
-    @Ignore // TODO dont find by partTypes
     @Test
     public void getMoviesByPartTypes() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1990, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
-        Movie m4 = createMovie(LocalDate.of(1944, 5, 4));
+        Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
+        Movie m2 = createMovieFilterTest(LocalDate.of(1990, 5, 4));
+        Movie m3 = createMovieFilterTest(LocalDate.of(1980, 5, 4));
+        Movie m4 = createMovieFilterTest(LocalDate.of(1944, 5, 4));
 
-        MovieParticipation mp1 = testObjectFactory.createMovieParticipation(person2, m1);
-        mp1.setPartType(PartType.COMPOSER);
-        MovieParticipation mp2 = testObjectFactory.createMovieParticipation(person2, m2);
-        mp2.setPartType(PartType.WRITER);
-        MovieParticipation mp3 = testObjectFactory.createMovieParticipation(person1, m3);
-        mp3.setPartType(PartType.PRODUCER);
-        MovieParticipation mp4 = testObjectFactory.createMovieParticipation(person1, m4);
-        mp4.setPartType(PartType.COSTUME_DESIGNER);
+        testObjectFactory.createMovieParticipationForFilter(person2, m1, PartType.COMPOSER);
+        testObjectFactory.createMovieParticipationForFilter(person2, m2, PartType.WRITER);
+        testObjectFactory.createMovieParticipationForFilter(person1, m3, PartType.PRODUCER);
+        testObjectFactory.createMovieParticipationForFilter(person2, m4, PartType.COSTUME_DESIGNER);
 
         MovieFilter filter = new MovieFilter();
         filter.setPartTypes(Set.of(PartType.COMPOSER, PartType.WRITER));
@@ -204,14 +197,14 @@ public class MovieServiceTest {
     public void getMoviesByReleasedInterval() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1990, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
-        Movie m4 = createMovie(LocalDate.of(1944, 5, 4));
+        Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
+        Movie m2 = createMovieFilterTest(LocalDate.of(1990, 5, 4));
+        Movie m3 = createMovieFilterTest(LocalDate.of(1980, 5, 4));
+        Movie m4 = createMovieFilterTest(LocalDate.of(1944, 5, 4));
 
-        MovieParticipation mp1 = testObjectFactory.createMovieParticipation(person2, m1);
-        MovieParticipation mp2 = testObjectFactory.createMovieParticipation(person2, m2);
-        MovieParticipation mp3 = testObjectFactory.createMovieParticipation(person1, m3);
+        testObjectFactory.createMovieParticipation(person2, m1);
+        testObjectFactory.createMovieParticipation(person2, m2);
+        testObjectFactory.createMovieParticipation(person1, m3);
 
         MovieFilter filter = new MovieFilter();
         filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
@@ -220,24 +213,19 @@ public class MovieServiceTest {
                 .containsExactlyInAnyOrder(m2.getId(), m3.getId());
     }
 
-    @Ignore //TODO dont find by partTypes
     @Test
     public void getMoviesByAllFilters() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4)); // no
-        Movie m2 = createMovie(LocalDate.of(1990, 5, 4)); // yes
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4)); // no
-        Movie m4 = createMovie(LocalDate.of(1987, 5, 4));
+        Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4)); // no
+        Movie m2 = createMovieFilterTest(LocalDate.of(1990, 5, 4)); // yes
+        Movie m3 = createMovieFilterTest(LocalDate.of(1980, 5, 4)); // no
+        Movie m4 = createMovieFilterTest(LocalDate.of(1987, 5, 4));
 
-        MovieParticipation mp1 = testObjectFactory.createMovieParticipation(person2, m1);
-        mp1.setPartType(PartType.COMPOSER);
-        MovieParticipation mp2 = testObjectFactory.createMovieParticipation(person2, m2);
-        mp2.setPartType(PartType.WRITER);
-        MovieParticipation mp3 = testObjectFactory.createMovieParticipation(person1, m3);
-        mp3.setPartType(PartType.PRODUCER);
-        MovieParticipation mp4 = testObjectFactory.createMovieParticipation(person2, m4);
-        mp4.setPartType(PartType.COSTUME_DESIGNER);
+        testObjectFactory.createMovieParticipationForFilter(person2, m1, PartType.COMPOSER);
+        testObjectFactory.createMovieParticipationForFilter(person2, m2, PartType.WRITER);
+        testObjectFactory.createMovieParticipationForFilter(person1, m3, PartType.PRODUCER);
+        testObjectFactory.createMovieParticipationForFilter(person2, m4, PartType.COSTUME_DESIGNER);
 
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(person2.getId());
@@ -249,7 +237,7 @@ public class MovieServiceTest {
                 .containsExactlyInAnyOrder(m2.getId());
     }
 
-    private Movie createMovie(LocalDate releasedDate) {
+    private Movie createMovieFilterTest(LocalDate releasedDate) {
         Movie movie = new Movie();
         movie.setMovieTitle("Title of the Movie");
         movie.setDescription("movie description");
