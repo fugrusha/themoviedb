@@ -14,7 +14,15 @@ import org.springframework.test.context.junit4.SpringRunner;
 @SpringBootTest
 @ActiveProfiles("test")
 @TestPropertySource(properties = "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml")
-@Sql(statements = {"delete from complaint", "delete from application_user"},
+@Sql(statements = {
+        "delete from complaint",
+        "delete from article",
+        "delete from application_user",
+        "delete from movie_cast",
+        "delete from movie_participation",
+        "delete from person",
+        "delete from movie"
+        },
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class LiquibaseLoadDataTest {
 

@@ -4,10 +4,7 @@ import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartPatchDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieParticipationRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -152,6 +149,28 @@ public class MovieParticipationServiceTest {
     }
 
     @Test
+    public void updateMovieParticipationTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieParticipation moviePart = testObjectFactory.createMovieParticipation(person, movie);
+
+        MoviePartPutDTO updateDTO = new MoviePartPutDTO();
+        updateDTO.setPartInfo("New text");
+        updateDTO.setPersonId(person.getId());
+        updateDTO.setPartType(PartType.PRODUCER);
+
+        MoviePartReadDTO readDTO = movieParticipationService
+                .updateMovieParticipation(movie.getId(), moviePart.getId(), updateDTO);
+
+        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
+
+        moviePart = movieParticipationRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart, "movieId", "personId");
+        Assert.assertEquals(moviePart.getMovie().getId(), readDTO.getMovieId());
+        Assert.assertEquals(moviePart.getPerson().getId(), readDTO.getPersonId());
+    }
+
+    @Test
     public void deleteMovieParticipationTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
@@ -163,7 +182,7 @@ public class MovieParticipationServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteMovieNotFound() {
+    public void deleteMovieParticipationNotFound() {
         movieParticipationService.deleteMovieParticipation(UUID.randomUUID(), UUID.randomUUID());
     }
 

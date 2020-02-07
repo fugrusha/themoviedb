@@ -108,11 +108,11 @@ public class TestObjectFactory {
         return movieParticipation;
     }
 
-
     public Article createArticle(ApplicationUser author, Instant time) {
         Article article = new Article();
         article.setTitle("Some title");
         article.setText("Some text");
+        article.setStatus(ArticleStatus.PUBLISHED);
         article.setDislikesCount(444);
         article.setLikesCount(111);
         article.setAuthor(author);

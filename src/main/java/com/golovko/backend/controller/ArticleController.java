@@ -22,8 +22,6 @@ public class ArticleController {
         return articleService.getArticle(id);
     }
 
-    // TODO add list of articles
-
     @GetMapping("/{id}/extended")
     public ArticleReadExtendedDTO getArticleExtended(@PathVariable UUID id) {
         return articleService.getArticleExtended(id);

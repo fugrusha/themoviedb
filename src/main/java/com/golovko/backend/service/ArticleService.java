@@ -42,18 +42,25 @@ public class ArticleService {
     }
 
     public ArticleReadDTO updateArticle(UUID id, ArticlePutDTO putDTO) {
+        Article article = getArticleRequired(id);
 
-        // TODO
-        return null;
+        translationService.updateEntity(article, putDTO);
+
+        article = articleRepository.save(article);
+        return translationService.toRead(article);
     }
 
     public ArticleReadDTO patchArticle(UUID id, ArticlePatchDTO patchDTO) {
-        // TODO
-        return null;
+        Article article =getArticleRequired(id);
+
+        translationService.patchEntity(article, patchDTO);
+
+        article = articleRepository.save(article);
+        return translationService.toRead(article);
     }
 
     public void deleteArticle(UUID id) {
-        // TODO
+        articleRepository.delete(getArticleRequired(id));
     }
 
     private Article getArticleRequired(UUID id) {

@@ -1,9 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
-import com.golovko.backend.dto.article.ArticleCreateDTO;
-import com.golovko.backend.dto.article.ArticleReadDTO;
-import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
+import com.golovko.backend.dto.article.*;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -334,5 +332,23 @@ public class TranslationService {
         article.setText(createDTO.getText());
         article.setStatus(createDTO.getStatus());
         return article;
+    }
+
+    public void updateEntity(Article article, ArticlePutDTO putDTO) {
+        article.setTitle(putDTO.getTitle());
+        article.setText(putDTO.getText());
+        article.setStatus(putDTO.getStatus());
+    }
+
+    public void patchEntity(Article article, ArticlePatchDTO patchDTO) {
+        if (patchDTO.getTitle() != null) {
+            article.setTitle(patchDTO.getTitle());
+        }
+        if (patchDTO.getText() != null) {
+            article.setText(patchDTO.getText());
+        }
+        if (patchDTO.getStatus() != null) {
+            article.setStatus(patchDTO.getStatus());
+        }
     }
 }
