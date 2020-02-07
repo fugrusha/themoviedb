@@ -21,12 +21,6 @@ public class ArticleReadDTO {
 
     private UUID authorId;
 
-//    private List<CommentReadDTO> comments;
-
-//    private List<UUID> relatedPeopleId;
-//
-//    private List<UUID> relatedMoviesId;
-
     private Integer likesCount;
 
     private Integer dislikesCount;

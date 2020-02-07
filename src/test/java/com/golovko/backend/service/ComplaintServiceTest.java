@@ -20,6 +20,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
 
@@ -38,6 +39,9 @@ public class ComplaintServiceTest {
 
     @Autowired
     private TestObjectFactory testObjectFactory;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Test
     public void getComplaintTest() {
@@ -92,13 +96,14 @@ public class ComplaintServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
     }
 
-    @Transactional
+    @Transactional // FIXME remove in the future, cause bidirectional connection between entities
     @Test
     public void patchComplaintEmptyPatchTest() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
+
         ComplaintReadDTO readDTO = complaintService.patchComplaint(complaint.getId(), patchDTO);
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
@@ -106,7 +111,7 @@ public class ComplaintServiceTest {
         Complaint complaintAfterUpdate = complaintRepository.findById(readDTO.getId()).get();
 
         Assertions.assertThat(complaintAfterUpdate).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(complaint).isEqualToComparingFieldByField(complaintAfterUpdate);
+        Assertions.assertThat(complaintAfterUpdate).isEqualToComparingFieldByField(complaint);
     }
 
     @Test
@@ -140,5 +145,11 @@ public class ComplaintServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void deleteComplaintNotFound() {
         complaintService.deleteComplaint(UUID.randomUUID());
+    }
+
+    private void inTransaction(Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
     }
 }

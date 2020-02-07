@@ -1,9 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
-import com.golovko.backend.dto.article.ArticleCreateDTO;
-import com.golovko.backend.dto.article.ArticleReadDTO;
-import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
+import com.golovko.backend.dto.article.*;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -12,12 +10,8 @@ import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MoviePutDTO;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.moviecast.MovieCastCreateDTO;
-import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
-import com.golovko.backend.dto.moviecast.MovieCastReadExtendedDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.moviecast.*;
+import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
@@ -48,10 +42,7 @@ public class TranslationService {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-
-        List<ComplaintReadDTO> asDTO = user.getComplaints()
-                .stream().map(this::toRead).collect(Collectors.toList());
-        dto.setComplaints(asDTO);
+        dto.setComplaints(user.getComplaints().stream().map(this::toRead).collect(Collectors.toList()));
         return dto;
     }
 
@@ -237,6 +228,24 @@ public class TranslationService {
         return movieParticipation;
     }
 
+    public void updateEntity(MoviePartPutDTO updateDTO, MovieParticipation movieParticipation) {
+        movieParticipation.setPartType(updateDTO.getPartType());
+        movieParticipation.setPartInfo(updateDTO.getPartInfo());
+    }
+
+    public void patchEntity(MoviePartPatchDTO patchDTO, MovieParticipation movieParticipation) {
+        if (patchDTO.getPartType() != null) {
+            movieParticipation.setPartType(patchDTO.getPartType());
+        }
+        if (patchDTO.getPartInfo() != null) {
+            movieParticipation.setPartInfo(patchDTO.getPartInfo());
+        }
+    }
+
+    public List<MoviePartReadDTO> toReadListOfMoviePart(List<MovieParticipation> listOfMoviePart) {
+        return listOfMoviePart.stream().map(this::toRead).collect(Collectors.toList());
+    }
+
     /*
         MovieCast translations
     */
@@ -268,6 +277,24 @@ public class TranslationService {
         dto.setMovie(toRead(movieCast.getMovie()));
         dto.setPerson(toRead(movieCast.getPerson()));
         return dto;
+    }
+
+    public void updateEntity(MovieCastPutDTO updateDTO, MovieCast movieCast) {
+        movieCast.setCharacter(updateDTO.getCharacter());
+        movieCast.setPartInfo(updateDTO.getPartInfo());
+    }
+
+    public void patchEntity(MovieCastPatchDTO patchDTO, MovieCast movieCast) {
+        if (patchDTO.getCharacter() != null) {
+            movieCast.setCharacter(patchDTO.getCharacter());
+        }
+        if (patchDTO.getPartInfo() != null) {
+            movieCast.setPartInfo(patchDTO.getPartInfo());
+        }
+    }
+
+    public List<MovieCastReadDTO> toReadList(List<MovieCast> listOfMovieCast) {
+        return listOfMovieCast.stream().map(this::toRead).collect(Collectors.toList());
     }
 
     /*
@@ -305,5 +332,23 @@ public class TranslationService {
         article.setText(createDTO.getText());
         article.setStatus(createDTO.getStatus());
         return article;
+    }
+
+    public void updateEntity(Article article, ArticlePutDTO putDTO) {
+        article.setTitle(putDTO.getTitle());
+        article.setText(putDTO.getText());
+        article.setStatus(putDTO.getStatus());
+    }
+
+    public void patchEntity(Article article, ArticlePatchDTO patchDTO) {
+        if (patchDTO.getTitle() != null) {
+            article.setTitle(patchDTO.getTitle());
+        }
+        if (patchDTO.getText() != null) {
+            article.setText(patchDTO.getText());
+        }
+        if (patchDTO.getStatus() != null) {
+            article.setStatus(patchDTO.getStatus());
+        }
     }
 }

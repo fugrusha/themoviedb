@@ -23,6 +23,8 @@ public class ComplaintController {
         return complaintService.getComplaint(id);
     }
 
+    // TODO add list of user's complaints
+
     @PostMapping
     public ComplaintReadDTO createComplaint(@RequestBody ComplaintCreateDTO createDTO, ApplicationUser author) {
         return complaintService.createComplaint(createDTO, author);

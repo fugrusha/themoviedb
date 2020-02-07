@@ -80,7 +80,8 @@ public class PersonServiceTest {
         Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
 
         person = personRepository.findById(person.getId()).get();
-        Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
+        Assertions.assertThat(person)
+                .isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
     }
 
     @Test
@@ -95,7 +96,8 @@ public class PersonServiceTest {
         Person personAfterUpdate = personRepository.findById(readDTO.getId()).get();
 
         Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate, "movieParticipations", "movieCast");
+        Assertions.assertThat(person)
+                .isEqualToIgnoringGivenFields(personAfterUpdate, "movieParticipations", "movieCast");
     }
 
     @Test
@@ -112,7 +114,8 @@ public class PersonServiceTest {
         Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
 
         person = personRepository.findById(person.getId()).get();
-        Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
+        Assertions.assertThat(person)
+                .isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
     }
 
     @Test

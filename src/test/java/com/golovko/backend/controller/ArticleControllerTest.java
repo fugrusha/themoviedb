@@ -3,19 +3,20 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.dto.article.ArticleReadDTO;
-import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
+import com.golovko.backend.dto.article.*;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.ArticleService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -23,7 +24,7 @@ import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -90,39 +91,84 @@ public class ArticleControllerTest {
         Mockito.verify(articleService).getArticleExtended(extendedDTO.getId());
     }
 
-//    @Ignore
-//    @Test
-//    public void createArticleTest() throws Exception {
-//        ApplicationUser author = createUser();
-//        ArticleReadDTO readDTO = createArticleReadDTO(author.getId());
-//
-//        ArticleCreateDTO createDTO = new ArticleCreateDTO();
-//        createDTO.setTitle("Text title");
-//        createDTO.setText("Some text");
-//        createDTO.setStatus(ArticleStatus.DRAFT);
-//
-//        Mockito.when(articleService.createArticle(createDTO, author)).thenReturn(readDTO);
-//
-//        String resultJson = mockMvc.perform(post("/api/v1/articles/")
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(objectMapper.writeValueAsString(createDTO)))
-//                .andExpect(status().isOk())
-//                .andReturn().getResponse().getContentAsString();
-//
-//        ArticleReadDTO actualDTO = objectMapper.readValue(resultJson, ArticleReadDTO.class);
-//        Assertions.assertThat(actualDTO).isEqualToComparingFieldByField(readDTO);
-//
-//        Mockito.verify(articleService).createArticle(createDTO, author);
-//    }
+    @Ignore // TODO add user authentication
+    @Test
+    public void createArticleTest() throws Exception {
+        UUID authorId = UUID.randomUUID();
+        ArticleReadDTO readDTO = createArticleReadDTO(authorId);
 
-//    private ApplicationUser createUser() {
-//        ApplicationUser applicationUser = new ApplicationUser();
-//        applicationUser.setUsername("Vitalka");
-//        applicationUser.setPassword("123456");
-//        applicationUser.setEmail("vetal@gmail.com");
-//        applicationUser = applicationUserRepository.save(applicationUser);
-//        return applicationUser;
-//    }
+        ArticleCreateDTO createDTO = new ArticleCreateDTO();
+        createDTO.setTitle("Text title");
+        createDTO.setText("Some text");
+        createDTO.setStatus(ArticleStatus.DRAFT);
+//        add user authentication
+//        Mockito.when(articleService.createArticle(createDTO, author)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(post("/api/v1/articles/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ArticleReadDTO actualDTO = objectMapper.readValue(resultJson, ArticleReadDTO.class);
+        Assertions.assertThat(actualDTO).isEqualToComparingFieldByField(readDTO);
+
+//        Mockito.verify(articleService).createArticle(createDTO, author);
+    }
+
+    @Test
+    public void updateArticleTest() throws Exception {
+        UUID authorId = UUID.randomUUID();
+        ArticleReadDTO readDTO = createArticleReadDTO(authorId);
+
+        ArticlePutDTO updateDTO = new ArticlePutDTO();
+        updateDTO.setTitle("Title");
+        updateDTO.setText("Some text");
+        updateDTO.setStatus(ArticleStatus.PUBLISHED);
+
+        Mockito.when(articleService.updateArticle(readDTO.getId(), updateDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(put("/api/v1/articles/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ArticleReadDTO actualArticle = objectMapper.readValue(resultJson, ArticleReadDTO.class);
+        Assertions.assertThat(actualArticle).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void patchArticleTest() throws Exception {
+        UUID authorId = UUID.randomUUID();
+        ArticleReadDTO readDTO = createArticleReadDTO(authorId);
+
+        ArticlePatchDTO patchDTO = new ArticlePatchDTO();
+        patchDTO.setTitle("Article title");
+        patchDTO.setText("Article text");
+        patchDTO.setStatus(ArticleStatus.NEED_MODERATION);
+
+        Mockito.when(articleService.patchArticle(readDTO.getId(), patchDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc.perform(patch("/api/v1/articles/{id}", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ArticleReadDTO actualArticle = objectMapper.readValue(resultJson, ArticleReadDTO.class);
+        Assertions.assertThat(actualArticle).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void deleteArticleTest() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/articles/{id}", id.toString()))
+                .andExpect(status().isOk());
+
+        Mockito.verify(articleService).deleteArticle(id);
+    }
 
     private ArticleReadDTO createArticleReadDTO(UUID authorId) {
         ArticleReadDTO dto = new ArticleReadDTO();

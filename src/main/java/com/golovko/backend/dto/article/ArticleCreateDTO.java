@@ -12,7 +12,4 @@ public class ArticleCreateDTO {
 
     private ArticleStatus status;
 
-//    private List<UUID> relatedPeopleId;
-//
-//    private List<UUID> relatedMoviesId;
 }

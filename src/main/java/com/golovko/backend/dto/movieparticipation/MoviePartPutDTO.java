@@ -12,7 +12,5 @@ public class MoviePartPutDTO {
 
     private PartType partType;
 
-    private UUID movieId;
-
     private UUID personId;
 }

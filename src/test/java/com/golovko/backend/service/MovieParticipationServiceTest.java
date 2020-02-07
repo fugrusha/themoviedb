@@ -4,9 +4,7 @@ import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.dto.movieparticipation.MoviePartCreateDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadExtendedDTO;
+import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieParticipationRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -19,8 +17,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -39,14 +38,17 @@ public class MovieParticipationServiceTest {
     @Autowired
     private TestObjectFactory testObjectFactory;
 
-    @Transactional
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Test
     public void getMovieParticipationTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
-        MoviePartReadDTO readDTO = movieParticipationService.getMovieParticipation(movieParticipation.getId());
+        MoviePartReadDTO readDTO = movieParticipationService
+                .getMovieParticipation(movie.getId(), movieParticipation.getId());
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
                 "movieId", "personId");
@@ -54,23 +56,35 @@ public class MovieParticipationServiceTest {
         Assertions.assertThat(readDTO.getPersonId()).isEqualToComparingFieldByField(person.getId());
     }
 
-    @Transactional
     @Test
     public void getMovieParticipationExtendedTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
-        MoviePartReadExtendedDTO readDTO = movieParticipationService
-                .getExtendedMovieParticipation(movieParticipation.getId());
+        inTransaction(() -> {
+            MoviePartReadExtendedDTO readDTO = movieParticipationService
+                    .getExtendedMovieParticipation(movie.getId(), movieParticipation.getId());
 
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
-                "movie", "person");
-        Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
-        Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
+            Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
+                    "movie", "person");
+            Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
+            Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
+        });
     }
 
-    @Transactional
+    @Test
+    public void getListOfMovieParticipationTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieParticipation moviePart = testObjectFactory.createMovieParticipation(person, movie);
+
+        List<MoviePartReadDTO> resultList = movieParticipationService.getListOfMovieParticipation(movie.getId());
+
+        Assertions.assertThat(resultList).extracting(MoviePartReadDTO::getId)
+                .containsExactlyInAnyOrder(moviePart.getId());
+    }
+
     @Test
     public void createMovieParticipationTest() {
         MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
@@ -94,20 +108,87 @@ public class MovieParticipationServiceTest {
     }
 
     @Test
+    public void patchMovieParticipationTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieParticipation moviePart = testObjectFactory.createMovieParticipation(person, movie);
+
+        MoviePartPatchDTO patchDTO = new MoviePartPatchDTO();
+        patchDTO.setPartType(PartType.COMPOSER);
+        patchDTO.setPartInfo("New text");
+        patchDTO.setPersonId(person.getId());;
+
+        MoviePartReadDTO readDTO = movieParticipationService
+                .patchMovieParticipation(movie.getId(), moviePart.getId(), patchDTO);
+
+        Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
+
+        moviePart = movieParticipationRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart, "movieId", "personId");
+        Assert.assertEquals(moviePart.getMovie().getId(), readDTO.getMovieId());
+        Assert.assertEquals(moviePart.getPerson().getId(), readDTO.getPersonId());
+    }
+
+    @Test
+    public void patchMovieCastEmptyPatchTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieParticipation moviePart = testObjectFactory.createMovieParticipation(person, movie);
+
+        MoviePartPatchDTO patchDTO = new MoviePartPatchDTO();
+
+        MoviePartReadDTO readDTO = movieParticipationService
+                .patchMovieParticipation(movie.getId(), moviePart.getId(), patchDTO);
+
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
+
+        moviePart = movieParticipationRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart, "movieId", "personId");
+        Assert.assertEquals(moviePart.getMovie().getId(), readDTO.getMovieId());
+        Assert.assertEquals(moviePart.getPerson().getId(), readDTO.getPersonId());
+    }
+
+    @Test
+    public void updateMovieParticipationTest() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieParticipation moviePart = testObjectFactory.createMovieParticipation(person, movie);
+
+        MoviePartPutDTO updateDTO = new MoviePartPutDTO();
+        updateDTO.setPartInfo("New text");
+        updateDTO.setPersonId(person.getId());
+        updateDTO.setPartType(PartType.PRODUCER);
+
+        MoviePartReadDTO readDTO = movieParticipationService
+                .updateMovieParticipation(movie.getId(), moviePart.getId(), updateDTO);
+
+        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
+
+        moviePart = movieParticipationRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart, "movieId", "personId");
+        Assert.assertEquals(moviePart.getMovie().getId(), readDTO.getMovieId());
+        Assert.assertEquals(moviePart.getPerson().getId(), readDTO.getPersonId());
+    }
+
+    @Test
     public void deleteMovieParticipationTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
-        movieParticipationService.deleteMovieParticipation(movieParticipation.getId());
+        movieParticipationService.deleteMovieParticipation(movie.getId(), movieParticipation.getId());
 
         Assert.assertFalse(movieParticipationRepository.existsById(movieParticipation.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteMovieNotFound() {
-        movieParticipationService.deleteMovieParticipation(UUID.randomUUID());
+    public void deleteMovieParticipationNotFound() {
+        movieParticipationService.deleteMovieParticipation(UUID.randomUUID(), UUID.randomUUID());
     }
 
-
+    private void inTransaction(Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
+    }
 }

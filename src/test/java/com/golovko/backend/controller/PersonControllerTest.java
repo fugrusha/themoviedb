@@ -37,15 +37,6 @@ public class PersonControllerTest {
     @MockBean
     private PersonService personService;
 
-    private PersonReadDTO createPersonReadDTO() {
-        PersonReadDTO dto = new PersonReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setFirstName("Max");
-        dto.setLastName("Popov");
-        dto.setGender(Gender.MALE);
-        return dto;
-    }
-
     @Test
     public void getPersonTest() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
@@ -137,5 +128,14 @@ public class PersonControllerTest {
                 .andExpect(status().is2xxSuccessful());
 
         Mockito.verify(personService).deletePerson(id);
+    }
+
+    private PersonReadDTO createPersonReadDTO() {
+        PersonReadDTO dto = new PersonReadDTO();
+        dto.setId(UUID.randomUUID());
+        dto.setFirstName("Max");
+        dto.setLastName("Popov");
+        dto.setGender(Gender.MALE);
+        return dto;
     }
 }

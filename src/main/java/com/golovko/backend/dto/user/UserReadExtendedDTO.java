@@ -16,4 +16,8 @@ public class UserReadExtendedDTO {
     private String email;
 
     private List<ComplaintReadDTO> complaints;
+
+    // TODO add list of articles
+    // TODO add list of comments
+    // TODO add list of likedMovies
 }

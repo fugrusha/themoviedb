@@ -5,6 +5,7 @@ import lombok.Data;
 
 @Data
 public class ComplaintCreateDTO {
+
     private String complaintTitle;
 
     private String complaintText;

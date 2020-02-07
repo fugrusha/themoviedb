@@ -35,23 +35,6 @@
             <column name="is_released" type="boolean"/>
             <column name="average_rating" type="double"/>
         </createTable>
-
-<!--        <createTable tableName="genre">-->
-<!--            <column name="id" type="uuid">-->
-<!--                <constraints primaryKey="true"/>-->
-<!--            </column>-->
-<!--            <column name="genre_title" type="varchar(128)">-->
-<!--                <constraints nullable="false"/>-->
-<!--            </column>-->
-<!--            <column name="movie" type="uuid">-->
-<!--                <constraints-->
-<!--                        foreignKeyName="fk_ai_application_movie_id"-->
-<!--                        referencedTableName="movie"-->
-<!--                        referencedColumnNames="id"-->
-<!--                        nullable="false"-->
-<!--                />-->
-<!--            </column>-->
-<!--        </createTable>-->
     </changeSet>
 
     <changeSet id="create_complaint_table" author="andrew">
@@ -90,7 +73,6 @@
             </column>
             <column name="gender" type="varchar(10)"/>
         </createTable>
-
     </changeSet>
 
     <changeSet id="create_movie_participation" author="andrew">
@@ -166,7 +148,6 @@
                 />
             </column>
         </createTable>
-
     </changeSet>
 
 </databaseChangeLog>

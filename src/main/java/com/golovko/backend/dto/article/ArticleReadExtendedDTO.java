@@ -22,12 +22,6 @@ public class ArticleReadExtendedDTO {
 
     private UserReadDTO author;
 
-//    private List<CommentReadDTO> comments;
-
-//    private List<PersonReadDTO> relatedPeople;
-//
-//    private List<MovieReadDTO> relatedMovies;
-
     private Integer likesCount;
 
     private Integer dislikesCount;
