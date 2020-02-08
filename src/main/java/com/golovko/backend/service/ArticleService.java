@@ -51,7 +51,7 @@ public class ArticleService {
     }
 
     public ArticleReadDTO patchArticle(UUID id, ArticlePatchDTO patchDTO) {
-        Article article =getArticleRequired(id);
+        Article article = getArticleRequired(id);
 
         translationService.patchEntity(article, patchDTO);
 

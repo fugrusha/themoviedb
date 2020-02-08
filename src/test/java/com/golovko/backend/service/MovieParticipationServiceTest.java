@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,9 +36,6 @@ public class MovieParticipationServiceTest {
 
     @Autowired
     private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Test
     public void getMovieParticipationTest() {
@@ -62,15 +58,13 @@ public class MovieParticipationServiceTest {
         Movie movie = testObjectFactory.createMovie();
         MovieParticipation movieParticipation = testObjectFactory.createMovieParticipation(person, movie);
 
-        inTransaction(() -> {
-            MoviePartReadExtendedDTO readDTO = movieParticipationService
-                    .getExtendedMovieParticipation(movie.getId(), movieParticipation.getId());
+        MoviePartReadExtendedDTO readDTO = movieParticipationService
+                .getExtendedMovieParticipation(movie.getId(), movieParticipation.getId());
 
-            Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
-                    "movie", "person");
-            Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
-            Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
-        });
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
+                "movie", "person");
+        Assertions.assertThat(readDTO.getMovie()).isEqualToComparingFieldByField(movie);
+        Assertions.assertThat(readDTO.getPerson()).isEqualToComparingFieldByField(person);
     }
 
     @Test
@@ -184,11 +178,5 @@ public class MovieParticipationServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void deleteMovieParticipationNotFound() {
         movieParticipationService.deleteMovieParticipation(UUID.randomUUID(), UUID.randomUUID());
-    }
-
-    private void inTransaction(Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
     }
 }

@@ -10,6 +10,7 @@ import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -39,6 +40,7 @@ public class MovieCastService {
         return translationService.toRead(getMovieCastByMovieIdRequired(id, movieId));
     }
 
+    @Transactional
     public MovieCastReadExtendedDTO getMovieCastExtended(UUID id, UUID movieId) {
         return translationService.toReadExtended(getMovieCastByMovieIdRequired(id, movieId));
     }

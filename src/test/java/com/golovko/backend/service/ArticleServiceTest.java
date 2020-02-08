@@ -54,19 +54,17 @@ public class ArticleServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), article.getAuthor().getId());
     }
 
+    @Transactional // FIXME remove this annotation
     @Test
     public void getArticleExtendedTest() {
         ApplicationUser user = testObjectFactory.createUser();
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         Article article = testObjectFactory.createArticle(user, now);
 
-        inTransaction(() -> {
-            ArticleReadExtendedDTO readDTO = articleService.getArticleExtended(article.getId());
+        ArticleReadExtendedDTO readDTO = articleService.getArticleExtended(article.getId());
 
-            Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(article, "author");
-            Assertions.assertThat(readDTO.getAuthor()).isEqualToComparingFieldByField(article.getAuthor());
-        });
-
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(article, "author");
+        Assertions.assertThat(readDTO.getAuthor()).isEqualToComparingFieldByField(article.getAuthor());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -126,27 +124,28 @@ public class ArticleServiceTest {
 
         Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
 
-        article = articleRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(article).isEqualToIgnoringGivenFields(readDTO, "author");
-        Assert.assertEquals(article.getAuthor().getId(), readDTO.getAuthorId());
+        Article articleAfterUpdate = articleRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(articleAfterUpdate).isEqualToIgnoringGivenFields(readDTO, "author");
+        Assert.assertEquals(articleAfterUpdate.getAuthor().getId(), readDTO.getAuthorId());
     }
 
-    @Transactional // FIXME remove this annotation
     @Test
     public void patchArticleEmptyPatchTest() {
         ArticlePatchDTO patchDTO = new ArticlePatchDTO();
 
         ApplicationUser author = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(author, Instant.now());
+        Article article = testObjectFactory.createArticle(author, Instant.parse("2016-08-18T06:17:10.225Z"));
 
         ArticleReadDTO readDTO = articleService.patchArticle(article.getId(), patchDTO);
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        Article article1AfterUpdate = articleRepository.findById(readDTO.getId()).get();
-
-        Assertions.assertThat(article1AfterUpdate).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(article1AfterUpdate).isEqualToComparingFieldByField(article);
+        inTransaction(() -> {
+            Article articleAfterUpdate = articleRepository.findById(readDTO.getId()).get();
+            Assertions.assertThat(articleAfterUpdate).hasNoNullFieldsOrProperties();
+            Assertions.assertThat(articleAfterUpdate).isEqualToIgnoringGivenFields(article, "author");
+            Assert.assertEquals(articleAfterUpdate.getAuthor().getId(), readDTO.getAuthorId());
+        });
     }
 
     @Test

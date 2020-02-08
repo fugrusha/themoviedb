@@ -19,7 +19,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.UUID;
@@ -96,7 +95,6 @@ public class ComplaintServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
     }
 
-    @Transactional // FIXME remove in the future, cause bidirectional connection between entities
     @Test
     public void patchComplaintEmptyPatchTest() {
         ApplicationUser user = testObjectFactory.createUser();
@@ -108,10 +106,13 @@ public class ComplaintServiceTest {
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        Complaint complaintAfterUpdate = complaintRepository.findById(readDTO.getId()).get();
+        inTransaction(() -> {
+            Complaint complaintAfterUpdate = complaintRepository.findById(readDTO.getId()).get();
 
-        Assertions.assertThat(complaintAfterUpdate).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(complaintAfterUpdate).isEqualToComparingFieldByField(complaint);
+            Assertions.assertThat(complaintAfterUpdate).hasNoNullFieldsOrProperties();
+            Assertions.assertThat(complaintAfterUpdate).isEqualToIgnoringGivenFields(complaint, "author");
+            Assert.assertEquals(readDTO.getAuthorId(), complaintAfterUpdate.getAuthor().getId());
+        });
     }
 
     @Test
@@ -147,7 +148,7 @@ public class ComplaintServiceTest {
         complaintService.deleteComplaint(UUID.randomUUID());
     }
 
-    private void inTransaction(Runnable runnable) {
+    private void inTransaction (Runnable runnable) {
         transactionTemplate.executeWithoutResult(status -> {
             runnable.run();
         });

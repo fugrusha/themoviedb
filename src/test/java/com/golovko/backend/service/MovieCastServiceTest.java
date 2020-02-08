@@ -16,7 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,9 +36,6 @@ public class MovieCastServiceTest {
     @Autowired
     private MovieCastService movieCastService;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     @Test
     public void getMovieCastTest() {
         Person person = testObjectFactory.createPerson();
@@ -58,16 +54,14 @@ public class MovieCastServiceTest {
     public void getMovieCastExtendedTest() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
-        MovieCast movieCast =  testObjectFactory.createMovieCast(person, movie);
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
 
-        inTransaction(() -> {
-            MovieCastReadExtendedDTO extendedDTO = movieCastService.getMovieCastExtended(movieCast.getId(), movie.getId());
+        MovieCastReadExtendedDTO extendedDTO = movieCastService.getMovieCastExtended(movieCast.getId(), movie.getId());
 
-            Assertions.assertThat(extendedDTO).isEqualToIgnoringGivenFields(movieCast,
-                    "movie", "person");
-            Assertions.assertThat(extendedDTO.getMovie()).isEqualToComparingFieldByField(movie);
-            Assertions.assertThat(extendedDTO.getPerson()).isEqualToComparingFieldByField(person);
-        });
+        Assertions.assertThat(extendedDTO).isEqualToIgnoringGivenFields(movieCast,
+                "movie", "person");
+        Assertions.assertThat(extendedDTO.getMovie()).isEqualToComparingFieldByField(movie);
+        Assertions.assertThat(extendedDTO.getPerson()).isEqualToComparingFieldByField(person);
     }
 
     @Test
@@ -176,11 +170,5 @@ public class MovieCastServiceTest {
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCast, "movieId", "personId");
         Assert.assertEquals(movieCast.getMovie().getId(), readDTO.getMovieId());
         Assert.assertEquals(movieCast.getPerson().getId(), readDTO.getPersonId());
-    }
-
-    private void inTransaction(Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
     }
 }

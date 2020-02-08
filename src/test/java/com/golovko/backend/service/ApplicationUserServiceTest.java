@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,7 +38,10 @@ public class ApplicationUserServiceTest {
     @Autowired
     private TestObjectFactory testObjectFactory;
 
-    @Transactional
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
+    @Transactional //FIXME remove this annotation
     @Test
     public void testGetUserExtendedTest() {
         ApplicationUser user = testObjectFactory.createUser();
@@ -100,7 +104,6 @@ public class ApplicationUserServiceTest {
                 .isEqualToIgnoringGivenFields(readDTO, "complaints", "articles");
     }
 
-    @Transactional
     @Test
     public void testPatchUserEmptyPatch() {
         ApplicationUser applicationUser = testObjectFactory.createUser();
@@ -110,11 +113,13 @@ public class ApplicationUserServiceTest {
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
+        inTransaction(() -> {
+            ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
 
-        Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
-
-        Assertions.assertThat(applicationUser).isEqualToComparingFieldByField(userAfterUpdate);
+            Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
+            Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
+                    "complaints", "articles");
+        });
     }
 
     @Test
@@ -148,5 +153,9 @@ public class ApplicationUserServiceTest {
         applicationUserService.deleteUser(UUID.randomUUID());
     }
 
-
+    private void inTransaction(Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
+    }
 }
