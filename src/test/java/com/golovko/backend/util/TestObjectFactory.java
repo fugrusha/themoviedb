@@ -66,6 +66,7 @@ public class TestObjectFactory {
         complaint.setComplaintTitle("Some title");
         complaint.setComplaintText("Some report text");
         complaint.setComplaintType(complaintType);
+        complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(user);
         complaint = complaintRepository.save(complaint);
         return complaint;

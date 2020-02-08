@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
+import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -29,6 +30,7 @@ public class ComplaintService {
 
     public ComplaintReadDTO createComplaint(ComplaintCreateDTO createDTO, ApplicationUser author) {
         Complaint complaint = translationService.toEntity(createDTO);
+        complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(author);
 
         complaint = complaintRepository.save(complaint);

@@ -1,5 +1,6 @@
 package com.golovko.backend.dto.complaint;
 
+import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import lombok.Data;
 
@@ -11,4 +12,6 @@ public class ComplaintPutDTO {
     private String complaintText;
 
     private ComplaintType complaintType;
+
+    private ComplaintStatus complaintStatus;
 }

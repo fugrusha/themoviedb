@@ -1,6 +1,7 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
@@ -103,6 +104,7 @@ public class ComplaintControllerTest {
         patchDTO.setComplaintTitle("another title");
         patchDTO.setComplaintText("another text");
         patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+        patchDTO.setComplaintStatus(ComplaintStatus.RENEWED);
 
         Mockito.when(complaintService.patchComplaint(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
@@ -124,6 +126,7 @@ public class ComplaintControllerTest {
         updateDTO.setComplaintText("new text");
         updateDTO.setComplaintTitle("new title");
         updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+        updateDTO.setComplaintStatus(ComplaintStatus.CLOSED);
 
         Mockito.when(complaintService.updateComplaint(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
@@ -153,6 +156,7 @@ public class ComplaintControllerTest {
         readDTO.setComplaintTitle("Report 1");
         readDTO.setComplaintText("I have noticed a spoiler");
         readDTO.setComplaintType(ComplaintType.SPOILER);
+        readDTO.setComplaintStatus(ComplaintStatus.DUPLICATE);
         readDTO.setAuthorId(UUID.randomUUID());
         return readDTO;
     }
