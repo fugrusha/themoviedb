@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -155,6 +156,7 @@ public class ComplaintControllerTest {
         readDTO.setId(UUID.randomUUID());
         readDTO.setComplaintTitle("Report 1");
         readDTO.setComplaintText("I have noticed a spoiler");
+        readDTO.setIssueDate(Instant.parse("2017-02-03T11:35:30.00Z"));
         readDTO.setComplaintType(ComplaintType.SPOILER);
         readDTO.setComplaintStatus(ComplaintStatus.DUPLICATE);
         readDTO.setAuthorId(UUID.randomUUID());

@@ -4,6 +4,7 @@ import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -14,6 +15,8 @@ public class ComplaintReadDTO {
     private String complaintTitle;
 
     private String complaintText;
+
+    private Instant issueDate;
 
     private ComplaintType complaintType;
 

@@ -127,6 +127,7 @@ public class TranslationService {
         dto.setId(complaint.getId());
         dto.setComplaintTitle(complaint.getComplaintTitle());
         dto.setComplaintText(complaint.getComplaintText());
+        dto.setIssueDate(complaint.getIssueDate());
         dto.setComplaintType(complaint.getComplaintType());
         dto.setComplaintStatus(complaint.getComplaintStatus());
         dto.setAuthorId(complaint.getAuthor().getId());

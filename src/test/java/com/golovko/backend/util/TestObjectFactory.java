@@ -67,6 +67,7 @@ public class TestObjectFactory {
         complaint.setComplaintText("Some report text");
         complaint.setComplaintType(complaintType);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
+        complaint.setIssueDate(Instant.parse("2017-02-03T11:35:30.00Z"));
         complaint.setAuthor(user);
         complaint = complaintRepository.save(complaint);
         return complaint;

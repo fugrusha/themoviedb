@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.util.UUID;
 
 @Entity
@@ -20,6 +21,9 @@ public class Complaint {
 
     @Column(nullable = false)
     private String complaintText;
+
+    @Column(nullable = false)
+    private Instant issueDate;
 
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)

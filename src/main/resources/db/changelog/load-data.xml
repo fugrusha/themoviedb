@@ -17,6 +17,8 @@
             <column name="complaint_title" type="string"/>
             <column name="complaint_text" type="string"/>
             <column name="complaint_type" type="string"/>
+            <column name="complaint_status" type="string"/>
+            <column name="issue_date" type="timestamp"/>
             <column name="author_id" type="uuid"/>
         </loadUpdateData>
     </changeSet>
