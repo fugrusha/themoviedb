@@ -56,7 +56,7 @@ public class MovieServiceTest {
         MovieCreateDTO createDTO = new MovieCreateDTO();
         createDTO.setMovieTitle("title");
         createDTO.setDescription("description");
-        createDTO.setReleased(true);
+        createDTO.setIsReleased(true);
         createDTO.setReleaseDate(LocalDate.parse("1900-01-01"));
 
         MovieReadDTO readDTO = movieService.createMovie(createDTO);
@@ -99,7 +99,8 @@ public class MovieServiceTest {
         Movie movieAfterUpdate = movieRepository.findById(readDTO.getId()).get();
 
         Assertions.assertThat(movieAfterUpdate).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate, "movieParticipations", "movieCast");
+        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate,
+                "movieParticipations", "movieCast");
     }
 
     @Test
@@ -118,7 +119,8 @@ public class MovieServiceTest {
         Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
 
         movie = movieRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO, "movieParticipations", "movieCast");
+        Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO,
+                "movieParticipations", "movieCast");
     }
 
     @Test

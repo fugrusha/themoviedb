@@ -72,7 +72,6 @@ public class TranslationService {
         user.setPassword(update.getPassword());
     }
 
-
     /*
         Movie translations
     */
@@ -82,7 +81,7 @@ public class TranslationService {
         dto.setMovieTitle(movie.getMovieTitle());
         dto.setDescription(movie.getDescription());
         dto.setReleaseDate(movie.getReleaseDate());
-        dto.setReleased(movie.getIsReleased());
+        dto.setIsReleased(movie.getIsReleased());
         dto.setAverageRating(movie.getAverageRating());
         return dto;
     }
@@ -92,7 +91,7 @@ public class TranslationService {
         movie.setMovieTitle(createDTO.getMovieTitle());
         movie.setDescription(createDTO.getDescription());
         movie.setReleaseDate(createDTO.getReleaseDate());
-        movie.setIsReleased(createDTO.isReleased());
+        movie.setIsReleased(createDTO.getIsReleased());
         return movie;
     }
 

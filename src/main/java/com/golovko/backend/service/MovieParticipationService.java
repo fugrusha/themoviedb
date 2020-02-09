@@ -79,7 +79,6 @@ public class MovieParticipationService {
         return translationService.toRead(movieParticipation);
     }
 
-
     public MoviePartReadDTO updateMovieParticipation(UUID movieId, UUID id, MoviePartPutDTO updateDTO) {
         Movie movie = movieRepository.findById(movieId)
                 .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));

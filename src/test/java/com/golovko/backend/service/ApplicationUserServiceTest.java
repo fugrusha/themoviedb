@@ -53,7 +53,8 @@ public class ApplicationUserServiceTest {
         Assertions.assertThat(readExtendedDTO).isEqualToIgnoringGivenFields(user, "complaints");
 
         Assert.assertEquals(readExtendedDTO.getComplaints().get(0).getAuthorId(), complaint.getAuthor().getId());
-        Assertions.assertThat(readExtendedDTO.getComplaints().get(0)).isEqualToIgnoringGivenFields(complaint, "authorId");
+        Assertions.assertThat(readExtendedDTO.getComplaints().get(0)).isEqualToIgnoringGivenFields(complaint,
+                "authorId");
     }
 
     @Test
@@ -100,8 +101,8 @@ public class ApplicationUserServiceTest {
         Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(applicationUser)
-                .isEqualToIgnoringGivenFields(readDTO, "complaints", "articles");
+        Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO,
+                "complaints", "articles");
     }
 
     @Test

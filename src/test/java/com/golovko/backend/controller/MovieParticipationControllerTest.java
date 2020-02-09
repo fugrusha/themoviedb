@@ -80,7 +80,8 @@ public class MovieParticipationControllerTest {
         MoviePartReadExtendedDTO actualDTO = objectMapper.readValue(resultJson, MoviePartReadExtendedDTO.class);
         Assertions.assertThat(actualDTO).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(movieParticipationService).getExtendedMovieParticipation(movieReadDTO.getId(), readDTO.getId());
+        Mockito.verify(movieParticipationService)
+                .getExtendedMovieParticipation(movieReadDTO.getId(), readDTO.getId());
     }
 
     @Test
@@ -90,7 +91,8 @@ public class MovieParticipationControllerTest {
 
         List<MoviePartReadDTO> listOfMoviePart = List.of(readDTO);
 
-        Mockito.when(movieParticipationService.getListOfMovieParticipation(movieId)).thenReturn(listOfMoviePart);
+        Mockito.when(movieParticipationService.getListOfMovieParticipation(movieId))
+                .thenReturn(listOfMoviePart);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/{movieId}/movie-participations", movieId))
@@ -218,7 +220,7 @@ public class MovieParticipationControllerTest {
         readDTO.setMovieTitle("Guess Who");
         readDTO.setDescription("12345");
         readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        readDTO.setReleased(false);
+        readDTO.setIsReleased(false);
         readDTO.setAverageRating(8.3);
         return readDTO;
     }
@@ -234,7 +236,10 @@ public class MovieParticipationControllerTest {
         return dto;
     }
 
-    private MoviePartReadExtendedDTO createMoviePartReadExtendedDTO(PersonReadDTO personDTO, MovieReadDTO movieDTO) {
+    private MoviePartReadExtendedDTO createMoviePartReadExtendedDTO(
+            PersonReadDTO personDTO,
+            MovieReadDTO movieDTO
+    ) {
         MoviePartReadExtendedDTO dto = new MoviePartReadExtendedDTO();
         dto.setId(UUID.randomUUID());
         dto.setPartInfo("Some text");

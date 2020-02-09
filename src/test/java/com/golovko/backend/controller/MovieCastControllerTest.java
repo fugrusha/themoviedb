@@ -67,10 +67,12 @@ public class MovieCastControllerTest {
         MovieReadDTO movieReadDTO = createMovieReadDTO();
         MovieCastReadExtendedDTO extendedDTO = createMovieCastReadExtendedDTO(personReadDTO, movieReadDTO);
 
-        Mockito.when(movieCastService.getMovieCastExtended(extendedDTO.getId(), movieReadDTO.getId())).thenReturn(extendedDTO);
+        Mockito.when(movieCastService.getMovieCastExtended(extendedDTO.getId(), movieReadDTO.getId()))
+                .thenReturn(extendedDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/{movieId}/movie-cast/{id}/extended", movieReadDTO.getId(), extendedDTO.getId()))
+                .perform(get("/api/v1/{movieId}/movie-cast/{id}/extended",
+                                            movieReadDTO.getId(), extendedDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -161,7 +163,8 @@ public class MovieCastControllerTest {
 
         MovieCastReadDTO readDTO = createMovieCastReadDTO(movieId, updateDTO.getPersonId());
 
-        Mockito.when(movieCastService.updateMovieCast(updateDTO, readDTO.getId(), movieId)).thenReturn(readDTO);
+        Mockito.when(movieCastService.updateMovieCast(updateDTO, readDTO.getId(), movieId))
+                .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(put("/api/v1/{movieId}/movie-cast/{id}", movieId, readDTO.getId())
@@ -185,7 +188,8 @@ public class MovieCastControllerTest {
 
         MovieCastReadDTO readDTO = createMovieCastReadDTO(movieId, patchDTO.getPersonId());
 
-        Mockito.when(movieCastService.patchMovieCast(patchDTO, readDTO.getId(), movieId)).thenReturn(readDTO);
+        Mockito.when(movieCastService.patchMovieCast(patchDTO, readDTO.getId(), movieId))
+                .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/{movieId}/movie-cast/{id}", movieId, readDTO.getId())
@@ -225,12 +229,15 @@ public class MovieCastControllerTest {
         readDTO.setMovieTitle("Guess Who");
         readDTO.setDescription("12345");
         readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        readDTO.setReleased(false);
+        readDTO.setIsReleased(false);
         readDTO.setAverageRating(8.3);
         return readDTO;
     }
 
-    private MovieCastReadExtendedDTO createMovieCastReadExtendedDTO(PersonReadDTO personDTO, MovieReadDTO movieDTO) {
+    private MovieCastReadExtendedDTO createMovieCastReadExtendedDTO(
+            PersonReadDTO personDTO,
+            MovieReadDTO movieDTO
+    ) {
         MovieCastReadExtendedDTO dto = new MovieCastReadExtendedDTO();
         dto.setId(UUID.randomUUID());
         dto.setPartInfo("Some text");

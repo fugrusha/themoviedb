@@ -101,11 +101,6 @@ public class MovieCastService {
         movieCastRepository.delete(getMovieCastByMovieIdRequired(id, movieId));
     }
 
-    private MovieCast getMovieCastRequired(UUID id) {
-        return movieCastRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(MovieCast.class, id));
-    }
-
     private MovieCast getMovieCastByMovieIdRequired(UUID id, UUID movieId) {
         if (movieCastRepository.findByIdAndMovieId(id, movieId) != null) {
             return movieCastRepository.findByIdAndMovieId(id, movieId);

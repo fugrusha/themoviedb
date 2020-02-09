@@ -48,7 +48,8 @@ public class ArticleControllerTest {
 
         Mockito.when(articleService.getArticle(readDTO.getId())).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(get("/api/v1/articles/{id}", readDTO.getId()))
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/{id}", readDTO.getId()))
                 .andDo(print())
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -67,7 +68,8 @@ public class ArticleControllerTest {
 
         Mockito.when(articleService.getArticle(wrongId)).thenThrow(exception);
 
-        String result = mockMvc.perform(get("/api/v1/articles/{id}", wrongId))
+        String result = mockMvc
+                .perform(get("/api/v1/articles/{id}", wrongId))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -81,7 +83,8 @@ public class ArticleControllerTest {
 
         Mockito.when(articleService.getArticleExtended(extendedDTO.getId())).thenReturn(extendedDTO);
 
-        String resultJson = mockMvc.perform(get("/api/v1/articles/{id}/extended", extendedDTO.getId()))
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/{id}/extended", extendedDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -104,7 +107,8 @@ public class ArticleControllerTest {
 //        add user authentication
 //        Mockito.when(articleService.createArticle(createDTO, author)).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(post("/api/v1/articles/")
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
@@ -128,7 +132,8 @@ public class ArticleControllerTest {
 
         Mockito.when(articleService.updateArticle(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(put("/api/v1/articles/{id}", readDTO.getId())
+        String resultJson = mockMvc
+                .perform(put("/api/v1/articles/{id}", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
@@ -150,7 +155,8 @@ public class ArticleControllerTest {
 
         Mockito.when(articleService.patchArticle(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(patch("/api/v1/articles/{id}", readDTO.getId())
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/articles/{id}", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isOk())
@@ -204,5 +210,4 @@ public class ArticleControllerTest {
         readDTO.setPassword("12345");
         return readDTO;
     }
-
 }

@@ -115,7 +115,8 @@ public class ComplaintServiceTest {
             Complaint complaintAfterUpdate = complaintRepository.findById(readDTO.getId()).get();
 
             Assertions.assertThat(complaintAfterUpdate).hasNoNullFieldsOrProperties();
-            Assertions.assertThat(complaintAfterUpdate).isEqualToIgnoringGivenFields(complaint, "author");
+            Assertions.assertThat(complaintAfterUpdate).isEqualToIgnoringGivenFields(complaint,
+                    "author");
             Assert.assertEquals(readDTO.getAuthorId(), complaintAfterUpdate.getAuthor().getId());
         });
     }

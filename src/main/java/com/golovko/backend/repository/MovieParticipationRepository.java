@@ -9,6 +9,7 @@ import java.util.UUID;
 
 @Repository
 public interface MovieParticipationRepository extends CrudRepository<MovieParticipation, UUID> {
+
     MovieParticipation findByIdAndMovieId(UUID id, UUID movieId);
 
     List<MovieParticipation> findByMovieId(UUID movieId);

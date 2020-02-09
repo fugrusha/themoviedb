@@ -49,7 +49,8 @@ public class MovieControllerTest {
 
         Mockito.when(movieService.getMovie(dto.getId())).thenReturn(dto);
 
-        String resultJSON = mockMvc.perform(get("/api/v1/movies/{id}", dto.getId()))
+        String resultJSON = mockMvc
+                .perform(get("/api/v1/movies/{id}", dto.getId()))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -68,7 +69,8 @@ public class MovieControllerTest {
         EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
         Mockito.when(movieService.getMovie(wrongId)).thenThrow(exception);
 
-        String result = mockMvc.perform(get("/api/v1/movies/{id}", wrongId))
+        String result = mockMvc
+                .perform(get("/api/v1/movies/{id}", wrongId))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -81,13 +83,14 @@ public class MovieControllerTest {
         createDTO.setMovieTitle("Guess Who");
         createDTO.setDescription("12345");
         createDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        createDTO.setReleased(false);
+        createDTO.setIsReleased(false);
 
         MovieReadDTO readDTO = createMovieReadDTO();
 
         Mockito.when(movieService.createMovie(createDTO)).thenReturn(readDTO);
 
-        String result = mockMvc.perform(post("/api/v1/movies")
+        String result = mockMvc
+                .perform(post("/api/v1/movies")
                 .content(objectMapper.writeValueAsString(createDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -109,7 +112,8 @@ public class MovieControllerTest {
 
         Mockito.when(movieService.patchMovie(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(patch("/api/v1/movies/{id}", readDTO.getId().toString())
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -132,7 +136,8 @@ public class MovieControllerTest {
 
         Mockito.when(movieService.updateMovie(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(put("/api/v1/movies/{id}", readDTO.getId().toString())
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(updateDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -166,7 +171,7 @@ public class MovieControllerTest {
         movieReadDTO.setDescription("Some text");
         movieReadDTO.setAverageRating(5.4);
         movieReadDTO.setReleaseDate(LocalDate.parse("1985-01-10"));
-        movieReadDTO.setReleased(true);
+        movieReadDTO.setIsReleased(true);
 
         MoviePartReadDTO moviePartReadDTO = new MoviePartReadDTO();
         moviePartReadDTO.setMovieId(movieReadDTO.getId());
@@ -199,7 +204,7 @@ public class MovieControllerTest {
         readDTO.setMovieTitle("Guess Who");
         readDTO.setDescription("12345");
         readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        readDTO.setReleased(false);
+        readDTO.setIsReleased(false);
         readDTO.setAverageRating(8.3);
         return readDTO;
     }

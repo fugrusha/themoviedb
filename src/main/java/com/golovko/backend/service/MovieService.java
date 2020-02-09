@@ -18,7 +18,7 @@ public class MovieService {
     private MovieRepository movieRepository;
 
     @Autowired
-    TranslationService translationService;
+    private TranslationService translationService;
 
     public MovieReadDTO getMovie(UUID id) {
         Movie movie = getMovieRequired(id);

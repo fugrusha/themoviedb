@@ -43,7 +43,8 @@ public class PersonControllerTest {
 
         Mockito.when(personService.getPerson(readDTO.getId())).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(get("/api/v1/persons/{id}", readDTO.getId()))
+        String resultJson = mockMvc
+                .perform(get("/api/v1/persons/{id}", readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -64,7 +65,8 @@ public class PersonControllerTest {
 
         Mockito.when(personService.createPerson(createDTO)).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(post("/api/v1/persons")
+        String resultJson = mockMvc
+                .perform(post("/api/v1/persons")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
@@ -87,7 +89,8 @@ public class PersonControllerTest {
 
         Mockito.when(personService.patchPerson(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(patch("/api/v1/persons/{id}", readDTO.getId())
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/persons/{id}", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isOk())
@@ -109,7 +112,8 @@ public class PersonControllerTest {
 
         Mockito.when(personService.updatePerson(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
-        String resultJson = mockMvc.perform(put("/api/v1/persons/{id}", readDTO.getId())
+        String resultJson = mockMvc
+                .perform(put("/api/v1/persons/{id}", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())

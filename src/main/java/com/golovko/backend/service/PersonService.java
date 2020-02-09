@@ -19,7 +19,7 @@ public class PersonService {
     private PersonRepository personRepository;
 
     @Autowired
-    TranslationService translationService;
+    private TranslationService translationService;
 
     public PersonReadDTO getPerson(UUID id) {
         Person person = getRequiredPerson(id);

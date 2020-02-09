@@ -96,7 +96,8 @@ public class MovieParticipationServiceTest {
 
         MovieParticipation movieParticipation = movieParticipationRepository.findById(readDTO.getId()).get();
 
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation, "movieId", "personId");
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
+                "movieId", "personId");
         Assert.assertEquals(readDTO.getMovieId(), movieParticipation.getMovie().getId());
         Assert.assertEquals(readDTO.getPersonId(), movieParticipation.getPerson().getId());
     }
@@ -118,7 +119,8 @@ public class MovieParticipationServiceTest {
         Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
 
         moviePart = movieParticipationRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart, "movieId", "personId");
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart,
+                "movieId", "personId");
         Assert.assertEquals(moviePart.getMovie().getId(), readDTO.getMovieId());
         Assert.assertEquals(moviePart.getPerson().getId(), readDTO.getPersonId());
     }
@@ -137,7 +139,8 @@ public class MovieParticipationServiceTest {
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
         moviePart = movieParticipationRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart, "movieId", "personId");
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart,
+                "movieId", "personId");
         Assert.assertEquals(moviePart.getMovie().getId(), readDTO.getMovieId());
         Assert.assertEquals(moviePart.getPerson().getId(), readDTO.getPersonId());
     }
@@ -159,7 +162,8 @@ public class MovieParticipationServiceTest {
         Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
 
         moviePart = movieParticipationRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart, "movieId", "personId");
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart,
+                "movieId", "personId");
         Assert.assertEquals(moviePart.getMovie().getId(), readDTO.getMovieId());
         Assert.assertEquals(moviePart.getPerson().getId(), readDTO.getPersonId());
     }

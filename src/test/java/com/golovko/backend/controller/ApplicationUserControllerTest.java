@@ -31,7 +31,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @RunWith(SpringRunner.class)
 @WebMvcTest(ApplicationUserController.class)
-public class ApplicationApplicationUserControllerTest {
+public class ApplicationUserControllerTest {
 
     @Autowired
     private MockMvc mvc;
@@ -48,7 +48,8 @@ public class ApplicationApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.getUser(user.getId())).thenReturn(user);
 
-        String resultJson = mvc.perform(get("/api/v1/users/{id}", user.getId()))
+        String resultJson = mvc
+                .perform(get("/api/v1/users/{id}", user.getId()))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -70,7 +71,8 @@ public class ApplicationApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.getExtendedUser(userDTO.getId())).thenReturn(userDTO);
 
-        String resultJson = mvc.perform(get("/api/v1/users/{id}/extended", userDTO.getId()))
+        String resultJson = mvc
+                .perform(get("/api/v1/users/{id}/extended", userDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn()
                 .getResponse()
@@ -89,7 +91,8 @@ public class ApplicationApplicationUserControllerTest {
         EntityNotFoundException exception = new EntityNotFoundException(ApplicationUser.class, wrongId);
         Mockito.when(applicationUserService.getUser(wrongId)).thenThrow(exception);
 
-        String resultJson = mvc.perform(get("/api/v1/users/{id}", wrongId))
+        String resultJson = mvc
+                .perform(get("/api/v1/users/{id}", wrongId))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -107,7 +110,8 @@ public class ApplicationApplicationUserControllerTest {
                 MethodArgumentTypeMismatchException.class,
                 errorMsg);
 
-        String result = mvc.perform(get("/api/v1/users/{id}", invalidId))
+        String result = mvc
+                .perform(get("/api/v1/users/{id}", invalidId))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
@@ -127,7 +131,8 @@ public class ApplicationApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.createUser(createDTO)).thenReturn(readDTO);
 
-        String result = mvc.perform(post("/api/v1/users")
+        String result = mvc
+                .perform(post("/api/v1/users")
                 .content(objectMapper.writeValueAsString(createDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -148,7 +153,8 @@ public class ApplicationApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.patchUser(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc.perform(patch("/api/v1/users/{id}", readDTO.getId().toString())
+        String resultJson = mvc
+                .perform(patch("/api/v1/users/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -169,7 +175,8 @@ public class ApplicationApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.updateUser(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc.perform(put("/api/v1/users/{id}", readDTO.getId().toString())
+        String resultJson = mvc
+                .perform(put("/api/v1/users/{id}", readDTO.getId().toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
@@ -216,5 +223,4 @@ public class ApplicationApplicationUserControllerTest {
         readDTO.setAuthorId(UUID.randomUUID());
         return readDTO;
     }
-
 }

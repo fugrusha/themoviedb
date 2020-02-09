@@ -13,5 +13,5 @@ public class MovieCreateDTO {
 
     private String description;
 
-    private boolean isReleased;
+    private Boolean isReleased;
 }

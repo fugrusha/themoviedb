@@ -15,7 +15,7 @@ public class MovieReadDTO {
 
     private String description;
 
-    private boolean isReleased;
+    private Boolean isReleased;
 
     private Double averageRating;
 }
