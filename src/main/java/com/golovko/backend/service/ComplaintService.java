@@ -30,10 +30,9 @@ public class ComplaintService {
     }
 
     public ComplaintReadDTO createComplaint(ComplaintCreateDTO createDTO, ApplicationUser author) {
-        Complaint complaint = translationService.toEntity(createDTO);
+        Complaint complaint = translationService.toEntity(createDTO, author);
         complaint.setIssueDate(Instant.now());
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
-        complaint.setAuthor(author);
 
         complaint = complaintRepository.save(complaint);
         return translationService.toRead(complaint);

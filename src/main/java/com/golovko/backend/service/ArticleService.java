@@ -32,10 +32,9 @@ public class ArticleService {
     }
 
     public ArticleReadDTO createArticle(ArticleCreateDTO createDTO, ApplicationUser author) {
-        Article article = translationService.toEntity(createDTO);
+        Article article = translationService.toEntity(createDTO, author);
         Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
         article.setPublishedDate(now);
-        article.setAuthor(author);
 
         article = articleRepository.save(article);
         return translationService.toRead(article);

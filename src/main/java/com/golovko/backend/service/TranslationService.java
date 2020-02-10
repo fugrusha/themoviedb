@@ -17,13 +17,24 @@ import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.dto.user.*;
+import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.repository.MovieRepository;
+import com.golovko.backend.repository.PersonRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
 public class TranslationService {
+
+    @Autowired
+    private MovieRepository movieRepository;
+
+    @Autowired
+    private PersonRepository personRepository;
 
     /*
         ApplicationUser translations
@@ -133,11 +144,12 @@ public class TranslationService {
         return dto;
     }
 
-    public Complaint toEntity(ComplaintCreateDTO createDTO) {
+    public Complaint toEntity(ComplaintCreateDTO createDTO, ApplicationUser author) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle(createDTO.getComplaintTitle());
         complaint.setComplaintText(createDTO.getComplaintText());
         complaint.setComplaintType(createDTO.getComplaintType());
+        complaint.setAuthor(author);
         return complaint;
     }
 
@@ -226,16 +238,19 @@ public class TranslationService {
         return dto;
     }
 
-    public MovieParticipation toEntity(MoviePartCreateDTO createDTO) {
+    public MovieParticipation toEntity(MoviePartCreateDTO createDTO, UUID movieId, UUID personId) {
         MovieParticipation movieParticipation = new MovieParticipation();
         movieParticipation.setPartInfo(createDTO.getPartInfo());
         movieParticipation.setPartType(createDTO.getPartType());
+        movieParticipation.setPerson(getPersonRequired(personId));
+        movieParticipation.setMovie(getMovieRequired(movieId));
         return movieParticipation;
     }
 
     public void updateEntity(MoviePartPutDTO updateDTO, MovieParticipation movieParticipation) {
         movieParticipation.setPartType(updateDTO.getPartType());
         movieParticipation.setPartInfo(updateDTO.getPartInfo());
+        movieParticipation.setPerson(getPersonRequired(updateDTO.getPersonId()));
     }
 
     public void patchEntity(MoviePartPatchDTO patchDTO, MovieParticipation movieParticipation) {
@@ -244,6 +259,9 @@ public class TranslationService {
         }
         if (patchDTO.getPartInfo() != null) {
             movieParticipation.setPartInfo(patchDTO.getPartInfo());
+        }
+        if (patchDTO.getPersonId() != null) {
+            movieParticipation.setPerson(getPersonRequired(patchDTO.getPersonId()));
         }
     }
 
@@ -266,10 +284,12 @@ public class TranslationService {
         return dto;
     }
 
-    public MovieCast toEntity(MovieCastCreateDTO createDTO) {
+    public MovieCast toEntity(MovieCastCreateDTO createDTO, UUID personId, UUID movieId) {
         MovieCast movieCast = new MovieCast();
         movieCast.setPartInfo(createDTO.getPartInfo());
         movieCast.setCharacter(createDTO.getCharacter());
+        movieCast.setMovie(getMovieRequired(movieId));
+        movieCast.setPerson(getPersonRequired(personId));
         return movieCast;
     }
 
@@ -287,6 +307,7 @@ public class TranslationService {
     public void updateEntity(MovieCastPutDTO updateDTO, MovieCast movieCast) {
         movieCast.setCharacter(updateDTO.getCharacter());
         movieCast.setPartInfo(updateDTO.getPartInfo());
+        movieCast.setPerson(getPersonRequired(updateDTO.getPersonId()));
     }
 
     public void patchEntity(MovieCastPatchDTO patchDTO, MovieCast movieCast) {
@@ -295,6 +316,9 @@ public class TranslationService {
         }
         if (patchDTO.getPartInfo() != null) {
             movieCast.setPartInfo(patchDTO.getPartInfo());
+        }
+        if (patchDTO.getPersonId() != null) {
+            movieCast.setPerson(getPersonRequired(patchDTO.getPersonId()));
         }
     }
 
@@ -331,11 +355,12 @@ public class TranslationService {
         return dto;
     }
 
-    public Article toEntity(ArticleCreateDTO createDTO) {
+    public Article toEntity(ArticleCreateDTO createDTO, ApplicationUser author) {
         Article article = new Article();
         article.setTitle(createDTO.getTitle());
         article.setText(createDTO.getText());
         article.setStatus(createDTO.getStatus());
+        article.setAuthor(author);
         return article;
     }
 
@@ -355,5 +380,17 @@ public class TranslationService {
         if (patchDTO.getStatus() != null) {
             article.setStatus(patchDTO.getStatus());
         }
+    }
+
+    private Movie getMovieRequired(UUID id) {
+        return movieRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(Movie.class, id)
+        );
+    }
+
+    private Person getPersonRequired(UUID id) {
+        return personRepository.findById(id).orElseThrow(() ->
+                new EntityNotFoundException(Person.class, id)
+        );
     }
 }

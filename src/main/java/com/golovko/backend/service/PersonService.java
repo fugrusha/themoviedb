@@ -44,7 +44,6 @@ public class PersonService {
         return translationService.toRead(person);
     }
 
-
     public PersonReadDTO updatePerson(UUID id, PersonPutDTO updateDTO) {
         Person person = getRequiredPerson(id);
 

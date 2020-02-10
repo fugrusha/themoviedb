@@ -1,13 +1,9 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieParticipation;
-import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieParticipationRepository;
-import com.golovko.backend.repository.MovieRepository;
-import com.golovko.backend.repository.PersonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,12 +16,6 @@ public class MovieParticipationService {
 
     @Autowired
     private MovieParticipationRepository movieParticipationRepository;
-
-    @Autowired
-    private MovieRepository movieRepository;
-
-    @Autowired
-    private PersonRepository personRepository;
 
     @Autowired
     private TranslationService translationService;
@@ -45,17 +35,9 @@ public class MovieParticipationService {
     }
 
     public MoviePartReadDTO createMovieParticipation(MoviePartCreateDTO createDTO, UUID movieId, UUID personId) {
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));
-        Person person = personRepository.findById(personId)
-                .orElseThrow(() -> new EntityNotFoundException(Person.class, personId));
+        MovieParticipation movieParticipation = translationService.toEntity(createDTO, movieId, personId);
 
-        MovieParticipation movieParticipation = translationService.toEntity(createDTO);
-
-        movieParticipation.setMovie(movie);
-        movieParticipation.setPerson(person);
         movieParticipation = movieParticipationRepository.save(movieParticipation);
-
         return translationService.toRead(movieParticipation);
     }
 
@@ -64,33 +46,14 @@ public class MovieParticipationService {
 
         translationService.patchEntity(patchDTO, movieParticipation);
 
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));
-        movieParticipation.setMovie(movie);
-
-        // TODO How can I remove this branches?
-        if (patchDTO.getPersonId() != null) {
-            Person person = personRepository.findById(patchDTO.getPersonId())
-                    .orElseThrow(() -> new EntityNotFoundException(Person.class, patchDTO.getPersonId()));
-            movieParticipation.setPerson(person);
-        }
-
         movieParticipation = movieParticipationRepository.save(movieParticipation);
         return translationService.toRead(movieParticipation);
     }
 
     public MoviePartReadDTO updateMovieParticipation(UUID movieId, UUID id, MoviePartPutDTO updateDTO) {
-        Movie movie = movieRepository.findById(movieId)
-                .orElseThrow(() -> new EntityNotFoundException(Movie.class, movieId));
-        Person person = personRepository.findById(updateDTO.getPersonId())
-                .orElseThrow(() -> new EntityNotFoundException(Person.class, updateDTO.getPersonId()));
-
-        MovieParticipation movieParticipation = getMovieParticipationRequired(id);
+        MovieParticipation movieParticipation = getMovieParticipationByMovieIdRequired(id, movieId);
 
         translationService.updateEntity(updateDTO, movieParticipation);
-
-        movieParticipation.setMovie(movie);
-        movieParticipation.setPerson(person);
 
         movieParticipation = movieParticipationRepository.save(movieParticipation);
         return translationService.toRead(movieParticipation);
@@ -98,11 +61,6 @@ public class MovieParticipationService {
 
     public void deleteMovieParticipation(UUID movieId, UUID id) {
         movieParticipationRepository.delete(getMovieParticipationByMovieIdRequired(id, movieId));
-    }
-
-    private MovieParticipation getMovieParticipationRequired(UUID id) {
-        return movieParticipationRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(MovieParticipation.class, id));
     }
 
     private MovieParticipation getMovieParticipationByMovieIdRequired(UUID id, UUID movieId) {
