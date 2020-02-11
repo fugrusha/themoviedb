@@ -2,6 +2,9 @@ package com.golovko.backend.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -10,26 +13,26 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@EntityListeners(AuditingEntityListener.class)
 public class Complaint {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    @Column(nullable = false)
     private String complaintTitle;
 
-    @Column(nullable = false)
     private String complaintText;
 
-    @Column(nullable = false)
-    private Instant issueDate;
+    @CreatedDate
+    private Instant createdAt;
 
-    @Column(nullable = false)
+    @LastModifiedDate
+    private Instant lastModifiedAt;
+
     @Enumerated(EnumType.STRING)
     private ComplaintType complaintType;
 
-    @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     private ComplaintStatus complaintStatus;
 

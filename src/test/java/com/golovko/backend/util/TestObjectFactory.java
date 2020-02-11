@@ -5,7 +5,6 @@ import com.golovko.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 @Component
@@ -67,7 +66,6 @@ public class TestObjectFactory {
         complaint.setComplaintText("Some report text");
         complaint.setComplaintType(complaintType);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
-        complaint.setIssueDate(Instant.parse("2017-02-03T11:35:30.00Z"));
         complaint.setAuthor(user);
         complaint = complaintRepository.save(complaint);
         return complaint;
@@ -110,7 +108,7 @@ public class TestObjectFactory {
         return movieParticipation;
     }
 
-    public Article createArticle(ApplicationUser author, Instant time) {
+    public Article createArticle(ApplicationUser author) {
         Article article = new Article();
         article.setTitle("Some title");
         article.setText("Some text");
@@ -118,7 +116,6 @@ public class TestObjectFactory {
         article.setDislikesCount(444);
         article.setLikesCount(111);
         article.setAuthor(author);
-        article.setPublishedDate(time);
         return articleRepository.save(article);
     }
 }

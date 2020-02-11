@@ -1,6 +1,8 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.util.TestObjectFactory;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +10,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+
+import java.time.Instant;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
@@ -21,15 +25,44 @@ public class ApplicationUserRepositoryTest {
     @Autowired
     private ApplicationUserRepository applicationUserRepository;
 
+    @Autowired
+    private TestObjectFactory testObjectFactory;
+
     @Test
     public void testSave() {
-        ApplicationUser applicationUser = new ApplicationUser();
-        applicationUser.setUsername("Vitalka");
-        applicationUser.setPassword("123456");
-        applicationUser.setEmail("vetal@gmail.com");
-        applicationUser = applicationUserRepository.save(applicationUser);
+        ApplicationUser user = testObjectFactory.createUser();
 
-        assertNotNull(applicationUser.getId());
-        assertTrue(applicationUserRepository.findById(applicationUser.getId()).isPresent());
+        assertNotNull(user.getId());
+        assertTrue(applicationUserRepository.findById(user.getId()).isPresent());
+    }
+
+    @Test
+    public void testCreateAtIsSet() {
+        ApplicationUser user = testObjectFactory.createUser();
+
+        Instant createdAtBeforeReload = user.getCreatedAt();
+        Assert.assertNotNull(createdAtBeforeReload);
+
+        user = applicationUserRepository.findById(user.getId()).get();
+
+        Instant createdAtAfterReload = user.getCreatedAt();
+        Assert.assertNotNull(createdAtAfterReload);
+        Assert.assertEquals(createdAtBeforeReload, createdAtAfterReload);
+    }
+
+    @Test
+    public void testModifiedAtIsSet() {
+        ApplicationUser user = testObjectFactory.createUser();
+
+        Instant modifiedAtBeforeReload = user.getLastModifiedAt();
+        Assert.assertNotNull(modifiedAtBeforeReload);
+
+        user = applicationUserRepository.findById(user.getId()).get();
+        user.setEmail("new.user@email.com");
+        user = applicationUserRepository.save(user);
+        Instant modifiedAtAfterReload = user.getLastModifiedAt();
+
+        Assert.assertNotNull(modifiedAtAfterReload);
+        Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
     }
 }

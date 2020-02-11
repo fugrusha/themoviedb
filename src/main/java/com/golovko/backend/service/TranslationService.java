@@ -45,6 +45,8 @@ public class TranslationService {
         dto.setUsername(user.getUsername());
         dto.setPassword(user.getPassword());
         dto.setEmail(user.getEmail());
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setLastModifiedAt(user.getLastModifiedAt());
         return dto;
     }
 
@@ -54,26 +56,28 @@ public class TranslationService {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setComplaints(user.getComplaints().stream().map(this::toRead).collect(Collectors.toList()));
+        dto.setCreatedAt(user.getCreatedAt());
+        dto.setLastModifiedAt(user.getLastModifiedAt());
         return dto;
     }
 
     public ApplicationUser toEntity(UserCreateDTO createDTO) {
-        ApplicationUser applicationUser = new ApplicationUser();
-        applicationUser.setUsername(createDTO.getUsername());
-        applicationUser.setEmail(createDTO.getEmail());
-        applicationUser.setPassword(createDTO.getPassword());
-        return applicationUser;
+        ApplicationUser user = new ApplicationUser();
+        user.setUsername(createDTO.getUsername());
+        user.setEmail(createDTO.getEmail());
+        user.setPassword(createDTO.getPassword());
+        return user;
     }
 
-    public void patchEntity(UserPatchDTO patchDTO, ApplicationUser applicationUser) {
+    public void patchEntity(UserPatchDTO patchDTO, ApplicationUser user) {
         if (patchDTO.getUsername() != null) {
-            applicationUser.setUsername(patchDTO.getUsername()); // username cannot be editable
+            user.setUsername(patchDTO.getUsername()); // username cannot be editable
         }
         if (patchDTO.getEmail() != null) {
-            applicationUser.setEmail(patchDTO.getEmail());
+            user.setEmail(patchDTO.getEmail());
         }
         if (patchDTO.getPassword() != null) {
-            applicationUser.setPassword(patchDTO.getPassword());
+            user.setPassword(patchDTO.getPassword());
         }
     }
 
@@ -94,6 +98,8 @@ public class TranslationService {
         dto.setReleaseDate(movie.getReleaseDate());
         dto.setIsReleased(movie.getIsReleased());
         dto.setAverageRating(movie.getAverageRating());
+        dto.setCreatedAt(movie.getCreatedAt());
+        dto.setLastModifiedAt(movie.getLastModifiedAt());
         return dto;
     }
 
@@ -137,10 +143,11 @@ public class TranslationService {
         dto.setId(complaint.getId());
         dto.setComplaintTitle(complaint.getComplaintTitle());
         dto.setComplaintText(complaint.getComplaintText());
-        dto.setIssueDate(complaint.getIssueDate());
         dto.setComplaintType(complaint.getComplaintType());
         dto.setComplaintStatus(complaint.getComplaintStatus());
         dto.setAuthorId(complaint.getAuthor().getId());
+        dto.setCreatedAt(complaint.getCreatedAt());
+        dto.setLastModifiedAt(complaint.getLastModifiedAt());
         return dto;
     }
 
@@ -334,11 +341,12 @@ public class TranslationService {
         dto.setId(article.getId());
         dto.setTitle(article.getTitle());
         dto.setText(article.getText());
-        dto.setPublishedDate(article.getPublishedDate());
         dto.setStatus(article.getStatus());
         dto.setDislikesCount(article.getDislikesCount());
         dto.setLikesCount(article.getLikesCount());
         dto.setAuthorId(article.getAuthor().getId());
+        dto.setCreatedAt(article.getCreatedAt());
+        dto.setLastModifiedAt(article.getLastModifiedAt());
         return dto;
     }
 
@@ -347,11 +355,12 @@ public class TranslationService {
         dto.setId(article.getId());
         dto.setTitle(article.getTitle());
         dto.setText(article.getText());
-        dto.setPublishedDate(article.getPublishedDate());
         dto.setStatus(article.getStatus());
         dto.setDislikesCount(article.getDislikesCount());
         dto.setLikesCount(article.getLikesCount());
         dto.setAuthor(toRead(article.getAuthor()));
+        dto.setCreatedAt(article.getCreatedAt());
+        dto.setLastModifiedAt(article.getLastModifiedAt());
         return dto;
     }
 

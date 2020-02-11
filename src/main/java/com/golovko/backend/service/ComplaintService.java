@@ -12,7 +12,6 @@ import com.golovko.backend.repository.ComplaintRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -31,7 +30,6 @@ public class ComplaintService {
 
     public ComplaintReadDTO createComplaint(ComplaintCreateDTO createDTO, ApplicationUser author) {
         Complaint complaint = translationService.toEntity(createDTO, author);
-        complaint.setIssueDate(Instant.now());
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
 
         complaint = complaintRepository.save(complaint);

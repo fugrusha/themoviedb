@@ -10,6 +10,8 @@
             <column name="username" type="string"/>
             <column name="password" type="string"/>
             <column name="email" type="string"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="last_modified_at" type="timestamp"/>
         </loadUpdateData>
 
         <loadUpdateData tableName="complaint" file="db/data/complaints.csv" separator=";" primaryKey="id">
@@ -18,7 +20,8 @@
             <column name="complaint_text" type="string"/>
             <column name="complaint_type" type="string"/>
             <column name="complaint_status" type="string"/>
-            <column name="issue_date" type="timestamp"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="last_modified_at" type="timestamp"/>
             <column name="author_id" type="uuid"/>
         </loadUpdateData>
     </changeSet>
@@ -38,6 +41,8 @@
             <column name="description" type="string"/>
             <column name="is_released" type="boolean"/>
             <column name="average_rating" type="numeric"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="last_modified_at" type="timestamp"/>
         </loadUpdateData>
     </changeSet>
 
@@ -74,6 +79,8 @@
             <column name="likes_count" type="numeric" />
             <column name="dislikes_count" type="numeric" />
             <column name="author_id" type="uuid"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="last_modified_at" type="timestamp"/>
         </loadUpdateData>
     </changeSet>
 

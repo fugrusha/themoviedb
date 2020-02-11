@@ -5,6 +5,7 @@ import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
+import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,6 +14,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.List;
 
@@ -42,5 +44,39 @@ public class ComplaintRepositoryTest {
                 .findByAuthorIdAndComplaintType(user1.getId(), ComplaintType.CHILD_ABUSE);
 
         Assertions.assertThat(result).extracting(Complaint::getId).isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
+    }
+
+    @Test
+    public void testCreateAtIsSet() {
+        ApplicationUser author = testObjectFactory.createUser();
+
+        Complaint complaint = testObjectFactory.createComplaint(author, ComplaintType.MISPRINT);
+
+        Instant createdAtBeforeReload = complaint.getCreatedAt();
+        Assert.assertNotNull(createdAtBeforeReload);
+
+        complaint = complaintRepository.findById(complaint.getId()).get();
+
+        Instant createdAtAfterReload = complaint.getCreatedAt();
+        Assert.assertNotNull(createdAtAfterReload);
+        Assert.assertEquals(createdAtBeforeReload, createdAtAfterReload);
+    }
+
+    @Test
+    public void testModifiedAtIsSet() {
+        ApplicationUser author = testObjectFactory.createUser();
+
+        Complaint complaint = testObjectFactory.createComplaint(author, ComplaintType.MISPRINT);
+
+        Instant modifiedAtBeforeReload = complaint.getLastModifiedAt();
+        Assert.assertNotNull(modifiedAtBeforeReload);
+
+        complaint = complaintRepository.findById(complaint.getId()).get();
+        complaint.setComplaintType(ComplaintType.CHILD_ABUSE);
+        complaint = complaintRepository.save(complaint);
+        Instant modifiedAtAfterReload = complaint.getLastModifiedAt();
+
+        Assert.assertNotNull(modifiedAtAfterReload);
+        Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
     }
 }

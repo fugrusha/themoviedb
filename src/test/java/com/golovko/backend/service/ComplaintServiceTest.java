@@ -22,7 +22,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @SpringBootTest
@@ -75,9 +74,9 @@ public class ComplaintServiceTest {
 
         Complaint complaint = complaintRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
-                "authorId", "issueDate");
+                "authorId", "createdAt", "lastModifiedAt");
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
-        Assert.assertEquals(readDTO.getIssueDate().truncatedTo(ChronoUnit.MICROS), complaint.getIssueDate());
+        Assert.assertEquals(readDTO.getCreatedAt(), complaint.getCreatedAt());
     }
 
     @Test

@@ -13,8 +13,6 @@ public class ArticleReadDTO {
 
     private String title;
 
-    private Instant publishedDate;
-
     private String text;
 
     private ArticleStatus status;
@@ -24,4 +22,8 @@ public class ArticleReadDTO {
     private Integer likesCount;
 
     private Integer dislikesCount;
+
+    private Instant createdAt;
+
+    private Instant lastModifiedAt;
 }

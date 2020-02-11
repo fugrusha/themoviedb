@@ -22,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -206,6 +207,8 @@ public class MovieControllerTest {
         readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
         readDTO.setIsReleased(false);
         readDTO.setAverageRating(8.3);
+        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        readDTO.setLastModifiedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return readDTO;
     }
 }

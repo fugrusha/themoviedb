@@ -8,8 +8,6 @@ import com.golovko.backend.repository.ArticleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Service
@@ -33,8 +31,6 @@ public class ArticleService {
 
     public ArticleReadDTO createArticle(ArticleCreateDTO createDTO, ApplicationUser author) {
         Article article = translationService.toEntity(createDTO, author);
-        Instant now = Instant.now().truncatedTo(ChronoUnit.MILLIS);
-        article.setPublishedDate(now);
 
         article = articleRepository.save(article);
         return translationService.toRead(article);

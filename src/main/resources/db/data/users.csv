@@ -1,7 +1,5 @@
-id;username;password;email
-83c8e93c-48d8-4093-a9db-455b849f5b2f; admin; admin; admin@gmail.com
-d3ff33c7-c03c-4c1b-818b-f119c2a2ca94; content-manager; content-manager; content-manager@gmail.com
-96c703f0-d270-4e61-bf01-66e8077dfdec; user1; pass1; user1@gmail.com
-6005f237-913a-4549-b5fd-8d4594dc0344; user2; pass2; user2@gmail.com
-a729fbe1-d8ce-4be9-92c5-19934997f3af; user3; pass3; user3@gmail.com
-
+id;username;password;email;created_at;last_modified_at
+83c8e93c-48d8-4093-a9db-455b849f5b2f;admin;admin;admin@gmail.com;2017-02-03T11:35:30;2020-02-01T12:12:12
+d3ff33c7-c03c-4c1b-818b-f119c2a2ca94;manager;manager;manager@gmail.com;2016-02-03T11:35:30;2020-02-01T12:12:12
+96c703f0-d270-4e61-bf01-66e8077dfdec;user1;pass1;user1@gmail.com;2019-02-03T11:35:30;2020-02-01T12:12:12
+6005f237-913a-4549-b5fd-8d4594dc0344;user2;pass2;user2@gmail.com;2018-02-03T11:35:30;2020-02-01T12:12:12

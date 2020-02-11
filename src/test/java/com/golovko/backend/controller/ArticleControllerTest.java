@@ -21,7 +21,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
-import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -183,9 +182,10 @@ public class ArticleControllerTest {
         dto.setText("Some Text");
         dto.setStatus(ArticleStatus.PUBLISHED);
         dto.setAuthorId(authorId);
-        dto.setPublishedDate(Instant.now().truncatedTo(ChronoUnit.MILLIS));
         dto.setDislikesCount(555);
         dto.setLikesCount(333);
+        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        dto.setLastModifiedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 
@@ -196,9 +196,10 @@ public class ArticleControllerTest {
         dto.setText("Some Text");
         dto.setStatus(ArticleStatus.PUBLISHED);
         dto.setAuthor(author);
-        dto.setPublishedDate(Instant.now().truncatedTo(ChronoUnit.MILLIS));
         dto.setDislikesCount(555);
         dto.setLikesCount(333);
+        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        dto.setLastModifiedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 

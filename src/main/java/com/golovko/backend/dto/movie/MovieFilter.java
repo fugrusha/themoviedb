@@ -10,6 +10,7 @@ import java.util.UUID;
 
 @Data
 public class MovieFilter {
+
     private UUID personId;
 
     private Set<PartType> partTypes;

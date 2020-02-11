@@ -32,9 +32,29 @@ public class LiquibaseLoadDataTest {
     @Autowired
     private ComplaintRepository complaintRepository;
 
+    @Autowired
+    private ArticleRepository articleRepository;
+
+    @Autowired
+    private MovieCastRepository movieCastRepository;
+
+    @Autowired
+    private MovieParticipationRepository movieParticipationRepository;
+
+    @Autowired
+    private MovieRepository movieRepository;
+
+    @Autowired
+    private PersonRepository personRepository;
+
     @Test
     public void loadDataTest() {
         Assert.assertTrue(applicationUserRepository.count() > 0);
         Assert.assertTrue(complaintRepository.count() > 0);
+        Assert.assertTrue(articleRepository.count() > 0);
+        Assert.assertTrue(movieCastRepository.count() > 0);
+        Assert.assertTrue(movieParticipationRepository.count() > 0);
+        Assert.assertTrue(movieRepository.count() > 0);
+        Assert.assertTrue(personRepository.count() > 0);
     }
 }

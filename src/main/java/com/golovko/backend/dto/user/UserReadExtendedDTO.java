@@ -3,6 +3,7 @@ package com.golovko.backend.dto.user;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,6 +15,10 @@ public class UserReadExtendedDTO {
     private String username;
 
     private String email;
+
+    private Instant createdAt;
+
+    private Instant lastModifiedAt;
 
     private List<ComplaintReadDTO> complaints;
 

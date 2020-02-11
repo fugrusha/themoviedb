@@ -161,10 +161,11 @@ public class ComplaintControllerTest {
         readDTO.setId(UUID.randomUUID());
         readDTO.setComplaintTitle("Report 1");
         readDTO.setComplaintText("I have noticed a spoiler");
-        readDTO.setIssueDate(Instant.parse("2017-02-03T11:35:30.00Z"));
         readDTO.setComplaintType(ComplaintType.SPOILER);
         readDTO.setComplaintStatus(ComplaintStatus.DUPLICATE);
         readDTO.setAuthorId(UUID.randomUUID());
+        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        readDTO.setLastModifiedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return readDTO;
     }
 }

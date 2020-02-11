@@ -14,8 +14,6 @@ public class ArticleReadExtendedDTO {
 
     private String title;
 
-    private Instant publishedDate;
-
     private String text;
 
     private ArticleStatus status;
@@ -25,4 +23,8 @@ public class ArticleReadExtendedDTO {
     private Integer likesCount;
 
     private Integer dislikesCount;
+
+    private Instant createdAt;
+
+    private Instant lastModifiedAt;
 }

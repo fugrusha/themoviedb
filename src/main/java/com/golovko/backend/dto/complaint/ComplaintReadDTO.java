@@ -16,11 +16,13 @@ public class ComplaintReadDTO {
 
     private String complaintText;
 
-    private Instant issueDate;
-
     private ComplaintType complaintType;
 
     private ComplaintStatus complaintStatus;
 
     private UUID authorId;
+
+    private Instant createdAt;
+
+    private Instant lastModifiedAt;
 }

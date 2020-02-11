@@ -2,8 +2,12 @@ package com.golovko.backend.domain;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
@@ -12,6 +16,7 @@ import java.util.UUID;
 @Entity
 @Setter
 @Getter
+@EntityListeners(AuditingEntityListener.class)
 public class Movie {
 
     @Id
@@ -28,6 +33,12 @@ public class Movie {
     private Boolean isReleased;
 
     private Double averageRating;
+
+    @CreatedDate
+    private Instant createdAt;
+
+    @LastModifiedDate
+    private Instant lastModifiedAt;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private Set<MovieParticipation> movieParticipations = new HashSet<>();

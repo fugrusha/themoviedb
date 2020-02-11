@@ -19,6 +19,8 @@
             <column name="email" type="varchar(50)">
                 <constraints nullable="false"/>
             </column>
+            <column name="created_at" type="timestamp"/>
+            <column name="last_modified_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
@@ -34,6 +36,8 @@
             <column name="description" type="varchar(1000)"/>
             <column name="is_released" type="boolean"/>
             <column name="average_rating" type="double"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="last_modified_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
@@ -48,9 +52,8 @@
             <column name="complaint_text" type="varchar(1000)">
                 <constraints nullable="false"/>
             </column>
-            <column name="issue_date" type="timestamp">
-                <constraints nullable="false"/>
-            </column>
+            <column name="created_at" type="timestamp"/>
+            <column name="last_modified_at" type="timestamp"/>
             <column name="complaint_type" type="varchar(30)">
                 <constraints nullable="false"/>
             </column>
@@ -138,13 +141,12 @@
             <column name="title" type="varchar(300)">
                 <constraints nullable="false"/>
             </column>
-            <column name="published_date" type="timestamp">
-                <constraints nullable="true"/>
-            </column>
+            <column name="created_at" type="timestamp"/>
+            <column name="last_modified_at" type="timestamp"/>
             <column name="text" type="varchar(10000)"/>
-            <column name="status" type="varchar(30)" />
-            <column name="likes_count" type="int4" />
-            <column name="dislikes_count" type="int4" />
+            <column name="status" type="varchar(30)"/>
+            <column name="likes_count" type="int4"/>
+            <column name="dislikes_count" type="int4"/>
             <column name="author_id" type="uuid">
                 <constraints
                         foreignKeyName="fk_article_application_user_id"
