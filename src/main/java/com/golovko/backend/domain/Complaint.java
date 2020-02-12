@@ -28,7 +28,7 @@ public class Complaint {
     private Instant createdAt;
 
     @LastModifiedDate
-    private Instant lastModifiedAt;
+    private Instant updatedAt;
 
     @Enumerated(EnumType.STRING)
     private ComplaintType complaintType;

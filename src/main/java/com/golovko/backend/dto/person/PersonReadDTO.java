@@ -3,6 +3,7 @@ package com.golovko.backend.dto.person;
 import com.golovko.backend.domain.Gender;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -15,4 +16,8 @@ public class PersonReadDTO {
     private String lastName;
 
     private Gender gender;
+
+    private Instant createdAt;
+
+    private Instant updatedAt;
 }

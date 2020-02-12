@@ -1,4 +1,4 @@
-id;username;password;email;created_at;last_modified_at
+id;username;password;email;created_at;updated_at
 83c8e93c-48d8-4093-a9db-455b849f5b2f;admin;admin;admin@gmail.com;2017-02-03T11:35:30;2020-02-01T12:12:12
 d3ff33c7-c03c-4c1b-818b-f119c2a2ca94;manager;manager;manager@gmail.com;2016-02-03T11:35:30;2020-02-01T12:12:12
 96c703f0-d270-4e61-bf01-66e8077dfdec;user1;pass1;user1@gmail.com;2019-02-03T11:35:30;2020-02-01T12:12:12

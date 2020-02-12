@@ -185,7 +185,7 @@ public class ArticleControllerTest {
         dto.setDislikesCount(555);
         dto.setLikesCount(333);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setLastModifiedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 
@@ -199,7 +199,7 @@ public class ArticleControllerTest {
         dto.setDislikesCount(555);
         dto.setLikesCount(333);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setLastModifiedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 

@@ -1,4 +1,4 @@
-id;movie_title;release_date;description;is_released;average_rating;created_at	;last_modified_at
+id;movie_title;release_date;description;is_released;average_rating;created_at	;updated_at
 950b4f87-7afc-40f4-bda8-cbb091a30206;Movie title 1;2002-05-10;Movie description;true;6.5;2018-11-01T11:00:12;2020-01-01T11:00:12
 075b603c-2547-4fc8-92f3-175b9cdedfc5;Movie title 2;1995-05-10;Movie description;true;6.0;2018-07-01T11:00:12;2020-01-01T11:00:12
 a14e15fd-aafd-4a3c-9620-3ac87f360ae6;Movie title 3;2000-05-10;Movie description;true;6.1;2018-12-01T11:00:12;2020-01-01T11:00:12

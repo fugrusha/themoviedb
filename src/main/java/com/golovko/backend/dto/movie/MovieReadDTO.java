@@ -23,5 +23,5 @@ public class MovieReadDTO {
 
     private Instant createdAt;
 
-    private Instant lastModifiedAt;
+    private Instant updatedAt;
 }

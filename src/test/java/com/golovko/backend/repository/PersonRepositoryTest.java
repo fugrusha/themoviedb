@@ -1,6 +1,6 @@
 package com.golovko.backend.repository;
 
-import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.Person;
 import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -16,42 +16,43 @@ import java.time.Instant;
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Sql(statements = "delete from movie", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MovieRepositoryTest {
+@Sql(statements = "delete from person", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+public class PersonRepositoryTest {
 
     @Autowired
-    private MovieRepository movieRepository;
+    private PersonRepository personRepository;
 
     @Autowired
     private TestObjectFactory testObjectFactory;
 
     @Test
     public void testCreateAtIsSet() {
-        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
 
-        Instant createdAtBeforeReload = movie.getCreatedAt();
+        Instant createdAtBeforeReload = person.getCreatedAt();
         Assert.assertNotNull(createdAtBeforeReload);
 
-        movie = movieRepository.findById(movie.getId()).get();
+        person = personRepository.findById(person.getId()).get();
 
-        Instant createdAtAfterReload = movie.getCreatedAt();
+        Instant createdAtAfterReload = person.getCreatedAt();
         Assert.assertNotNull(createdAtAfterReload);
         Assert.assertEquals(createdAtBeforeReload, createdAtAfterReload);
     }
 
     @Test
     public void testModifiedAtIsSet() {
-        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
 
-        Instant modifiedAtBeforeReload = movie.getUpdatedAt();
+        Instant modifiedAtBeforeReload = person.getUpdatedAt();
         Assert.assertNotNull(modifiedAtBeforeReload);
 
-        movie = movieRepository.findById(movie.getId()).get();
-        movie.setMovieTitle("Another Movie Title");
-        movie = movieRepository.save(movie);
-        Instant modifiedAtAfterReload = movie.getUpdatedAt();
+        person = personRepository.findById(person.getId()).get();
+        person.setFirstName("Another Person Name");
+        person = personRepository.save(person);
+        Instant modifiedAtAfterReload = person.getUpdatedAt();
 
         Assert.assertNotNull(modifiedAtAfterReload);
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
     }
+
 }

@@ -35,7 +35,7 @@ public class ApplicationUser {
     private Instant createdAt;
 
     @LastModifiedDate
-    private Instant lastModifiedAt;
+    private Instant updatedAt;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Complaint> complaints = new ArrayList<>();

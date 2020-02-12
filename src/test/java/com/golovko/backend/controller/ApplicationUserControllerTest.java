@@ -204,7 +204,7 @@ public class ApplicationUserControllerTest {
         readDTO.setEmail("david101@email.com");
         readDTO.setPassword("12345");
         readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setLastModifiedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return readDTO;
     }
 
@@ -215,7 +215,7 @@ public class ApplicationUserControllerTest {
         readDTO.setEmail("david101@email.com");
         readDTO.setComplaints(complaints);
         readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setLastModifiedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return readDTO;
     }
 

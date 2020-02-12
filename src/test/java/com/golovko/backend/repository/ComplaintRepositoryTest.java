@@ -68,13 +68,13 @@ public class ComplaintRepositoryTest {
 
         Complaint complaint = testObjectFactory.createComplaint(author, ComplaintType.MISPRINT);
 
-        Instant modifiedAtBeforeReload = complaint.getLastModifiedAt();
+        Instant modifiedAtBeforeReload = complaint.getUpdatedAt();
         Assert.assertNotNull(modifiedAtBeforeReload);
 
         complaint = complaintRepository.findById(complaint.getId()).get();
         complaint.setComplaintType(ComplaintType.CHILD_ABUSE);
         complaint = complaintRepository.save(complaint);
-        Instant modifiedAtAfterReload = complaint.getLastModifiedAt();
+        Instant modifiedAtAfterReload = complaint.getUpdatedAt();
 
         Assert.assertNotNull(modifiedAtAfterReload);
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));

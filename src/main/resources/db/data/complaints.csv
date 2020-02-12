@@ -1,4 +1,4 @@
-id;complaint_title;complaint_text;created_at;last_modified_at;complaint_type;complaint_status;author_id
+id;complaint_title;complaint_text;created_at;updated_at;complaint_type;complaint_status;author_id
 1d7f0464-b751-4839-ba29-3752944b6eb2;Complaint title 1;Complaint text 1;2017-02-03T11:35:30;2020-02-01T12:12:12;VIOLENCE;INITIATED;96c703f0-d270-4e61-bf01-66e8077dfdec
 0dce3e94-d467-495a-b2e6-15f5110a72ec;Complaint title 2;Complaint text 2;2019-02-03T14:35:30;2020-02-01T12:12:12;VIOLENCE;DUPLICATE;6005f237-913a-4549-b5fd-8d4594dc0344
 e2de6a58-6d54-4d90-8238-b2f9eed2f702;Complaint title 3;Complaint text 3;2019-04-20T01:35:30;2020-02-01T12:12:12;MISPRINT;INITIATED;6005f237-913a-4549-b5fd-8d4594dc0344

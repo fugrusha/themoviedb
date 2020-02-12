@@ -19,6 +19,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -140,6 +141,8 @@ public class PersonControllerTest {
         dto.setFirstName("Max");
         dto.setLastName("Popov");
         dto.setGender(Gender.MALE);
+        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

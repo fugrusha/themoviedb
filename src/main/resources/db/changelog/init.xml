@@ -20,7 +20,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamp"/>
-            <column name="last_modified_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
@@ -37,7 +37,7 @@
             <column name="is_released" type="boolean"/>
             <column name="average_rating" type="double"/>
             <column name="created_at" type="timestamp"/>
-            <column name="last_modified_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
@@ -53,7 +53,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamp"/>
-            <column name="last_modified_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
             <column name="complaint_type" type="varchar(30)">
                 <constraints nullable="false"/>
             </column>
@@ -81,6 +81,8 @@
                 <constraints nullable="true"/>
             </column>
             <column name="gender" type="varchar(10)"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
         </createTable>
     </changeSet>
 
@@ -92,6 +94,8 @@
             <column name="part_info" type="varchar(1000)" />
             <column name="part_type" type="varchar(30)" />
             <column name="average_rating" type="double" />
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
             <column name="movie_id" type="uuid">
                 <constraints referencedTableName="movie"
                              referencedColumnNames="id"
@@ -116,6 +120,8 @@
             <column name="part_type" type="varchar(10)" />
             <column name="character" type="varchar(50)" />
             <column name="average_rating" type="double" />
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
             <column name="movie_id" type="uuid">
                 <constraints referencedTableName="movie"
                              referencedColumnNames="id"
@@ -142,7 +148,7 @@
                 <constraints nullable="false"/>
             </column>
             <column name="created_at" type="timestamp"/>
-            <column name="last_modified_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
             <column name="text" type="varchar(10000)"/>
             <column name="status" type="varchar(30)"/>
             <column name="likes_count" type="int4"/>

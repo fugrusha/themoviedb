@@ -1,4 +1,4 @@
-id;title;created_at;last_modified_at;text;status;likes_count;dislikes_count;author_id
+id;title;created_at;updated_at;text;status;likes_count;dislikes_count;author_id
 484257ae-811e-4bc7-beff-897968f5024c;Article title 1;2018-09-15T15:45:30;2020-02-01T12:12:12;Article text 1;DRAFT;100;75575;83c8e93c-48d8-4093-a9db-455b849f5b2f
 ed8d6477-0dbe-4f0f-ae99-96057677da45;Article title 2;2019-02-11T10:45:00;2020-02-01T12:12:12;Article text 2;NEED_MODERATION;45555;5;d3ff33c7-c03c-4c1b-818b-f119c2a2ca94
 108eed48-1a0d-47e3-b8dc-ee037afd4b1a;Article title 3;2017-12-15T00:45:00;2020-02-01T12:12:12;Article text 3;BLOCKED;442;45;d3ff33c7-c03c-4c1b-818b-f119c2a2ca94

@@ -46,7 +46,7 @@ public class TranslationService {
         dto.setPassword(user.getPassword());
         dto.setEmail(user.getEmail());
         dto.setCreatedAt(user.getCreatedAt());
-        dto.setLastModifiedAt(user.getLastModifiedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
     }
 
@@ -57,7 +57,7 @@ public class TranslationService {
         dto.setEmail(user.getEmail());
         dto.setComplaints(user.getComplaints().stream().map(this::toRead).collect(Collectors.toList()));
         dto.setCreatedAt(user.getCreatedAt());
-        dto.setLastModifiedAt(user.getLastModifiedAt());
+        dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
     }
 
@@ -99,7 +99,7 @@ public class TranslationService {
         dto.setIsReleased(movie.getIsReleased());
         dto.setAverageRating(movie.getAverageRating());
         dto.setCreatedAt(movie.getCreatedAt());
-        dto.setLastModifiedAt(movie.getLastModifiedAt());
+        dto.setUpdatedAt(movie.getUpdatedAt());
         return dto;
     }
 
@@ -147,7 +147,7 @@ public class TranslationService {
         dto.setComplaintStatus(complaint.getComplaintStatus());
         dto.setAuthorId(complaint.getAuthor().getId());
         dto.setCreatedAt(complaint.getCreatedAt());
-        dto.setLastModifiedAt(complaint.getLastModifiedAt());
+        dto.setUpdatedAt(complaint.getUpdatedAt());
         return dto;
     }
 
@@ -191,6 +191,8 @@ public class TranslationService {
         dto.setFirstName(person.getFirstName());
         dto.setLastName(person.getLastName());
         dto.setGender(person.getGender());
+        dto.setCreatedAt(person.getCreatedAt());
+        dto.setUpdatedAt(person.getUpdatedAt());
         return dto;
     }
 
@@ -231,6 +233,8 @@ public class TranslationService {
         dto.setPartType(movieParticipation.getPartType());
         dto.setMovieId(movieParticipation.getMovie().getId());
         dto.setPersonId(movieParticipation.getPerson().getId());
+        dto.setCreatedAt(movieParticipation.getCreatedAt());
+        dto.setUpdatedAt(movieParticipation.getUpdatedAt());
         return dto;
     }
 
@@ -242,6 +246,8 @@ public class TranslationService {
         dto.setAverageRating(movieParticipation.getAverageRating());
         dto.setMovie(toRead(movieParticipation.getMovie()));
         dto.setPerson(toRead(movieParticipation.getPerson()));
+        dto.setCreatedAt(movieParticipation.getCreatedAt());
+        dto.setUpdatedAt(movieParticipation.getUpdatedAt());
         return dto;
     }
 
@@ -288,6 +294,8 @@ public class TranslationService {
         dto.setMovieId(movieCast.getMovie().getId());
         dto.setPersonId(movieCast.getPerson().getId());
         dto.setCharacter(movieCast.getCharacter());
+        dto.setCreatedAt(movieCast.getCreatedAt());
+        dto.setUpdatedAt(movieCast.getUpdatedAt());
         return dto;
     }
 
@@ -308,6 +316,8 @@ public class TranslationService {
         dto.setAverageRating(movieCast.getAverageRating());
         dto.setMovie(toRead(movieCast.getMovie()));
         dto.setPerson(toRead(movieCast.getPerson()));
+        dto.setCreatedAt(movieCast.getCreatedAt());
+        dto.setUpdatedAt(movieCast.getUpdatedAt());
         return dto;
     }
 
@@ -346,7 +356,7 @@ public class TranslationService {
         dto.setLikesCount(article.getLikesCount());
         dto.setAuthorId(article.getAuthor().getId());
         dto.setCreatedAt(article.getCreatedAt());
-        dto.setLastModifiedAt(article.getLastModifiedAt());
+        dto.setUpdatedAt(article.getUpdatedAt());
         return dto;
     }
 
@@ -360,7 +370,7 @@ public class TranslationService {
         dto.setLikesCount(article.getLikesCount());
         dto.setAuthor(toRead(article.getAuthor()));
         dto.setCreatedAt(article.getCreatedAt());
-        dto.setLastModifiedAt(article.getLastModifiedAt());
+        dto.setUpdatedAt(article.getUpdatedAt());
         return dto;
     }
 

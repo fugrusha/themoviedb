@@ -18,7 +18,7 @@ public class UserReadExtendedDTO {
 
     private Instant createdAt;
 
-    private Instant lastModifiedAt;
+    private Instant updatedAt;
 
     private List<ComplaintReadDTO> complaints;
 

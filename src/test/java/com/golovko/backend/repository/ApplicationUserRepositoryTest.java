@@ -54,13 +54,13 @@ public class ApplicationUserRepositoryTest {
     public void testModifiedAtIsSet() {
         ApplicationUser user = testObjectFactory.createUser();
 
-        Instant modifiedAtBeforeReload = user.getLastModifiedAt();
+        Instant modifiedAtBeforeReload = user.getUpdatedAt();
         Assert.assertNotNull(modifiedAtBeforeReload);
 
         user = applicationUserRepository.findById(user.getId()).get();
         user.setEmail("new.user@email.com");
         user = applicationUserRepository.save(user);
-        Instant modifiedAtAfterReload = user.getLastModifiedAt();
+        Instant modifiedAtAfterReload = user.getUpdatedAt();
 
         Assert.assertNotNull(modifiedAtAfterReload);
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));

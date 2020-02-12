@@ -26,7 +26,7 @@ public class Article {
     private Instant createdAt;
 
     @LastModifiedDate
-    private Instant lastModifiedAt;
+    private Instant updatedAt;
 
     private String text;
 

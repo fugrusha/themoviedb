@@ -53,13 +53,13 @@ public class ArticleRepositoryTest {
         article.setAuthor(author);
         article = articleRepository.save(article);
 
-        Instant modifiedAtBeforeReload = article.getLastModifiedAt();
+        Instant modifiedAtBeforeReload = article.getUpdatedAt();
         Assert.assertNotNull(modifiedAtBeforeReload);
 
         article = articleRepository.findById(article.getId()).get();
         article.setStatus(ArticleStatus.PUBLISHED);
         article = articleRepository.save(article);
-        Instant modifiedAtAfterReload = article.getLastModifiedAt();
+        Instant modifiedAtAfterReload = article.getUpdatedAt();
 
         Assert.assertNotNull(modifiedAtAfterReload);
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));    }

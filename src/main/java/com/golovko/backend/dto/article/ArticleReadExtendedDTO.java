@@ -26,5 +26,5 @@ public class ArticleReadExtendedDTO {
 
     private Instant createdAt;
 
-    private Instant lastModifiedAt;
+    private Instant updatedAt;
 }

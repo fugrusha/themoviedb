@@ -22,6 +22,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
@@ -233,6 +234,8 @@ public class MovieParticipationControllerTest {
         dto.setPersonId(UUID.randomUUID());
         dto.setMovieId(UUID.randomUUID());
         dto.setPartType(PartType.COSTUME_DESIGNER);
+        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 
@@ -247,6 +250,8 @@ public class MovieParticipationControllerTest {
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
         dto.setPartType(PartType.COSTUME_DESIGNER);
+        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

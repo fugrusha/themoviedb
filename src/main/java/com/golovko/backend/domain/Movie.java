@@ -38,7 +38,7 @@ public class Movie {
     private Instant createdAt;
 
     @LastModifiedDate
-    private Instant lastModifiedAt;
+    private Instant updatedAt;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
     private Set<MovieParticipation> movieParticipations = new HashSet<>();

@@ -5,6 +5,7 @@ import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import lombok.Data;
 
+import java.time.Instant;
 import java.util.UUID;
 
 @Data
@@ -21,4 +22,8 @@ public class MovieCastReadExtendedDTO {
     private MovieReadDTO movie;
 
     private PersonReadDTO person;
+
+    private Instant createdAt;
+
+    private Instant updatedAt;
 }

@@ -24,5 +24,5 @@ public class ComplaintReadDTO {
 
     private Instant createdAt;
 
-    private Instant lastModifiedAt;
+    private Instant updatedAt;
 }

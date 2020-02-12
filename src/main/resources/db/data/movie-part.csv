@@ -1,4 +1,4 @@
-id;part_info;part_type;average_rating;movie_id;person_id
-21c4eb07-f943-4579-92ab-a90c27adfb89;Some text;EDITOR;5.7;a14e15fd-aafd-4a3c-9620-3ac87f360ae6;4308661f-1a51-4b25-8ac2-abbd21ac2487
-67c18fb5-3a69-49f6-91ae-a7d0d2555f95;Some text;DIRECTOR;5.4;536adcbf-8cd7-48be-9530-d0d1b0646bef;2c79abee-759b-460b-b831-abc69aca874f
-0beaa1ba-e686-4032-97ff-68b4033028b6;Some text;DIRECTOR;5.4;950b4f87-7afc-40f4-bda8-cbb091a30206;07354809-4fe9-454e-8a51-e2bf01c13e47
+id;part_info;part_type;average_rating;movie_id;person_id;created_at;updated_at
+21c4eb07-f943-4579-92ab-a90c27adfb89;Some text;EDITOR;5.7;a14e15fd-aafd-4a3c-9620-3ac87f360ae6;4308661f-1a51-4b25-8ac2-abbd21ac2487;2019-02-07T14:35:30;2020-01-07T14:35:30
+67c18fb5-3a69-49f6-91ae-a7d0d2555f95;Some text;DIRECTOR;5.4;536adcbf-8cd7-48be-9530-d0d1b0646bef;2c79abee-759b-460b-b831-abc69aca874f;2018-12-27T14:35:30;2020-01-17T04:55:00
+0beaa1ba-e686-4032-97ff-68b4033028b6;Some text;DIRECTOR;5.4;950b4f87-7afc-40f4-bda8-cbb091a30206;07354809-4fe9-454e-8a51-e2bf01c13e47;2019-12-17T14:35:30;2020-02-03T22:35:30
