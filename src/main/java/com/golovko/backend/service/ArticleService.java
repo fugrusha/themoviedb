@@ -2,13 +2,16 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Article;
+import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class ArticleService {
@@ -27,6 +30,11 @@ public class ArticleService {
     public ArticleReadExtendedDTO getArticleExtended(UUID id) {
         Article article = getArticleRequired(id);
         return translationService.toReadExtended(article);
+    }
+
+    public List<ArticleReadDTO> getArticleList() {
+        List<Article> articles = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.PUBLISHED);
+        return articles.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
     public ArticleReadDTO createArticle(ArticleCreateDTO createDTO, ApplicationUser author) {

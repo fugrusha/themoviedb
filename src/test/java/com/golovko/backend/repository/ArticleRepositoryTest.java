@@ -31,7 +31,7 @@ public class ArticleRepositoryTest {
     @Test
     public void testCreateAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(author);
+        Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
 
         Instant createdAtBeforeReload = article.getCreatedAt();
         Assert.assertNotNull(createdAtBeforeReload);
