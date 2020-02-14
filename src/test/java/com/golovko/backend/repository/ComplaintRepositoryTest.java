@@ -41,7 +41,7 @@ public class ComplaintRepositoryTest {
         testObjectFactory.createComplaint(user2, ComplaintType.MISPRINT);
 
         List<Complaint> result = complaintRepository
-                .findByAuthorIdAndComplaintType(user1.getId(), ComplaintType.CHILD_ABUSE);
+                .findByAuthorIdOrderByCreatedAtAsc(user1.getId());
 
         Assertions.assertThat(result).extracting(Complaint::getId).isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
     }
