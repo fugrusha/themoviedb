@@ -4,7 +4,6 @@ import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
-import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
@@ -22,6 +21,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.UUID;
 
 @SpringBootTest
@@ -29,10 +29,10 @@ import java.util.UUID;
 @ActiveProfiles("test")
 @Sql(statements = {"delete from complaint", "delete from application_user"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class ComplaintServiceTest {
+public class UserComplaintServiceTest {
 
     @Autowired
-    private ComplaintService complaintService;
+    private UserComplaintService userComplaintService;
 
     @Autowired
     private ComplaintRepository complaintRepository;
@@ -47,36 +47,31 @@ public class ComplaintServiceTest {
     public void getComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
-        ComplaintReadDTO readDTO = complaintService.getComplaint(complaint.getId());
+
+        ComplaintReadDTO readDTO = userComplaintService.getComplaint(user.getId(), complaint.getId());
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint, "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
     }
 
-    @Test(expected = EntityNotFoundException.class)
-    public void getComplaintWrongIdTest() {
-        complaintService.getComplaint(UUID.randomUUID());
+    @Test
+    public void getListOfUserComplaintsTest() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(user1, ComplaintType.CHILD_ABUSE);
+        Complaint c2 = testObjectFactory.createComplaint(user1, ComplaintType.MISPRINT);
+        testObjectFactory.createComplaint(user2, ComplaintType.MISPRINT);
+        testObjectFactory.createComplaint(user2, ComplaintType.SPAM);
+
+        List<ComplaintReadDTO> complaints = userComplaintService.getUserComplaints(user1.getId());
+
+        Assertions.assertThat(complaints).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
-    @Test
-    public void createComplaintTest() {
-        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
-        createDTO.setComplaintTitle("some title");
-        createDTO.setComplaintText("some text");
-        createDTO.setComplaintType(ComplaintType.SPOILER);
-
-        ApplicationUser author = testObjectFactory.createUser();
-
-        ComplaintReadDTO readDTO = complaintService.createComplaint(createDTO, author);
-
-        Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
-        Assert.assertNotNull(readDTO.getId());
-
-        Complaint complaint = complaintRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
-                "authorId", "createdAt", "lastModifiedAt");
-        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
-        Assert.assertEquals(readDTO.getCreatedAt(), complaint.getCreatedAt());
+    @Test(expected = EntityNotFoundException.class)
+    public void getComplaintWrongIdTest() {
+        userComplaintService.getComplaint(UUID.randomUUID(), UUID.randomUUID());
     }
 
     @Test
@@ -90,7 +85,7 @@ public class ComplaintServiceTest {
         patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
         patchDTO.setComplaintStatus(ComplaintStatus.DUPLICATE);
 
-        ComplaintReadDTO readDTO = complaintService.patchComplaint(complaint.getId(), patchDTO);
+        ComplaintReadDTO readDTO = userComplaintService.patchComplaint(user.getId(), complaint.getId(), patchDTO);
 
         Assertions.assertThat(patchDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
 
@@ -106,7 +101,7 @@ public class ComplaintServiceTest {
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
 
-        ComplaintReadDTO readDTO = complaintService.patchComplaint(complaint.getId(), patchDTO);
+        ComplaintReadDTO readDTO = userComplaintService.patchComplaint(user.getId(), complaint.getId(), patchDTO);
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
@@ -131,7 +126,7 @@ public class ComplaintServiceTest {
         updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
         updateDTO.setComplaintStatus(ComplaintStatus.DUPLICATE);
 
-        ComplaintReadDTO readDTO = complaintService.updateComplaint(complaint.getId(), updateDTO);
+        ComplaintReadDTO readDTO = userComplaintService.updateComplaint(user.getId(), complaint.getId(), updateDTO);
 
         Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
 
@@ -144,14 +139,14 @@ public class ComplaintServiceTest {
     public void deleteComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
-        complaintService.deleteComplaint(complaint.getId());
+        userComplaintService.deleteComplaint(user.getId(), complaint.getId());
 
         Assert.assertFalse(complaintRepository.existsById(complaint.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void deleteComplaintNotFound() {
-        complaintService.deleteComplaint(UUID.randomUUID());
+        userComplaintService.deleteComplaint(UUID.randomUUID(), UUID.randomUUID());
     }
 
     private void inTransaction (Runnable runnable) {

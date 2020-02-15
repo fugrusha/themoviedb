@@ -6,6 +6,7 @@ import com.golovko.backend.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -15,11 +16,14 @@ public class ArticleController {
     @Autowired
     private ArticleService articleService;
 
-    // TODO add list of articles
-
     @GetMapping("/{id}")
     public ArticleReadDTO getArticle(@PathVariable UUID id) {
         return articleService.getArticle(id);
+    }
+
+    @GetMapping
+    public List<ArticleReadDTO> getArticleList() {
+        return articleService.getArticleList();
     }
 
     @GetMapping("/{id}/extended")

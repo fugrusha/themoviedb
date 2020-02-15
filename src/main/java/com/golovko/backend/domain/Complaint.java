@@ -39,4 +39,7 @@ public class Complaint {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(nullable = false, name = "author_id")
     private ApplicationUser author;
+
+    @Column(nullable = false)
+    private UUID parentId;
 }

@@ -119,7 +119,6 @@ public class ApplicationUserControllerTest {
         ErrorInfo actualErrorInfo = objectMapper.readValue(result, ErrorInfo.class);
         Assertions.assertThat(actualErrorInfo).isEqualToComparingFieldByField(expectedErrorInfo);
     }
-    
 
     @Test
     public void testCreateUser() throws Exception {

@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.domain.Movie;
@@ -21,6 +22,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -57,6 +59,31 @@ public class ArticleControllerTest {
         Assertions.assertThat(actualArticle).isEqualToComparingFieldByField(readDTO);
 
         Mockito.verify(articleService).getArticle(readDTO.getId());
+    }
+
+    @Test
+    public void getArticleListTest() throws Exception {
+        UUID authorId1 = UUID.randomUUID();
+        UUID authorId2 = UUID.randomUUID();
+        ArticleReadDTO a1 = createArticleReadDTO(authorId1);
+        ArticleReadDTO a2 = createArticleReadDTO(authorId1);
+        ArticleReadDTO a3 = createArticleReadDTO(authorId2);
+        ArticleReadDTO a4 = createArticleReadDTO(authorId2);
+
+        List<ArticleReadDTO> expectedResult = List.of(a1, a2, a3, a4);
+
+        Mockito.when(articleService.getArticleList()).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult).extracting(ArticleReadDTO::getId)
+                .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId(), a4.getId());
+
+        Mockito.verify(articleService).getArticleList();
     }
 
     @Test

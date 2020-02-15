@@ -23,6 +23,7 @@
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
             <column name="author_id" type="uuid"/>
+            <column name="parent_id" type="uuid"/>
         </loadUpdateData>
     </changeSet>
 

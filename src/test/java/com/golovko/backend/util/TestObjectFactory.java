@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Component
 public class TestObjectFactory {
@@ -67,6 +68,19 @@ public class TestObjectFactory {
         complaint.setComplaintType(complaintType);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(user);
+        complaint.setParentId(UUID.randomUUID());
+        complaint = complaintRepository.save(complaint);
+        return complaint;
+    }
+
+    public Complaint createMovieComplaint(UUID movieId, ApplicationUser user, ComplaintType complaintType) {
+        Complaint complaint = new Complaint();
+        complaint.setComplaintTitle("Some title");
+        complaint.setComplaintText("Some report text");
+        complaint.setComplaintType(complaintType);
+        complaint.setComplaintStatus(ComplaintStatus.INITIATED);
+        complaint.setAuthor(user);
+        complaint.setParentId(movieId);
         complaint = complaintRepository.save(complaint);
         return complaint;
     }
@@ -108,11 +122,11 @@ public class TestObjectFactory {
         return movieParticipation;
     }
 
-    public Article createArticle(ApplicationUser author) {
+    public Article createArticle(ApplicationUser author, ArticleStatus status) {
         Article article = new Article();
         article.setTitle("Some title");
         article.setText("Some text");
-        article.setStatus(ArticleStatus.PUBLISHED);
+        article.setStatus(status);
         article.setDislikesCount(444);
         article.setLikesCount(111);
         article.setAuthor(author);

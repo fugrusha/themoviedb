@@ -19,6 +19,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.UUID;
 
 @SpringBootTest
@@ -43,7 +44,7 @@ public class ArticleServiceTest {
     @Test
     public void getArticleTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(user);
+        Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
 
         ArticleReadDTO readDTO = articleService.getArticle(article.getId());
 
@@ -55,7 +56,7 @@ public class ArticleServiceTest {
     @Test
     public void getArticleExtendedTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(user);
+        Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
 
         ArticleReadExtendedDTO readDTO = articleService.getArticleExtended(article.getId());
 
@@ -66,6 +67,22 @@ public class ArticleServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void getArticleWrongIdTest() {
         articleService.getArticle(UUID.randomUUID());
+    }
+
+    @Test
+    public void getArticleListTest() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Article a2 = testObjectFactory.createArticle(user2, ArticleStatus.PUBLISHED);
+        testObjectFactory.createArticle(user1, ArticleStatus.DRAFT);
+        testObjectFactory.createArticle(user2, ArticleStatus.NEED_MODERATION);
+        testObjectFactory.createArticle(user2, ArticleStatus.DRAFT);
+
+        List<ArticleReadDTO> articles = articleService.getArticleList();
+
+        Assertions.assertThat(articles).extracting("id")
+                .containsExactlyInAnyOrder(a1.getId(), a2.getId());
     }
 
     @Test
@@ -95,7 +112,7 @@ public class ArticleServiceTest {
         updateDTO.setStatus(ArticleStatus.PUBLISHED);
 
         ApplicationUser author = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(author);
+        Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
 
         ArticleReadDTO readDTO = articleService.updateArticle(article.getId(), updateDTO);
 
@@ -114,7 +131,7 @@ public class ArticleServiceTest {
         patchDTO.setStatus(ArticleStatus.NEED_MODERATION);
 
         ApplicationUser author = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(author);
+        Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
 
         ArticleReadDTO readDTO = articleService.patchArticle(article.getId(), patchDTO);
 
@@ -130,7 +147,7 @@ public class ArticleServiceTest {
         ArticlePatchDTO patchDTO = new ArticlePatchDTO();
 
         ApplicationUser author = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(author);
+        Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
 
         ArticleReadDTO readDTO = articleService.patchArticle(article.getId(), patchDTO);
 
@@ -147,7 +164,7 @@ public class ArticleServiceTest {
     @Test
     public void deleteArticleTest() {
         ApplicationUser author = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(author);
+        Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
         articleService.deleteArticle(article.getId());
 
         Assert.assertFalse(articleRepository.existsById(article.getId()));

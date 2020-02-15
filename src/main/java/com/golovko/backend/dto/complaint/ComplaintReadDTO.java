@@ -25,4 +25,6 @@ public class ComplaintReadDTO {
     private Instant createdAt;
 
     private Instant updatedAt;
+
+    private UUID parentId;
 }
