@@ -22,13 +22,13 @@ public class ApplicationUser {
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String username;
 
     @Column(nullable = false)
     private String password;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     private String email;
 
     @CreatedDate
