@@ -47,6 +47,7 @@ public class UserComplaintServiceTest {
     public void getComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
+
         ComplaintReadDTO readDTO = userComplaintService.getComplaint(user.getId(), complaint.getId());
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint, "authorId");

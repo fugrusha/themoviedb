@@ -29,14 +29,20 @@ public class MovieComplaintService {
         return translationService.toRead(complaint);
     }
 
-    // TODO add movie to complaint
     public List<ComplaintReadDTO> getMovieComplaints(UUID movieId) {
-        List<Complaint> complaints = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(movieId);
+        List<Complaint> complaints = complaintRepository.findByParentIdOrderByCreatedAtAsc(movieId);
         return complaints.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
-    public ComplaintReadDTO createMovieComplaint(UUID movieId, ComplaintCreateDTO createDTO, ApplicationUser author) {
-        return null; //TODO
+    public ComplaintReadDTO createMovieComplaint(
+            UUID movieId,
+            ComplaintCreateDTO createDTO,
+            ApplicationUser author
+    ) {
+        Complaint complaint = translationService.toEntity(createDTO, movieId, author);
+
+        complaint = complaintRepository.save(complaint);
+        return translationService.toRead(complaint);
     }
 
     public ComplaintReadDTO patchMovieComplaint(UUID movieId, UUID id, ComplaintPatchDTO patchDTO) {
@@ -52,8 +58,8 @@ public class MovieComplaintService {
     }
 
     private Complaint getComplaintByMovieId(UUID id, UUID movieId) {
-        if (complaintRepository.findByIdAndAuthorId(id, movieId) != null) {
-            return complaintRepository.findByIdAndAuthorId(id, movieId);
+        if (complaintRepository.findByIdAndParentId(id, movieId) != null) {
+            return complaintRepository.findByIdAndParentId(id, movieId);
         } else {
             throw new EntityNotFoundException(Complaint.class, id);
         }

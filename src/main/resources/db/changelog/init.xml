@@ -60,6 +60,9 @@
             <column name="complaint_status" type="varchar(30)">
                 <constraints nullable="false"/>
             </column>
+            <column name="parent_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
             <column name="author_id" type="uuid">
                 <constraints
                         foreignKeyName="fk_ai_application_user_id"

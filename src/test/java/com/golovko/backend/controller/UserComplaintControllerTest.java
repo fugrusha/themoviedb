@@ -45,7 +45,8 @@ public class UserComplaintControllerTest {
     @Test
     public void getComplaintByIdTest() throws Exception {
         UUID userId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId);
+        UUID parentId = UUID.randomUUID();
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId);
 
         Mockito.when(userComplaintService.getComplaint(userId, readDTO.getId())).thenReturn(readDTO);
 
@@ -66,10 +67,11 @@ public class UserComplaintControllerTest {
     public void getListOfUserComplaintsTest() throws Exception {
         UUID userId1 = UUID.randomUUID();
         UUID userId2 = UUID.randomUUID();
-        ComplaintReadDTO c1 = createComplaintReadDTO(userId1);
-        ComplaintReadDTO c2 = createComplaintReadDTO(userId1);
-        createComplaintReadDTO(userId2);
-        createComplaintReadDTO(userId2);
+        UUID parentId = UUID.randomUUID();
+        ComplaintReadDTO c1 = createComplaintReadDTO(userId1, parentId);
+        ComplaintReadDTO c2 = createComplaintReadDTO(userId1, parentId);
+        createComplaintReadDTO(userId2, parentId);
+        createComplaintReadDTO(userId2, parentId);
 
         List<ComplaintReadDTO> expectedResult = List.of(c1, c2);
 
@@ -83,6 +85,8 @@ public class UserComplaintControllerTest {
         List<ComplaintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assertions.assertThat(actualResult).extracting(ComplaintReadDTO::getId)
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+
+        Mockito.verify(userComplaintService).getUserComplaints(userId1);
     }
 
     @Test
@@ -105,7 +109,8 @@ public class UserComplaintControllerTest {
     @Test
     public void patchComplaintTest() throws Exception {
         UUID userId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId);
+        UUID parentId = UUID.randomUUID();
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
@@ -130,7 +135,8 @@ public class UserComplaintControllerTest {
     @Test
     public void updateComplaintTest() throws Exception {
         UUID userId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId);
+        UUID parentId = UUID.randomUUID();
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId);
 
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
@@ -163,7 +169,7 @@ public class UserComplaintControllerTest {
         Mockito.verify(userComplaintService).deleteComplaint(userId, id);
     }
 
-    private ComplaintReadDTO createComplaintReadDTO(UUID authorId) {
+    private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId) {
         ComplaintReadDTO readDTO = new ComplaintReadDTO();
         readDTO.setId(UUID.randomUUID());
         readDTO.setComplaintTitle("Report 1");
@@ -173,6 +179,7 @@ public class UserComplaintControllerTest {
         readDTO.setAuthorId(authorId);
         readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        readDTO.setParentId(parentId);
         return readDTO;
     }
 }

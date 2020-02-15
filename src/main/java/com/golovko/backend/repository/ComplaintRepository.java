@@ -13,4 +13,8 @@ public interface ComplaintRepository extends CrudRepository<Complaint, UUID> {
     List<Complaint> findByAuthorIdOrderByCreatedAtAsc(UUID authorId);
 
     Complaint findByIdAndAuthorId(UUID id, UUID authorId);
+
+    Complaint findByIdAndParentId(UUID id, UUID parentId);
+
+    List<Complaint> findByParentIdOrderByCreatedAtAsc(UUID parentId);
 }

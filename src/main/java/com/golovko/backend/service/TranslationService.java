@@ -148,15 +148,18 @@ public class TranslationService {
         dto.setAuthorId(complaint.getAuthor().getId());
         dto.setCreatedAt(complaint.getCreatedAt());
         dto.setUpdatedAt(complaint.getUpdatedAt());
+        dto.setParentId(complaint.getParentId());
         return dto;
     }
 
-    public Complaint toEntity(ComplaintCreateDTO createDTO, ApplicationUser author) {
+    public Complaint toEntity(ComplaintCreateDTO createDTO, UUID parentId, ApplicationUser author) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle(createDTO.getComplaintTitle());
         complaint.setComplaintText(createDTO.getComplaintText());
         complaint.setComplaintType(createDTO.getComplaintType());
+        complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(author);
+        complaint.setParentId(parentId);
         return complaint;
     }
 
