@@ -2,7 +2,6 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
-import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -83,7 +82,6 @@ public class UserComplaintServiceTest {
         patchDTO.setComplaintTitle("another title");
         patchDTO.setComplaintText("another text");
         patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
-        patchDTO.setComplaintStatus(ComplaintStatus.DUPLICATE);
 
         ComplaintReadDTO readDTO = userComplaintService.patchComplaint(user.getId(), complaint.getId(), patchDTO);
 
@@ -124,7 +122,6 @@ public class UserComplaintServiceTest {
         updateDTO.setComplaintText("new text");
         updateDTO.setComplaintTitle("new title");
         updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
-        updateDTO.setComplaintStatus(ComplaintStatus.DUPLICATE);
 
         ComplaintReadDTO readDTO = userComplaintService.updateComplaint(user.getId(), complaint.getId(), updateDTO);
 

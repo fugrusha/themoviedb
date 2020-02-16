@@ -117,7 +117,6 @@ public class UserComplaintControllerTest {
         patchDTO.setComplaintTitle("another title");
         patchDTO.setComplaintText("another text");
         patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
-        patchDTO.setComplaintStatus(ComplaintStatus.RENEWED);
 
         Mockito.when(userComplaintService.patchComplaint(userId, readDTO.getId(), patchDTO))
                 .thenReturn(readDTO);
@@ -143,7 +142,6 @@ public class UserComplaintControllerTest {
         updateDTO.setComplaintText("new text");
         updateDTO.setComplaintTitle("new title");
         updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
-        updateDTO.setComplaintStatus(ComplaintStatus.CLOSED);
 
         Mockito.when(userComplaintService.updateComplaint(userId, readDTO.getId(), updateDTO))
                 .thenReturn(readDTO);

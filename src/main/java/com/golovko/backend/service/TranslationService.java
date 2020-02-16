@@ -173,16 +173,12 @@ public class TranslationService {
         if (patchDTO.getComplaintType() != null) {
             complaint.setComplaintType(patchDTO.getComplaintType());
         }
-        if (patchDTO.getComplaintStatus() != null) {
-            complaint.setComplaintStatus(patchDTO.getComplaintStatus());
-        }
     }
 
     public void updateEntity(ComplaintPutDTO updateDTO, Complaint complaint) {
         complaint.setComplaintTitle(updateDTO.getComplaintTitle());
         complaint.setComplaintText(updateDTO.getComplaintText());
         complaint.setComplaintType(updateDTO.getComplaintType());
-        complaint.setComplaintStatus(updateDTO.getComplaintStatus());
     }
 
     /*

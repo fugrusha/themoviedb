@@ -5,6 +5,8 @@ import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
+import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
@@ -96,6 +98,88 @@ public class MovieComplaintServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void getMovieComplaintWrongIdTest() {
         movieComplaintService.getMovieComplaint(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    @Test
+    public void patchMovieComplaintTest() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Complaint complaint = testObjectFactory.createMovieComplaint(movie.getId(), user, ComplaintType.CHILD_ABUSE);
+
+        ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
+        patchDTO.setComplaintTitle("another title");
+        patchDTO.setComplaintText("another text");
+        patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+
+        ComplaintReadDTO readDTO = movieComplaintService
+                .patchMovieComplaint(movie.getId(), complaint.getId(), patchDTO);
+
+        Assertions.assertThat(patchDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+
+        complaint = complaintRepository.findByIdAndParentId(readDTO.getId(), readDTO.getParentId());
+        Assertions.assertThat(complaint).isEqualToIgnoringGivenFields(readDTO, "author");
+        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+    }
+
+    @Test
+    public void patchMovieComplaintEmptyPatchTest() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Complaint complaint = testObjectFactory.createMovieComplaint(movie.getId(), user, ComplaintType.CHILD_ABUSE);
+
+        ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
+
+        ComplaintReadDTO readDTO = movieComplaintService
+                .patchMovieComplaint(movie.getId(), complaint.getId(), patchDTO);
+
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
+
+        inTransaction(() -> {
+            Complaint complaintAfterUpdate = complaintRepository
+                    .findByIdAndParentId(readDTO.getId(), readDTO.getParentId());
+
+            Assertions.assertThat(complaintAfterUpdate).hasNoNullFieldsOrProperties();
+            Assertions.assertThat(complaintAfterUpdate).isEqualToIgnoringGivenFields(complaint,
+                    "author");
+            Assert.assertEquals(readDTO.getAuthorId(), complaintAfterUpdate.getAuthor().getId());
+        });
+    }
+
+    @Test
+    public void updateMovieComplaintTest() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Complaint complaint = testObjectFactory.createMovieComplaint(movie.getId(), user, ComplaintType.CHILD_ABUSE);
+
+        ComplaintPutDTO updateDTO = new ComplaintPutDTO();
+        updateDTO.setComplaintText("new text");
+        updateDTO.setComplaintTitle("new title");
+        updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+
+        ComplaintReadDTO readDTO = movieComplaintService
+                .updateMovieComplaint(movie.getId(), complaint.getId(), updateDTO);
+
+        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+
+        complaint = complaintRepository.findByIdAndParentId(readDTO.getId(), readDTO.getParentId());
+        Assertions.assertThat(complaint).isEqualToIgnoringGivenFields(readDTO, "author");
+        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+    }
+
+    @Test
+    public void deleteMovieComplaintTest() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Complaint complaint = testObjectFactory.createMovieComplaint(movie.getId(), user, ComplaintType.CHILD_ABUSE);
+
+        movieComplaintService.deleteMovieComplaint(movie.getId(), complaint.getId());
+
+        Assert.assertFalse(complaintRepository.existsById(complaint.getId()));
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void deleteMovieComplaintNotFound() {
+        movieComplaintService.deleteMovieComplaint(UUID.randomUUID(), UUID.randomUUID());
     }
 
     private void inTransaction (Runnable runnable) {

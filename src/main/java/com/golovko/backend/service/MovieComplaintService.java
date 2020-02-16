@@ -47,15 +47,25 @@ public class MovieComplaintService {
     }
 
     public ComplaintReadDTO patchMovieComplaint(UUID movieId, UUID id, ComplaintPatchDTO patchDTO) {
-        return null; //TODO
+        Complaint complaint = getComplaintByMovieId(id, movieId);
+
+        translationService.patchEntity(patchDTO, complaint);
+        complaint = complaintRepository.save(complaint);
+
+        return translationService.toRead(complaint);
     }
 
     public ComplaintReadDTO updateMovieComplaint(UUID movieId, UUID id, ComplaintPutDTO updateDTO) {
-        return null; //TODO
+        Complaint complaint = getComplaintByMovieId(id, movieId);
+
+        translationService.updateEntity(updateDTO, complaint);
+        complaint = complaintRepository.save(complaint);
+
+        return translationService.toRead(complaint);
     }
 
     public void deleteMovieComplaint(UUID movieId, UUID id) {
-        //TODO
+        complaintRepository.delete(getComplaintByMovieId(id, movieId));
     }
 
     private Complaint getComplaintByMovieId(UUID id, UUID movieId) {

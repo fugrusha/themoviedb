@@ -7,6 +7,8 @@ import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
+import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
+import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieComplaintService;
@@ -27,8 +29,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
@@ -128,6 +129,67 @@ public class MovieComplaintControllerTest {
 
         ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void patchMovieComplaintTest() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID movieId = UUID.randomUUID();
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId);
+
+        ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
+        patchDTO.setComplaintTitle("another title");
+        patchDTO.setComplaintText("another text");
+        patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+
+        Mockito.when(movieComplaintService.patchMovieComplaint(movieId, readDTO.getId(), patchDTO))
+                .thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{movieId}/complaints/{id}", movieId, readDTO.getId())
+                        .content(objectMapper.writeValueAsString(patchDTO))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
+        Assert.assertEquals(readDTO, actualComplaint);
+    }
+
+    @Test
+    public void updateMovieComplaintTest() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID movieId = UUID.randomUUID();
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId);
+
+        ComplaintPutDTO updateDTO = new ComplaintPutDTO();
+        updateDTO.setComplaintText("new text");
+        updateDTO.setComplaintTitle("new title");
+        updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+
+        Mockito.when(movieComplaintService.updateMovieComplaint(movieId, readDTO.getId(), updateDTO))
+                .thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{movieId}/complaints/{id}", movieId, readDTO.getId())
+                .content(objectMapper.writeValueAsString(updateDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
+        Assert.assertEquals(readDTO, actualComplaint);
+    }
+
+    @Test
+    public void deleteMovieComplaintTest() throws Exception {
+        UUID id = UUID.randomUUID();
+        UUID movieId = UUID.randomUUID();
+
+        mockMvc.perform(delete("/api/v1/movies/{movieId}/complaints/{id}", movieId, id))
+                .andExpect(status().isOk());
+
+        Mockito.verify(movieComplaintService).deleteMovieComplaint(movieId, id);
     }
 
     private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId) {
