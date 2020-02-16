@@ -6,6 +6,7 @@ import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
+import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
@@ -20,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -89,6 +91,11 @@ public class MovieComplaintServiceTest {
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint, "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void getMovieComplaintWrongIdTest() {
+        movieComplaintService.getMovieComplaint(UUID.randomUUID(), UUID.randomUUID());
     }
 
     private void inTransaction (Runnable runnable) {

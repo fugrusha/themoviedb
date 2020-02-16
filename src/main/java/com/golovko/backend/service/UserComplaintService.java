@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -58,7 +59,7 @@ public class UserComplaintService {
         if (complaintRepository.findByIdAndAuthorId(id, userId) != null) {
             return complaintRepository.findByIdAndAuthorId(id, userId);
         } else {
-            throw new EntityNotFoundException(Complaint.class, id);
+            throw new EntityNotFoundException(Complaint.class, id, ApplicationUser.class, userId);
         }
     }
 }

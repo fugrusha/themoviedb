@@ -176,4 +176,9 @@ public class MovieCastServiceTest {
         Assert.assertEquals(movieCast.getMovie().getId(), readDTO.getMovieId());
         Assert.assertEquals(movieCast.getPerson().getId(), readDTO.getPersonId());
     }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void getMovieCastWrongIdTest() {
+        movieCastService.getMovieCast(UUID.randomUUID(), UUID.randomUUID());
+    }
 }

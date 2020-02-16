@@ -2,6 +2,7 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.Movie;
@@ -92,16 +93,16 @@ public class MovieComplaintControllerTest {
         UUID wrongId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
+        EntityNotFoundException ex = new EntityNotFoundException(Complaint.class, wrongId, Movie.class, movieId);
 
-        Mockito.when(movieComplaintService.getMovieComplaint(movieId, wrongId)).thenThrow(exception);
+        Mockito.when(movieComplaintService.getMovieComplaint(movieId, wrongId)).thenThrow(ex);
 
         String result = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/complaints/{id}", movieId, wrongId))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Assert.assertTrue(result.contains(exception.getMessage()));
+        Assert.assertTrue(result.contains(ex.getMessage()));
     }
 
     @Ignore // TODO add user authentication

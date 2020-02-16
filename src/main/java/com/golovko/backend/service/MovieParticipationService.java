@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -67,7 +68,7 @@ public class MovieParticipationService {
         if (movieParticipationRepository.findByIdAndMovieId(id, movieId) != null) {
             return movieParticipationRepository.findByIdAndMovieId(id, movieId);
         } else {
-            throw new EntityNotFoundException(MovieParticipation.class, id);
+            throw new EntityNotFoundException(MovieParticipation.class, id, Movie.class, movieId);
         }
     }
 }

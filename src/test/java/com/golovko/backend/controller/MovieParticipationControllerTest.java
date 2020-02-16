@@ -3,6 +3,7 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
+import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.domain.PartType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
@@ -109,15 +110,16 @@ public class MovieParticipationControllerTest {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        EntityNotFoundException exception = new EntityNotFoundException(MovieParticipation.class, id);
-        Mockito.when(movieParticipationService.getMovieParticipation(movieId, id)).thenThrow(exception);
+        EntityNotFoundException ex = new EntityNotFoundException(MovieParticipation.class, id, Movie.class, movieId);
+
+        Mockito.when(movieParticipationService.getMovieParticipation(movieId, id)).thenThrow(ex);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/{movieId}/movie-participations/{id}", movieId, id))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Assert.assertTrue(resultJson.contains(exception.getMessage()));
+        Assert.assertTrue(resultJson.contains(ex.getMessage()));
     }
 
     @Test

@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCast;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -68,7 +69,7 @@ public class MovieCastService {
         if (movieCastRepository.findByIdAndMovieId(id, movieId) != null) {
             return movieCastRepository.findByIdAndMovieId(id, movieId);
         } else {
-            throw new EntityNotFoundException(MovieCast.class, id);
+            throw new EntityNotFoundException(MovieCast.class, id, Movie.class, movieId);
         }
     }
 }

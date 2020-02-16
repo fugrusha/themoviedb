@@ -183,4 +183,9 @@ public class MovieParticipationServiceTest {
     public void deleteMovieParticipationNotFound() {
         movieParticipationService.deleteMovieParticipation(UUID.randomUUID(), UUID.randomUUID());
     }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void getMovieParticipationWrongIdTest() {
+        movieParticipationService.getMovieParticipation(UUID.randomUUID(), UUID.randomUUID());
+    }
 }
