@@ -32,6 +32,9 @@ public class TestObjectFactory {
     @Autowired
     private ArticleRepository articleRepository;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
     public Movie createMovie() {
         Movie movie = new Movie();
         movie.setMovieTitle("Title of the Movie");
@@ -39,8 +42,7 @@ public class TestObjectFactory {
         movie.setIsReleased(false);
         movie.setReleaseDate(LocalDate.parse("1990-05-14"));
         movie.setAverageRating(5.0);
-        movie = movieRepository.save(movie);
-        return movie;
+        return movieRepository.save(movie);
     }
 
     public Person createPerson() {
@@ -48,17 +50,15 @@ public class TestObjectFactory {
         person.setFirstName("Anna");
         person.setLastName("Popova");
         person.setGender(Gender.FEMALE);
-        person = personRepository.save(person);
-        return person;
+        return personRepository.save(person);
     }
 
     public ApplicationUser createUser() {
-        ApplicationUser applicationUser = new ApplicationUser();
-        applicationUser.setUsername("Vitalka");
-        applicationUser.setPassword("123456");
-        applicationUser.setEmail("vetal@gmail.com");
-        applicationUser = applicationUserRepository.save(applicationUser);
-        return applicationUser;
+        ApplicationUser user = new ApplicationUser();
+        user.setUsername("Vitalka");
+        user.setPassword("123456");
+        user.setEmail("vetal@gmail.com");
+        return applicationUserRepository.save(user);
     }
 
     public Complaint createComplaint(ApplicationUser user, ComplaintType complaintType) {
@@ -69,8 +69,7 @@ public class TestObjectFactory {
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(user);
         complaint.setParentId(UUID.randomUUID());
-        complaint = complaintRepository.save(complaint);
-        return complaint;
+        return complaintRepository.save(complaint);
     }
 
     public Complaint createMovieComplaint(UUID movieId, ApplicationUser user, ComplaintType complaintType) {
@@ -81,8 +80,7 @@ public class TestObjectFactory {
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(user);
         complaint.setParentId(movieId);
-        complaint = complaintRepository.save(complaint);
-        return complaint;
+        return complaintRepository.save(complaint);
     }
 
     public MovieCast createMovieCast(Person person, Movie movie) {
@@ -93,9 +91,7 @@ public class TestObjectFactory {
         movieCast.setMovie(movie);
         movieCast.setPartType(PartType.CAST);
         movieCast.setCharacter("Leon");
-
-        movieCast = movieCastRepository.save(movieCast);
-        return movieCast;
+        return movieCastRepository.save(movieCast);
     }
 
     public MovieParticipation createMovieParticipation(Person person, Movie movie) {
@@ -105,9 +101,7 @@ public class TestObjectFactory {
         movieParticipation.setPerson(person);
         movieParticipation.setMovie(movie);
         movieParticipation.setPartType(PartType.WRITER);
-
-        movieParticipation = movieParticipationRepository.save(movieParticipation);
-        return movieParticipation;
+        return movieParticipationRepository.save(movieParticipation);
     }
 
     public MovieParticipation createMovieParticipationForFilter(Person person, Movie movie, PartType partType) {
@@ -117,9 +111,7 @@ public class TestObjectFactory {
         movieParticipation.setPerson(person);
         movieParticipation.setMovie(movie);
         movieParticipation.setPartType(partType);
-
-        movieParticipation = movieParticipationRepository.save(movieParticipation);
-        return movieParticipation;
+        return movieParticipationRepository.save(movieParticipation);
     }
 
     public Article createArticle(ApplicationUser author, ArticleStatus status) {
@@ -131,5 +123,16 @@ public class TestObjectFactory {
         article.setLikesCount(111);
         article.setAuthor(author);
         return articleRepository.save(article);
+    }
+
+    public Comment createComment(ApplicationUser author, UUID parentId, CommentStatus status) {
+        Comment comment = new Comment();
+        comment.setMessage("text");
+        comment.setStatus(status);
+        comment.setLikesCount(45);
+        comment.setDislikesCount(78);
+        comment.setAuthor(author);
+        comment.setParentId(parentId);
+        return commentRepository.save(comment);
     }
 }

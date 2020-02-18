@@ -15,6 +15,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test")
 @TestPropertySource(properties = "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml")
 @Sql(statements = {
+        "delete from comment",
         "delete from complaint",
         "delete from article",
         "delete from application_user",
@@ -47,6 +48,9 @@ public class LiquibaseLoadDataTest {
     @Autowired
     private PersonRepository personRepository;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
     @Test
     public void loadDataTest() {
         Assert.assertTrue(applicationUserRepository.count() > 0);
@@ -56,5 +60,6 @@ public class LiquibaseLoadDataTest {
         Assert.assertTrue(movieParticipationRepository.count() > 0);
         Assert.assertTrue(movieRepository.count() > 0);
         Assert.assertTrue(personRepository.count() > 0);
+        Assert.assertTrue(commentRepository.count() > 0);
     }
 }

@@ -35,7 +35,7 @@ public class MovieCastRepositoryTest {
     private MovieCastRepository movieCastRepository;
 
     @Test
-    public void getMoviesWithActor() {
+    public void getMovieCastsWithActor() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovie(LocalDate.of(1992, 5, 4)); // releasedFrom

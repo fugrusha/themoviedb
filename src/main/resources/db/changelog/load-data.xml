@@ -91,4 +91,18 @@
         </loadUpdateData>
     </changeSet>
 
+    <changeSet id="load comments" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="comment" file="db/data/comments.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="message" type="string"/>
+            <column name="status" type="string" />
+            <column name="likes_count" type="numeric" />
+            <column name="dislikes_count" type="numeric" />
+            <column name="author_id" type="uuid"/>
+            <column name="parent_id" type="uuid"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </loadUpdateData>
+    </changeSet>
+
 </databaseChangeLog>

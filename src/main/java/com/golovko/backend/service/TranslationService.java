@@ -2,6 +2,10 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.article.*;
+import com.golovko.backend.dto.comment.CommentCreateDTO;
+import com.golovko.backend.dto.comment.CommentPatchDTO;
+import com.golovko.backend.dto.comment.CommentPutDTO;
+import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -397,6 +401,39 @@ public class TranslationService {
         }
         if (patchDTO.getStatus() != null) {
             article.setStatus(patchDTO.getStatus());
+        }
+    }
+
+    /*
+         Comment translations
+     */
+    public CommentReadDTO toRead(Comment comment) {
+        CommentReadDTO dto = new CommentReadDTO();
+        dto.setId(comment.getId());
+        dto.setMessage(comment.getMessage());
+        dto.setDislikesCount(comment.getDislikesCount());
+        dto.setLikesCount(comment.getLikesCount());
+        dto.setStatus(comment.getStatus());
+        dto.setAuthorId(comment.getAuthor().getId());
+        dto.setCreatedAt(comment.getCreatedAt());
+        dto.setUpdatedAt(comment.getUpdatedAt());
+        dto.setParentId(comment.getParentId());
+        return dto;
+    }
+
+    public Comment toEntity(CommentCreateDTO createDTO) {
+        Comment comment = new Comment();
+        comment.setMessage(createDTO.getMessage());
+        return comment;
+    }
+
+    public void updateEntity(CommentPutDTO putDTO, Comment comment) {
+        comment.setMessage(putDTO.getMessage());
+    }
+
+    public void patchEntity(CommentPatchDTO patchDTO, Comment comment) {
+        if (patchDTO.getMessage() != null) {
+            comment.setMessage(patchDTO.getMessage());
         }
     }
 

@@ -167,4 +167,29 @@
         </createTable>
     </changeSet>
 
+    <changeSet id="create_comment_table" author="andrew">
+        <createTable tableName="comment">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="message" type="varchar(500)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+            <column name="parent_id" type="uuid"/>
+            <column name="likes_count" type="int4"/>
+            <column name="dislikes_count" type="int4"/>
+            <column name="status" type="varchar(30)"/>
+            <column name="author_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_comment_application_user_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="false"
+                />
+            </column>
+        </createTable>
+    </changeSet>
+
 </databaseChangeLog>
