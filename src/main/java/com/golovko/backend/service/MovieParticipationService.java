@@ -5,6 +5,7 @@ import com.golovko.backend.domain.MovieParticipation;
 import com.golovko.backend.dto.movieparticipation.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieParticipationRepository;
+import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,9 @@ public class MovieParticipationService {
     @Autowired
     private TranslationService translationService;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     public List<MoviePartReadDTO> getListOfMovieParticipation(UUID movieId) {
         List<MovieParticipation> listOfMoviePart = movieParticipationRepository.findByMovieId(movieId);
         return translationService.toReadListOfMoviePart(listOfMoviePart);
@@ -35,8 +39,9 @@ public class MovieParticipationService {
         return translationService.toReadExtended(getMovieParticipationByMovieIdRequired(id, movieId));
     }
 
-    public MoviePartReadDTO createMovieParticipation(MoviePartCreateDTO createDTO, UUID movieId, UUID personId) {
-        MovieParticipation movieParticipation = translationService.toEntity(createDTO, movieId, personId);
+    public MoviePartReadDTO createMovieParticipation(MoviePartCreateDTO createDTO, UUID movieId) {
+        MovieParticipation movieParticipation = translationService.toEntity(createDTO);
+        movieParticipation.setMovie(repoHelper.getReferenceIfExist(Movie.class, movieId));
 
         movieParticipation = movieParticipationRepository.save(movieParticipation);
         return translationService.toRead(movieParticipation);

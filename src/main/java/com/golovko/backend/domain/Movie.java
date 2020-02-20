@@ -40,7 +40,7 @@ public class Movie {
     @LastModifiedDate
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.PERSIST, orphanRemoval = true)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MovieParticipation> movieParticipations = new HashSet<>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -49,7 +49,4 @@ public class Movie {
 //    TODO genres for movies
 //    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
 //    private Set<Genre> genres = new HashSet<>();
-//    TODO relatedArticles for movies
-//    @OneToMany(mappedBy = "")
-//    private List<Article> relatedArticles = new ArrayList<>();
 }

@@ -81,15 +81,16 @@ public class MovieParticipationServiceTest {
 
     @Test
     public void createMovieParticipationTest() {
-        MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
-        createDTO.setPartInfo("some text");
-        createDTO.setPartType(PartType.COSTUME_DESIGNER);
-
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
 
+        MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
+        createDTO.setPersonId(person.getId());
+        createDTO.setPartInfo("some text");
+        createDTO.setPartType(PartType.COSTUME_DESIGNER);
+
         MoviePartReadDTO readDTO =
-                movieParticipationService.createMovieParticipation(createDTO, movie.getId(), person.getId());
+                movieParticipationService.createMovieParticipation(createDTO, movie.getId());
 
         Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
         Assert.assertNotNull(readDTO.getId());
@@ -100,6 +101,18 @@ public class MovieParticipationServiceTest {
                 "movieId", "personId");
         Assert.assertEquals(readDTO.getMovieId(), movieParticipation.getMovie().getId());
         Assert.assertEquals(readDTO.getPersonId(), movieParticipation.getPerson().getId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void createMovieParticipationWrongPersonTest() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
+        createDTO.setPersonId(UUID.randomUUID());
+        createDTO.setPartInfo("some text");
+        createDTO.setPartType(PartType.COSTUME_DESIGNER);
+
+        movieParticipationService.createMovieParticipation(createDTO, movie.getId());
     }
 
     @Test

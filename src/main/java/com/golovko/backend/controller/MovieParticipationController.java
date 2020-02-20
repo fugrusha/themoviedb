@@ -33,10 +33,9 @@ public class MovieParticipationController {
     @PostMapping
     public MoviePartReadDTO createMovieParticipation(
             @RequestBody MoviePartCreateDTO createDTO,
-            @PathVariable("movieId") UUID movieId,
-            @RequestParam("personId") UUID personId
+            @PathVariable UUID movieId
     ){
-        return movieParticipationService.createMovieParticipation(createDTO, movieId, personId);
+        return movieParticipationService.createMovieParticipation(createDTO, movieId);
     }
 
     @PatchMapping("/{id}")

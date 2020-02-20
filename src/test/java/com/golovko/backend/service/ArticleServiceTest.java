@@ -16,8 +16,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -38,9 +36,6 @@ public class ArticleServiceTest {
     @Autowired
     private TestObjectFactory testObjectFactory;
 
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
     @Test
     public void getArticleTest() {
         ApplicationUser user = testObjectFactory.createUser();
@@ -52,7 +47,6 @@ public class ArticleServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), article.getAuthor().getId());
     }
 
-    @Transactional // FIXME remove this annotation
     @Test
     public void getArticleExtendedTest() {
         ApplicationUser user = testObjectFactory.createUser();
@@ -153,12 +147,10 @@ public class ArticleServiceTest {
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        inTransaction(() -> {
-            Article articleAfterUpdate = articleRepository.findById(readDTO.getId()).get();
-            Assertions.assertThat(articleAfterUpdate).hasNoNullFieldsOrProperties();
-            Assertions.assertThat(articleAfterUpdate).isEqualToIgnoringGivenFields(article, "author");
-            Assert.assertEquals(articleAfterUpdate.getAuthor().getId(), readDTO.getAuthorId());
-        });
+        Article articleAfterUpdate = articleRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(articleAfterUpdate).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(articleAfterUpdate).isEqualToIgnoringGivenFields(article, "author");
+        Assert.assertEquals(articleAfterUpdate.getAuthor().getId(), readDTO.getAuthorId());
     }
 
     @Test
@@ -171,13 +163,7 @@ public class ArticleServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteComplaintNotFound() {
+    public void deleteArticleNotFound() {
         articleService.deleteArticle(UUID.randomUUID());
-    }
-
-    private void inTransaction(Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
     }
 }

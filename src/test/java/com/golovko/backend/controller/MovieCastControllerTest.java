@@ -137,16 +137,16 @@ public class MovieCastControllerTest {
         MovieCastReadDTO readDTO = createMovieCastReadDTO(movieId, personId);
 
         MovieCastCreateDTO createDTO = new MovieCastCreateDTO();
+        createDTO.setPersonId(personId);
         createDTO.setPartInfo("Some text");
         createDTO.setCharacter("Vally");
 
-        Mockito.when(movieCastService.createMovieCast(createDTO, personId, movieId)).thenReturn(readDTO);
+        Mockito.when(movieCastService.createMovieCast(createDTO, movieId)).thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/{movieId}/movie-cast", movieId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createDTO))
-                .param("personId", personId.toString()))
+                .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 

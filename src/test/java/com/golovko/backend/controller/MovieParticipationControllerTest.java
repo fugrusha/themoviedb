@@ -125,22 +125,21 @@ public class MovieParticipationControllerTest {
     @Test
     public void createMovieParticipationTest() throws Exception {
         MoviePartReadDTO readDTO = createMoviePartReadDTO();
-        UUID personId = readDTO.getPersonId();
         UUID movieId = readDTO.getMovieId();
 
         MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
+        createDTO.setPersonId(readDTO.getPersonId());
         createDTO.setPartInfo("some text");
         createDTO.setPartType(PartType.COSTUME_DESIGNER);
 
         Mockito
-                .when(movieParticipationService.createMovieParticipation(createDTO, movieId, personId))
+                .when(movieParticipationService.createMovieParticipation(createDTO, movieId))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/{movieId}/movie-participations", movieId)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createDTO))
-                .param("personId", personId.toString()))
+                .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 

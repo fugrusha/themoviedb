@@ -21,14 +21,12 @@ import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.dto.user.*;
-import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieRepository;
-import com.golovko.backend.repository.PersonRepository;
+import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -38,7 +36,7 @@ public class TranslationService {
     private MovieRepository movieRepository;
 
     @Autowired
-    private PersonRepository personRepository;
+    private RepositoryHelper repoHelper;
 
     /*
         ApplicationUser translations
@@ -59,7 +57,6 @@ public class TranslationService {
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
-        dto.setComplaints(user.getComplaints().stream().map(this::toRead).collect(Collectors.toList()));
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
@@ -156,14 +153,11 @@ public class TranslationService {
         return dto;
     }
 
-    public Complaint toEntity(ComplaintCreateDTO createDTO, UUID parentId, ApplicationUser author) {
+    public Complaint toEntity(ComplaintCreateDTO createDTO) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle(createDTO.getComplaintTitle());
         complaint.setComplaintText(createDTO.getComplaintText());
         complaint.setComplaintType(createDTO.getComplaintType());
-        complaint.setComplaintStatus(ComplaintStatus.INITIATED);
-        complaint.setAuthor(author);
-        complaint.setParentId(parentId);
         return complaint;
     }
 
@@ -254,19 +248,18 @@ public class TranslationService {
         return dto;
     }
 
-    public MovieParticipation toEntity(MoviePartCreateDTO createDTO, UUID movieId, UUID personId) {
+    public MovieParticipation toEntity(MoviePartCreateDTO createDTO) {
         MovieParticipation movieParticipation = new MovieParticipation();
         movieParticipation.setPartInfo(createDTO.getPartInfo());
         movieParticipation.setPartType(createDTO.getPartType());
-        movieParticipation.setPerson(getPersonRequired(personId));
-        movieParticipation.setMovie(getMovieRequired(movieId));
+        movieParticipation.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
         return movieParticipation;
     }
 
     public void updateEntity(MoviePartPutDTO updateDTO, MovieParticipation movieParticipation) {
         movieParticipation.setPartType(updateDTO.getPartType());
         movieParticipation.setPartInfo(updateDTO.getPartInfo());
-        movieParticipation.setPerson(getPersonRequired(updateDTO.getPersonId()));
+        movieParticipation.setPerson(repoHelper.getReferenceIfExist(Person.class, updateDTO.getPersonId()));
     }
 
     public void patchEntity(MoviePartPatchDTO patchDTO, MovieParticipation movieParticipation) {
@@ -277,7 +270,7 @@ public class TranslationService {
             movieParticipation.setPartInfo(patchDTO.getPartInfo());
         }
         if (patchDTO.getPersonId() != null) {
-            movieParticipation.setPerson(getPersonRequired(patchDTO.getPersonId()));
+            movieParticipation.setPerson(repoHelper.getReferenceIfExist(Person.class, patchDTO.getPersonId()));
         }
     }
 
@@ -302,12 +295,11 @@ public class TranslationService {
         return dto;
     }
 
-    public MovieCast toEntity(MovieCastCreateDTO createDTO, UUID personId, UUID movieId) {
+    public MovieCast toEntity(MovieCastCreateDTO createDTO) {
         MovieCast movieCast = new MovieCast();
         movieCast.setPartInfo(createDTO.getPartInfo());
         movieCast.setCharacter(createDTO.getCharacter());
-        movieCast.setMovie(getMovieRequired(movieId));
-        movieCast.setPerson(getPersonRequired(personId));
+        movieCast.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
         return movieCast;
     }
 
@@ -327,7 +319,7 @@ public class TranslationService {
     public void updateEntity(MovieCastPutDTO updateDTO, MovieCast movieCast) {
         movieCast.setCharacter(updateDTO.getCharacter());
         movieCast.setPartInfo(updateDTO.getPartInfo());
-        movieCast.setPerson(getPersonRequired(updateDTO.getPersonId()));
+        movieCast.setPerson(repoHelper.getReferenceIfExist(Person.class, updateDTO.getPersonId()));
     }
 
     public void patchEntity(MovieCastPatchDTO patchDTO, MovieCast movieCast) {
@@ -338,7 +330,7 @@ public class TranslationService {
             movieCast.setPartInfo(patchDTO.getPartInfo());
         }
         if (patchDTO.getPersonId() != null) {
-            movieCast.setPerson(getPersonRequired(patchDTO.getPersonId()));
+            movieCast.setPerson(repoHelper.getReferenceIfExist(Person.class, patchDTO.getPersonId()));
         }
     }
 
@@ -377,12 +369,11 @@ public class TranslationService {
         return dto;
     }
 
-    public Article toEntity(ArticleCreateDTO createDTO, ApplicationUser author) {
+    public Article toEntity(ArticleCreateDTO createDTO) {
         Article article = new Article();
         article.setTitle(createDTO.getTitle());
         article.setText(createDTO.getText());
         article.setStatus(createDTO.getStatus());
-        article.setAuthor(author);
         return article;
     }
 
@@ -435,17 +426,5 @@ public class TranslationService {
         if (patchDTO.getMessage() != null) {
             comment.setMessage(patchDTO.getMessage());
         }
-    }
-
-    private Movie getMovieRequired(UUID id) {
-        return movieRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(Movie.class, id)
-        );
-    }
-
-    private Person getPersonRequired(UUID id) {
-        return personRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(Person.class, id)
-        );
     }
 }

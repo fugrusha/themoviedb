@@ -1,9 +1,10 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Complaint;
-import com.golovko.backend.domain.ComplaintType;
-import com.golovko.backend.dto.user.*;
+import com.golovko.backend.dto.user.UserCreateDTO;
+import com.golovko.backend.dto.user.UserPatchDTO;
+import com.golovko.backend.dto.user.UserPutDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -16,10 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -37,25 +35,6 @@ public class ApplicationUserServiceTest {
 
     @Autowired
     private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
-    @Transactional //FIXME remove this annotation
-    @Test
-    public void testGetUserExtendedTest() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.MISPRINT);
-        user.setComplaints(List.of(complaint));
-
-        UserReadExtendedDTO readExtendedDTO = applicationUserService.getExtendedUser(user.getId());
-
-        Assertions.assertThat(readExtendedDTO).isEqualToIgnoringGivenFields(user, "complaints");
-
-        Assert.assertEquals(readExtendedDTO.getComplaints().get(0).getAuthorId(), complaint.getAuthor().getId());
-        Assertions.assertThat(readExtendedDTO.getComplaints().get(0)).isEqualToIgnoringGivenFields(complaint,
-                "authorId");
-    }
 
     @Test
     public void testGetUser() {
@@ -114,13 +93,11 @@ public class ApplicationUserServiceTest {
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        inTransaction(() -> {
-            ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
+        ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
 
-            Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
-            Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
-                    "complaints", "articles");
-        });
+        Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
+                "complaints", "articles");
     }
 
     @Test
@@ -152,11 +129,5 @@ public class ApplicationUserServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteUserNotFound() {
         applicationUserService.deleteUser(UUID.randomUUID());
-    }
-
-    private void inTransaction(Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
     }
 }
