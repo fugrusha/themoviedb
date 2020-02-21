@@ -23,8 +23,7 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from complaint", "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {"delete from application_user"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ApplicationUserServiceTest {
 
     @Autowired
@@ -59,7 +58,7 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.createUser(create);
 
-        Assertions.assertThat(create).isEqualToComparingFieldByField(readDTO);
+        Assertions.assertThat(create).isEqualToIgnoringGivenFields(readDTO, "password");
         Assert.assertNotNull(readDTO.getId());
 
         ApplicationUser applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
@@ -77,11 +76,11 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patch);
 
-        Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
+        Assertions.assertThat(patch).isEqualToIgnoringGivenFields(readDTO, "password");
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO,
-                "complaints", "articles");
+                "password", "articles");
     }
 
     @Test
@@ -97,7 +96,7 @@ public class ApplicationUserServiceTest {
 
         Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
-                "complaints", "articles");
+                "password", "articles");
     }
 
     @Test
@@ -111,11 +110,11 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.updateUser(user.getId(), updateDTO);
 
-        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
+        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO, "password");
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(user)
-                .isEqualToIgnoringGivenFields(readDTO, "complaints", "articles");
+        Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
+                "password", "articles");
     }
 
     @Test

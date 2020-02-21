@@ -58,28 +58,37 @@ public class TestObjectFactory {
         user.setUsername("Vitalka");
         user.setPassword("123456");
         user.setEmail("vetal@gmail.com");
+        user.setIsBlocked(false);
         return applicationUserRepository.save(user);
     }
 
-    public Complaint createComplaint(ApplicationUser user, ComplaintType complaintType) {
+    public Complaint createComplaint(ApplicationUser user, ComplaintType complaintType, ParentType parentType) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle("Some title");
         complaint.setComplaintText("Some report text");
         complaint.setComplaintType(complaintType);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(user);
+        complaint.setParentType(parentType);
         complaint.setParentId(UUID.randomUUID());
         return complaintRepository.save(complaint);
     }
 
-    public Complaint createMovieComplaint(UUID movieId, ApplicationUser user, ComplaintType complaintType) {
+    public Complaint createMovieComplaint(
+            UUID movieId,
+            ApplicationUser user,
+            ComplaintType complaintType,
+            ApplicationUser moderator
+    ) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle("Some title");
         complaint.setComplaintText("Some report text");
         complaint.setComplaintType(complaintType);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(user);
+        complaint.setModerator(moderator);
         complaint.setParentId(movieId);
+        complaint.setParentType(ParentType.MOVIE);
         return complaintRepository.save(complaint);
     }
 
@@ -125,13 +134,18 @@ public class TestObjectFactory {
         return articleRepository.save(article);
     }
 
-    public Comment createComment(ApplicationUser author, UUID parentId, CommentStatus status) {
+    public Comment createComment(
+            ApplicationUser author,
+            UUID parentId,
+            CommentStatus status,
+            ParentType parentType) {
         Comment comment = new Comment();
         comment.setMessage("text");
         comment.setStatus(status);
         comment.setLikesCount(45);
         comment.setDislikesCount(78);
         comment.setAuthor(author);
+        comment.setParentType(parentType);
         comment.setParentId(parentId);
         return commentRepository.save(comment);
     }

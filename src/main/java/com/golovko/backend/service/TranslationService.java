@@ -21,7 +21,6 @@ import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.dto.user.*;
-import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,9 +32,6 @@ import java.util.stream.Collectors;
 public class TranslationService {
 
     @Autowired
-    private MovieRepository movieRepository;
-
-    @Autowired
     private RepositoryHelper repoHelper;
 
     /*
@@ -45,8 +41,8 @@ public class TranslationService {
         UserReadDTO dto = new UserReadDTO();
         dto.setId(user.getId());
         dto.setUsername(user.getUsername());
-        dto.setPassword(user.getPassword());
         dto.setEmail(user.getEmail());
+        dto.setIsBlocked(user.getIsBlocked());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
@@ -149,7 +145,11 @@ public class TranslationService {
         dto.setAuthorId(complaint.getAuthor().getId());
         dto.setCreatedAt(complaint.getCreatedAt());
         dto.setUpdatedAt(complaint.getUpdatedAt());
+        dto.setParentType(complaint.getParentType());
         dto.setParentId(complaint.getParentId());
+        if (complaint.getModerator() != null) {
+            dto.setModeratorId(complaint.getModerator().getId());
+        }
         return dto;
     }
 
@@ -408,6 +408,7 @@ public class TranslationService {
         dto.setAuthorId(comment.getAuthor().getId());
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setUpdatedAt(comment.getUpdatedAt());
+        dto.setParentType(comment.getParentType());
         dto.setParentId(comment.getParentId());
         return dto;
     }

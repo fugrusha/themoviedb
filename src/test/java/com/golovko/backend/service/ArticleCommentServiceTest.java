@@ -1,6 +1,9 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.*;
+import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.Article;
+import com.golovko.backend.domain.ArticleStatus;
+import com.golovko.backend.domain.Comment;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
@@ -20,6 +23,9 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.golovko.backend.domain.CommentStatus.*;
+import static com.golovko.backend.domain.ParentType.ARTICLE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -41,7 +47,7 @@ public class ArticleCommentServiceTest {
     public void getArticleCommentTest() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
-        Comment comment = testObjectFactory.createComment(user, article.getId(), CommentStatus.APPROVED);
+        Comment comment = testObjectFactory.createComment(user, article.getId(), APPROVED, ARTICLE);
 
         CommentReadDTO readDTO = articleCommentService.getComment(article.getId(), comment.getId());
 
@@ -59,9 +65,9 @@ public class ArticleCommentServiceTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
-        Comment c1 = testObjectFactory.createComment(user1, article1.getId(), CommentStatus.APPROVED);
-        Comment c2 = testObjectFactory.createComment(user2, article1.getId(), CommentStatus.BLOCKED);
-        Comment c3 = testObjectFactory.createComment(user2, article1.getId(), CommentStatus.PENDING);
+        Comment c1 = testObjectFactory.createComment(user1, article1.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, article1.getId(), BLOCKED, ARTICLE);
+        Comment c3 = testObjectFactory.createComment(user2, article1.getId(), PENDING, ARTICLE);
 
         List<CommentReadDTO> comments = articleCommentService.getAllComments(article1.getId());
 
@@ -74,11 +80,11 @@ public class ArticleCommentServiceTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
-        Comment comment1 = testObjectFactory.createComment(user2, article1.getId(), CommentStatus.APPROVED);
-        Comment comment2 = testObjectFactory.createComment(user2, article1.getId(), CommentStatus.APPROVED);
-        testObjectFactory.createComment(user2, article1.getId(), CommentStatus.NEED_MODERATION);
-        testObjectFactory.createComment(user1, article1.getId(), CommentStatus.PENDING);
-        testObjectFactory.createComment(user1, article1.getId(), CommentStatus.BLOCKED);
+        Comment comment1 = testObjectFactory.createComment(user2, article1.getId(), APPROVED, ARTICLE);
+        Comment comment2 = testObjectFactory.createComment(user2, article1.getId(), APPROVED, ARTICLE);
+        testObjectFactory.createComment(user2, article1.getId(), NEED_MODERATION, ARTICLE);
+        testObjectFactory.createComment(user1, article1.getId(), PENDING, ARTICLE);
+        testObjectFactory.createComment(user1, article1.getId(), BLOCKED, ARTICLE);
 
         List<CommentReadDTO> comments = articleCommentService.getAllPublishedComments(article1.getId());
 
@@ -110,7 +116,7 @@ public class ArticleCommentServiceTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
-        Comment c = testObjectFactory.createComment(user2, article.getId(), CommentStatus.APPROVED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("New message");
@@ -129,7 +135,7 @@ public class ArticleCommentServiceTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
-        Comment c = testObjectFactory.createComment(user2, article.getId(), CommentStatus.APPROVED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
 
@@ -148,7 +154,7 @@ public class ArticleCommentServiceTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
-        Comment c = testObjectFactory.createComment(user2, article.getId(), CommentStatus.APPROVED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
 
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("message text");
@@ -167,7 +173,7 @@ public class ArticleCommentServiceTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
-        Comment c = testObjectFactory.createComment(user2, article.getId(), CommentStatus.APPROVED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
 
         articleCommentService.deleteComment(article.getId(), c.getId());
 

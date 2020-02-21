@@ -2,10 +2,7 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golovko.backend.domain.Complaint;
-import com.golovko.backend.domain.ComplaintStatus;
-import com.golovko.backend.domain.ComplaintType;
-import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -48,8 +45,9 @@ public class MovieComplaintControllerTest {
     @Test
     public void getMovieComplaintByIdTest() throws Exception {
         UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId, moderatorId);
 
         Mockito.when(movieComplaintService.getMovieComplaint(movieId, readDTO.getId())).thenReturn(readDTO);
 
@@ -67,11 +65,11 @@ public class MovieComplaintControllerTest {
     @Test
     public void getListOfMovieComplaintsTest() throws Exception {
         UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID movieId1 = UUID.randomUUID();
         UUID movieId2 = UUID.randomUUID();
-        ComplaintReadDTO c1 = createComplaintReadDTO(userId, movieId1);
-        ComplaintReadDTO c2 = createComplaintReadDTO(userId, movieId1);
-        ComplaintReadDTO c3 = createComplaintReadDTO(userId, movieId2);
+        ComplaintReadDTO c1 = createComplaintReadDTO(userId, movieId1, moderatorId);
+        ComplaintReadDTO c2 = createComplaintReadDTO(userId, movieId1, moderatorId);
 
         List<ComplaintReadDTO> expectedResult = List.of(c1, c2);
 
@@ -115,8 +113,9 @@ public class MovieComplaintControllerTest {
         createDTO.setComplaintType(ComplaintType.SPAM);
 
         UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId, moderatorId);
 
 //        Mockito.when(movieComplaintService.createMovieComplaint(movieId, createDTO, author)).thenReturn(readDTO);
 
@@ -134,8 +133,9 @@ public class MovieComplaintControllerTest {
     @Test
     public void patchMovieComplaintTest() throws Exception {
         UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId, moderatorId);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
@@ -159,8 +159,9 @@ public class MovieComplaintControllerTest {
     @Test
     public void updateMovieComplaintTest() throws Exception {
         UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId, moderatorId);
 
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
@@ -192,7 +193,7 @@ public class MovieComplaintControllerTest {
         Mockito.verify(movieComplaintService).deleteMovieComplaint(movieId, id);
     }
 
-    private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId) {
+    private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {
         ComplaintReadDTO readDTO = new ComplaintReadDTO();
         readDTO.setId(UUID.randomUUID());
         readDTO.setComplaintTitle("Report 1");
@@ -202,7 +203,9 @@ public class MovieComplaintControllerTest {
         readDTO.setAuthorId(authorId);
         readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        readDTO.setParentType(ParentType.PERSON);
         readDTO.setParentId(parentId);
+        readDTO.setModeratorId(moderatorId);
         return readDTO;
     }
 }

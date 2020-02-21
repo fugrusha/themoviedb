@@ -14,6 +14,8 @@ public class UserReadExtendedDTO {
 
     private String email;
 
+    private Boolean isBlocked;
+
     private Instant createdAt;
 
     private Instant updatedAt;

@@ -1,9 +1,6 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Article;
-import com.golovko.backend.domain.Comment;
-import com.golovko.backend.domain.CommentStatus;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
@@ -32,21 +29,24 @@ public class ArticleCommentService {
     }
 
     public List<CommentReadDTO> getAllComments(UUID articleId) {
-        List<Comment> comments = commentRepository.findByParentIdOrderByCreatedAtAsc(articleId);
+        List<Comment> comments = commentRepository.findByParentIdOrderByCreatedAtAsc(articleId, ParentType.ARTICLE);
         return comments.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
     public List<CommentReadDTO> getAllPublishedComments(UUID articleId) {
         List<Comment> comments =
-                commentRepository.findAllByStatusAndByParentId(articleId, CommentStatus.APPROVED);
+                commentRepository.findAllByStatusAndParent(articleId, CommentStatus.APPROVED, ParentType.ARTICLE);
         return comments.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
     public CommentReadDTO createComment(UUID articleId, CommentCreateDTO createDTO, ApplicationUser author) {
         Comment comment = translationService.toEntity(createDTO);
+
         comment.setStatus(CommentStatus.PENDING);
         comment.setParentId(articleId);
         comment.setAuthor(author);
+        comment.setParentType(ParentType.ARTICLE);
+
         comment = commentRepository.save(comment);
         return translationService.toRead(comment);
     }
@@ -74,8 +74,10 @@ public class ArticleCommentService {
     }
 
     private Comment getArticleCommentRequired(UUID articleId, UUID commentId) {
-        if (commentRepository.findByIdAndParentId(commentId, articleId) != null) {
-            return commentRepository.findByIdAndParentId(commentId, articleId);
+        Comment comment = commentRepository.findByIdAndParentId(commentId, articleId, ParentType.ARTICLE);
+
+        if (comment != null) {
+            return comment;
         } else {
             throw new EntityNotFoundException(Comment.class, commentId, Article.class, articleId);
         }

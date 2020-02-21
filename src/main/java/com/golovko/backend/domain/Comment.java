@@ -38,6 +38,9 @@ public class Comment {
     @ManyToOne
     private ApplicationUser author;
 
+    @Enumerated(EnumType.STRING)
+    private ParentType parentType;
+
     @Column(nullable = false)
     private UUID parentId;
 }

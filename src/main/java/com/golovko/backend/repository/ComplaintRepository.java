@@ -1,6 +1,8 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Complaint;
+import com.golovko.backend.domain.ParentType;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
@@ -10,11 +12,16 @@ import java.util.UUID;
 @Repository
 public interface ComplaintRepository extends CrudRepository<Complaint, UUID> {
 
-    List<Complaint> findByAuthorIdOrderByCreatedAtAsc(UUID authorId);
-
     Complaint findByIdAndAuthorId(UUID id, UUID authorId);
 
-    Complaint findByIdAndParentId(UUID id, UUID parentId);
+    List<Complaint> findByAuthorIdOrderByCreatedAtAsc(UUID authorId);
 
-    List<Complaint> findByParentIdOrderByCreatedAtAsc(UUID parentId);
+    @Query("select c from Complaint c where c.id = :id and" +
+            " c.parentId = :parentId and c.parentType = :parentType")
+    Complaint findByIdAndParentId(UUID id, UUID parentId, ParentType parentType);
+
+    @Query("select c from Complaint c" +
+            " where c.parentId = :parentId and c.parentType = :parentType" +
+            " order by c.createdAt asc")
+    List<Complaint> findAllByParent(UUID parentId, ParentType parentType);
 }

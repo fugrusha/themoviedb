@@ -31,6 +31,8 @@ public class ApplicationUser {
     @Column(nullable = false, unique = true)
     private String email;
 
+    private Boolean isBlocked = false;
+
     @CreatedDate
     private Instant createdAt;
 

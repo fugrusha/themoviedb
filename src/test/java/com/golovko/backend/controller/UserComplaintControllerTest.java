@@ -2,10 +2,7 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.ComplaintStatus;
-import com.golovko.backend.domain.ComplaintType;
-import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
@@ -46,8 +43,9 @@ public class UserComplaintControllerTest {
     @Test
     public void getComplaintByIdTest() throws Exception {
         UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId, moderatorId);
 
         Mockito.when(userComplaintService.getComplaint(userId, readDTO.getId())).thenReturn(readDTO);
 
@@ -67,12 +65,10 @@ public class UserComplaintControllerTest {
     @Test
     public void getListOfUserComplaintsTest() throws Exception {
         UUID userId1 = UUID.randomUUID();
-        UUID userId2 = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
-        ComplaintReadDTO c1 = createComplaintReadDTO(userId1, parentId);
-        ComplaintReadDTO c2 = createComplaintReadDTO(userId1, parentId);
-        createComplaintReadDTO(userId2, parentId);
-        createComplaintReadDTO(userId2, parentId);
+        ComplaintReadDTO c1 = createComplaintReadDTO(userId1, parentId, moderatorId);
+        ComplaintReadDTO c2 = createComplaintReadDTO(userId1, parentId, moderatorId);
 
         List<ComplaintReadDTO> expectedResult = List.of(c1, c2);
 
@@ -110,8 +106,9 @@ public class UserComplaintControllerTest {
     @Test
     public void patchComplaintTest() throws Exception {
         UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId, moderatorId);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
@@ -135,8 +132,9 @@ public class UserComplaintControllerTest {
     @Test
     public void updateComplaintTest() throws Exception {
         UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId, moderatorId);
 
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
@@ -168,7 +166,7 @@ public class UserComplaintControllerTest {
         Mockito.verify(userComplaintService).deleteComplaint(userId, id);
     }
 
-    private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId) {
+    private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {
         ComplaintReadDTO readDTO = new ComplaintReadDTO();
         readDTO.setId(UUID.randomUUID());
         readDTO.setComplaintTitle("Report 1");
@@ -178,7 +176,9 @@ public class UserComplaintControllerTest {
         readDTO.setAuthorId(authorId);
         readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        readDTO.setParentType(ParentType.PERSON);
         readDTO.setParentId(parentId);
+        readDTO.setModeratorId(moderatorId);
         return readDTO;
     }
 }

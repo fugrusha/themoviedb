@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.ParentType;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
@@ -210,6 +211,7 @@ public class ArticleCommentControllerTest {
         dto.setId(UUID.randomUUID());
         dto.setMessage("some text");
         dto.setAuthorId(authorId);
+        dto.setParentType(ParentType.ARTICLE);
         dto.setParentId(parentId);
         dto.setDislikesCount(46);
         dto.setLikesCount(120);

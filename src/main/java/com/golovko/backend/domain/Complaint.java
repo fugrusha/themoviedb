@@ -39,6 +39,12 @@ public class Complaint {
     @ManyToOne
     private ApplicationUser author;
 
+    @ManyToOne
+    private ApplicationUser moderator;
+
+    @Enumerated(EnumType.STRING)
+    private ParentType parentType;
+
     @Column(nullable = false)
     private UUID parentId;
 }

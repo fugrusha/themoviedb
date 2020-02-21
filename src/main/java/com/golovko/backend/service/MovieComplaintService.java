@@ -1,9 +1,6 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Complaint;
-import com.golovko.backend.domain.ComplaintStatus;
-import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -36,7 +33,7 @@ public class MovieComplaintService {
     }
 
     public List<ComplaintReadDTO> getMovieComplaints(UUID movieId) {
-        List<Complaint> complaints = complaintRepository.findByParentIdOrderByCreatedAtAsc(movieId);
+        List<Complaint> complaints = complaintRepository.findAllByParent(movieId, ParentType.MOVIE);
         return complaints.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
@@ -49,6 +46,7 @@ public class MovieComplaintService {
 
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, author.getId()));
+        complaint.setParentType(ParentType.MOVIE);
         complaint.setParentId(movieId);
 
         complaint = complaintRepository.save(complaint);
@@ -78,8 +76,8 @@ public class MovieComplaintService {
     }
 
     private Complaint getComplaintByMovieId(UUID id, UUID movieId) {
-        if (complaintRepository.findByIdAndParentId(id, movieId) != null) {
-            return complaintRepository.findByIdAndParentId(id, movieId);
+        if (complaintRepository.findByIdAndParentId(id, movieId, ParentType.MOVIE) != null) {
+            return complaintRepository.findByIdAndParentId(id, movieId, ParentType.MOVIE);
         } else {
             throw new EntityNotFoundException(Complaint.class, id, Movie.class, movieId);
         }
