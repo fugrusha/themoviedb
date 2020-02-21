@@ -5,6 +5,7 @@ import com.golovko.backend.domain.MovieCast;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieCastRepository;
+import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -21,6 +22,8 @@ public class MovieCastService {
     @Autowired
     private TranslationService translationService;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
 
     public List<MovieCastReadDTO> getListOfMovieCast(UUID movieId) {
         List<MovieCast> listOfMovieCast = movieCastRepository.findByMovieId(movieId);
@@ -36,10 +39,12 @@ public class MovieCastService {
         return translationService.toReadExtended(getMovieCastByMovieIdRequired(id, movieId));
     }
 
-    public MovieCastReadDTO createMovieCast(MovieCastCreateDTO createDTO, UUID personId, UUID movieId) {
-        MovieCast movieCast = translationService.toEntity(createDTO, personId, movieId);
+    public MovieCastReadDTO createMovieCast(MovieCastCreateDTO createDTO, UUID movieId) {
+        MovieCast movieCast = translationService.toEntity(createDTO);
 
+        movieCast.setMovie(repoHelper.getReferenceIfExist(Movie.class, movieId));
         movieCast = movieCastRepository.save(movieCast);
+
         return translationService.toRead(movieCast);
     }
 

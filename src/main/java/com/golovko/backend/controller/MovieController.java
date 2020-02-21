@@ -44,5 +44,4 @@ public class MovieController {
     public void deleteMovie(@PathVariable UUID id){
         movieService.deleteMovie(id);
     }
-
 }

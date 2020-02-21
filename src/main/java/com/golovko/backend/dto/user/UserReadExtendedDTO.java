@@ -1,10 +1,8 @@
 package com.golovko.backend.dto.user;
 
-import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -16,13 +14,12 @@ public class UserReadExtendedDTO {
 
     private String email;
 
+    private Boolean isBlocked;
+
     private Instant createdAt;
 
     private Instant updatedAt;
 
-    private List<ComplaintReadDTO> complaints;
-
-    // TODO add list of articles
-    // TODO add list of comments
-    // TODO add list of likedMovies
+    // TODO add liked movies
+    // TODO rated movies
 }

@@ -1,0 +1,36 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="add isBlocked to application_user" author="andrew">
+        <addColumn tableName="application_user">
+            <column name="is_blocked" type="boolean"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add moderator to complaint" author="andrew">
+        <addColumn tableName="complaint">
+            <column name="moderator_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_ai_moderator_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"/>
+            </column>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add parent_type to complaint" author="andrew">
+        <addColumn tableName="complaint">
+            <column name="parent_type" type="varchar(30)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add parent_type to comment" author="andrew">
+        <addColumn tableName="comment">
+            <column name="parent_type" type="varchar(30)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

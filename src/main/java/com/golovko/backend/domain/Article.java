@@ -33,18 +33,14 @@ public class Article {
     @Enumerated(EnumType.STRING)
     private ArticleStatus status;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(nullable = false, name = "author_id")
+    @ManyToOne
     private ApplicationUser author;
-
-    // TODO comments for articles
-    // private List<Comment> comments;
-    // TODO relatedPersons for articles
-    //private List<Person> relatedPeople;
-    // TODO relatedMovies for articles
-    //private List<Movie> relatedMovies;
 
     private Integer likesCount;
 
     private Integer dislikesCount;
+
+    // TODO relatedPersons for articles
+    // TODO relatedMovies for articles
+
 }

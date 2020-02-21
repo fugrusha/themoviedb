@@ -33,10 +33,9 @@ public class MovieCastController {
     @PostMapping
     public MovieCastReadDTO createMovieCast(
             @RequestBody MovieCastCreateDTO createDTO,
-            @RequestParam UUID personId,
             @PathVariable UUID movieId
     ) {
-        return movieCastService.createMovieCast(createDTO, personId, movieId);
+        return movieCastService.createMovieCast(createDTO, movieId);
     }
 
     @PutMapping("/{id}")

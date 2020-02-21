@@ -6,6 +6,7 @@ import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
+import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,6 +22,9 @@ public class ArticleService {
 
     @Autowired
     private TranslationService translationService;
+
+    @Autowired
+    private RepositoryHelper repoHelper;
 
     public ArticleReadDTO getArticle(UUID id) {
         Article article = getArticleRequired(id);
@@ -38,9 +42,11 @@ public class ArticleService {
     }
 
     public ArticleReadDTO createArticle(ArticleCreateDTO createDTO, ApplicationUser author) {
-        Article article = translationService.toEntity(createDTO, author);
+        Article article = translationService.toEntity(createDTO);
 
+        article.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, author.getId()));
         article = articleRepository.save(article);
+
         return translationService.toRead(article);
     }
 

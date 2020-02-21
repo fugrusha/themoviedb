@@ -1,9 +1,10 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Complaint;
-import com.golovko.backend.domain.ComplaintType;
-import com.golovko.backend.dto.user.*;
+import com.golovko.backend.dto.user.UserCreateDTO;
+import com.golovko.backend.dto.user.UserPatchDTO;
+import com.golovko.backend.dto.user.UserPutDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -16,17 +17,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionTemplate;
 
-import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from complaint", "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {"delete from application_user"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ApplicationUserServiceTest {
 
     @Autowired
@@ -37,25 +34,6 @@ public class ApplicationUserServiceTest {
 
     @Autowired
     private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
-
-    @Transactional //FIXME remove this annotation
-    @Test
-    public void testGetUserExtendedTest() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.MISPRINT);
-        user.setComplaints(List.of(complaint));
-
-        UserReadExtendedDTO readExtendedDTO = applicationUserService.getExtendedUser(user.getId());
-
-        Assertions.assertThat(readExtendedDTO).isEqualToIgnoringGivenFields(user, "complaints");
-
-        Assert.assertEquals(readExtendedDTO.getComplaints().get(0).getAuthorId(), complaint.getAuthor().getId());
-        Assertions.assertThat(readExtendedDTO.getComplaints().get(0)).isEqualToIgnoringGivenFields(complaint,
-                "authorId");
-    }
 
     @Test
     public void testGetUser() {
@@ -80,7 +58,7 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.createUser(create);
 
-        Assertions.assertThat(create).isEqualToComparingFieldByField(readDTO);
+        Assertions.assertThat(create).isEqualToIgnoringGivenFields(readDTO, "password");
         Assert.assertNotNull(readDTO.getId());
 
         ApplicationUser applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
@@ -98,11 +76,11 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patch);
 
-        Assertions.assertThat(patch).isEqualToComparingFieldByField(readDTO);
+        Assertions.assertThat(patch).isEqualToIgnoringGivenFields(readDTO, "password");
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO,
-                "complaints", "articles");
+                "password", "articles");
     }
 
     @Test
@@ -114,13 +92,11 @@ public class ApplicationUserServiceTest {
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        inTransaction(() -> {
-            ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
+        ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
 
-            Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
-            Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
-                    "complaints", "articles");
-        });
+        Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
+                "password", "articles");
     }
 
     @Test
@@ -134,11 +110,11 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.updateUser(user.getId(), updateDTO);
 
-        Assertions.assertThat(updateDTO).isEqualToComparingFieldByField(readDTO);
+        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO, "password");
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(user)
-                .isEqualToIgnoringGivenFields(readDTO, "complaints", "articles");
+        Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
+                "password", "articles");
     }
 
     @Test
@@ -152,11 +128,5 @@ public class ApplicationUserServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteUserNotFound() {
         applicationUserService.deleteUser(UUID.randomUUID());
-    }
-
-    private void inTransaction(Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
     }
 }

@@ -2,7 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
-import com.golovko.backend.domain.ComplaintType;
+import com.golovko.backend.domain.ParentType;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
@@ -22,6 +22,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.golovko.backend.domain.ComplaintType.*;
 
 @SpringBootTest
 @RunWith(SpringRunner.class)
@@ -45,11 +47,12 @@ public class UserComplaintServiceTest {
     @Test
     public void getComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
+        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, ParentType.PERSON);
 
         ComplaintReadDTO readDTO = userComplaintService.getComplaint(user.getId(), complaint.getId());
 
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint, "authorId");
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
+                "moderatorId", "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
     }
 
@@ -57,10 +60,10 @@ public class UserComplaintServiceTest {
     public void getListOfUserComplaintsTest() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user1, ComplaintType.CHILD_ABUSE);
-        Complaint c2 = testObjectFactory.createComplaint(user1, ComplaintType.MISPRINT);
-        testObjectFactory.createComplaint(user2, ComplaintType.MISPRINT);
-        testObjectFactory.createComplaint(user2, ComplaintType.SPAM);
+        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, ParentType.PERSON);
+        Complaint c2 = testObjectFactory.createComplaint(user1, MISPRINT, ParentType.PERSON);
+        testObjectFactory.createComplaint(user2, MISPRINT, ParentType.PERSON);
+        testObjectFactory.createComplaint(user2, SPAM, ParentType.PERSON);
 
         List<ComplaintReadDTO> complaints = userComplaintService.getUserComplaints(user1.getId());
 
@@ -76,39 +79,41 @@ public class UserComplaintServiceTest {
     @Test
     public void patchComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
+        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, ParentType.PERSON);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
         patchDTO.setComplaintText("another text");
-        patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+        patchDTO.setComplaintType(CHILD_ABUSE);
 
         ComplaintReadDTO readDTO = userComplaintService.patchComplaint(user.getId(), complaint.getId(), patchDTO);
 
-        Assertions.assertThat(patchDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assertions.assertThat(patchDTO).isEqualToIgnoringGivenFields(readDTO,
+                "moderatorId", "authorId");
 
         complaint = complaintRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(complaint).isEqualToIgnoringGivenFields(readDTO, "author");
+        Assertions.assertThat(complaint).isEqualToIgnoringGivenFields(readDTO,
+                "moderator", "author");
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
     }
 
     @Test
     public void patchComplaintEmptyPatchTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
+        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, ParentType.PERSON);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
 
         ComplaintReadDTO readDTO = userComplaintService.patchComplaint(user.getId(), complaint.getId(), patchDTO);
 
-        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("moderatorId");
 
         inTransaction(() -> {
             Complaint complaintAfterUpdate = complaintRepository.findById(readDTO.getId()).get();
 
-            Assertions.assertThat(complaintAfterUpdate).hasNoNullFieldsOrProperties();
+            Assertions.assertThat(complaintAfterUpdate).hasNoNullFieldsOrPropertiesExcept("moderator");
             Assertions.assertThat(complaintAfterUpdate).isEqualToIgnoringGivenFields(complaint,
-                    "author");
+                    "author", "moderator");
             Assert.assertEquals(readDTO.getAuthorId(), complaintAfterUpdate.getAuthor().getId());
         });
     }
@@ -116,26 +121,28 @@ public class UserComplaintServiceTest {
     @Test
     public void updateComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
+        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, ParentType.PERSON);
 
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
         updateDTO.setComplaintTitle("new title");
-        updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+        updateDTO.setComplaintType(CHILD_ABUSE);
 
         ComplaintReadDTO readDTO = userComplaintService.updateComplaint(user.getId(), complaint.getId(), updateDTO);
 
-        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO,
+                "moderatorId", "authorId");
 
         complaint = complaintRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(complaint).isEqualToIgnoringGivenFields(readDTO, "author");
+        Assertions.assertThat(complaint).isEqualToIgnoringGivenFields(readDTO,
+                "moderator", "author");
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
     }
 
     @Test
     public void deleteComplaintTest() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, ComplaintType.CHILD_ABUSE);
+        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, ParentType.PERSON);
         userComplaintService.deleteComplaint(user.getId(), complaint.getId());
 
         Assert.assertFalse(complaintRepository.existsById(complaint.getId()));

@@ -3,6 +3,7 @@ package com.golovko.backend.repository;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintType;
+import com.golovko.backend.domain.ParentType;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -35,10 +36,10 @@ public class ComplaintRepositoryTest {
     public void getComplaintsByUser() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user1, ComplaintType.CHILD_ABUSE);
-        Complaint c2 = testObjectFactory.createComplaint(user1, ComplaintType.CHILD_ABUSE);
-        testObjectFactory.createComplaint(user2, ComplaintType.CHILD_ABUSE);
-        testObjectFactory.createComplaint(user2, ComplaintType.MISPRINT);
+        Complaint c1 = testObjectFactory.createComplaint(user1, ComplaintType.CHILD_ABUSE, ParentType.PERSON);
+        Complaint c2 = testObjectFactory.createComplaint(user1, ComplaintType.CHILD_ABUSE, ParentType.PERSON);
+        testObjectFactory.createComplaint(user2, ComplaintType.CHILD_ABUSE, ParentType.PERSON);
+        testObjectFactory.createComplaint(user2, ComplaintType.MISPRINT, ParentType.PERSON);
 
         List<Complaint> result = complaintRepository
                 .findByAuthorIdOrderByCreatedAtAsc(user1.getId());
@@ -50,7 +51,7 @@ public class ComplaintRepositoryTest {
     public void testCreateAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
 
-        Complaint complaint = testObjectFactory.createComplaint(author, ComplaintType.MISPRINT);
+        Complaint complaint = testObjectFactory.createComplaint(author, ComplaintType.MISPRINT, ParentType.PERSON);
 
         Instant createdAtBeforeReload = complaint.getCreatedAt();
         Assert.assertNotNull(createdAtBeforeReload);
@@ -66,7 +67,7 @@ public class ComplaintRepositoryTest {
     public void testModifiedAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
 
-        Complaint complaint = testObjectFactory.createComplaint(author, ComplaintType.MISPRINT);
+        Complaint complaint = testObjectFactory.createComplaint(author, ComplaintType.MISPRINT, ParentType.PERSON);
 
         Instant modifiedAtBeforeReload = complaint.getUpdatedAt();
         Assert.assertNotNull(modifiedAtBeforeReload);
