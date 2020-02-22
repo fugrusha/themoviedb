@@ -132,18 +132,18 @@ public class MovieServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteMovieNotFound() {
+    public void deleteMovieNotFoundTest() {
         movieService.deleteMovie(UUID.randomUUID());
     }
 
     @Test
-    public void getMoviesWithEmptyFilter() {
+    public void getMoviesWithEmptyFilterTest() {
         Person person1 = testObjectFactory.createPerson();
-        Person person2 = testObjectFactory.createPerson();        Person person3 = testObjectFactory.createPerson();
+        Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
         Movie m2 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
         Movie m3 = createMovieFilterTest(LocalDate.of(1980, 5, 4));
-        Movie m4 = createMovieFilterTest(LocalDate.of(1944, 5, 4));
+        createMovieFilterTest(LocalDate.of(1944, 5, 4));
 
         testObjectFactory.createMovieParticipation(person2, m1);
         testObjectFactory.createMovieParticipation(person2, m2);
@@ -155,14 +155,13 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getMoviesByPerson() {
+    public void getMoviesByPersonTest() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
-        Person person3 = testObjectFactory.createPerson();
         Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
         Movie m2 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
         Movie m3 = createMovieFilterTest(LocalDate.of(1980, 5, 4));
-        Movie m4 = createMovieFilterTest(LocalDate.of(1944, 5, 4));
+        createMovieFilterTest(LocalDate.of(1944, 5, 4));
 
         testObjectFactory.createMovieParticipation(person2, m1);
         testObjectFactory.createMovieParticipation(person2, m2);
@@ -175,7 +174,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getMoviesByPartTypes() {
+    public void getMoviesByPartTypesTest() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
@@ -196,13 +195,13 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getMoviesByReleasedInterval() {
+    public void getMoviesByReleasedIntervalTest() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4));
         Movie m2 = createMovieFilterTest(LocalDate.of(1990, 5, 4));
         Movie m3 = createMovieFilterTest(LocalDate.of(1980, 5, 4));
-        Movie m4 = createMovieFilterTest(LocalDate.of(1944, 5, 4));
+        createMovieFilterTest(LocalDate.of(1944, 5, 4));
 
         testObjectFactory.createMovieParticipation(person2, m1);
         testObjectFactory.createMovieParticipation(person2, m2);
@@ -216,7 +215,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getMoviesByAllFilters() {
+    public void getMoviesByAllFiltersTest() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovieFilterTest(LocalDate.of(1992, 5, 4)); // no
