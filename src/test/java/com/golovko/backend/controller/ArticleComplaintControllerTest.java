@@ -8,7 +8,7 @@ import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.service.MovieComplaintService;
+import com.golovko.backend.service.ArticleComplaintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Ignore;
@@ -30,8 +30,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(MovieComplaintController.class)
-public class MovieComplaintControllerTest {
+@WebMvcTest(ArticleComplaintController.class)
+public class ArticleComplaintControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -40,42 +40,43 @@ public class MovieComplaintControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private MovieComplaintService movieComplaintService;
+    private ArticleComplaintService articleComplaintService;
 
     @Test
-    public void getMovieComplaintByIdTest() throws Exception {
+    public void getArticleComplaintByIdTest() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId, moderatorId);
+        UUID articleId = UUID.randomUUID();
 
-        Mockito.when(movieComplaintService.getMovieComplaint(movieId, readDTO.getId())).thenReturn(readDTO);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, articleId, moderatorId);
+
+        Mockito.when(articleComplaintService.getComplaint(articleId, readDTO.getId())).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/complaints/{id}", movieId, readDTO.getId()))
+                .perform(get("/api/v1/articles/{articleId}/complaints/{id}", articleId, readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(movieComplaintService).getMovieComplaint(movieId, readDTO.getId());
+        Mockito.verify(articleComplaintService).getComplaint(articleId, readDTO.getId());
     }
 
     @Test
-    public void getListOfMovieComplaintsTest() throws Exception {
+    public void getListOfArticleComplaintsTest() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID movieId1 = UUID.randomUUID();
-        ComplaintReadDTO c1 = createComplaintReadDTO(userId, movieId1, moderatorId);
-        ComplaintReadDTO c2 = createComplaintReadDTO(userId, movieId1, moderatorId);
+        UUID articleId = UUID.randomUUID();
+        ComplaintReadDTO c1 = createComplaintReadDTO(userId, articleId, moderatorId);
+        ComplaintReadDTO c2 = createComplaintReadDTO(userId, articleId, moderatorId);
 
         List<ComplaintReadDTO> expectedResult = List.of(c1, c2);
 
-        Mockito.when(movieComplaintService.getMovieComplaints(movieId1)).thenReturn(expectedResult);
+        Mockito.when(articleComplaintService.getAllComplaints(articleId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/complaints/", movieId1))
+                .perform(get("/api/v1/articles/{articleId}/complaints/", articleId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -83,20 +84,20 @@ public class MovieComplaintControllerTest {
         Assertions.assertThat(actualResult).extracting(ComplaintReadDTO::getId)
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
 
-        Mockito.verify(movieComplaintService).getMovieComplaints(movieId1);
+        Mockito.verify(articleComplaintService).getAllComplaints(articleId);
     }
 
     @Test
-    public void getMovieComplaintByWrongIdTest() throws Exception {
+    public void getArticleComplaintByWrongIdTest() throws Exception {
         UUID wrongId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
+        UUID articleId = UUID.randomUUID();
 
-        EntityNotFoundException ex = new EntityNotFoundException(Complaint.class, wrongId, Movie.class, movieId);
+        EntityNotFoundException ex = new EntityNotFoundException(Complaint.class, wrongId, Movie.class, articleId);
 
-        Mockito.when(movieComplaintService.getMovieComplaint(movieId, wrongId)).thenThrow(ex);
+        Mockito.when(articleComplaintService.getComplaint(articleId, wrongId)).thenThrow(ex);
 
         String result = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/complaints/{id}", movieId, wrongId))
+                .perform(get("/api/v1/articles/{articleId}/complaints/{id}", articleId, wrongId))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -105,7 +106,7 @@ public class MovieComplaintControllerTest {
 
     @Ignore // TODO add user authentication
     @Test
-    public void createMovieComplaintTest() throws Exception {
+    public void createArticleComplaintTest() throws Exception {
         ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
         createDTO.setComplaintTitle("Complaint Title");
         createDTO.setComplaintText("Text text text");
@@ -113,13 +114,13 @@ public class MovieComplaintControllerTest {
 
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId, moderatorId);
+        UUID articleId = UUID.randomUUID();
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, articleId, moderatorId);
 
-//        Mockito.when(movieComplaintService.createMovieComplaint(movieId, createDTO, author)).thenReturn(readDTO);
+//        Mockito.when(articleComplaintService.createComplaint(articleId, createDTO, author)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/movies/{movieId}/complaints/", movieId)
+                .perform(post("/api/v1/articles/{articleId}/complaints/", articleId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
@@ -130,24 +131,24 @@ public class MovieComplaintControllerTest {
     }
 
     @Test
-    public void patchMovieComplaintTest() throws Exception {
+    public void patchArticleComplaintTest() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId, moderatorId);
+        UUID articleId = UUID.randomUUID();
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, articleId, moderatorId);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
         patchDTO.setComplaintText("another text");
         patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
 
-        Mockito.when(movieComplaintService.patchMovieComplaint(movieId, readDTO.getId(), patchDTO))
+        Mockito.when(articleComplaintService.patchComplaint(articleId, readDTO.getId(), patchDTO))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/movies/{movieId}/complaints/{id}", movieId, readDTO.getId())
-                        .content(objectMapper.writeValueAsString(patchDTO))
-                        .contentType(MediaType.APPLICATION_JSON))
+                .perform(patch("/api/v1/articles/{articleId}/complaints/{id}", articleId, readDTO.getId())
+                .content(objectMapper.writeValueAsString(patchDTO))
+                .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -156,22 +157,22 @@ public class MovieComplaintControllerTest {
     }
 
     @Test
-    public void updateMovieComplaintTest() throws Exception {
+    public void updateArticleComplaintTest() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, movieId, moderatorId);
+        UUID articleId = UUID.randomUUID();
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, articleId, moderatorId);
 
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
         updateDTO.setComplaintTitle("new title");
         updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
 
-        Mockito.when(movieComplaintService.updateMovieComplaint(movieId, readDTO.getId(), updateDTO))
+        Mockito.when(articleComplaintService.updateComplaint(articleId, readDTO.getId(), updateDTO))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/movies/{movieId}/complaints/{id}", movieId, readDTO.getId())
+                .perform(put("/api/v1/articles/{articleId}/complaints/{id}", articleId, readDTO.getId())
                 .content(objectMapper.writeValueAsString(updateDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -182,14 +183,14 @@ public class MovieComplaintControllerTest {
     }
 
     @Test
-    public void deleteMovieComplaintTest() throws Exception {
+    public void deleteArticleComplaintTest() throws Exception {
         UUID id = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
+        UUID articleId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/movies/{movieId}/complaints/{id}", movieId, id))
+        mockMvc.perform(delete("/api/v1/articles/{articleId}/complaints/{id}", articleId, id))
                 .andExpect(status().isOk());
 
-        Mockito.verify(movieComplaintService).deleteMovieComplaint(movieId, id);
+        Mockito.verify(articleComplaintService).deleteComplaint(articleId, id);
     }
 
     private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {

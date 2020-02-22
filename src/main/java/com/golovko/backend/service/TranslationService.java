@@ -20,7 +20,10 @@ import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
-import com.golovko.backend.dto.user.*;
+import com.golovko.backend.dto.user.UserCreateDTO;
+import com.golovko.backend.dto.user.UserPatchDTO;
+import com.golovko.backend.dto.user.UserPutDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,16 +46,6 @@ public class TranslationService {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setIsBlocked(user.getIsBlocked());
-        dto.setCreatedAt(user.getCreatedAt());
-        dto.setUpdatedAt(user.getUpdatedAt());
-        return dto;
-    }
-
-    public UserReadExtendedDTO toReadExtended(ApplicationUser user) {
-        UserReadExtendedDTO dto = new UserReadExtendedDTO();
-        dto.setId(user.getId());
-        dto.setUsername(user.getUsername());
-        dto.setEmail(user.getEmail());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
