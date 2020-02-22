@@ -74,21 +74,21 @@ public class TestObjectFactory {
         return complaintRepository.save(complaint);
     }
 
-    public Complaint createMovieComplaint(
-            UUID movieId,
-            ApplicationUser user,
-            ComplaintType complaintType,
+    public Complaint createComplaint(
+            UUID articleId,
+            ParentType parentType,
+            ApplicationUser author,
             ApplicationUser moderator
     ) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle("Some title");
         complaint.setComplaintText("Some report text");
-        complaint.setComplaintType(complaintType);
+        complaint.setComplaintType(ComplaintType.MISPRINT);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
-        complaint.setAuthor(user);
+        complaint.setAuthor(author);
         complaint.setModerator(moderator);
-        complaint.setParentId(movieId);
-        complaint.setParentType(ParentType.MOVIE);
+        complaint.setParentId(articleId);
+        complaint.setParentType(parentType);
         return complaintRepository.save(complaint);
     }
 
