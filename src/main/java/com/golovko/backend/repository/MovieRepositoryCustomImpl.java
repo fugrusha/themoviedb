@@ -16,12 +16,12 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
     @Override
     public List<Movie> findByFilter(MovieFilter filter) {
         StringBuilder sb = new StringBuilder();
-        sb.append("select m from Movie m join fetch m.movieParticipations mp where 1=1");
+        sb.append("select m from Movie m join fetch m.movieCrews mc where 1=1");
         if (filter.getPersonId() != null) {
-            sb.append(" and mp.person.id = :personId");
+            sb.append(" and mc.person.id = :personId");
         }
-        if (filter.getPartTypes() != null && !filter.getPartTypes().isEmpty()) {
-            sb.append(" and mp.partType in (:partTypes)");
+        if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()) {
+            sb.append(" and mc.movieCrewType in (:movieCrewTypes)");
         }
         if (filter.getReleasedFrom() != null) {
             sb.append(" and m.releaseDate >= (:releasedFrom)");
@@ -35,8 +35,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         if (filter.getPersonId() != null) {
             query.setParameter("personId", filter.getPersonId());
         }
-        if (filter.getPartTypes() != null && !filter.getPartTypes().isEmpty()) {
-            query.setParameter("partTypes", filter.getPartTypes());
+        if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()) {
+            query.setParameter("movieCrewTypes", filter.getMovieCrewTypes());
         }
         if (filter.getReleasedFrom() != null) {
             query.setParameter("releasedFrom", filter.getReleasedFrom());

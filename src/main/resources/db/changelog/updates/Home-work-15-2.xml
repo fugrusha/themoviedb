@@ -12,4 +12,18 @@
       <renameColumn tableName="comment" oldColumnName="parent_type" newColumnName="target_object_type"/>
   </changeSet>
 
+    <changeSet id="rename movie_participation table" author="andrew">
+        <renameTable oldTableName="movie_participation" newTableName="movie_crew"/>
+    </changeSet>
+
+    <changeSet id="rename columns in movie_crew table" author="andrew">
+        <renameColumn tableName="movie_crew" oldColumnName="part_type" newColumnName="movie_crew_type"/>
+        <renameColumn tableName="movie_crew" oldColumnName="part_info" newColumnName="description"/>
+    </changeSet>
+
+    <changeSet id="rename columns in movie_cast table" author="andrew">
+        <renameColumn tableName="movie_cast" oldColumnName="part_type" newColumnName="movie_crew_type"/>
+        <renameColumn tableName="movie_cast" oldColumnName="part_info" newColumnName="description"/>
+    </changeSet>
+
 </databaseChangeLog>

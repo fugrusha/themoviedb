@@ -4,9 +4,9 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.PartType;
+import com.golovko.backend.domain.MovieCrewType;
 import com.golovko.backend.dto.movie.*;
-import com.golovko.backend.dto.movieparticipation.MoviePartReadDTO;
+import com.golovko.backend.dto.moviecrew.MovieCrewReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.MovieService;
 import org.assertj.core.api.Assertions;
@@ -162,7 +162,7 @@ public class MovieControllerTest {
     public void getMoviesWithFilter() throws Exception {
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(UUID.randomUUID());
-        filter.setPartTypes(Set.of(PartType.COMPOSER, PartType.WRITER));
+        filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
         filter.setReleasedFrom(LocalDate.parse("1980-07-10"));
         filter.setReleasedTo(LocalDate.parse("1992-07-10"));
 
@@ -174,13 +174,13 @@ public class MovieControllerTest {
         movieReadDTO.setReleaseDate(LocalDate.parse("1985-01-10"));
         movieReadDTO.setIsReleased(true);
 
-        MoviePartReadDTO moviePartReadDTO = new MoviePartReadDTO();
-        moviePartReadDTO.setMovieId(movieReadDTO.getId());
-        moviePartReadDTO.setPersonId(filter.getPersonId());
-        moviePartReadDTO.setPartType(PartType.WRITER);
-        moviePartReadDTO.setId(UUID.randomUUID());
-        moviePartReadDTO.setAverageRating(5.4);
-        moviePartReadDTO.setPartInfo("Some text");
+        MovieCrewReadDTO movieCrewReadDTO = new MovieCrewReadDTO();
+        movieCrewReadDTO.setMovieId(movieReadDTO.getId());
+        movieCrewReadDTO.setPersonId(filter.getPersonId());
+        movieCrewReadDTO.setMovieCrewType(MovieCrewType.WRITER);
+        movieCrewReadDTO.setId(UUID.randomUUID());
+        movieCrewReadDTO.setAverageRating(5.4);
+        movieCrewReadDTO.setDescription("Some text");
 
         List<MovieReadDTO> expectedResult = List.of(movieReadDTO);
 
@@ -188,7 +188,7 @@ public class MovieControllerTest {
 
         String resultJson = mockMvc.perform(get("/api/v1/movies")
             .param("personId", filter.getPersonId().toString())
-            .param("partTypes", "COMPOSER, WRITER")
+            .param("movieCrewTypes", "COMPOSER, WRITER")
             .param("releasedFrom", filter.getReleasedFrom().toString())
             .param("releasedTo", filter.getReleasedTo().toString()))
             .andDo(MockMvcResultHandlers.print())

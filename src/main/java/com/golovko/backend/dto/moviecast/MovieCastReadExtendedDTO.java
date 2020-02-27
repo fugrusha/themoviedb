@@ -1,6 +1,6 @@
 package com.golovko.backend.dto.moviecast;
 
-import com.golovko.backend.domain.PartType;
+import com.golovko.backend.domain.MovieCrewType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import lombok.Data;
@@ -13,9 +13,9 @@ public class MovieCastReadExtendedDTO {
 
     private UUID id;
 
-    private String partInfo;
+    private String description;
 
-    private PartType partType;
+    private MovieCrewType movieCrewType;
 
     private Double averageRating;
 

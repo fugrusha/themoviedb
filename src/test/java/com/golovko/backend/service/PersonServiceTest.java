@@ -81,7 +81,7 @@ public class PersonServiceTest {
 
         person = personRepository.findById(person.getId()).get();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO,
-                        "movieParticipations", "movieCast");
+                        "movieCrews", "movieCast");
     }
 
     @Test
@@ -97,7 +97,7 @@ public class PersonServiceTest {
 
         Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate,
-                        "movieParticipations", "movieCast");
+                        "movieCrews", "movieCast");
     }
 
     @Test
@@ -115,7 +115,7 @@ public class PersonServiceTest {
 
         person = personRepository.findById(person.getId()).get();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO,
-                "movieParticipations", "movieCast");
+                "movieCrews", "movieCast");
     }
 
     @Test

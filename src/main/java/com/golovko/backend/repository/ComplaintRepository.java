@@ -16,12 +16,12 @@ public interface ComplaintRepository extends CrudRepository<Complaint, UUID> {
 
     List<Complaint> findByAuthorIdOrderByCreatedAtAsc(UUID authorId);
 
-    @Query("select c from Complaint c where c.id = :id and" +
-            " c.targetObjectId = :targetId and c.targetObjectType = :targetType")
+    @Query("select c from Complaint c where c.id = :id and"
+            + " c.targetObjectId = :targetId and c.targetObjectType = :targetType")
     Complaint findByIdAndTargetId(UUID id, UUID targetId, TargetObjectType targetType);
 
-    @Query("select c from Complaint c" +
-            " where c.targetObjectId = :targetId and c.targetObjectType = :targetType" +
-            " order by c.createdAt asc")
+    @Query("select c from Complaint c"
+            + " where c.targetObjectId = :targetId and c.targetObjectType = :targetType"
+            + " order by c.createdAt asc")
     List<Complaint> findAllByTarget(UUID targetId, TargetObjectType targetType);
 }

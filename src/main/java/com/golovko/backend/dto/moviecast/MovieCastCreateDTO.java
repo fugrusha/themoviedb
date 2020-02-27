@@ -9,7 +9,7 @@ public class MovieCastCreateDTO {
 
     private UUID personId;
 
-    private String partInfo;
+    private String description;
 
     private String character;
 }

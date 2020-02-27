@@ -20,7 +20,7 @@ import org.springframework.test.context.junit4.SpringRunner;
         "delete from article",
         "delete from application_user",
         "delete from movie_cast",
-        "delete from movie_participation",
+        "delete from movie_crew",
         "delete from person",
         "delete from movie"
         },
@@ -40,7 +40,7 @@ public class LiquibaseLoadDataTest {
     private MovieCastRepository movieCastRepository;
 
     @Autowired
-    private MovieParticipationRepository movieParticipationRepository;
+    private MovieCrewRepository movieCrewRepository;
 
     @Autowired
     private MovieRepository movieRepository;
@@ -57,7 +57,7 @@ public class LiquibaseLoadDataTest {
         Assert.assertTrue(complaintRepository.count() > 0);
         Assert.assertTrue(articleRepository.count() > 0);
         Assert.assertTrue(movieCastRepository.count() > 0);
-        Assert.assertTrue(movieParticipationRepository.count() > 0);
+        Assert.assertTrue(movieCrewRepository.count() > 0);
         Assert.assertTrue(movieRepository.count() > 0);
         Assert.assertTrue(personRepository.count() > 0);
         Assert.assertTrue(commentRepository.count() > 0);

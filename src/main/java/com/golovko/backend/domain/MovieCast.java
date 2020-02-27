@@ -20,7 +20,7 @@ public class MovieCast {
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    private String partInfo;
+    private String description;
 
     private Double averageRating;
 
@@ -34,7 +34,7 @@ public class MovieCast {
 
     @Column(updatable = false)
     @Enumerated(EnumType.STRING)
-    private PartType partType = PartType.CAST;
+    private MovieCrewType movieCrewType = MovieCrewType.CAST;
 
     @CreatedDate
     private Instant createdAt;

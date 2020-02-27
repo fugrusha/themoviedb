@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class MovieCastService {
@@ -26,8 +27,8 @@ public class MovieCastService {
     private RepositoryHelper repoHelper;
 
     public List<MovieCastReadDTO> getListOfMovieCast(UUID movieId) {
-        List<MovieCast> listOfMovieCast = movieCastRepository.findByMovieId(movieId);
-        return translationService.toReadList(listOfMovieCast);
+        List<MovieCast> allMovieCasts = movieCastRepository.findByMovieId(movieId);
+        return allMovieCasts.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
     public MovieCastReadDTO getMovieCast(UUID id, UUID movieId) {

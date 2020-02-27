@@ -5,7 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCast;
-import com.golovko.backend.domain.PartType;
+import com.golovko.backend.domain.MovieCrewType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.dto.person.PersonReadDTO;
@@ -53,7 +53,7 @@ public class MovieCastControllerTest {
         Mockito.when(movieCastService.getMovieCast(readDTO.getId(), movieId)).thenReturn(readDTO);
 
         String result = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/movie-cast/{id}", movieId, readDTO.getId()))
+                .perform(get("/api/v1/movies/{movieId}/movie-casts/{id}", movieId, readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -73,7 +73,7 @@ public class MovieCastControllerTest {
                 .thenReturn(extendedDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/movie-cast/{id}/extended",
+                .perform(get("/api/v1/movies/{movieId}/movie-casts/{id}/extended",
                                             movieReadDTO.getId(), extendedDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -85,7 +85,7 @@ public class MovieCastControllerTest {
     }
 
     @Test
-    public void getListOfMovieCastTest() throws Exception {
+    public void getAllMovieCastsTest() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID personId = UUID.randomUUID();
         MovieCastReadDTO readDTO = createMovieCastReadDTO(movieId, personId);
@@ -95,7 +95,7 @@ public class MovieCastControllerTest {
         Mockito.when(movieCastService.getListOfMovieCast(movieId)).thenReturn(listOfMovieCast);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/movie-cast", movieId))
+                .perform(get("/api/v1/movies/{movieId}/movie-casts", movieId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -112,7 +112,7 @@ public class MovieCastControllerTest {
         Mockito.when(movieCastService.getMovieCast(id, movieId)).thenThrow(exception);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/movie-cast/{id}", movieId, id))
+                .perform(get("/api/v1/movies/{movieId}/movie-casts/{id}", movieId, id))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -124,7 +124,7 @@ public class MovieCastControllerTest {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-cast/{id}", movieId, id.toString()))
+        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-casts/{id}", movieId, id.toString()))
                 .andExpect(status().isOk());
 
         Mockito.verify(movieCastService).deleteMovieCast(id, movieId);
@@ -138,13 +138,13 @@ public class MovieCastControllerTest {
 
         MovieCastCreateDTO createDTO = new MovieCastCreateDTO();
         createDTO.setPersonId(personId);
-        createDTO.setPartInfo("Some text");
+        createDTO.setDescription("Some text");
         createDTO.setCharacter("Vally");
 
         Mockito.when(movieCastService.createMovieCast(createDTO, movieId)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/movies/{movieId}/movie-cast", movieId)
+                .perform(post("/api/v1/movies/{movieId}/movie-casts", movieId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
@@ -158,7 +158,7 @@ public class MovieCastControllerTest {
     public void updateMovieCastTest() throws Exception {
         MovieCastPutDTO updateDTO = new MovieCastPutDTO();
         updateDTO.setCharacter("New Character");
-        updateDTO.setPartInfo("New text");
+        updateDTO.setDescription("New text");
         updateDTO.setPersonId(UUID.randomUUID());
 
         UUID movieId = UUID.randomUUID();
@@ -169,7 +169,7 @@ public class MovieCastControllerTest {
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/movies/{movieId}/movie-cast/{id}", movieId, readDTO.getId())
+                .perform(put("/api/v1/movies/{movieId}/movie-casts/{id}", movieId, readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
@@ -183,7 +183,7 @@ public class MovieCastControllerTest {
     public void patchMovieCastTest() throws Exception {
         MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
         patchDTO.setCharacter("New Character");
-        patchDTO.setPartInfo("New text");
+        patchDTO.setDescription("New text");
         patchDTO.setPersonId(UUID.randomUUID());
 
         UUID movieId = UUID.randomUUID();
@@ -194,7 +194,7 @@ public class MovieCastControllerTest {
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/movies/{movieId}/movie-cast/{id}", movieId, readDTO.getId())
+                .perform(patch("/api/v1/movies/{movieId}/movie-casts/{id}", movieId, readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isOk())
@@ -207,9 +207,9 @@ public class MovieCastControllerTest {
     private MovieCastReadDTO createMovieCastReadDTO(UUID movieId, UUID personId) {
         MovieCastReadDTO dto = new MovieCastReadDTO();
         dto.setId(UUID.randomUUID());
-        dto.setPartInfo("Some Text");
+        dto.setDescription("Some Text");
         dto.setAverageRating(5.3);
-        dto.setPartType(PartType.CAST);
+        dto.setMovieCrewType(MovieCrewType.CAST);
         dto.setMovieId(movieId);
         dto.setPersonId(personId);
         dto.setCharacter("Leon Killer");
@@ -244,11 +244,11 @@ public class MovieCastControllerTest {
     ) {
         MovieCastReadExtendedDTO dto = new MovieCastReadExtendedDTO();
         dto.setId(UUID.randomUUID());
-        dto.setPartInfo("Some text");
+        dto.setDescription("Some text");
         dto.setAverageRating(9.2);
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
-        dto.setPartType(PartType.CAST);
+        dto.setMovieCrewType(MovieCrewType.CAST);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;

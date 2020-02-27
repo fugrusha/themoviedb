@@ -38,7 +38,7 @@ public class Person {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieParticipation> movieParticipations = new HashSet<>();
+    private Set<MovieCrew> movieCrews = new HashSet<>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MovieCast> movieCast = new HashSet<>();

@@ -7,7 +7,7 @@ import java.util.UUID;
 @Data
 public class MovieCastPatchDTO {
 
-    private String partInfo;
+    private String description;
 
     private String character;
 

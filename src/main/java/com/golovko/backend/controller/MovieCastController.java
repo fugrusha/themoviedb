@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/movies/{movieId}/movie-cast")
+@RequestMapping("/api/v1/movies/{movieId}/movie-casts")
 public class MovieCastController {
 
     @Autowired

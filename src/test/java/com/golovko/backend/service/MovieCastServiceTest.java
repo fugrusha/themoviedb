@@ -104,7 +104,7 @@ public class MovieCastServiceTest {
 
         MovieCastCreateDTO createDTO = new MovieCastCreateDTO();
         createDTO.setPersonId(person.getId());
-        createDTO.setPartInfo("Some text");
+        createDTO.setDescription("Some text");
         createDTO.setCharacter("vally");
 
         MovieCastReadDTO readDTO = movieCastService.createMovieCast(createDTO, movie.getId());
@@ -125,7 +125,7 @@ public class MovieCastServiceTest {
 
         MovieCastCreateDTO createDTO = new MovieCastCreateDTO();
         createDTO.setPersonId(UUID.randomUUID());
-        createDTO.setPartInfo("Some text");
+        createDTO.setDescription("Some text");
         createDTO.setCharacter("vally");
 
         movieCastService.createMovieCast(createDTO, movie.getId());
@@ -139,7 +139,7 @@ public class MovieCastServiceTest {
 
         MovieCastPutDTO updateDTO = new MovieCastPutDTO();
         updateDTO.setCharacter("New Character");
-        updateDTO.setPartInfo("New text");
+        updateDTO.setDescription("New text");
         updateDTO.setPersonId(person.getId());
 
         MovieCastReadDTO readDTO = movieCastService.updateMovieCast(updateDTO, movieCast.getId(), movie.getId());
@@ -161,7 +161,7 @@ public class MovieCastServiceTest {
 
         MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
         patchDTO.setCharacter("New Character");
-        patchDTO.setPartInfo("New text");
+        patchDTO.setDescription("New text");
         patchDTO.setPersonId(person.getId());;
 
         MovieCastReadDTO readDTO = movieCastService.patchMovieCast(patchDTO, movieCast.getId(), movie.getId());

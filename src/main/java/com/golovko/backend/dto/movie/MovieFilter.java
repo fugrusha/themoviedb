@@ -1,6 +1,6 @@
 package com.golovko.backend.dto.movie;
 
-import com.golovko.backend.domain.PartType;
+import com.golovko.backend.domain.MovieCrewType;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -13,7 +13,7 @@ public class MovieFilter {
 
     private UUID personId;
 
-    private Set<PartType> partTypes;
+    private Set<MovieCrewType> movieCrewTypes;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private LocalDate releasedFrom;

@@ -1,7 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.PartType;
+import com.golovko.backend.domain.MovieCrewType;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -25,7 +25,7 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from movie_participation", "delete from person", "delete from movie"},
+@Sql(statements = {"delete from movie_crew", "delete from person", "delete from movie"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class MovieServiceTest {
 
@@ -84,7 +84,7 @@ public class MovieServiceTest {
 
         movie = movieRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO,
-                "movieParticipations", "movieCast");
+                "movieCrews", "movieCast");
     }
 
     @Test
@@ -100,7 +100,7 @@ public class MovieServiceTest {
 
         Assertions.assertThat(movieAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate,
-                "movieParticipations", "movieCast");
+                "movieCrews", "movieCast");
     }
 
     @Test
@@ -120,7 +120,7 @@ public class MovieServiceTest {
 
         movie = movieRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(movie).isEqualToIgnoringGivenFields(readDTO,
-                "movieParticipations", "movieCast");
+                "movieCrews", "movieCast");
     }
 
     @Test
@@ -145,9 +145,9 @@ public class MovieServiceTest {
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
         createMovie(LocalDate.of(1944, 5, 4));
 
-        testObjectFactory.createMovieParticipation(person2, m1);
-        testObjectFactory.createMovieParticipation(person2, m2);
-        testObjectFactory.createMovieParticipation(person1, m3);
+        testObjectFactory.createMovieCrew(person2, m1);
+        testObjectFactory.createMovieCrew(person2, m2);
+        testObjectFactory.createMovieCrew(person1, m3);
 
         MovieFilter filter = new MovieFilter();
         Assertions.assertThat(movieService.getMovies(filter)).extracting("id")
@@ -163,9 +163,9 @@ public class MovieServiceTest {
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
         createMovie(LocalDate.of(1944, 5, 4));
 
-        testObjectFactory.createMovieParticipation(person2, m1);
-        testObjectFactory.createMovieParticipation(person2, m2);
-        testObjectFactory.createMovieParticipation(person1, m3);
+        testObjectFactory.createMovieCrew(person2, m1);
+        testObjectFactory.createMovieCrew(person2, m2);
+        testObjectFactory.createMovieCrew(person1, m3);
 
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(person2.getId());
@@ -182,13 +182,13 @@ public class MovieServiceTest {
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
         Movie m4 = createMovie(LocalDate.of(1944, 5, 4));
 
-        testObjectFactory.createMovieParticipationForFilter(person2, m1, PartType.COMPOSER);
-        testObjectFactory.createMovieParticipationForFilter(person2, m2, PartType.WRITER);
-        testObjectFactory.createMovieParticipationForFilter(person1, m3, PartType.PRODUCER);
-        testObjectFactory.createMovieParticipationForFilter(person2, m4, PartType.COSTUME_DESIGNER);
+        testObjectFactory.createMovieCrewForFilter(person2, m1, MovieCrewType.COMPOSER);
+        testObjectFactory.createMovieCrewForFilter(person2, m2, MovieCrewType.WRITER);
+        testObjectFactory.createMovieCrewForFilter(person1, m3, MovieCrewType.PRODUCER);
+        testObjectFactory.createMovieCrewForFilter(person2, m4, MovieCrewType.COSTUME_DESIGNER);
 
         MovieFilter filter = new MovieFilter();
-        filter.setPartTypes(Set.of(PartType.COMPOSER, PartType.WRITER));
+        filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
         List<MovieReadDTO> filteredMovies = movieService.getMovies(filter);
         Assertions.assertThat(filteredMovies).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
@@ -203,9 +203,9 @@ public class MovieServiceTest {
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
         createMovie(LocalDate.of(1944, 5, 4));
 
-        testObjectFactory.createMovieParticipation(person2, m1);
-        testObjectFactory.createMovieParticipation(person2, m2);
-        testObjectFactory.createMovieParticipation(person1, m3);
+        testObjectFactory.createMovieCrew(person2, m1);
+        testObjectFactory.createMovieCrew(person2, m2);
+        testObjectFactory.createMovieCrew(person1, m3);
 
         MovieFilter filter = new MovieFilter();
         filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
@@ -223,14 +223,14 @@ public class MovieServiceTest {
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4)); // no
         Movie m4 = createMovie(LocalDate.of(1987, 5, 4));
 
-        testObjectFactory.createMovieParticipationForFilter(person2, m1, PartType.COMPOSER);
-        testObjectFactory.createMovieParticipationForFilter(person2, m2, PartType.WRITER);
-        testObjectFactory.createMovieParticipationForFilter(person1, m3, PartType.PRODUCER);
-        testObjectFactory.createMovieParticipationForFilter(person2, m4, PartType.COSTUME_DESIGNER);
+        testObjectFactory.createMovieCrewForFilter(person2, m1, MovieCrewType.COMPOSER);
+        testObjectFactory.createMovieCrewForFilter(person2, m2, MovieCrewType.WRITER);
+        testObjectFactory.createMovieCrewForFilter(person1, m3, MovieCrewType.PRODUCER);
+        testObjectFactory.createMovieCrewForFilter(person2, m4, MovieCrewType.COSTUME_DESIGNER);
 
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(person2.getId());
-        filter.setPartTypes(Set.of(PartType.COMPOSER, PartType.WRITER));
+        filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
         filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
         filter.setReleasedTo(LocalDate.of(1992, 5, 4));
         List<MovieReadDTO> filteredMovies = movieService.getMovies(filter);

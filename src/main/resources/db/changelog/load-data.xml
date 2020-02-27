@@ -52,11 +52,11 @@
         </loadUpdateData>
     </changeSet>
 
-    <changeSet id="load movie participations" author="andrew" runOnChange="true">
-        <loadUpdateData tableName="movie_participation" file="db/data/movie-part.csv" separator=";" primaryKey="id">
+    <changeSet id="load movie crews" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="movie_crew" file="db/data/movie-crew.csv" separator=";" primaryKey="id">
             <column name="id" type="uuid"/>
-            <column name="part_info" type="string"/>
-            <column name="part_type" type="string"/>
+            <column name="description" type="string"/>
+            <column name="movie_crew_type" type="string"/>
             <column name="movie_id" type="uuid"/>
             <column name="person_id" type="uuid"/>
             <column name="average_rating" type="numeric"/>
@@ -68,8 +68,8 @@
     <changeSet id="load movie casts" author="andrew" runOnChange="true">
         <loadUpdateData tableName="movie_cast" file="db/data/movie-cast.csv" separator=";" primaryKey="id">
             <column name="id" type="uuid"/>
-            <column name="part_info" type="string"/>
-            <column name="part_type" type="string"/>
+            <column name="description" type="string"/>
+            <column name="movie_crew_type" type="string"/>
             <column name="character" type="string"/>
             <column name="movie_id" type="uuid"/>
             <column name="person_id" type="uuid"/>

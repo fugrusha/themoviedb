@@ -4,13 +4,13 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.MovieParticipation;
-import com.golovko.backend.domain.PartType;
+import com.golovko.backend.domain.MovieCrew;
+import com.golovko.backend.domain.MovieCrewType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
-import com.golovko.backend.dto.movieparticipation.*;
+import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.service.MovieParticipationService;
+import com.golovko.backend.service.MovieCrewService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -32,8 +32,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(MovieParticipationController.class)
-public class MovieParticipationControllerTest {
+@WebMvcTest(MovieCrewController.class)
+public class MovieCrewControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -42,80 +42,76 @@ public class MovieParticipationControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private MovieParticipationService movieParticipationService;
+    private MovieCrewService movieCrewService;
 
     @Test
-    public void getMovieParticipationTest() throws Exception {
-        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+    public void getMovieCrewTest() throws Exception {
+        MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
 
-        Mockito.when(movieParticipationService.getMovieParticipation(readDTO.getMovieId(), readDTO.getId()))
-                .thenReturn(readDTO);
+        Mockito.when(movieCrewService.getMovieCrew(readDTO.getMovieId(), readDTO.getId())).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/movie-participations/{id}",
+                .perform(get("/api/v1/movies/{movieId}/movie-crews/{id}",
                         readDTO.getMovieId(), readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        MoviePartReadDTO actualDTO = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
+        MovieCrewReadDTO actualDTO = objectMapper.readValue(resultJson, MovieCrewReadDTO.class);
         Assertions.assertThat(actualDTO).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(movieParticipationService).getMovieParticipation(readDTO.getMovieId(), readDTO.getId());
+        Mockito.verify(movieCrewService).getMovieCrew(readDTO.getMovieId(), readDTO.getId());
     }
 
     @Test
-    public void getMovieParticipationExtendedTest() throws Exception {
+    public void getMovieCrewExtendedTest() throws Exception {
         PersonReadDTO personReadDTO = createPersonReadDTO();
         MovieReadDTO movieReadDTO = createMovieReadDTO();
-        MoviePartReadExtendedDTO readDTO = createMoviePartReadExtendedDTO(personReadDTO, movieReadDTO);
+        MovieCrewReadExtendedDTO readDTO = createMovieCrewReadExtendedDTO(personReadDTO, movieReadDTO);
 
-        Mockito
-                .when(movieParticipationService.getExtendedMovieParticipation(movieReadDTO.getId(), readDTO.getId()))
+        Mockito.when(movieCrewService.getExtendedMovieCrew(movieReadDTO.getId(), readDTO.getId()))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/movie-participations/{id}/extended",
+                .perform(get("/api/v1/movies/{movieId}/movie-crews/{id}/extended",
                         movieReadDTO.getId(), readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        MoviePartReadExtendedDTO actualDTO = objectMapper.readValue(resultJson, MoviePartReadExtendedDTO.class);
+        MovieCrewReadExtendedDTO actualDTO = objectMapper.readValue(resultJson, MovieCrewReadExtendedDTO.class);
         Assertions.assertThat(actualDTO).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(movieParticipationService)
-                .getExtendedMovieParticipation(movieReadDTO.getId(), readDTO.getId());
+        Mockito.verify(movieCrewService).getExtendedMovieCrew(movieReadDTO.getId(), readDTO.getId());
     }
 
     @Test
-    public void getListOfMovieParticipationTest() throws Exception {
-        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+    public void getListOfMovieCrewTest() throws Exception {
+        MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
-        List<MoviePartReadDTO> listOfMoviePart = List.of(readDTO);
+        List<MovieCrewReadDTO> listOfMoviePart = List.of(readDTO);
 
-        Mockito.when(movieParticipationService.getListOfMovieParticipation(movieId))
-                .thenReturn(listOfMoviePart);
+        Mockito.when(movieCrewService.getAllMovieCrews(movieId)).thenReturn(listOfMoviePart);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/movie-participations", movieId))
+                .perform(get("/api/v1/movies/{movieId}/movie-crews", movieId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MoviePartReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        List<MovieCrewReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assert.assertEquals(listOfMoviePart, actualResult);
     }
 
     @Test
-    public void getMovieParticipationWrongIdTest() throws Exception {
+    public void getMovieCrewWrongIdTest() throws Exception {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        EntityNotFoundException ex = new EntityNotFoundException(MovieParticipation.class, id, Movie.class, movieId);
+        EntityNotFoundException ex = new EntityNotFoundException(MovieCrew.class, id, Movie.class, movieId);
 
-        Mockito.when(movieParticipationService.getMovieParticipation(movieId, id)).thenThrow(ex);
+        Mockito.when(movieCrewService.getMovieCrew(movieId, id)).thenThrow(ex);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/movie-participations/{id}", movieId, id))
+                .perform(get("/api/v1/movies/{movieId}/movie-crews/{id}", movieId, id))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -123,87 +119,83 @@ public class MovieParticipationControllerTest {
     }
 
     @Test
-    public void createMovieParticipationTest() throws Exception {
-        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+    public void createMovieCrewTest() throws Exception {
+        MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
-        MoviePartCreateDTO createDTO = new MoviePartCreateDTO();
+        MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
         createDTO.setPersonId(readDTO.getPersonId());
-        createDTO.setPartInfo("some text");
-        createDTO.setPartType(PartType.COSTUME_DESIGNER);
+        createDTO.setDescription("some text");
+        createDTO.setMovieCrewType(MovieCrewType.COSTUME_DESIGNER);
 
-        Mockito
-                .when(movieParticipationService.createMovieParticipation(createDTO, movieId))
-                .thenReturn(readDTO);
+        Mockito.when(movieCrewService.createMovieCrew(createDTO, movieId)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/movies/{movieId}/movie-participations", movieId)
+                .perform(post("/api/v1/movies/{movieId}/movie-crews", movieId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        MoviePartReadDTO actualReadDTO = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
+        MovieCrewReadDTO actualReadDTO = objectMapper.readValue(resultJson, MovieCrewReadDTO.class);
         Assertions.assertThat(actualReadDTO).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test
-    public void updateMovieParticipationTest() throws Exception {
-        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+    public void updateMovieCrewTest() throws Exception {
+        MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
-        MoviePartPutDTO updateDTO = new MoviePartPutDTO();
-        updateDTO.setPartType(PartType.COMPOSER);
-        updateDTO.setPartInfo("New text");
+        MovieCrewPutDTO updateDTO = new MovieCrewPutDTO();
+        updateDTO.setMovieCrewType(MovieCrewType.COMPOSER);
+        updateDTO.setDescription("New text");
         updateDTO.setPersonId(UUID.randomUUID());
 
-        Mockito.when(movieParticipationService.updateMovieParticipation(movieId, readDTO.getId(), updateDTO))
-                .thenReturn(readDTO);
+        Mockito.when(movieCrewService.updateMovieCrew(movieId, readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/movies/{movieId}/movie-participations/{id}", movieId, readDTO.getId())
+                .perform(put("/api/v1/movies/{movieId}/movie-crews/{id}", movieId, readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        MoviePartReadDTO actualMovieParticipation = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
+        MovieCrewReadDTO actualMovieParticipation = objectMapper.readValue(resultJson, MovieCrewReadDTO.class);
         Assertions.assertThat(actualMovieParticipation).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test
-    public void patchMovieParticipationTest() throws Exception {
-        MoviePartPatchDTO patchDTO = new MoviePartPatchDTO();
-        patchDTO.setPartType(PartType.COMPOSER);
-        patchDTO.setPartInfo("New text");
+    public void patchMovieCrewTest() throws Exception {
+        MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
+        patchDTO.setMovieCrewType(MovieCrewType.COMPOSER);
+        patchDTO.setDescription("New text");
         patchDTO.setPersonId(UUID.randomUUID());
 
-        MoviePartReadDTO readDTO = createMoviePartReadDTO();
+        MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
-        Mockito.when(movieParticipationService.patchMovieParticipation(movieId, readDTO.getId(), patchDTO))
-                .thenReturn(readDTO);
+        Mockito.when(movieCrewService.patchMovieCrew(movieId, readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/movies/{movieId}/movie-participations/{id}", movieId, readDTO.getId())
+                .perform(patch("/api/v1/movies/{movieId}/movie-crews/{id}", movieId, readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        MoviePartReadDTO actualMovieParticipation = objectMapper.readValue(resultJson, MoviePartReadDTO.class);
+        MovieCrewReadDTO actualMovieParticipation = objectMapper.readValue(resultJson, MovieCrewReadDTO.class);
         Assertions.assertThat(actualMovieParticipation).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test
-    public void deleteMovieParticipationTest() throws Exception {
+    public void deleteMovieCrewTest() throws Exception {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-participations/{id}", movieId, id.toString()))
+        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-crews/{id}", movieId, id.toString()))
                 .andExpect(status().is2xxSuccessful());
 
-        Mockito.verify(movieParticipationService).deleteMovieParticipation(movieId, id);
+        Mockito.verify(movieCrewService).deleteMovieCrew(movieId, id);
     }
 
 
@@ -227,30 +219,30 @@ public class MovieParticipationControllerTest {
         return readDTO;
     }
 
-    private MoviePartReadDTO createMoviePartReadDTO() {
-        MoviePartReadDTO dto = new MoviePartReadDTO();
+    private MovieCrewReadDTO createMovieCrewReadDTO() {
+        MovieCrewReadDTO dto = new MovieCrewReadDTO();
         dto.setId(UUID.randomUUID());
-        dto.setPartInfo("Some text");
+        dto.setDescription("Some text");
         dto.setAverageRating(9.2);
         dto.setPersonId(UUID.randomUUID());
         dto.setMovieId(UUID.randomUUID());
-        dto.setPartType(PartType.COSTUME_DESIGNER);
+        dto.setMovieCrewType(MovieCrewType.COSTUME_DESIGNER);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 
-    private MoviePartReadExtendedDTO createMoviePartReadExtendedDTO(
+    private MovieCrewReadExtendedDTO createMovieCrewReadExtendedDTO(
             PersonReadDTO personDTO,
             MovieReadDTO movieDTO
     ) {
-        MoviePartReadExtendedDTO dto = new MoviePartReadExtendedDTO();
+        MovieCrewReadExtendedDTO dto = new MovieCrewReadExtendedDTO();
         dto.setId(UUID.randomUUID());
-        dto.setPartInfo("Some text");
+        dto.setDescription("Some text");
         dto.setAverageRating(9.2);
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
-        dto.setPartType(PartType.COSTUME_DESIGNER);
+        dto.setMovieCrewType(MovieCrewType.COSTUME_DESIGNER);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;

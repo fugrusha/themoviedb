@@ -27,7 +27,7 @@ public class TestObjectFactory {
     private MovieCastRepository movieCastRepository;
 
     @Autowired
-    private MovieParticipationRepository movieParticipationRepository;
+    private MovieCrewRepository movieCrewRepository;
 
     @Autowired
     private ArticleRepository articleRepository;
@@ -98,33 +98,33 @@ public class TestObjectFactory {
 
     public MovieCast createMovieCast(Person person, Movie movie) {
         MovieCast movieCast = new MovieCast();
-        movieCast.setPartInfo("Some text");
+        movieCast.setDescription("Some text");
         movieCast.setAverageRating(5.0);
         movieCast.setPerson(person);
         movieCast.setMovie(movie);
-        movieCast.setPartType(PartType.CAST);
+        movieCast.setMovieCrewType(MovieCrewType.CAST);
         movieCast.setCharacter("Leon");
         return movieCastRepository.save(movieCast);
     }
 
-    public MovieParticipation createMovieParticipation(Person person, Movie movie) {
-        MovieParticipation movieParticipation = new MovieParticipation();
-        movieParticipation.setPartInfo("Some text");
-        movieParticipation.setAverageRating(5.0);
-        movieParticipation.setPerson(person);
-        movieParticipation.setMovie(movie);
-        movieParticipation.setPartType(PartType.WRITER);
-        return movieParticipationRepository.save(movieParticipation);
+    public MovieCrew createMovieCrew(Person person, Movie movie) {
+        MovieCrew movieCrew = new MovieCrew();
+        movieCrew.setDescription("Some text");
+        movieCrew.setAverageRating(5.0);
+        movieCrew.setPerson(person);
+        movieCrew.setMovie(movie);
+        movieCrew.setMovieCrewType(MovieCrewType.WRITER);
+        return movieCrewRepository.save(movieCrew);
     }
 
-    public MovieParticipation createMovieParticipationForFilter(Person person, Movie movie, PartType partType) {
-        MovieParticipation movieParticipation = new MovieParticipation();
-        movieParticipation.setPartInfo("Some text");
-        movieParticipation.setAverageRating(5.0);
-        movieParticipation.setPerson(person);
-        movieParticipation.setMovie(movie);
-        movieParticipation.setPartType(partType);
-        return movieParticipationRepository.save(movieParticipation);
+    public MovieCrew createMovieCrewForFilter(Person person, Movie movie, MovieCrewType movieCrewType) {
+        MovieCrew movieCrew = new MovieCrew();
+        movieCrew.setDescription("Some text");
+        movieCrew.setAverageRating(5.0);
+        movieCrew.setPerson(person);
+        movieCrew.setMovie(movie);
+        movieCrew.setMovieCrewType(movieCrewType);
+        return movieCrewRepository.save(movieCrew);
     }
 
     public Article createArticle(ApplicationUser author, ArticleStatus status) {

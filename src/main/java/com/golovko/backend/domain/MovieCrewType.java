@@ -1,6 +1,6 @@
 package com.golovko.backend.domain;
 
-public enum PartType {
+public enum MovieCrewType {
     CAST,
     COMPOSER,
     COSTUME_DESIGNER,

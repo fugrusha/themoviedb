@@ -14,16 +14,16 @@ import java.util.UUID;
 @Getter
 @Setter
 @EntityListeners(AuditingEntityListener.class)
-public class MovieParticipation {
+public class MovieCrew {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    private String partInfo;
+    private String description;
 
     @Enumerated(EnumType.STRING)
-    private PartType partType;
+    private MovieCrewType movieCrewType;
 
     private Double averageRating;
 
