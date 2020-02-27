@@ -2,7 +2,7 @@ package com.golovko.backend.dto.complaint;
 
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
-import com.golovko.backend.domain.ParentType;
+import com.golovko.backend.domain.TargetObjectType;
 import lombok.Data;
 
 import java.time.Instant;
@@ -27,9 +27,9 @@ public class ComplaintReadDTO {
 
     private Instant updatedAt;
 
-    private ParentType parentType;
+    private TargetObjectType targetObjectType;
 
-    private UUID parentId;
+    private UUID targetObjectId;
 
     private UUID moderatorId;
 }

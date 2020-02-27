@@ -5,8 +5,8 @@ import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
-import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
+import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +21,11 @@ public class PersonService {
     @Autowired
     private TranslationService translationService;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     public PersonReadDTO getPerson(UUID id) {
-        Person person = getRequiredPerson(id);
+        Person person = repoHelper.getEntityById(Person.class, id);
         return translationService.toRead(person);
     }
 
@@ -35,7 +38,7 @@ public class PersonService {
     }
 
     public PersonReadDTO patchPerson(UUID id, PersonPatchDTO patchDTO) {
-        Person person = getRequiredPerson(id);
+        Person person = repoHelper.getEntityById(Person.class, id);
 
         translationService.patchEntity(patchDTO, person);
 
@@ -45,7 +48,7 @@ public class PersonService {
     }
 
     public PersonReadDTO updatePerson(UUID id, PersonPutDTO updateDTO) {
-        Person person = getRequiredPerson(id);
+        Person person = repoHelper.getEntityById(Person.class, id);
 
         translationService.updateEntity(updateDTO, person);
 
@@ -55,11 +58,6 @@ public class PersonService {
     }
 
     public void deletePerson(UUID id) {
-        personRepository.delete(getRequiredPerson(id));
-    }
-
-    private Person getRequiredPerson(UUID id) {
-        return personRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(Person.class, id));
+        personRepository.delete(repoHelper.getEntityById(Person.class, id));
     }
 }

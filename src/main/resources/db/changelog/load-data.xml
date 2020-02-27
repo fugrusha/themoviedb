@@ -25,8 +25,8 @@
             <column name="updated_at" type="timestamp"/>
             <column name="author_id" type="uuid"/>
             <column name="moderator_id" type="uuid"/>
-            <column name="parent_type" type="string"/>
-            <column name="parent_id" type="uuid"/>
+            <column name="target_object_type" type="string"/>
+            <column name="target_object_id" type="uuid"/>
         </loadUpdateData>
     </changeSet>
 
@@ -102,8 +102,8 @@
             <column name="likes_count" type="numeric" />
             <column name="dislikes_count" type="numeric" />
             <column name="author_id" type="uuid"/>
-            <column name="parent_type" type="string"/>
-            <column name="parent_id" type="uuid"/>
+            <column name="target_object_type" type="string"/>
+            <column name="target_object_id" type="uuid"/>
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
         </loadUpdateData>

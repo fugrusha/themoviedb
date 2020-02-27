@@ -10,7 +10,6 @@ import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.ArticleService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -120,7 +119,6 @@ public class ArticleControllerTest {
         Mockito.verify(articleService).getArticleExtended(extendedDTO.getId());
     }
 
-    @Ignore // TODO add user authentication
     @Test
     public void createArticleTest() throws Exception {
         UUID authorId = UUID.randomUUID();
@@ -130,8 +128,9 @@ public class ArticleControllerTest {
         createDTO.setTitle("Text title");
         createDTO.setText("Some text");
         createDTO.setStatus(ArticleStatus.DRAFT);
-//        add user authentication
-//        Mockito.when(articleService.createArticle(createDTO, author)).thenReturn(readDTO);
+        createDTO.setAuthorId(authorId);
+
+        Mockito.when(articleService.createArticle(createDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/articles/")
@@ -143,7 +142,7 @@ public class ArticleControllerTest {
         ArticleReadDTO actualDTO = objectMapper.readValue(resultJson, ArticleReadDTO.class);
         Assertions.assertThat(actualDTO).isEqualToComparingFieldByField(readDTO);
 
-//        Mockito.verify(articleService).createArticle(createDTO, author);
+        Mockito.verify(articleService).createArticle(createDTO);
     }
 
     @Test

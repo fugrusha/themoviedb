@@ -1,7 +1,7 @@
 package com.golovko.backend.dto.comment;
 
 import com.golovko.backend.domain.CommentStatus;
-import com.golovko.backend.domain.ParentType;
+import com.golovko.backend.domain.TargetObjectType;
 import lombok.Data;
 
 import java.time.Instant;
@@ -26,7 +26,7 @@ public class CommentReadDTO {
 
     private UUID authorId;
 
-    private ParentType parentType;
+    private TargetObjectType targetObjectType;
 
-    private UUID parentId;
+    private UUID targetObjectId;
 }

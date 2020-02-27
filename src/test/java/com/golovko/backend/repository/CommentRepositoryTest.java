@@ -18,7 +18,7 @@ import java.time.Instant;
 
 import static com.golovko.backend.domain.CommentStatus.APPROVED;
 import static com.golovko.backend.domain.CommentStatus.NEED_MODERATION;
-import static com.golovko.backend.domain.ParentType.ARTICLE;
+import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest

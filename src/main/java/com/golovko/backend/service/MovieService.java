@@ -2,8 +2,8 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.movie.*;
-import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieRepository;
+import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,8 +20,11 @@ public class MovieService {
     @Autowired
     private TranslationService translationService;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     public MovieReadDTO getMovie(UUID id) {
-        Movie movie = getMovieRequired(id);
+        Movie movie = repoHelper.getEntityById(Movie.class, id);
         return translationService.toRead(movie);
     }
 
@@ -39,7 +42,7 @@ public class MovieService {
     }
 
     public MovieReadDTO patchMovie(UUID id, MoviePatchDTO patchDTO) {
-        Movie movie = getMovieRequired(id);
+        Movie movie = repoHelper.getEntityById(Movie.class, id);
 
         translationService.patchEntity(patchDTO, movie);
 
@@ -49,7 +52,7 @@ public class MovieService {
     }
 
     public MovieReadDTO updateMovie(UUID id, MoviePutDTO updateDTO) {
-        Movie movie = getMovieRequired(id);
+        Movie movie = repoHelper.getEntityById(Movie.class, id);
 
         translationService.updateEntity(updateDTO, movie);
 
@@ -59,12 +62,6 @@ public class MovieService {
     }
 
     public void deleteMovie(UUID id) {
-        movieRepository.delete(getMovieRequired(id));
-    }
-
-    private Movie getMovieRequired(UUID id) {
-        return movieRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(Movie.class, id)
-        );
+        movieRepository.delete(repoHelper.getEntityById(Movie.class, id));
     }
 }

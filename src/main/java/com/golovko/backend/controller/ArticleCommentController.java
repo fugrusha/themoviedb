@@ -1,11 +1,10 @@
 package com.golovko.backend.controller;
 
-import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
-import com.golovko.backend.service.ArticleCommentService;
+import com.golovko.backend.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,31 +16,31 @@ import java.util.UUID;
 public class ArticleCommentController {
 
     @Autowired
-    private ArticleCommentService articleCommentService;
+    private CommentService commentService;
 
     @GetMapping("/{id}")
     public CommentReadDTO getArticleComment(@PathVariable UUID articleId, @PathVariable UUID id) {
-        return articleCommentService.getComment(articleId, id);
+        return commentService.getComment(articleId, id);
     }
 
     // for users
     @GetMapping
     public List<CommentReadDTO> getAllPublishedArticleComments(@PathVariable UUID articleId) {
-        return articleCommentService.getAllPublishedComments(articleId);
+        return commentService.getAllPublishedComments(articleId);
     }
 
     // for moderator
     @GetMapping("/moderator")
     public List<CommentReadDTO> getAllArticleComments(@PathVariable UUID articleId) {
-        return articleCommentService.getAllComments(articleId);
+        return commentService.getAllComments(articleId);
     }
 
     @PostMapping
     public CommentReadDTO createArticleComment(
             @PathVariable UUID articleId,
-            CommentCreateDTO createDTO,
-            ApplicationUser author) {
-        return articleCommentService.createComment(articleId, createDTO, author);
+            @RequestBody CommentCreateDTO createDTO
+    ) {
+        return commentService.createComment(articleId, createDTO);
     }
 
     @PutMapping("/{id}")
@@ -50,7 +49,7 @@ public class ArticleCommentController {
             @PathVariable UUID id,
             @RequestBody CommentPutDTO putDTO
     ) {
-        return articleCommentService.updateComment(articleId, id, putDTO);
+        return commentService.updateComment(articleId, id, putDTO);
     }
 
     @PatchMapping("/{id}")
@@ -59,11 +58,11 @@ public class ArticleCommentController {
             @PathVariable UUID id,
             @RequestBody CommentPatchDTO patchDTO
     ) {
-        return articleCommentService.patchComment(articleId, id, patchDTO);
+        return commentService.patchComment(articleId, id, patchDTO);
     }
 
     @DeleteMapping("/{id}")
     public void deleteArticleComment(@PathVariable UUID articleId, @PathVariable UUID id) {
-        articleCommentService.deleteComment(articleId, id);
+        commentService.deleteComment(articleId, id);
     }
 }

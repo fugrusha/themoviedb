@@ -70,8 +70,10 @@ public class MovieParticipationService {
     }
 
     private MovieParticipation getMovieParticipationByMovieIdRequired(UUID id, UUID movieId) {
-        if (movieParticipationRepository.findByIdAndMovieId(id, movieId) != null) {
-            return movieParticipationRepository.findByIdAndMovieId(id, movieId);
+        MovieParticipation moviePart = movieParticipationRepository.findByIdAndMovieId(id, movieId);
+
+        if (moviePart != null) {
+            return moviePart;
         } else {
             throw new EntityNotFoundException(MovieParticipation.class, id, Movie.class, movieId);
         }

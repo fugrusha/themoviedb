@@ -1,10 +1,8 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Article;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.dto.article.*;
-import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,12 +25,12 @@ public class ArticleService {
     private RepositoryHelper repoHelper;
 
     public ArticleReadDTO getArticle(UUID id) {
-        Article article = getArticleRequired(id);
+        Article article = repoHelper.getEntityById(Article.class, id);
         return translationService.toRead(article);
     }
 
     public ArticleReadExtendedDTO getArticleExtended(UUID id) {
-        Article article = getArticleRequired(id);
+        Article article = repoHelper.getEntityById(Article.class, id);
         return translationService.toReadExtended(article);
     }
 
@@ -41,17 +39,16 @@ public class ArticleService {
         return articles.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
-    public ArticleReadDTO createArticle(ArticleCreateDTO createDTO, ApplicationUser author) {
+    public ArticleReadDTO createArticle(ArticleCreateDTO createDTO) {
         Article article = translationService.toEntity(createDTO);
 
-        article.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, author.getId()));
         article = articleRepository.save(article);
 
         return translationService.toRead(article);
     }
 
     public ArticleReadDTO updateArticle(UUID id, ArticlePutDTO putDTO) {
-        Article article = getArticleRequired(id);
+        Article article = repoHelper.getEntityById(Article.class, id);
 
         translationService.updateEntity(article, putDTO);
 
@@ -60,7 +57,7 @@ public class ArticleService {
     }
 
     public ArticleReadDTO patchArticle(UUID id, ArticlePatchDTO patchDTO) {
-        Article article = getArticleRequired(id);
+        Article article = repoHelper.getEntityById(Article.class, id);
 
         translationService.patchEntity(article, patchDTO);
 
@@ -69,11 +66,6 @@ public class ArticleService {
     }
 
     public void deleteArticle(UUID id) {
-        articleRepository.delete(getArticleRequired(id));
-    }
-
-    private Article getArticleRequired(UUID id) {
-        return articleRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(Article.class, id));
+        articleRepository.delete(repoHelper.getEntityById(Article.class, id));
     }
 }

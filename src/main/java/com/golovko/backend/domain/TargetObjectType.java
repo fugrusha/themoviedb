@@ -1,6 +1,6 @@
 package com.golovko.backend.domain;
 
-public enum ParentType {
+public enum TargetObjectType {
     COMMENT,
     MOVIE,
     ARTICLE,

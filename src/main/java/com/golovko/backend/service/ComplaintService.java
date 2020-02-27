@@ -1,6 +1,8 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.*;
+import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.Complaint;
+import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -16,7 +18,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class MovieComplaintService {
+public class ComplaintService {
 
     @Autowired
     private ComplaintRepository complaintRepository;
@@ -27,34 +29,28 @@ public class MovieComplaintService {
     @Autowired
     private RepositoryHelper repoHelper;
 
-    public ComplaintReadDTO getMovieComplaint(UUID movieId, UUID id) {
-        Complaint complaint = getComplaintByMovieId(id, movieId);
+    public ComplaintReadDTO getComplaint(UUID userId, UUID id) {
+        Complaint complaint = getComplaintByUserId(id, userId);
         return translationService.toRead(complaint);
     }
 
-    public List<ComplaintReadDTO> getMovieComplaints(UUID movieId) {
-        List<Complaint> complaints = complaintRepository.findAllByParent(movieId, ParentType.MOVIE);
+    public List<ComplaintReadDTO> getUserComplaints(UUID userId) {
+        List<Complaint> complaints = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
         return complaints.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
-    public ComplaintReadDTO createMovieComplaint(
-            UUID movieId,
-            ComplaintCreateDTO createDTO,
-            ApplicationUser author
-    ) {
+    public ComplaintReadDTO createComplaint(UUID userId, ComplaintCreateDTO createDTO) {
         Complaint complaint = translationService.toEntity(createDTO);
 
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
-        complaint.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, author.getId()));
-        complaint.setParentType(ParentType.MOVIE);
-        complaint.setParentId(movieId);
+        complaint.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, userId));
 
         complaint = complaintRepository.save(complaint);
         return translationService.toRead(complaint);
     }
 
-    public ComplaintReadDTO patchMovieComplaint(UUID movieId, UUID id, ComplaintPatchDTO patchDTO) {
-        Complaint complaint = getComplaintByMovieId(id, movieId);
+    public ComplaintReadDTO patchComplaint(UUID userId, UUID id, ComplaintPatchDTO patchDTO) {
+        Complaint complaint = getComplaintByUserId(id, userId);
 
         translationService.patchEntity(patchDTO, complaint);
         complaint = complaintRepository.save(complaint);
@@ -62,8 +58,8 @@ public class MovieComplaintService {
         return translationService.toRead(complaint);
     }
 
-    public ComplaintReadDTO updateMovieComplaint(UUID movieId, UUID id, ComplaintPutDTO updateDTO) {
-        Complaint complaint = getComplaintByMovieId(id, movieId);
+    public ComplaintReadDTO updateComplaint(UUID userId, UUID id, ComplaintPutDTO updateDTO) {
+        Complaint complaint = getComplaintByUserId(id, userId);
 
         translationService.updateEntity(updateDTO, complaint);
         complaint = complaintRepository.save(complaint);
@@ -71,17 +67,17 @@ public class MovieComplaintService {
         return translationService.toRead(complaint);
     }
 
-    public void deleteMovieComplaint(UUID movieId, UUID id) {
-        complaintRepository.delete(getComplaintByMovieId(id, movieId));
+    public void deleteComplaint(UUID userId, UUID id) {
+        complaintRepository.delete(getComplaintByUserId(id, userId));
     }
 
-    private Complaint getComplaintByMovieId(UUID id, UUID movieId) {
-        Complaint complaint = complaintRepository.findByIdAndParentId(id, movieId, ParentType.MOVIE);
+    private Complaint getComplaintByUserId(UUID id, UUID userId) {
+        Complaint complaint = complaintRepository.findByIdAndAuthorId(id, userId);
 
         if (complaint != null) {
             return complaint;
         } else {
-            throw new EntityNotFoundException(Complaint.class, id, Movie.class, movieId);
+            throw new EntityNotFoundException(Complaint.class, id, ApplicationUser.class, userId);
         }
     }
 }

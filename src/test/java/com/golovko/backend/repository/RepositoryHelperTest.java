@@ -49,4 +49,22 @@ public class RepositoryHelperTest {
     public void getReferenceNegativeTest() {
         repoHelper.getReferenceIfExist(ApplicationUser.class, UUID.randomUUID());
     }
+
+    @Test
+    public void getEntityByIdTest() {
+        ApplicationUser user = testObjectFactory.createUser();
+
+        ApplicationUser userFromDB = applicationUserRepository.findById(user.getId()).get();
+
+        ApplicationUser userEntity = repoHelper.getEntityById(ApplicationUser.class, user.getId());
+
+        Assertions.assertThat(userEntity).isInstanceOf(ApplicationUser.class);
+        Assert.assertEquals(userFromDB.getId(), userEntity.getId());
+        Assertions.assertThat(userEntity).isEqualToIgnoringGivenFields(userFromDB, "articles");
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void getEntityByWrongId() {
+        repoHelper.getEntityById(ApplicationUser.class, UUID.randomUUID());
+    }
 }

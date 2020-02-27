@@ -52,7 +52,7 @@ public class MovieParticipationControllerTest {
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/{movieId}/movie-participations/{id}",
+                .perform(get("/api/v1/movies/{movieId}/movie-participations/{id}",
                         readDTO.getMovieId(), readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -74,7 +74,7 @@ public class MovieParticipationControllerTest {
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/{movieId}/movie-participations/{id}/extended",
+                .perform(get("/api/v1/movies/{movieId}/movie-participations/{id}/extended",
                         movieReadDTO.getId(), readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -97,7 +97,7 @@ public class MovieParticipationControllerTest {
                 .thenReturn(listOfMoviePart);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/{movieId}/movie-participations", movieId))
+                .perform(get("/api/v1/movies/{movieId}/movie-participations", movieId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -115,7 +115,7 @@ public class MovieParticipationControllerTest {
         Mockito.when(movieParticipationService.getMovieParticipation(movieId, id)).thenThrow(ex);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/{movieId}/movie-participations/{id}", movieId, id))
+                .perform(get("/api/v1/movies/{movieId}/movie-participations/{id}", movieId, id))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
@@ -137,7 +137,7 @@ public class MovieParticipationControllerTest {
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/{movieId}/movie-participations", movieId)
+                .perform(post("/api/v1/movies/{movieId}/movie-participations", movieId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
@@ -161,7 +161,7 @@ public class MovieParticipationControllerTest {
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/{movieId}/movie-participations/{id}", movieId, readDTO.getId())
+                .perform(put("/api/v1/movies/{movieId}/movie-participations/{id}", movieId, readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
@@ -185,7 +185,7 @@ public class MovieParticipationControllerTest {
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/{movieId}/movie-participations/{id}", movieId, readDTO.getId())
+                .perform(patch("/api/v1/movies/{movieId}/movie-participations/{id}", movieId, readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isOk())
@@ -200,7 +200,7 @@ public class MovieParticipationControllerTest {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/{movieId}/movie-participations/{id}", movieId, id.toString()))
+        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-participations/{id}", movieId, id.toString()))
                 .andExpect(status().is2xxSuccessful());
 
         Mockito.verify(movieParticipationService).deleteMovieParticipation(movieId, id);

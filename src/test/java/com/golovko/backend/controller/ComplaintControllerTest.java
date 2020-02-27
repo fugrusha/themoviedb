@@ -3,11 +3,12 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.service.UserComplaintService;
+import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -28,8 +29,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @RunWith(SpringRunner.class)
-@WebMvcTest(UserComplaintController.class)
-public class UserComplaintControllerTest {
+@WebMvcTest(ComplaintController.class)
+public class ComplaintControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -38,7 +39,7 @@ public class UserComplaintControllerTest {
     private ObjectMapper objectMapper;
 
     @MockBean
-    private UserComplaintService userComplaintService;
+    private ComplaintService complaintService;
 
     @Test
     public void getComplaintByIdTest() throws Exception {
@@ -47,7 +48,7 @@ public class UserComplaintControllerTest {
         UUID parentId = UUID.randomUUID();
         ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId, moderatorId);
 
-        Mockito.when(userComplaintService.getComplaint(userId, readDTO.getId())).thenReturn(readDTO);
+        Mockito.when(complaintService.getComplaint(userId, readDTO.getId())).thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/users/{userId}/complaints/{id}", userId, readDTO.getId()))
@@ -59,11 +60,11 @@ public class UserComplaintControllerTest {
         ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(userComplaintService).getComplaint(userId, readDTO.getId());
+        Mockito.verify(complaintService).getComplaint(userId, readDTO.getId());
     }
 
     @Test
-    public void getListOfUserComplaintsTest() throws Exception {
+    public void getAllUserComplaintsTest() throws Exception {
         UUID userId1 = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
@@ -72,7 +73,7 @@ public class UserComplaintControllerTest {
 
         List<ComplaintReadDTO> expectedResult = List.of(c1, c2);
 
-        Mockito.when(userComplaintService.getUserComplaints(userId1)).thenReturn(expectedResult);
+        Mockito.when(complaintService.getUserComplaints(userId1)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/users/{userId}/complaints/", userId1))
@@ -83,7 +84,7 @@ public class UserComplaintControllerTest {
         Assertions.assertThat(actualResult).extracting(ComplaintReadDTO::getId)
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
 
-        Mockito.verify(userComplaintService).getUserComplaints(userId1);
+        Mockito.verify(complaintService).getUserComplaints(userId1);
     }
 
     @Test
@@ -93,7 +94,7 @@ public class UserComplaintControllerTest {
 
         EntityNotFoundException ex = new EntityNotFoundException(Movie.class, wrongId, ApplicationUser.class, userId);
 
-        Mockito.when(userComplaintService.getComplaint(userId, wrongId)).thenThrow(ex);
+        Mockito.when(complaintService.getComplaint(userId, wrongId)).thenThrow(ex);
 
         String result = mockMvc
                 .perform(get("/api/v1/users/{userId}/complaints/{id}", userId, wrongId))
@@ -101,6 +102,34 @@ public class UserComplaintControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         Assert.assertTrue(result.contains(ex.getMessage()));
+    }
+
+    @Test
+    public void createComplaintTest() throws Exception {
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setTargetObjectId(UUID.randomUUID());
+
+        UUID userId = UUID.randomUUID();
+        UUID targetObjectId = createDTO.getTargetObjectId();
+        UUID moderatorId = UUID.randomUUID();
+
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, targetObjectId, moderatorId);
+
+        Mockito.when(complaintService.createComplaint(userId, createDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/complaints/", userId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
+        Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
     }
 
     @Test
@@ -115,7 +144,7 @@ public class UserComplaintControllerTest {
         patchDTO.setComplaintText("another text");
         patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
 
-        Mockito.when(userComplaintService.patchComplaint(userId, readDTO.getId(), patchDTO))
+        Mockito.when(complaintService.patchComplaint(userId, readDTO.getId(), patchDTO))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
@@ -141,7 +170,7 @@ public class UserComplaintControllerTest {
         updateDTO.setComplaintTitle("new title");
         updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
 
-        Mockito.when(userComplaintService.updateComplaint(userId, readDTO.getId(), updateDTO))
+        Mockito.when(complaintService.updateComplaint(userId, readDTO.getId(), updateDTO))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
@@ -163,7 +192,7 @@ public class UserComplaintControllerTest {
         mockMvc.perform(delete("/api/v1/users/{userId}/complaints/{id}", userId, id))
                 .andExpect(status().isOk());
 
-        Mockito.verify(userComplaintService).deleteComplaint(userId, id);
+        Mockito.verify(complaintService).deleteComplaint(userId, id);
     }
 
     private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {
@@ -176,8 +205,8 @@ public class UserComplaintControllerTest {
         readDTO.setAuthorId(authorId);
         readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        readDTO.setParentType(ParentType.PERSON);
-        readDTO.setParentId(parentId);
+        readDTO.setTargetObjectType(TargetObjectType.PERSON);
+        readDTO.setTargetObjectId(parentId);
         readDTO.setModeratorId(moderatorId);
         return readDTO;
     }

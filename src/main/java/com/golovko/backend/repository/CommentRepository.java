@@ -2,7 +2,6 @@ package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
-import com.golovko.backend.domain.ParentType;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -14,18 +13,15 @@ import java.util.UUID;
 public interface CommentRepository extends CrudRepository<Comment, UUID> {
 
     @Query("select c from Comment c where c.id = :commentId" +
-            " and c.parentId = :parentId" +
-            " and c.parentType = :parentType")
-    Comment findByIdAndParentId(UUID commentId, UUID parentId, ParentType parentType);
+            " and c.targetObjectId = :targetId")
+    Comment findByIdAndTargetId(UUID commentId, UUID targetId);
 
-    @Query("select c from Comment c where c.parentId = :parentId" +
-            " and c.parentType = :parentType" +
+    @Query("select c from Comment c where c.targetObjectId = :targetId" +
             " order by c.createdAt asc")
-    List<Comment> findByParentIdOrderByCreatedAtAsc(UUID parentId, ParentType parentType);
+    List<Comment> findByTargetIdOrderByCreatedAtAsc(UUID targetId);
 
-    @Query("select c from Comment c where c.parentId = :parentId" +
+    @Query("select c from Comment c where c.targetObjectId = :targetId" +
             " and c.status = :status" +
-            " and c.parentType = :parentType" +
             " order by c.createdAt asc")
-    List<Comment> findAllByStatusAndParent(UUID parentId, CommentStatus status, ParentType parentType);
+    List<Comment> findAllByStatusAndTarget(UUID targetId, CommentStatus status);
 }

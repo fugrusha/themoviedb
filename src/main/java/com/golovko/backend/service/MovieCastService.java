@@ -71,8 +71,10 @@ public class MovieCastService {
     }
 
     private MovieCast getMovieCastByMovieIdRequired(UUID id, UUID movieId) {
-        if (movieCastRepository.findByIdAndMovieId(id, movieId) != null) {
-            return movieCastRepository.findByIdAndMovieId(id, movieId);
+        MovieCast movieCast = movieCastRepository.findByIdAndMovieId(id, movieId);
+
+        if (movieCast != null) {
+            return movieCast;
         } else {
             throw new EntityNotFoundException(MovieCast.class, id, Movie.class, movieId);
         }

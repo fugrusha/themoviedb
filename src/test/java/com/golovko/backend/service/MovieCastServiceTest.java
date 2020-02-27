@@ -16,6 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -36,6 +37,9 @@ public class MovieCastServiceTest {
     @Autowired
     private MovieCastService movieCastService;
 
+    @Autowired
+    TransactionTemplate transactionTemplate;
+
     @Test
     public void getMovieCastTest() {
         Person person = testObjectFactory.createPerson();
@@ -46,8 +50,8 @@ public class MovieCastServiceTest {
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCast,
                 "movieId", "personId");
-        Assertions.assertThat(readDTO.getMovieId()).isEqualToComparingFieldByField(movie.getId());
-        Assertions.assertThat(readDTO.getPersonId()).isEqualToComparingFieldByField(person.getId());
+        Assert.assertEquals(readDTO.getMovieId(), movie.getId());
+        Assert.assertEquals(readDTO.getPersonId(), person.getId());
     }
 
     @Test
@@ -183,15 +187,23 @@ public class MovieCastServiceTest {
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        movieCast = movieCastRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCast,
-                "movieId", "personId");
-        Assert.assertEquals(movieCast.getMovie().getId(), readDTO.getMovieId());
-        Assert.assertEquals(movieCast.getPerson().getId(), readDTO.getPersonId());
+        inTransaction(() -> {
+            MovieCast movieCastAfterUpdate = movieCastRepository.findById(readDTO.getId()).get();
+            Assertions.assertThat(movieCastAfterUpdate).isEqualToIgnoringGivenFields(movieCast,
+                    "person", "movie");
+            Assert.assertEquals(movieCast.getMovie().getId(), movieCastAfterUpdate.getMovie().getId());
+            Assert.assertEquals(movieCast.getPerson().getId(), movieCastAfterUpdate.getPerson().getId());
+        });
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void getMovieCastWrongIdTest() {
         movieCastService.getMovieCast(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    private void inTransaction (Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
     }
 }

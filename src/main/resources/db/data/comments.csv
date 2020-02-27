@@ -1,4 +1,4 @@
-id;message;status;likes_count;dislikes_count;author_id;parent_type;parent_id;created_at;updated_at
+id;message;status;likes_count;dislikes_count;author_id;target_object_type;target_object_id;created_at;updated_at
 a9b0e470-7e8f-4452-867f-9bccc6b93242;One more;PENDING;10;10;6005f237-913a-4549-b5fd-8d4594dc0344;ARTICLE;108eed48-1a0d-47e3-b8dc-ee037afd4b1a;2018-02-15T15:00:03;2019-03-11T10:45:00
 968bc853-a172-43c3-b55f-1987c6afc29b;Comment 1;PENDING;10;10;6005f237-913a-4549-b5fd-8d4594dc0344;ARTICLE;484257ae-811e-4bc7-beff-897968f5024c;2018-04-15T15:00:03;2019-04-11T10:45:00
 56d6879e-6d07-46c1-b36f-2e65504c7759;Comment 2;NEED_MODERATION;56;124;6005f237-913a-4549-b5fd-8d4594dc0344;ARTICLE;484257ae-811e-4bc7-beff-897968f5024c;2018-05-15T15:00:03;2019-05-11T10:45:00

@@ -1,9 +1,10 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.service.UserComplaintService;
+import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,19 +13,27 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/users/{userId}/complaints")
-public class UserComplaintController {
+public class ComplaintController {
 
     @Autowired
-    private UserComplaintService userComplaintService;
+    private ComplaintService complaintService;
 
     @GetMapping("/{id}")
     public ComplaintReadDTO getComplaint(@PathVariable UUID userId, @PathVariable UUID id) {
-        return userComplaintService.getComplaint(userId, id);
+        return complaintService.getComplaint(userId, id);
     }
 
     @GetMapping
-    public List<ComplaintReadDTO> getListOfUserComplaints(@PathVariable UUID userId) {
-        return userComplaintService.getUserComplaints(userId);
+    public List<ComplaintReadDTO> getAllUserComplaints(@PathVariable UUID userId) {
+        return complaintService.getUserComplaints(userId);
+    }
+
+    @PostMapping
+    public ComplaintReadDTO createComplaint(
+            @PathVariable UUID userId,
+            @RequestBody ComplaintCreateDTO createDTO
+    ) {
+        return complaintService.createComplaint(userId, createDTO);
     }
 
     @PatchMapping("/{id}")
@@ -32,7 +41,7 @@ public class UserComplaintController {
             @PathVariable UUID userId,
             @PathVariable UUID id,
             @RequestBody ComplaintPatchDTO patchDTO) {
-        return userComplaintService.patchComplaint(userId, id, patchDTO);
+        return complaintService.patchComplaint(userId, id, patchDTO);
     }
 
     @PutMapping("/{id}")
@@ -40,11 +49,11 @@ public class UserComplaintController {
             @PathVariable UUID userId,
             @PathVariable UUID id,
             @RequestBody ComplaintPutDTO updateDTO) {
-        return userComplaintService.updateComplaint(userId, id, updateDTO);
+        return complaintService.updateComplaint(userId, id, updateDTO);
     }
 
     @DeleteMapping("/{id}")
     public void deleteComplaint(@PathVariable UUID userId, @PathVariable UUID id) {
-        userComplaintService.deleteComplaint(userId, id);
+        complaintService.deleteComplaint(userId, id);
     }
 }

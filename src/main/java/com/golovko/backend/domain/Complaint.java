@@ -43,8 +43,8 @@ public class Complaint {
     private ApplicationUser moderator;
 
     @Enumerated(EnumType.STRING)
-    private ParentType parentType;
+    private TargetObjectType targetObjectType;
 
     @Column(nullable = false)
-    private UUID parentId;
+    private UUID targetObjectId;
 }

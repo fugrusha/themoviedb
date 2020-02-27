@@ -81,14 +81,15 @@ public class ArticleServiceTest {
 
     @Test
     public void createArticleTest() {
+        ApplicationUser author = testObjectFactory.createUser();
+
         ArticleCreateDTO createDTO = new ArticleCreateDTO();
         createDTO.setTitle("Text title");
         createDTO.setText("Some text");
         createDTO.setStatus(ArticleStatus.DRAFT);
+        createDTO.setAuthorId(author.getId());
 
-        ApplicationUser author = testObjectFactory.createUser();
-
-        ArticleReadDTO readDTO = articleService.createArticle(createDTO, author);
+        ArticleReadDTO readDTO = articleService.createArticle(createDTO);
 
         Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
         Assert.assertNotNull(readDTO.getId());

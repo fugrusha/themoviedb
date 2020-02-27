@@ -138,8 +138,8 @@ public class TranslationService {
         dto.setAuthorId(complaint.getAuthor().getId());
         dto.setCreatedAt(complaint.getCreatedAt());
         dto.setUpdatedAt(complaint.getUpdatedAt());
-        dto.setParentType(complaint.getParentType());
-        dto.setParentId(complaint.getParentId());
+        dto.setTargetObjectType(complaint.getTargetObjectType());
+        dto.setTargetObjectId(complaint.getTargetObjectId());
         if (complaint.getModerator() != null) {
             dto.setModeratorId(complaint.getModerator().getId());
         }
@@ -151,6 +151,8 @@ public class TranslationService {
         complaint.setComplaintTitle(createDTO.getComplaintTitle());
         complaint.setComplaintText(createDTO.getComplaintText());
         complaint.setComplaintType(createDTO.getComplaintType());
+        complaint.setTargetObjectType(createDTO.getTargetObjectType());
+        complaint.setTargetObjectId(createDTO.getTargetObjectId());
         return complaint;
     }
 
@@ -367,6 +369,7 @@ public class TranslationService {
         article.setTitle(createDTO.getTitle());
         article.setText(createDTO.getText());
         article.setStatus(createDTO.getStatus());
+        article.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId()));
         return article;
     }
 
@@ -401,14 +404,16 @@ public class TranslationService {
         dto.setAuthorId(comment.getAuthor().getId());
         dto.setCreatedAt(comment.getCreatedAt());
         dto.setUpdatedAt(comment.getUpdatedAt());
-        dto.setParentType(comment.getParentType());
-        dto.setParentId(comment.getParentId());
+        dto.setTargetObjectType(comment.getTargetObjectType());
+        dto.setTargetObjectId(comment.getTargetObjectId());
         return dto;
     }
 
     public Comment toEntity(CommentCreateDTO createDTO) {
         Comment comment = new Comment();
         comment.setMessage(createDTO.getMessage());
+        comment.setTargetObjectType(createDTO.getTargetObjectType());
+        comment.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId()));
         return comment;
     }
 

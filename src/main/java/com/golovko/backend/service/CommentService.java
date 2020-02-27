@@ -1,6 +1,8 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.*;
+import com.golovko.backend.domain.Article;
+import com.golovko.backend.domain.Comment;
+import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
@@ -15,7 +17,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
-public class ArticleCommentService {
+public class CommentService {
 
     @Autowired
     private CommentRepository commentRepository;
@@ -23,36 +25,33 @@ public class ArticleCommentService {
     @Autowired
     private TranslationService translationService;
 
-    public CommentReadDTO getComment(UUID articleId, UUID id) {
-        Comment comment = getArticleCommentRequired(articleId, id);
+    public CommentReadDTO getComment(UUID targetObjectId, UUID id) {
+        Comment comment = getCommentRequired(targetObjectId, id);
         return translationService.toRead(comment);
     }
 
-    public List<CommentReadDTO> getAllComments(UUID articleId) {
-        List<Comment> comments = commentRepository.findByParentIdOrderByCreatedAtAsc(articleId, ParentType.ARTICLE);
+    public List<CommentReadDTO> getAllComments(UUID targetObjectId) {
+        List<Comment> comments = commentRepository.findByTargetIdOrderByCreatedAtAsc(targetObjectId);
         return comments.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
-    public List<CommentReadDTO> getAllPublishedComments(UUID articleId) {
-        List<Comment> comments =
-                commentRepository.findAllByStatusAndParent(articleId, CommentStatus.APPROVED, ParentType.ARTICLE);
+    public List<CommentReadDTO> getAllPublishedComments(UUID targetObjectId) {
+        List<Comment> comments = commentRepository.findAllByStatusAndTarget(targetObjectId, CommentStatus.APPROVED);
         return comments.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
-    public CommentReadDTO createComment(UUID articleId, CommentCreateDTO createDTO, ApplicationUser author) {
+    public CommentReadDTO createComment(UUID targetObjectId, CommentCreateDTO createDTO) {
         Comment comment = translationService.toEntity(createDTO);
 
         comment.setStatus(CommentStatus.PENDING);
-        comment.setParentId(articleId);
-        comment.setAuthor(author);
-        comment.setParentType(ParentType.ARTICLE);
+        comment.setTargetObjectId(targetObjectId);
 
         comment = commentRepository.save(comment);
         return translationService.toRead(comment);
     }
 
-    public CommentReadDTO updateComment(UUID articleId, UUID id, CommentPutDTO putDTO) {
-        Comment comment = getArticleCommentRequired(articleId, id);
+    public CommentReadDTO updateComment(UUID targetObjectId, UUID id, CommentPutDTO putDTO) {
+        Comment comment = getCommentRequired(targetObjectId, id);
 
         translationService.updateEntity(putDTO, comment);
         comment = commentRepository.save(comment);
@@ -60,8 +59,8 @@ public class ArticleCommentService {
         return translationService.toRead(comment);
     }
 
-    public CommentReadDTO patchComment(UUID articleId, UUID id, CommentPatchDTO patchDTO) {
-        Comment comment = getArticleCommentRequired(articleId, id);
+    public CommentReadDTO patchComment(UUID targetObjectId, UUID id, CommentPatchDTO patchDTO) {
+        Comment comment = getCommentRequired(targetObjectId, id);
 
         translationService.patchEntity(patchDTO, comment);
         comment = commentRepository.save(comment);
@@ -69,17 +68,17 @@ public class ArticleCommentService {
         return translationService.toRead(comment);
     }
 
-    public void deleteComment(UUID articleId, UUID id) {
-        commentRepository.delete(getArticleCommentRequired(articleId, id));
+    public void deleteComment(UUID targetObjectId, UUID id) {
+        commentRepository.delete(getCommentRequired(targetObjectId, id));
     }
 
-    private Comment getArticleCommentRequired(UUID articleId, UUID commentId) {
-        Comment comment = commentRepository.findByIdAndParentId(commentId, articleId, ParentType.ARTICLE);
+    private Comment getCommentRequired(UUID targetObjectId, UUID commentId) {
+        Comment comment = commentRepository.findByIdAndTargetId(commentId, targetObjectId);
 
         if (comment != null) {
             return comment;
         } else {
-            throw new EntityNotFoundException(Comment.class, commentId, Article.class, articleId);
+            throw new EntityNotFoundException(Comment.class, commentId, Article.class, targetObjectId);
         }
     }
 }

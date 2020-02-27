@@ -17,6 +17,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,6 +38,9 @@ public class MovieParticipationServiceTest {
     @Autowired
     private TestObjectFactory testObjectFactory;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Test
     public void getMovieParticipationTest() {
         Person person = testObjectFactory.createPerson();
@@ -48,8 +52,8 @@ public class MovieParticipationServiceTest {
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieParticipation,
                 "movieId", "personId");
-        Assertions.assertThat(readDTO.getMovieId()).isEqualToComparingFieldByField(movie.getId());
-        Assertions.assertThat(readDTO.getPersonId()).isEqualToComparingFieldByField(person.getId());
+        Assert.assertEquals(readDTO.getMovieId(), movie.getId());
+        Assert.assertEquals(readDTO.getPersonId(), person.getId());
     }
 
     @Test
@@ -151,11 +155,13 @@ public class MovieParticipationServiceTest {
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
-        moviePart = movieParticipationRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(moviePart,
-                "movieId", "personId");
-        Assert.assertEquals(moviePart.getMovie().getId(), readDTO.getMovieId());
-        Assert.assertEquals(moviePart.getPerson().getId(), readDTO.getPersonId());
+        inTransaction(() -> {
+            MovieParticipation moviePartAfterUpdate = movieParticipationRepository.findById(readDTO.getId()).get();
+            Assertions.assertThat(moviePartAfterUpdate).isEqualToIgnoringGivenFields(moviePart,
+                    "person", "movie");
+            Assert.assertEquals(moviePart.getMovie().getId(), moviePartAfterUpdate.getMovie().getId());
+            Assert.assertEquals(moviePart.getPerson().getId(), moviePartAfterUpdate.getPerson().getId());
+        });
     }
 
     @Test
@@ -200,5 +206,11 @@ public class MovieParticipationServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void getMovieParticipationWrongIdTest() {
         movieParticipationService.getMovieParticipation(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    private void inTransaction (Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
     }
 }

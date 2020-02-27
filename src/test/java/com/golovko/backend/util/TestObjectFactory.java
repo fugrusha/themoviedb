@@ -62,21 +62,25 @@ public class TestObjectFactory {
         return applicationUserRepository.save(user);
     }
 
-    public Complaint createComplaint(ApplicationUser user, ComplaintType complaintType, ParentType parentType) {
+    public Complaint createComplaint(
+            ApplicationUser user,
+            ComplaintType complaintType,
+            TargetObjectType targetObjectType
+    ) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle("Some title");
         complaint.setComplaintText("Some report text");
         complaint.setComplaintType(complaintType);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(user);
-        complaint.setParentType(parentType);
-        complaint.setParentId(UUID.randomUUID());
+        complaint.setTargetObjectType(targetObjectType);
+        complaint.setTargetObjectId(UUID.randomUUID());
         return complaintRepository.save(complaint);
     }
 
     public Complaint createComplaint(
             UUID articleId,
-            ParentType parentType,
+            TargetObjectType targetObjectType,
             ApplicationUser author,
             ApplicationUser moderator
     ) {
@@ -87,8 +91,8 @@ public class TestObjectFactory {
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(author);
         complaint.setModerator(moderator);
-        complaint.setParentId(articleId);
-        complaint.setParentType(parentType);
+        complaint.setTargetObjectId(articleId);
+        complaint.setTargetObjectType(targetObjectType);
         return complaintRepository.save(complaint);
     }
 
@@ -138,15 +142,15 @@ public class TestObjectFactory {
             ApplicationUser author,
             UUID parentId,
             CommentStatus status,
-            ParentType parentType) {
+            TargetObjectType targetObjectType) {
         Comment comment = new Comment();
         comment.setMessage("text");
         comment.setStatus(status);
         comment.setLikesCount(45);
         comment.setDislikesCount(78);
         comment.setAuthor(author);
-        comment.setParentType(parentType);
-        comment.setParentId(parentId);
+        comment.setTargetObjectType(targetObjectType);
+        comment.setTargetObjectId(parentId);
         return commentRepository.save(comment);
     }
 }

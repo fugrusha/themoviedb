@@ -3,6 +3,8 @@ package com.golovko.backend.dto.article;
 import com.golovko.backend.domain.ArticleStatus;
 import lombok.Data;
 
+import java.util.UUID;
+
 @Data
 public class ArticleCreateDTO {
 
@@ -11,5 +13,7 @@ public class ArticleCreateDTO {
     private String text;
 
     private ArticleStatus status;
+
+    private UUID authorId;
 
 }

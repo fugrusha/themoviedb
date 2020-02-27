@@ -5,8 +5,8 @@ import com.golovko.backend.dto.user.UserCreateDTO;
 import com.golovko.backend.dto.user.UserPatchDTO;
 import com.golovko.backend.dto.user.UserPutDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
-import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
+import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -21,8 +21,11 @@ public class ApplicationUserService {
     @Autowired
     private TranslationService translationService;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     public UserReadDTO getUser(UUID id) {
-        ApplicationUser applicationUser = getUserRequired(id);
+        ApplicationUser applicationUser = repoHelper.getEntityById(ApplicationUser.class, id);
         return translationService.toRead(applicationUser);
     }
 
@@ -34,7 +37,7 @@ public class ApplicationUserService {
     }
 
     public UserReadDTO patchUser(UUID id, UserPatchDTO patch) {
-        ApplicationUser applicationUser = getUserRequired(id);
+        ApplicationUser applicationUser = repoHelper.getEntityById(ApplicationUser.class, id);
 
         translationService.patchEntity(patch, applicationUser);
 
@@ -43,7 +46,7 @@ public class ApplicationUserService {
     }
 
     public UserReadDTO updateUser(UUID id, UserPutDTO update) {
-        ApplicationUser user = getUserRequired(id);
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
         translationService.updateEntity(update, user);
 
@@ -52,12 +55,6 @@ public class ApplicationUserService {
     }
 
     public void deleteUser(UUID id) {
-        applicationUserRepository.delete(getUserRequired(id));
-    }
-
-    private ApplicationUser getUserRequired(UUID id) {
-        return applicationUserRepository.findById(id).orElseThrow(() ->
-                new EntityNotFoundException(ApplicationUser.class, id)
-        );
+        applicationUserRepository.delete(repoHelper.getEntityById(ApplicationUser.class, id));
     }
 }

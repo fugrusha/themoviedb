@@ -9,14 +9,14 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/{movieId}/movie-participations")
+@RequestMapping("/api/v1/movies/{movieId}/movie-participations")
 public class MovieParticipationController {
 
     @Autowired
     private MovieParticipationService movieParticipationService;
 
     @GetMapping
-    public List<MoviePartReadDTO> getListOfMovieCast(@PathVariable UUID movieId) {
+    public List<MoviePartReadDTO> getAllMovieCasts(@PathVariable UUID movieId) {
         return movieParticipationService.getListOfMovieParticipation(movieId);
     }
 
