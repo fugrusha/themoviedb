@@ -10,6 +10,7 @@ import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
+import com.golovko.backend.dto.genre.*;
 import com.golovko.backend.dto.movie.MovieCreateDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MoviePutDTO;
@@ -27,6 +28,8 @@ import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import java.util.stream.Collectors;
 
 @Service
 public class TranslationService {
@@ -146,6 +149,16 @@ public class TranslationService {
         return dto;
     }
 
+    public GenreReadDTO toRead(Genre genre) {
+        GenreReadDTO dto = new GenreReadDTO();
+        dto.setId(genre.getId());
+        dto.setGenreName(genre.getGenreName());
+        dto.setDescription(genre.getDescription());
+        dto.setCreatedAt(genre.getCreatedAt());
+        dto.setUpdatedAt(genre.getUpdatedAt());
+        return dto;
+    }
+
     /*
     toReadExtended methods
      */
@@ -186,6 +199,17 @@ public class TranslationService {
         dto.setAuthor(toRead(article.getAuthor()));
         dto.setCreatedAt(article.getCreatedAt());
         dto.setUpdatedAt(article.getUpdatedAt());
+        return dto;
+    }
+
+    public GenreReadExtendedDTO toReadExtended(Genre genre) {
+        GenreReadExtendedDTO dto = new GenreReadExtendedDTO();
+        dto.setId(genre.getId());
+        dto.setGenreName(genre.getGenreName());
+        dto.setDescription(genre.getDescription());
+        dto.setCreatedAt(genre.getCreatedAt());
+        dto.setUpdatedAt(genre.getUpdatedAt());
+        dto.setMovies(genre.getMovies().stream().map(this::toRead).collect(Collectors.toList()));
         return dto;
     }
 
@@ -258,6 +282,13 @@ public class TranslationService {
         comment.setTargetObjectType(createDTO.getTargetObjectType());
         comment.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId()));
         return comment;
+    }
+
+    public Genre toEntity(GenreCreateDTO createDTO) {
+        Genre genre = new Genre();
+        genre.setGenreName(createDTO.getGenreName());
+        genre.setDescription(createDTO.getDescription());
+        return genre;
     }
 
     /*
@@ -356,6 +387,15 @@ public class TranslationService {
         }
     }
 
+    public void patchEntity(GenrePatchDTO patchDTO, Genre genre) {
+        if (patchDTO.getGenreName() != null) {
+            genre.setGenreName(patchDTO.getGenreName());
+        }
+        if (patchDTO.getDescription() != null) {
+            genre.setDescription(patchDTO.getDescription());
+        }
+    }
+
     /*
     updateEntity methods
      */
@@ -405,5 +445,10 @@ public class TranslationService {
 
     public void updateEntity(CommentPutDTO putDTO, Comment comment) {
         comment.setMessage(putDTO.getMessage());
+    }
+
+    public void updateEntity(GenrePutDTO putDTO, Genre genre) {
+        genre.setGenreName(putDTO.getGenreName());
+        genre.setDescription(putDTO.getDescription());
     }
 }

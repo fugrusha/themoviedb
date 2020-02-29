@@ -35,6 +35,9 @@ public class TestObjectFactory {
     @Autowired
     private CommentRepository commentRepository;
 
+    @Autowired
+    private GenreRepository genreRepository;
+
     public Movie createMovie() {
         Movie movie = new Movie();
         movie.setMovieTitle("Title of the Movie");
@@ -152,5 +155,12 @@ public class TestObjectFactory {
         comment.setTargetObjectType(targetObjectType);
         comment.setTargetObjectId(parentId);
         return commentRepository.save(comment);
+    }
+
+    public Genre createGenre(String genreName) {
+        Genre genre = new Genre();
+        genre.setGenreName(genreName);
+        genre.setDescription("Scary movies");
+        return genreRepository.save(genre);
     }
 }

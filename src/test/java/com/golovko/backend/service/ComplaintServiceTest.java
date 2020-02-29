@@ -173,7 +173,7 @@ public class ComplaintServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteComplaintNotFound() {
+    public void deleteComplaintNotFoundTest() {
         complaintService.deleteComplaint(UUID.randomUUID(), UUID.randomUUID());
     }
 

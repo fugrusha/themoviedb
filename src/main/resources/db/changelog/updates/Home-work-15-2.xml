@@ -26,4 +26,42 @@
         <renameColumn tableName="movie_cast" oldColumnName="part_info" newColumnName="description"/>
     </changeSet>
 
+    <changeSet id="create genre table" author="andrew">
+        <createTable tableName="genre">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="genre_name" type="varchar(100)"/>
+            <column name="description" type="varchar(500)"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create genre_movie" author="andrew">
+        <createTable tableName="genre_movie">
+            <column name="genre_id" type="uuid"/>
+            <column name="movie_id" type="uuid"/>
+        </createTable>
+    </changeSet>
+    
+    <changeSet id="add foreign keys to genre_movie" author="andrew">
+        <addForeignKeyConstraint baseTableName="genre_movie" baseColumnNames="movie_id"
+                                 constraintName="movie_constraint"
+                                 referencedTableName="movie"
+                                 referencedColumnNames="id"/>
+        <addForeignKeyConstraint baseTableName="genre_movie" baseColumnNames="genre_id"
+                                 constraintName="genre_constraint"
+                                 referencedTableName="genre"
+                                 referencedColumnNames="id"/>
+    </changeSet>
+
+    <changeSet id="add composite unique constraint" author="andrew">
+        <addUniqueConstraint
+                columnNames="genre_id, movie_id"
+                constraintName="composite_constraint_genre_movie"
+                tableName="genre_movie"
+        />
+    </changeSet>
+
 </databaseChangeLog>

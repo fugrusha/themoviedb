@@ -41,12 +41,16 @@ public class Movie {
     private Instant updatedAt;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCrew> movieCrews = new HashSet<>();
+    private Set<MovieCrew> movieCrews = new HashSet<MovieCrew>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCast> movieCast = new HashSet<>();
+    private Set<MovieCast> movieCast = new HashSet<MovieCast>();
 
-//    TODO genres for movies
-//    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-//    private Set<Genre> genres = new HashSet<>();
+    @ManyToMany(cascade = {CascadeType.PERSIST})
+    @JoinTable(
+            name = "genre_movie",
+            joinColumns = @JoinColumn(name = "movie_id"),
+            inverseJoinColumns = @JoinColumn(name = "genre_id")
+    )
+    private Set<Genre> genres = new HashSet<Genre>();
 }
