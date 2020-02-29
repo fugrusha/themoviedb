@@ -11,10 +11,7 @@ import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.dto.genre.*;
-import com.golovko.backend.dto.movie.MovieCreateDTO;
-import com.golovko.backend.dto.movie.MoviePatchDTO;
-import com.golovko.backend.dto.movie.MoviePutDTO;
-import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.dto.person.PersonCreateDTO;
@@ -162,6 +159,23 @@ public class TranslationService {
     /*
     toReadExtended methods
      */
+
+    public MovieReadExtendedDTO toReadExtended(Movie movie) {
+        MovieReadExtendedDTO dto = new MovieReadExtendedDTO();
+        dto.setId(movie.getId());
+        dto.setMovieTitle(movie.getMovieTitle());
+        dto.setDescription(movie.getDescription());
+        dto.setReleaseDate(movie.getReleaseDate());
+        dto.setIsReleased(movie.getIsReleased());
+        dto.setAverageRating(movie.getAverageRating());
+        dto.setCreatedAt(movie.getCreatedAt());
+        dto.setUpdatedAt(movie.getUpdatedAt());
+        dto.setMovieCasts(movie.getMovieCasts().stream().map(this::toRead).collect(Collectors.toSet()));
+        dto.setMovieCrews(movie.getMovieCrews().stream().map(this::toRead).collect(Collectors.toSet()));
+        dto.setGenres(movie.getGenres().stream().map(this::toRead).collect(Collectors.toSet()));
+        return dto;
+    }
+
     public MovieCrewReadExtendedDTO toReadExtended(MovieCrew movieCrew) {
         MovieCrewReadExtendedDTO dto = new MovieCrewReadExtendedDTO();
         dto.setId(movieCrew.getId());

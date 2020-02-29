@@ -6,6 +6,7 @@ import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -31,6 +32,12 @@ public class MovieService {
     public List<MovieReadDTO> getMovies(MovieFilter filter) {
         List<Movie> movies = movieRepository.findByFilter(filter);
         return movies.stream().map(translationService::toRead).collect(Collectors.toList());
+    }
+
+    @Transactional
+    public MovieReadExtendedDTO getMovieExtended(UUID id) {
+        Movie movie = repoHelper.getEntityById(Movie.class, id);
+        return translationService.toReadExtended(movie);
     }
 
     public MovieReadDTO createMovie(MovieCreateDTO createDTO) {

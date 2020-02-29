@@ -25,6 +25,11 @@ public class MovieController {
         return movieService.getMovie(id);
     }
 
+    @GetMapping("/{id}/extended")
+    public MovieReadExtendedDTO getMovieExtendedById(@PathVariable UUID id) {
+        return movieService.getMovieExtended(id);
+    }
+
     @PostMapping
     public MovieReadDTO createMovie(@RequestBody MovieCreateDTO createDTO) {
         return movieService.createMovie(createDTO);

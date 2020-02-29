@@ -44,7 +44,7 @@ public class Movie {
     private Set<MovieCrew> movieCrews = new HashSet<MovieCrew>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCast> movieCast = new HashSet<MovieCast>();
+    private Set<MovieCast> movieCasts = new HashSet<MovieCast>();
 
     @ManyToMany(cascade = {CascadeType.PERSIST})
     @JoinTable(

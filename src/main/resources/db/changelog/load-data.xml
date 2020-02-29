@@ -109,4 +109,21 @@
         </loadUpdateData>
     </changeSet>
 
+    <changeSet id="load genres" author="andrew">
+        <loadUpdateData tableName="genre" file="db/data/genres.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="genre_name" type="string"/>
+            <column name="description" type="string"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load genre_movie table" author="andrew">
+        <loadUpdateData tableName="genre_movie" file="db/data/genre_movie.csv" separator=";" primaryKey="movie_id, genre_id">
+            <column name="movie_id" type="uuid"/>
+            <column name="genre_id" type="uuid"/>
+        </loadUpdateData>
+    </changeSet>
+
 </databaseChangeLog>

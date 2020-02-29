@@ -1,5 +1,5 @@
 id;complaint_title;complaint_text;created_at;updated_at;complaint_type;complaint_status;author_id;target_object_id;target_object_type
-1d7f0464-b751-4839-ba29-3752944b6eb2;Complaint title 1;Complaint text 1;2017-02-03T11:35:30;2009-02-01T12:12:00;VIOLENCE;INITIATED;96c703f0-d270-4e61-bf01-66e8077dfdec;3d640474-a4cf-4c15-8c4d-e7b97d8fedf4;MOVIE
+1d7f0464-b751-4839-ba29-3752944b6eb2;Complaint title 1;Complaint text 1;2017-02-03T11:35:30;2019-02-01T12:12:00;VIOLENCE;INITIATED;96c703f0-d270-4e61-bf01-66e8077dfdec;3d640474-a4cf-4c15-8c4d-e7b97d8fedf4;MOVIE
 0dce3e94-d467-495a-b2e6-15f5110a72ec;Complaint title 2;Complaint text 2;2019-02-03T14:35:30;2020-32-11T14:12:20;VIOLENCE;DUPLICATE;6005f237-913a-4549-b5fd-8d4594dc0344;536adcbf-8cd7-48be-9530-d0d1b0646bef;MOVIE
 e2de6a58-6d54-4d90-8238-b2f9eed2f702;Complaint title 3;Complaint text 3;2019-04-20T01:35:30;2020-02-01T12:12:12;MISPRINT;INITIATED;6005f237-913a-4549-b5fd-8d4594dc0344;536adcbf-8cd7-48be-9530-d0d1b0646bef;MOVIE
 3610f7e0-845f-442c-8b91-77591dc9a380;Complaint title 4;Complaint text 4;2018-10-03T11:01:00;2020-02-01T19:12:44;OTHER;CLOSED;96c703f0-d270-4e61-bf01-66e8077dfdec;075b603c-2547-4fc8-92f3-175b9cdedfc5;MOVIE

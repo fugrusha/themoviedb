@@ -213,6 +213,8 @@ public class MovieCastControllerTest {
         dto.setMovieId(movieId);
         dto.setPersonId(personId);
         dto.setCharacter("Leon Killer");
+        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 
@@ -222,6 +224,8 @@ public class MovieCastControllerTest {
         dto.setFirstName("Max");
         dto.setLastName("Popov");
         dto.setGender(Gender.MALE);
+        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 
