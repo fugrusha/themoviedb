@@ -83,7 +83,7 @@ public class MovieCrewService {
         MovieCrew movieCrew = repoHelper.getEntityById(MovieCrew.class, movieCrewId);
 
         log.info("Setting new average rating of movieCrew: {}. Old value: {}, new value: {}",
-                movieCrew.getId(), movieCrew.getAverageRating() , averageRating);
+                movieCrew.getId(), movieCrew.getAverageRating(), averageRating);
 
         movieCrew.setAverageRating(averageRating);
         movieCrewRepository.save(movieCrew);
