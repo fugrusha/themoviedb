@@ -5,20 +5,27 @@ import com.golovko.backend.domain.MovieCast;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieCastRepository;
+import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class MovieCastService {
 
     @Autowired
     private MovieCastRepository movieCastRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
 
     @Autowired
     private TranslationService translationService;
@@ -35,7 +42,7 @@ public class MovieCastService {
         return translationService.toRead(getMovieCastByMovieIdRequired(id, movieId));
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public MovieCastReadExtendedDTO getMovieCastExtended(UUID id, UUID movieId) {
         return translationService.toReadExtended(getMovieCastByMovieIdRequired(id, movieId));
     }
@@ -69,6 +76,18 @@ public class MovieCastService {
 
     public void deleteMovieCast(UUID id, UUID movieId) {
         movieCastRepository.delete(getMovieCastByMovieIdRequired(id, movieId));
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateAverageRatingOfMovieCast(UUID movieCastId) {
+        Double averageRating = ratingRepository.calcAverageRating(movieCastId);
+        MovieCast movieCast = repoHelper.getEntityById(MovieCast.class, movieCastId);
+
+        log.info("Setting new average rating of movieCast: {}. Old value {}, new value {}", movieCastId,
+                movieCast.getAverageRating(), averageRating);
+
+        movieCast.setAverageRating(averageRating);
+        movieCastRepository.save(movieCast);
     }
 
     private MovieCast getMovieCastByMovieIdRequired(UUID id, UUID movieId) {

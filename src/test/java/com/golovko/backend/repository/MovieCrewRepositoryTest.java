@@ -12,8 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -28,8 +33,11 @@ public class MovieCrewRepositoryTest {
     @Autowired
     private MovieCrewRepository movieCrewRepository;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
@@ -45,7 +53,7 @@ public class MovieCrewRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
@@ -62,4 +70,18 @@ public class MovieCrewRepositoryTest {
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
     }
 
+    @Test
+    public void testGetIdsOfMovieCrews() {
+        Set<UUID> expectedResult = new HashSet<>();
+        Person p1 = testObjectFactory.createPerson();
+        Person p2 = testObjectFactory.createPerson();
+        Movie m1 = testObjectFactory.createMovie();
+        expectedResult.add(testObjectFactory.createMovieCrew(p1, m1).getId());
+        expectedResult.add(testObjectFactory.createMovieCrew(p2, m1).getId());
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Set<UUID> actualResult = movieCrewRepository.getIdsOfMovieCrews().collect(Collectors.toSet());
+            Assert.assertEquals(expectedResult, actualResult);
+        });
+    }
 }

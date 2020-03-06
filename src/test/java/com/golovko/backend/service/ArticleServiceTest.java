@@ -37,7 +37,7 @@ public class ArticleServiceTest {
     private TestObjectFactory testObjectFactory;
 
     @Test
-    public void getArticleTest() {
+    public void testGetArticleById() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
 
@@ -48,7 +48,7 @@ public class ArticleServiceTest {
     }
 
     @Test
-    public void getArticleExtendedTest() {
+    public void testGetArticleExtended() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
 
@@ -59,12 +59,12 @@ public class ArticleServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getArticleWrongIdTest() {
+    public void testGetArticleWrongId() {
         articleService.getArticle(UUID.randomUUID());
     }
 
     @Test
-    public void getArticleListTest() {
+    public void testGetAllArticles() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article a1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -73,14 +73,14 @@ public class ArticleServiceTest {
         testObjectFactory.createArticle(user2, ArticleStatus.NEED_MODERATION);
         testObjectFactory.createArticle(user2, ArticleStatus.DRAFT);
 
-        List<ArticleReadDTO> articles = articleService.getArticleList();
+        List<ArticleReadDTO> articles = articleService.getAllArticles();
 
         Assertions.assertThat(articles).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId());
     }
 
     @Test
-    public void createArticleTest() {
+    public void testCreateArticle() {
         ApplicationUser author = testObjectFactory.createUser();
 
         ArticleCreateDTO createDTO = new ArticleCreateDTO();
@@ -100,7 +100,7 @@ public class ArticleServiceTest {
     }
 
     @Test
-    public void updateArticleTest() {
+    public void testUpdateArticle() {
         ArticlePutDTO updateDTO = new ArticlePutDTO();
         updateDTO.setTitle("Title");
         updateDTO.setText("Some text");
@@ -119,7 +119,7 @@ public class ArticleServiceTest {
     }
 
     @Test
-    public void patchArticleTest() {
+    public void testPatchArticle() {
         ArticlePatchDTO patchDTO = new ArticlePatchDTO();
         patchDTO.setTitle("Article title");
         patchDTO.setText("Article text");
@@ -138,7 +138,7 @@ public class ArticleServiceTest {
     }
 
     @Test
-    public void patchArticleEmptyPatchTest() {
+    public void testPatchArticleEmptyPatch() {
         ArticlePatchDTO patchDTO = new ArticlePatchDTO();
 
         ApplicationUser author = testObjectFactory.createUser();
@@ -155,7 +155,7 @@ public class ArticleServiceTest {
     }
 
     @Test
-    public void deleteArticleTest() {
+    public void testDeleteArticle() {
         ApplicationUser author = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
         articleService.deleteArticle(article.getId());
@@ -164,7 +164,7 @@ public class ArticleServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteArticleNotFound() {
+    public void testDeleteArticleNotFound() {
         articleService.deleteArticle(UUID.randomUUID());
     }
 }

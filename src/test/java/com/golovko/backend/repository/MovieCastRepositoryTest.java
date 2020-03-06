@@ -12,9 +12,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
-import java.time.LocalDate;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -32,10 +36,13 @@ public class MovieCastRepositoryTest {
     @Autowired
     private MovieCastRepository movieCastRepository;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         Person person = testObjectFactory.createPerson();
-        Movie movie = createMovie();
+        Movie movie = testObjectFactory.createMovie();
         MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
 
         Instant createdAtBeforeReload = movieCast.getCreatedAt();
@@ -49,9 +56,9 @@ public class MovieCastRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         Person person = testObjectFactory.createPerson();
-        Movie movie = createMovie();
+        Movie movie = testObjectFactory.createMovie();
         MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
 
         Instant modifiedAtBeforeReload = movieCast.getUpdatedAt();
@@ -66,14 +73,18 @@ public class MovieCastRepositoryTest {
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
     }
 
-    private Movie createMovie() {
-        Movie movie = new Movie();
-        movie.setMovieTitle("Title of the Movie");
-        movie.setDescription("movie description");
-        movie.setIsReleased(true);
-        movie.setReleaseDate(LocalDate.of(1992, 5, 4));
-        movie.setAverageRating(5.0);
-        movie = movieRepository.save(movie);
-        return movie;
+    @Test
+    public void testGetIdsOfMovieCasts() {
+        Set<UUID> expectedResult = new HashSet<>();
+        Person p1 = testObjectFactory.createPerson();
+        Person p2 = testObjectFactory.createPerson();
+        Movie m1 = testObjectFactory.createMovie();
+        expectedResult.add(testObjectFactory.createMovieCast(p1, m1).getId());
+        expectedResult.add(testObjectFactory.createMovieCast(p2, m1).getId());
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Set<UUID> actualResult = movieCastRepository.getIdsOfMovieCasts().collect(Collectors.toSet());
+            Assert.assertEquals(expectedResult, actualResult);
+        });
     }
 }

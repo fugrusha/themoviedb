@@ -46,7 +46,7 @@ public class GenreServiceTest {
     private TransactionTemplate transactionTemplate;
 
     @Test
-    public void getGenreTest() {
+    public void testGetGenreById() {
         Genre genre = testObjectFactory.createGenre("Comedy");
 
         GenreReadDTO readDTO = genreService.getGenre(genre.getId());
@@ -56,7 +56,7 @@ public class GenreServiceTest {
 
     // TODO to be or not to be // Will filter be better?
     @Test
-    public void getExtendedGenreTest() {
+    public void testGetExtendedGenre() {
         Genre genre = testObjectFactory.createGenre("comedy");
         UUID genreId = genre.getId();
 
@@ -78,7 +78,7 @@ public class GenreServiceTest {
     }
 
     @Test
-    public void getAllGenresTest() {
+    public void testGetAllGenres() {
         Genre g1 = testObjectFactory.createGenre("Thriller");
         Genre g2 = testObjectFactory.createGenre("Horror");
         Genre g3 = testObjectFactory.createGenre("Comedy");
@@ -91,12 +91,12 @@ public class GenreServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getGenreByWrongIdTest() {
+    public void testGetGenreByWrongId() {
         genreService.getGenre(UUID.randomUUID());
     }
 
     @Test
-    public void createGenreTest() {
+    public void testCreateGenre() {
         GenreCreateDTO createDTO = new GenreCreateDTO();
         createDTO.setGenreName("genre name");
         createDTO.setDescription("some description");
@@ -111,7 +111,7 @@ public class GenreServiceTest {
     }
 
     @Test
-    public void patchGenreTest() {
+    public void testPatchGenre() {
         Genre genre = testObjectFactory.createGenre("Thriller");
 
         GenrePatchDTO patchDTO = new GenrePatchDTO();
@@ -127,7 +127,7 @@ public class GenreServiceTest {
     }
 
     @Test
-    public void patchGenreEmptyPatchTest() {
+    public void testPatchGenreEmptyPatch() {
         Genre genre = testObjectFactory.createGenre("Thriller");
 
         GenrePatchDTO patchDTO = new GenrePatchDTO();
@@ -144,7 +144,7 @@ public class GenreServiceTest {
     }
 
     @Test
-    public void updateGenreTest() {
+    public void testUpdateGenre() {
         Genre genre = testObjectFactory.createGenre("Thriller");
 
         GenrePutDTO putDTO = new GenrePutDTO();
@@ -160,7 +160,7 @@ public class GenreServiceTest {
     }
 
     @Test
-    public void deleteGenreTest() {
+    public void testDeleteGenre() {
         Genre genre = testObjectFactory.createGenre("Thriller");
 
         genreService.deleteGenre(genre.getId());
@@ -169,7 +169,7 @@ public class GenreServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteGenreNotFoundTest() {
+    public void testDeleteGenreNotFound() {
         genreService.deleteGenre(UUID.randomUUID());
     }
 

@@ -47,7 +47,7 @@ public class MovieControllerTest {
     private MovieService movieService;
 
     @Test
-    public void getMovieByIdTest() throws Exception {
+    public void testGetMovieById() throws Exception {
         MovieReadDTO dto = createMovieReadDTO();
 
         Mockito.when(movieService.getMovie(dto.getId())).thenReturn(dto);
@@ -66,7 +66,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void getMovieExtendedBuIdTest() throws Exception {
+    public void testGetMovieExtended() throws Exception {
         UUID movieId = UUID.randomUUID();
         Set<GenreReadDTO> genres = Set.of(createGenreReadDTO());
         Set<MovieCastReadDTO> movieCasts = Set.of(createMovieCastReadDTO(movieId));
@@ -89,7 +89,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void getMovieWrongIdTest() throws Exception {
+    public void testGetMovieWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
 
         EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
@@ -104,7 +104,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void createMovieTest() throws Exception {
+    public void testCreateMovie() throws Exception {
         MovieCreateDTO createDTO = new MovieCreateDTO();
         createDTO.setMovieTitle("Guess Who");
         createDTO.setDescription("12345");
@@ -127,7 +127,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void patchMovieTest() throws Exception {
+    public void testPatchMovie() throws Exception {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         patchDTO.setMovieTitle("title");
         patchDTO.setDescription("some description");
@@ -150,7 +150,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void updateMovieTest() throws Exception {
+    public void testUpdateMovie() throws Exception {
         MoviePutDTO updateDTO = new MoviePutDTO();
         updateDTO.setMovieTitle("new title");
         updateDTO.setDescription("some NEW description");
@@ -174,17 +174,17 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void deleteMovieTest() throws Exception {
+    public void testDeleteMovie() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/movies/{id}", id.toString()))
+        mockMvc.perform(delete("/api/v1/movies/{id}", id))
                 .andExpect(status().isOk());
 
         Mockito.verify(movieService).deleteMovie(id);
     }
 
     @Test
-    public void getMoviesWithFilterTest() throws Exception {
+    public void testGetMoviesWithFilter() throws Exception {
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(UUID.randomUUID());
         filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));

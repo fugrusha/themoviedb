@@ -29,7 +29,7 @@ public class ArticleRepositoryTest {
     private ArticleRepository articleRepository;
 
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
 
@@ -44,7 +44,7 @@ public class ArticleRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
         Article article = new Article();
         article.setText("text");

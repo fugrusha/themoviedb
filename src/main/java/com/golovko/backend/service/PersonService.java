@@ -24,6 +24,8 @@ public class PersonService {
     @Autowired
     private RepositoryHelper repoHelper;
 
+    // TODO add getAllPersons
+
     public PersonReadDTO getPerson(UUID id) {
         Person person = repoHelper.getEntityById(Person.class, id);
         return translationService.toRead(person);

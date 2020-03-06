@@ -20,8 +20,13 @@ public class RepositoryHelper {
     }
 
     public <E> E getEntityById(Class<E> entityClass, UUID id) {
-        validateExists(entityClass, id);
-        return entityManager.find(entityClass, id);
+        E obj = entityManager.find(entityClass, id);
+
+        if (obj != null) {
+            return obj;
+        } else {
+            throw new EntityNotFoundException(entityClass, id);
+        }
     }
 
     public <E> void validateExists(Class<E> entityClass, UUID id) {

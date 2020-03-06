@@ -18,6 +18,10 @@ import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.rating.RatingCreateDTO;
+import com.golovko.backend.dto.rating.RatingPatchDTO;
+import com.golovko.backend.dto.rating.RatingPutDTO;
+import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.dto.user.UserCreateDTO;
 import com.golovko.backend.dto.user.UserPatchDTO;
 import com.golovko.backend.dto.user.UserPutDTO;
@@ -153,6 +157,18 @@ public class TranslationService {
         dto.setDescription(genre.getDescription());
         dto.setCreatedAt(genre.getCreatedAt());
         dto.setUpdatedAt(genre.getUpdatedAt());
+        return dto;
+    }
+
+    public RatingReadDTO toRead(Rating rating) {
+        RatingReadDTO dto = new RatingReadDTO();
+        dto.setId(rating.getId());
+        dto.setRating(rating.getRating());
+        dto.setAuthorId(rating.getAuthor().getId());
+        dto.setCreatedAt(rating.getCreatedAt());
+        dto.setUpdatedAt(rating.getUpdatedAt());
+        dto.setTargetObjectId(rating.getTargetObjectId());
+        dto.setTargetObjectType(rating.getTargetObjectType());
         return dto;
     }
 
@@ -305,6 +321,14 @@ public class TranslationService {
         return genre;
     }
 
+    public Rating toEntity(RatingCreateDTO createDTO) {
+        Rating rating = new Rating();
+        rating.setRating(createDTO.getRating());
+        rating.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId()));
+        rating.setTargetObjectType(createDTO.getTargetObjectType());
+        return rating;
+    }
+
     /*
     patchEntity methods
      */
@@ -410,6 +434,12 @@ public class TranslationService {
         }
     }
 
+    public void patchEntity(RatingPatchDTO patchDTO, Rating rating) {
+        if (patchDTO.getRating() != null) {
+            rating.setRating(patchDTO.getRating());
+        }
+    }
+
     /*
     updateEntity methods
      */
@@ -464,5 +494,9 @@ public class TranslationService {
     public void updateEntity(GenrePutDTO putDTO, Genre genre) {
         genre.setGenreName(putDTO.getGenreName());
         genre.setDescription(putDTO.getDescription());
+    }
+
+    public void updateEntity(RatingPutDTO putDTO, Rating rating) {
+        rating.setRating(putDTO.getRating());
     }
 }

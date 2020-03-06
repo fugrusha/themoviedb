@@ -39,7 +39,7 @@ public class PersonControllerTest {
     private PersonService personService;
 
     @Test
-    public void getPersonTest() throws Exception {
+    public void testGetPerson() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
 
         Mockito.when(personService.getPerson(readDTO.getId())).thenReturn(readDTO);
@@ -56,7 +56,7 @@ public class PersonControllerTest {
     }
 
     @Test
-    public void createPersonTest() throws Exception {
+    public void testCreatePerson() throws Exception {
         PersonCreateDTO createDTO = new PersonCreateDTO();
         createDTO.setFirstName("Max");
         createDTO.setLastName("Popov");
@@ -80,7 +80,7 @@ public class PersonControllerTest {
     }
 
     @Test
-    public void patchPersonTest() throws Exception {
+    public void testPatchPerson() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
 
         PersonPatchDTO patchDTO = new PersonPatchDTO();
@@ -103,7 +103,7 @@ public class PersonControllerTest {
     }
 
     @Test
-    public void updatePersonTest() throws Exception {
+    public void testUpdatePerson() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
 
         PersonPutDTO updateDTO = new PersonPutDTO();
@@ -126,10 +126,10 @@ public class PersonControllerTest {
     }
 
     @Test
-    public void deletePersonTest() throws Exception {
+    public void testDeletePerson() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/persons/{id}", id.toString()))
+        mockMvc.perform(delete("/api/v1/persons/{id}", id))
                 .andExpect(status().is2xxSuccessful());
 
         Mockito.verify(personService).deletePerson(id);

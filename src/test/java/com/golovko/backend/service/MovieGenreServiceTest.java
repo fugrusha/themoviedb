@@ -39,7 +39,7 @@ public class MovieGenreServiceTest {
     private TransactionTemplate transactionTemplate;
 
     @Test
-    public void addGenreToMovieTest() {
+    public void testAddGenreToMovie() {
         Genre genre = testObjectFactory.createGenre("Comedy");
         Movie movie = testObjectFactory.createMovie();
 
@@ -57,7 +57,7 @@ public class MovieGenreServiceTest {
 
     @Ignore // TODO add unlink option
     @Test
-    public void removeLinkGenreAndMovieTest() {
+    public void testRemoveLinkGenreAndMovie() {
         Genre genre = testObjectFactory.createGenre("Comedy");
         Movie movie = testObjectFactory.createMovie();
         UUID movieId = movie.getId();

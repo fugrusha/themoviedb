@@ -34,7 +34,7 @@ public class CommentRepositoryTest {
     private CommentRepository commentRepository;
 
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -51,7 +51,7 @@ public class CommentRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);

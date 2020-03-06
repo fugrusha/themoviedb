@@ -31,7 +31,7 @@ public class CommentService {
     }
 
     public List<CommentReadDTO> getAllComments(UUID targetObjectId) {
-        List<Comment> comments = commentRepository.findByTargetIdOrderByCreatedAtAsc(targetObjectId);
+        List<Comment> comments = commentRepository.findAllByTargetIdOrderByCreatedAtAsc(targetObjectId);
         return comments.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 

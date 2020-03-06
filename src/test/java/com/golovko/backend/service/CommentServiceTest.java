@@ -44,7 +44,7 @@ public class CommentServiceTest {
     private CommentRepository commentRepository;
 
     @Test
-    public void getCommentTest() {
+    public void testGetCommentById() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
         Comment comment = testObjectFactory.createComment(user, article.getId(), APPROVED, ARTICLE);
@@ -56,12 +56,12 @@ public class CommentServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getCommentWrongIdTest() {
+    public void testGetCommentWrongId() {
         commentService.getComment(UUID.randomUUID(), UUID.randomUUID());
     }
 
     @Test
-    public void getAllCommentsTest() {
+    public void testGetAllComments() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -76,7 +76,7 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void getAllPublishedCommentsTest() {
+    public void testGetAllPublishedComments() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -93,7 +93,7 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void createCommentTest() {
+    public void testCreateComment() {
         ApplicationUser articleAuthor = testObjectFactory.createUser();
         ApplicationUser commentAuthor = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(articleAuthor, ArticleStatus.PUBLISHED);
@@ -114,7 +114,7 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void patchCommentTest() {
+    public void testPatchComment() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -133,7 +133,7 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void patchCommentEmptyPatchTest() {
+    public void testPatchCommentEmptyPatch() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -152,7 +152,7 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void updateCommentTest() {
+    public void testUpdateComment() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -171,7 +171,7 @@ public class CommentServiceTest {
     }
 
     @Test
-    public void deleteCommentTest() {
+    public void testDeleteComment() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -183,7 +183,7 @@ public class CommentServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteCommentNotFound() {
+    public void testDeleteCommentNotFound() {
         commentService.deleteComment(UUID.randomUUID(), UUID.randomUUID());
     }
 }

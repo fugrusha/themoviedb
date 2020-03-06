@@ -29,7 +29,7 @@ public class GenreService {
         return genres.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public GenreReadExtendedDTO getExtendedGenre(UUID id) {
         Genre genre = repoHelper.getEntityById(Genre.class, id);
         return translationService.toReadExtended(genre);

@@ -37,7 +37,7 @@ public class PersonServiceTest {
     private TestObjectFactory testObjectFactory;
 
     @Test
-    public void getPersonTest() {
+    public void testGetPerson() {
         Person person = testObjectFactory.createPerson();
 
         PersonReadDTO readDTO = personService.getPerson(person.getId());
@@ -46,12 +46,12 @@ public class PersonServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getPersonWrongIdTest() {
+    public void testGetPersonWrongId() {
         personService.getPerson(UUID.randomUUID());
     }
 
     @Test
-    public void createPersonTest() {
+    public void testCreatePerson() {
         PersonCreateDTO createDTO = new PersonCreateDTO();
         createDTO.setFirstName("Max");
         createDTO.setLastName("Popov");
@@ -67,7 +67,7 @@ public class PersonServiceTest {
     }
 
     @Test
-    public void patchPersonTest() {
+    public void testPatchPerson() {
         Person person = testObjectFactory.createPerson();
 
         PersonPatchDTO patchDTO = new PersonPatchDTO();
@@ -85,7 +85,7 @@ public class PersonServiceTest {
     }
 
     @Test
-    public void patchPersonEmptyPatchTest() {
+    public void testPatchPersonEmptyPatch() {
         Person person = testObjectFactory.createPerson();
         PersonPatchDTO patchDTO = new PersonPatchDTO();
 
@@ -101,7 +101,7 @@ public class PersonServiceTest {
     }
 
     @Test
-    public void updatePersonTest() {
+    public void testUpdatePerson() {
         Person person = testObjectFactory.createPerson();
 
         PersonPutDTO updateDTO = new PersonPutDTO();
@@ -119,7 +119,7 @@ public class PersonServiceTest {
     }
 
     @Test
-    public void deletePersonTest() {
+    public void testDeletePerson() {
         Person person = testObjectFactory.createPerson();
         personService.deletePerson(person.getId());
 
@@ -127,7 +127,7 @@ public class PersonServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deletePersonNotFoundTest() {
+    public void testDeletePersonNotFound() {
         personService.deletePerson(UUID.randomUUID());
     }
 }

@@ -42,7 +42,7 @@ public class ComplaintControllerTest {
     private ComplaintService complaintService;
 
     @Test
-    public void getComplaintByIdTest() throws Exception {
+    public void testGetComplaintById() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
@@ -64,7 +64,7 @@ public class ComplaintControllerTest {
     }
 
     @Test
-    public void getAllUserComplaintsTest() throws Exception {
+    public void testGetAllUserComplaints() throws Exception {
         UUID userId1 = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
@@ -88,7 +88,7 @@ public class ComplaintControllerTest {
     }
 
     @Test
-    public void getComplaintByWrongIdTest() throws Exception {
+    public void testGetComplaintByWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
@@ -105,7 +105,7 @@ public class ComplaintControllerTest {
     }
 
     @Test
-    public void createComplaintTest() throws Exception {
+    public void testCreateComplaint() throws Exception {
         ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
         createDTO.setComplaintTitle("Complaint Title");
         createDTO.setComplaintText("Text text text");
@@ -133,7 +133,7 @@ public class ComplaintControllerTest {
     }
 
     @Test
-    public void patchComplaintTest() throws Exception {
+    public void testPatchComplaint() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
@@ -159,7 +159,7 @@ public class ComplaintControllerTest {
     }
 
     @Test
-    public void updateComplaintTest() throws Exception {
+    public void testUpdateComplaint() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
         UUID parentId = UUID.randomUUID();
@@ -185,7 +185,7 @@ public class ComplaintControllerTest {
     }
 
     @Test
-    public void deleteComplaintTest() throws Exception {
+    public void testDeleteComplaint() throws Exception {
         UUID id = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 

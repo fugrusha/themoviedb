@@ -42,7 +42,7 @@ public class ArticleControllerTest {
     private ArticleService articleService;
 
     @Test
-    public void getArticleByIdTest() throws Exception {
+    public void testGetArticleById() throws Exception {
         UUID authorId = UUID.randomUUID();
         ArticleReadDTO readDTO = createArticleReadDTO(authorId);
 
@@ -61,7 +61,7 @@ public class ArticleControllerTest {
     }
 
     @Test
-    public void getArticleListTest() throws Exception {
+    public void testGetAllArticles() throws Exception {
         UUID authorId1 = UUID.randomUUID();
         UUID authorId2 = UUID.randomUUID();
         ArticleReadDTO a1 = createArticleReadDTO(authorId1);
@@ -71,7 +71,7 @@ public class ArticleControllerTest {
 
         List<ArticleReadDTO> expectedResult = List.of(a1, a2, a3, a4);
 
-        Mockito.when(articleService.getArticleList()).thenReturn(expectedResult);
+        Mockito.when(articleService.getAllArticles()).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/articles/"))
@@ -82,11 +82,11 @@ public class ArticleControllerTest {
         Assertions.assertThat(actualResult).extracting(ArticleReadDTO::getId)
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId(), a4.getId());
 
-        Mockito.verify(articleService).getArticleList();
+        Mockito.verify(articleService).getAllArticles();
     }
 
     @Test
-    public void getArticleByWrongIdTest() throws Exception {
+    public void testGetArticleByWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
 
         EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
@@ -102,7 +102,7 @@ public class ArticleControllerTest {
     }
 
     @Test
-    public void getArticleExtendedTest() throws Exception {
+    public void testGetArticleExtended() throws Exception {
         UserReadDTO userReadDTO = createUserReadDTO();
         ArticleReadExtendedDTO extendedDTO = createArticleReadExtendedDTO(userReadDTO);
 
@@ -120,7 +120,7 @@ public class ArticleControllerTest {
     }
 
     @Test
-    public void createArticleTest() throws Exception {
+    public void testCreateArticle() throws Exception {
         UUID authorId = UUID.randomUUID();
         ArticleReadDTO readDTO = createArticleReadDTO(authorId);
 
@@ -146,7 +146,7 @@ public class ArticleControllerTest {
     }
 
     @Test
-    public void updateArticleTest() throws Exception {
+    public void testUpdateArticle() throws Exception {
         UUID authorId = UUID.randomUUID();
         ArticleReadDTO readDTO = createArticleReadDTO(authorId);
 
@@ -169,7 +169,7 @@ public class ArticleControllerTest {
     }
 
     @Test
-    public void patchArticleTest() throws Exception {
+    public void testPatchArticle() throws Exception {
         UUID authorId = UUID.randomUUID();
         ArticleReadDTO readDTO = createArticleReadDTO(authorId);
 
@@ -192,10 +192,10 @@ public class ArticleControllerTest {
     }
 
     @Test
-    public void deleteArticleTest() throws Exception {
+    public void testDeleteArticle() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/articles/{id}", id.toString()))
+        mockMvc.perform(delete("/api/v1/articles/{id}", id))
                 .andExpect(status().isOk());
 
         Mockito.verify(articleService).deleteArticle(id);

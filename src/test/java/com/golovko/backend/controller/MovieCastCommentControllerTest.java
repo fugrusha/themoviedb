@@ -44,7 +44,7 @@ public class MovieCastCommentControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void getMovieCastCommentByIdTest() throws Exception {
+    public void testGetMovieCastCommentById() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
@@ -65,7 +65,7 @@ public class MovieCastCommentControllerTest {
     }
 
     @Test
-    public void getAllMovieCastCommentsTest() throws Exception {
+    public void testGetAllMovieCastComments() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
@@ -89,7 +89,7 @@ public class MovieCastCommentControllerTest {
     }
 
     @Test
-    public void getAllPublishedMovieCastCommentsTest() throws Exception {
+    public void testGetAllPublishedMovieCastComments() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
@@ -113,7 +113,7 @@ public class MovieCastCommentControllerTest {
     }
 
     @Test
-    public void getMovieCastCommentByWrongIdTest() throws Exception {
+    public void testGetMovieCastCommentByWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
@@ -132,7 +132,7 @@ public class MovieCastCommentControllerTest {
     }
 
     @Test
-    public void createMovieCastCommentTest() throws Exception {
+    public void testCreateMovieCastComment() throws Exception {
         UUID movieCastId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         UUID authorId = UUID.randomUUID();
@@ -161,7 +161,7 @@ public class MovieCastCommentControllerTest {
     }
 
     @Test
-    public void updateMovieCastCommentTest() throws Exception {
+    public void testUpdateMovieCastComment() throws Exception {
         UUID movieCastId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -186,7 +186,7 @@ public class MovieCastCommentControllerTest {
     }
 
     @Test
-    public void patchMovieCastCommentTest() throws Exception {
+    public void testPatchMovieCastComment() throws Exception {
         UUID movieCastId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -211,7 +211,7 @@ public class MovieCastCommentControllerTest {
     }
 
     @Test
-    public void deleteMovieCastCommentTest() throws Exception {
+    public void testDeleteMovieCastComment() throws Exception {
         UUID movieCastId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
