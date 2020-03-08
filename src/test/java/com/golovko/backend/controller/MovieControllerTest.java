@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -190,6 +191,7 @@ public class MovieControllerTest {
         filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
         filter.setReleasedFrom(LocalDate.parse("1980-07-10"));
         filter.setReleasedTo(LocalDate.parse("1992-07-10"));
+        filter.setGenreIds(Set.of(UUID.randomUUID(), UUID.randomUUID()));
 
         MovieReadDTO movieReadDTO = new MovieReadDTO();
         movieReadDTO.setId(UUID.randomUUID());
@@ -215,7 +217,9 @@ public class MovieControllerTest {
             .param("personId", filter.getPersonId().toString())
             .param("movieCrewTypes", "COMPOSER, WRITER")
             .param("releasedFrom", filter.getReleasedFrom().toString())
-            .param("releasedTo", filter.getReleasedTo().toString()))
+            .param("releasedTo", filter.getReleasedTo().toString())
+            .param("genreIds", String.join(", ", filter.getGenreIds()
+                    .stream().map(UUID::toString).collect(Collectors.toSet()))))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();

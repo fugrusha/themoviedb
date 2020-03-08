@@ -16,12 +16,30 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
     @Override
     public List<Movie> findByFilter(MovieFilter filter) {
         StringBuilder sb = new StringBuilder();
-        sb.append("select m from Movie m join fetch m.movieCrews mc where 1=1");
-        if (filter.getPersonId() != null) {
-            sb.append(" and mc.person.id = :personId");
+        sb.append("select m from Movie m");
+
+        if (filter.getGenreIds() != null
+                || filter.getMovieCrewTypes() != null
+                || filter.getPersonId() != null) {
+            if (filter.getGenreIds() != null && !filter.getGenreIds().isEmpty()) {
+                sb.append(" join m.genres g");
+            }
+            if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()
+                    || filter.getPersonId() != null) {
+                sb.append(" join m.movieCrews mcr");
+            }
+        }
+
+        sb.append(" where 1=1");
+
+        if (filter.getGenreIds() != null && !filter.getGenreIds().isEmpty()) {
+            sb.append(" and g.id in (:genreIds)");
         }
         if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()) {
-            sb.append(" and mc.movieCrewType in (:movieCrewTypes)");
+            sb.append(" and mcr.movieCrewType in (:movieCrewTypes)");
+        }
+        if (filter.getPersonId() != null) {
+            sb.append(" and mcr.person.id = :personId");
         }
         if (filter.getReleasedFrom() != null) {
             sb.append(" and m.releaseDate >= (:releasedFrom)");
@@ -37,6 +55,9 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         }
         if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()) {
             query.setParameter("movieCrewTypes", filter.getMovieCrewTypes());
+        }
+        if (filter.getGenreIds() != null && !filter.getGenreIds().isEmpty()) {
+            query.setParameter("genreIds", filter.getGenreIds());
         }
         if (filter.getReleasedFrom() != null) {
             query.setParameter("releasedFrom", filter.getReleasedFrom());
