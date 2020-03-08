@@ -5,6 +5,7 @@ import com.golovko.backend.domain.Article;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.util.TestObjectFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,9 +16,10 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
+import java.util.List;
+import java.util.UUID;
 
-import static com.golovko.backend.domain.CommentStatus.APPROVED;
-import static com.golovko.backend.domain.CommentStatus.NEED_MODERATION;
+import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
 
 @RunWith(SpringRunner.class)
@@ -67,5 +69,53 @@ public class CommentRepositoryTest {
 
         Assert.assertNotNull(modifiedAtAfterReload);
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
+    }
+
+    @Test
+    public void testFindByIdAndTargetId() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        Comment expectedComment = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+
+        Comment actualComment = commentRepository.findByIdAndTargetId(expectedComment.getId(), article.getId());
+
+        Assertions.assertThat(expectedComment).isEqualToIgnoringGivenFields(actualComment, "author");
+        Assert.assertEquals(user2.getId(), actualComment.getAuthor().getId());
+    }
+
+    @Test
+    public void testFindAllByTargetId() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        Comment c1 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, article.getId(), NEED_MODERATION, ARTICLE);
+        testObjectFactory.createComment(user2, UUID.randomUUID(), NEED_MODERATION, ARTICLE);
+        testObjectFactory.createComment(user2, UUID.randomUUID(), APPROVED, ARTICLE);
+
+        List<Comment> comments = commentRepository.findAllByTargetIdOrderByCreatedAtAsc(article.getId());
+
+        Assertions.assertThat(comments).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testFindAllByStatusAndTargetId() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        Comment c1 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        testObjectFactory.createComment(user2, article.getId(), NEED_MODERATION, ARTICLE);
+        testObjectFactory.createComment(user2, article.getId(), BLOCKED, ARTICLE);
+
+        List<Comment> comments = commentRepository.findAllByStatusAndTarget(article.getId(), APPROVED);
+
+        Assertions.assertThat(comments).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 }

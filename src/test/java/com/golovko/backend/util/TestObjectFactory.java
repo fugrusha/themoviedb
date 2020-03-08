@@ -85,10 +85,9 @@ public class TestObjectFactory {
     }
 
     public Complaint createComplaint(
-            UUID articleId,
+            UUID targetObjectId,
             TargetObjectType targetObjectType,
-            ApplicationUser author,
-            ApplicationUser moderator
+            ApplicationUser author
     ) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle("Some title");
@@ -96,8 +95,8 @@ public class TestObjectFactory {
         complaint.setComplaintType(ComplaintType.MISPRINT);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(author);
-        complaint.setModerator(moderator);
-        complaint.setTargetObjectId(articleId);
+        complaint.setModerator(null);
+        complaint.setTargetObjectId(targetObjectId);
         complaint.setTargetObjectType(targetObjectType);
         return complaintRepository.save(complaint);
     }
