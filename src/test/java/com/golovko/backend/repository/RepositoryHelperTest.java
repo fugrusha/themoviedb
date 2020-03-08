@@ -32,7 +32,7 @@ public class RepositoryHelperTest {
     private RepositoryHelper repoHelper;
 
     @Test
-    public void getReferenceIfExistsTest() {
+    public void testGetReferenceIfExists() {
         ApplicationUser user = testObjectFactory.createUser();
 
         ApplicationUser userEntity = applicationUserRepository.findById(user.getId()).get();
@@ -46,12 +46,12 @@ public class RepositoryHelperTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getReferenceNegativeTest() {
+    public void testGetReferenceByWrongId() {
         repoHelper.getReferenceIfExist(ApplicationUser.class, UUID.randomUUID());
     }
 
     @Test
-    public void getEntityByIdTest() {
+    public void testGetEntityById() {
         ApplicationUser user = testObjectFactory.createUser();
 
         ApplicationUser userFromDB = applicationUserRepository.findById(user.getId()).get();
@@ -64,7 +64,7 @@ public class RepositoryHelperTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getEntityByWrongId() {
+    public void testGetEntityByWrongId() {
         repoHelper.getEntityById(ApplicationUser.class, UUID.randomUUID());
     }
 }

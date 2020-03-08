@@ -22,7 +22,7 @@ public class ArticleController {
 
     @GetMapping
     public List<ArticleReadDTO> getArticleList() {
-        return articleService.getArticleList();
+        return articleService.getAllArticles();
     }
 
     @GetMapping("/{id}/extended")

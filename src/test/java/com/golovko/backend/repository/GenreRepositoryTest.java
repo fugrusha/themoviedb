@@ -28,7 +28,7 @@ public class GenreRepositoryTest {
     private GenreRepository genreRepository;
 
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         Genre genre = testObjectFactory.createGenre("Comedy");
 
         Instant createdAtBeforeReload = genre.getCreatedAt();
@@ -42,7 +42,7 @@ public class GenreRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         Genre genre = testObjectFactory.createGenre("Comedy");
 
         Instant modifiedAtBeforeReload = genre.getUpdatedAt();

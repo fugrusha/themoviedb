@@ -126,4 +126,16 @@
         </loadUpdateData>
     </changeSet>
 
+    <changeSet id="load ratings" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="rating" file="db/data/ratings.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="rating" type="numeric"/>
+            <column name="author_id" type="uuid"/>
+            <column name="target_object_type" type="string"/>
+            <column name="target_object_id" type="uuid"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </loadUpdateData>
+    </changeSet>
+
 </databaseChangeLog>

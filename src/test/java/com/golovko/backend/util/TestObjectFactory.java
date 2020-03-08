@@ -38,13 +38,16 @@ public class TestObjectFactory {
     @Autowired
     private GenreRepository genreRepository;
 
+    @Autowired
+    private RatingRepository ratingRepository;
+
     public Movie createMovie() {
         Movie movie = new Movie();
         movie.setMovieTitle("Title of the Movie");
         movie.setDescription("movie description");
         movie.setIsReleased(false);
         movie.setReleaseDate(LocalDate.parse("1990-05-14"));
-        movie.setAverageRating(5.0);
+        movie.setAverageRating(null);
         return movieRepository.save(movie);
     }
 
@@ -82,10 +85,9 @@ public class TestObjectFactory {
     }
 
     public Complaint createComplaint(
-            UUID articleId,
+            UUID targetObjectId,
             TargetObjectType targetObjectType,
-            ApplicationUser author,
-            ApplicationUser moderator
+            ApplicationUser author
     ) {
         Complaint complaint = new Complaint();
         complaint.setComplaintTitle("Some title");
@@ -93,8 +95,8 @@ public class TestObjectFactory {
         complaint.setComplaintType(ComplaintType.MISPRINT);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(author);
-        complaint.setModerator(moderator);
-        complaint.setTargetObjectId(articleId);
+        complaint.setModerator(null);
+        complaint.setTargetObjectId(targetObjectId);
         complaint.setTargetObjectType(targetObjectType);
         return complaintRepository.save(complaint);
     }
@@ -102,7 +104,7 @@ public class TestObjectFactory {
     public MovieCast createMovieCast(Person person, Movie movie) {
         MovieCast movieCast = new MovieCast();
         movieCast.setDescription("Some text");
-        movieCast.setAverageRating(5.0);
+        movieCast.setAverageRating(null);
         movieCast.setPerson(person);
         movieCast.setMovie(movie);
         movieCast.setMovieCrewType(MovieCrewType.CAST);
@@ -113,7 +115,7 @@ public class TestObjectFactory {
     public MovieCrew createMovieCrew(Person person, Movie movie) {
         MovieCrew movieCrew = new MovieCrew();
         movieCrew.setDescription("Some text");
-        movieCrew.setAverageRating(5.0);
+        movieCrew.setAverageRating(null);
         movieCrew.setPerson(person);
         movieCrew.setMovie(movie);
         movieCrew.setMovieCrewType(MovieCrewType.WRITER);
@@ -143,7 +145,7 @@ public class TestObjectFactory {
 
     public Comment createComment(
             ApplicationUser author,
-            UUID parentId,
+            UUID targetObjectId,
             CommentStatus status,
             TargetObjectType targetObjectType) {
         Comment comment = new Comment();
@@ -153,7 +155,7 @@ public class TestObjectFactory {
         comment.setDislikesCount(78);
         comment.setAuthor(author);
         comment.setTargetObjectType(targetObjectType);
-        comment.setTargetObjectId(parentId);
+        comment.setTargetObjectId(targetObjectId);
         return commentRepository.save(comment);
     }
 
@@ -162,5 +164,19 @@ public class TestObjectFactory {
         genre.setGenreName(genreName);
         genre.setDescription("Scary movies");
         return genreRepository.save(genre);
+    }
+
+    public Rating createRating(
+            Integer starRating,
+            ApplicationUser author,
+            UUID targetObjectId,
+            TargetObjectType targetObjectType
+    ) {
+        Rating rating = new Rating();
+        rating.setRating(starRating);
+        rating.setTargetObjectId(targetObjectId);
+        rating.setTargetObjectType(targetObjectType);
+        rating.setAuthor(author);
+        return ratingRepository.save(rating);
     }
 }

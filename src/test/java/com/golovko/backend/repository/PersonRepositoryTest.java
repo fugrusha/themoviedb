@@ -26,7 +26,7 @@ public class PersonRepositoryTest {
     private TestObjectFactory testObjectFactory;
 
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         Person person = testObjectFactory.createPerson();
 
         Instant createdAtBeforeReload = person.getCreatedAt();
@@ -40,7 +40,7 @@ public class PersonRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         Person person = testObjectFactory.createPerson();
 
         Instant modifiedAtBeforeReload = person.getUpdatedAt();

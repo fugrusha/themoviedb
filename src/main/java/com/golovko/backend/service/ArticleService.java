@@ -7,6 +7,7 @@ import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -29,12 +30,13 @@ public class ArticleService {
         return translationService.toRead(article);
     }
 
+    @Transactional(readOnly = true)
     public ArticleReadExtendedDTO getArticleExtended(UUID id) {
         Article article = repoHelper.getEntityById(Article.class, id);
         return translationService.toReadExtended(article);
     }
 
-    public List<ArticleReadDTO> getArticleList() {
+    public List<ArticleReadDTO> getAllArticles() {
         List<Article> articles = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.PUBLISHED);
         return articles.stream().map(translationService::toRead).collect(Collectors.toList());
     }

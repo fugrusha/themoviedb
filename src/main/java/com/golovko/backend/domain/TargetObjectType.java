@@ -6,5 +6,5 @@ public enum TargetObjectType {
     ARTICLE,
     PERSON,
     MOVIE_CAST,
-    MOVIE_PARTICIPATION
+    MOVIE_CREW
 }

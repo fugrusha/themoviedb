@@ -29,6 +29,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -47,7 +48,7 @@ public class MovieControllerTest {
     private MovieService movieService;
 
     @Test
-    public void getMovieByIdTest() throws Exception {
+    public void testGetMovieById() throws Exception {
         MovieReadDTO dto = createMovieReadDTO();
 
         Mockito.when(movieService.getMovie(dto.getId())).thenReturn(dto);
@@ -66,7 +67,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void getMovieExtendedBuIdTest() throws Exception {
+    public void testGetMovieExtended() throws Exception {
         UUID movieId = UUID.randomUUID();
         Set<GenreReadDTO> genres = Set.of(createGenreReadDTO());
         Set<MovieCastReadDTO> movieCasts = Set.of(createMovieCastReadDTO(movieId));
@@ -89,7 +90,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void getMovieWrongIdTest() throws Exception {
+    public void testGetMovieWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
 
         EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
@@ -104,7 +105,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void createMovieTest() throws Exception {
+    public void testCreateMovie() throws Exception {
         MovieCreateDTO createDTO = new MovieCreateDTO();
         createDTO.setMovieTitle("Guess Who");
         createDTO.setDescription("12345");
@@ -127,7 +128,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void patchMovieTest() throws Exception {
+    public void testPatchMovie() throws Exception {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         patchDTO.setMovieTitle("title");
         patchDTO.setDescription("some description");
@@ -150,7 +151,7 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void updateMovieTest() throws Exception {
+    public void testUpdateMovie() throws Exception {
         MoviePutDTO updateDTO = new MoviePutDTO();
         updateDTO.setMovieTitle("new title");
         updateDTO.setDescription("some NEW description");
@@ -174,22 +175,23 @@ public class MovieControllerTest {
     }
 
     @Test
-    public void deleteMovieTest() throws Exception {
+    public void testDeleteMovie() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/movies/{id}", id.toString()))
+        mockMvc.perform(delete("/api/v1/movies/{id}", id))
                 .andExpect(status().isOk());
 
         Mockito.verify(movieService).deleteMovie(id);
     }
 
     @Test
-    public void getMoviesWithFilterTest() throws Exception {
+    public void testGetMoviesWithFilter() throws Exception {
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(UUID.randomUUID());
         filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
         filter.setReleasedFrom(LocalDate.parse("1980-07-10"));
         filter.setReleasedTo(LocalDate.parse("1992-07-10"));
+        filter.setGenreIds(Set.of(UUID.randomUUID(), UUID.randomUUID()));
 
         MovieReadDTO movieReadDTO = new MovieReadDTO();
         movieReadDTO.setId(UUID.randomUUID());
@@ -215,7 +217,9 @@ public class MovieControllerTest {
             .param("personId", filter.getPersonId().toString())
             .param("movieCrewTypes", "COMPOSER, WRITER")
             .param("releasedFrom", filter.getReleasedFrom().toString())
-            .param("releasedTo", filter.getReleasedTo().toString()))
+            .param("releasedTo", filter.getReleasedTo().toString())
+            .param("genreIds", String.join(", ", filter.getGenreIds()
+                    .stream().map(UUID::toString).collect(Collectors.toSet()))))
             .andDo(MockMvcResultHandlers.print())
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();

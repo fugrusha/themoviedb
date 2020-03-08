@@ -4,6 +4,7 @@ import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Article;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.util.TestObjectFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -14,6 +15,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
+import java.util.List;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -29,7 +31,7 @@ public class ArticleRepositoryTest {
     private ArticleRepository articleRepository;
 
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
 
@@ -44,7 +46,7 @@ public class ArticleRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
         Article article = new Article();
         article.setText("text");
@@ -62,5 +64,20 @@ public class ArticleRepositoryTest {
         Instant modifiedAtAfterReload = article.getUpdatedAt();
 
         Assert.assertNotNull(modifiedAtAfterReload);
-        Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));    }
+        Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
+    }
+
+    @Test
+    public void testGetArticlesByStatus() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
+        Article a2 = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
+        Article a3 = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
+        testObjectFactory.createArticle(author, ArticleStatus.NEED_MODERATION);
+
+        List<Article> articles = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.DRAFT);
+
+        Assertions.assertThat(articles).extracting("id")
+                .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId());
+    }
 }

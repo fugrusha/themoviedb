@@ -45,7 +45,7 @@ public class MovieCastControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void getMovieCastTest() throws Exception {
+    public void testGetMovieCast() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID personId = UUID.randomUUID();
         MovieCastReadDTO readDTO = createMovieCastReadDTO(movieId, personId);
@@ -64,7 +64,7 @@ public class MovieCastControllerTest {
     }
 
     @Test
-    public void getMovieCastExtendedTest() throws Exception {
+    public void testGetMovieCastExtended() throws Exception {
         PersonReadDTO personReadDTO = createPersonReadDTO();
         MovieReadDTO movieReadDTO = createMovieReadDTO();
         MovieCastReadExtendedDTO extendedDTO = createMovieCastReadExtendedDTO(personReadDTO, movieReadDTO);
@@ -85,7 +85,7 @@ public class MovieCastControllerTest {
     }
 
     @Test
-    public void getAllMovieCastsTest() throws Exception {
+    public void testGetAllMovieCasts() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID personId = UUID.randomUUID();
         MovieCastReadDTO readDTO = createMovieCastReadDTO(movieId, personId);
@@ -104,7 +104,7 @@ public class MovieCastControllerTest {
     }
 
     @Test
-    public void getMovieCastWrongIdTest() throws Exception {
+    public void testGetMovieCastWrongId() throws Exception {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
@@ -120,18 +120,18 @@ public class MovieCastControllerTest {
     }
 
     @Test
-    public void deleteMovieCastTest() throws Exception {
+    public void testDeleteMovieCast() throws Exception {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-casts/{id}", movieId, id.toString()))
+        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-casts/{id}", movieId, id))
                 .andExpect(status().isOk());
 
         Mockito.verify(movieCastService).deleteMovieCast(id, movieId);
     }
 
     @Test
-    public void createMovieCastTest() throws Exception {
+    public void testCreateMovieCast() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID personId = UUID.randomUUID();
         MovieCastReadDTO readDTO = createMovieCastReadDTO(movieId, personId);
@@ -155,7 +155,7 @@ public class MovieCastControllerTest {
     }
 
     @Test
-    public void updateMovieCastTest() throws Exception {
+    public void testUpdateMovieCast() throws Exception {
         MovieCastPutDTO updateDTO = new MovieCastPutDTO();
         updateDTO.setCharacter("New Character");
         updateDTO.setDescription("New text");
@@ -180,7 +180,7 @@ public class MovieCastControllerTest {
     }
 
     @Test
-    public void patchMovieCastTest() throws Exception {
+    public void testPatchMovieCast() throws Exception {
         MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
         patchDTO.setCharacter("New Character");
         patchDTO.setDescription("New text");

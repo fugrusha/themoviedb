@@ -10,8 +10,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
@@ -25,8 +30,11 @@ public class MovieRepositoryTest {
     @Autowired
     private TestObjectFactory testObjectFactory;
 
+    @Autowired
+    private TransactionTemplate transactionTemplate;
+
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         Movie movie = testObjectFactory.createMovie();
 
         Instant createdAtBeforeReload = movie.getCreatedAt();
@@ -40,7 +48,7 @@ public class MovieRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         Movie movie = testObjectFactory.createMovie();
 
         Instant modifiedAtBeforeReload = movie.getUpdatedAt();
@@ -53,5 +61,18 @@ public class MovieRepositoryTest {
 
         Assert.assertNotNull(modifiedAtAfterReload);
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
+    }
+
+    @Test
+    public void testGetIdsOfMovies() {
+        Set<UUID> expectedResult = new HashSet<>();
+        expectedResult.add(testObjectFactory.createMovie().getId());
+        expectedResult.add(testObjectFactory.createMovie().getId());
+        expectedResult.add(testObjectFactory.createMovie().getId());
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Set<UUID> actualResult = movieRepository.getIdsOfMovies().collect(Collectors.toSet());
+            Assert.assertEquals(expectedResult, actualResult);
+        });
     }
 }

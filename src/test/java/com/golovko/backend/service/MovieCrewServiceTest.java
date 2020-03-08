@@ -1,9 +1,6 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.MovieCrew;
-import com.golovko.backend.domain.MovieCrewType;
-import com.golovko.backend.domain.Person;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.MovieCrewRepository;
@@ -22,11 +19,18 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.UUID;
 
+import static com.golovko.backend.domain.TargetObjectType.MOVIE_CREW;
+
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from person", "delete from movie", "delete from movie_crew"},
-    executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {
+        "delete from rating",
+        "delete from application_user",
+        "delete from person",
+        "delete from movie",
+        "delete from movie_crew"},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class MovieCrewServiceTest {
 
     @Autowired
@@ -42,7 +46,7 @@ public class MovieCrewServiceTest {
     private TransactionTemplate transactionTemplate;
 
     @Test
-    public void getMovieCrewTest() {
+    public void testGetMovieCrew() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
@@ -56,7 +60,7 @@ public class MovieCrewServiceTest {
     }
 
     @Test
-    public void getMovieCrewExtendedTest() {
+    public void testGetMovieCrewExtended() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
@@ -70,19 +74,19 @@ public class MovieCrewServiceTest {
     }
 
     @Test
-    public void getListOfMovieCrewTest() {
+    public void testGetAllMovieCrewsByMovieId() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew moviePart = testObjectFactory.createMovieCrew(person, movie);
 
-        List<MovieCrewReadDTO> resultList = movieCrewService.getAllMovieCrews(movie.getId());
+        List<MovieCrewReadDTO> result = movieCrewService.getAllMovieCrews(movie.getId());
 
-        Assertions.assertThat(resultList).extracting(MovieCrewReadDTO::getId)
+        Assertions.assertThat(result).extracting(MovieCrewReadDTO::getId)
                 .containsExactlyInAnyOrder(moviePart.getId());
     }
 
     @Test
-    public void createMovieCrewTest() {
+    public void testCreateMovieCrew() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
 
@@ -105,7 +109,7 @@ public class MovieCrewServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void createMovieCrewnWrongPersonTest() {
+    public void testCreateMovieCrewWrongPersonId() {
         Movie movie = testObjectFactory.createMovie();
 
         MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
@@ -117,7 +121,7 @@ public class MovieCrewServiceTest {
     }
 
     @Test
-    public void patchMovieCrewTest() {
+    public void testPatchMovieCrew() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
@@ -139,7 +143,7 @@ public class MovieCrewServiceTest {
     }
 
     @Test
-    public void patchMovieCrewEmptyPatchTest() {
+    public void testPatchMovieCrewEmptyPatch() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
@@ -148,7 +152,7 @@ public class MovieCrewServiceTest {
 
         MovieCrewReadDTO readDTO = movieCrewService.patchMovieCrew(movie.getId(), movieCrew.getId(), patchDTO);
 
-        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRating");
 
         inTransaction(() -> {
             MovieCrew moviePartAfterUpdate = movieCrewRepository.findById(readDTO.getId()).get();
@@ -160,7 +164,7 @@ public class MovieCrewServiceTest {
     }
 
     @Test
-    public void updateMovieCrewTest() {
+    public void testUpdateMovieCrew() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
@@ -182,7 +186,7 @@ public class MovieCrewServiceTest {
     }
 
     @Test
-    public void deleteMovieCrewTest() {
+    public void testDeleteMovieCrew() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
@@ -193,13 +197,31 @@ public class MovieCrewServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteMovieCrewNotFound() {
+    public void testDeleteMovieCrewNotFound() {
         movieCrewService.deleteMovieCrew(UUID.randomUUID(), UUID.randomUUID());
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getMovieCrewWrongIdTest() {
+    public void testGetMovieCrewWrongId() {
         movieCrewService.getMovieCrew(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    @Test
+    public void testCalcAverageRatingOfMovieCrew() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        ApplicationUser u2 = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+
+        testObjectFactory.createRating(3, u1, movieCrew.getId(), MOVIE_CREW);
+        testObjectFactory.createRating(6, u2, movieCrew.getId(), MOVIE_CREW);
+
+        movieCrewService.updateAverageRatingOfMovieCrew(movieCrew.getId());
+
+        movieCrew = movieCrewRepository.findById(movieCrew.getId()).get();
+        Assert.assertEquals(4.5, movieCrew.getAverageRating(), Double.MIN_NORMAL);
     }
 
     private void inTransaction (Runnable runnable) {

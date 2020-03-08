@@ -44,7 +44,7 @@ public class ArticleCommentControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void getArticleCommentByIdTest() throws Exception {
+    public void testGetArticleCommentById() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
@@ -63,7 +63,7 @@ public class ArticleCommentControllerTest {
     }
 
     @Test
-    public void getAllArticleCommentsTest() throws Exception {
+    public void testGetAllArticleComments() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
@@ -85,7 +85,7 @@ public class ArticleCommentControllerTest {
     }
 
     @Test
-    public void getAllPublishedArticleCommentsTest() throws Exception {
+    public void testGetAllPublishedArticleComments() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
@@ -107,7 +107,7 @@ public class ArticleCommentControllerTest {
     }
 
     @Test
-    public void getArticleCommentByWrongIdTest() throws Exception {
+    public void testGetArticleCommentByWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();
 
@@ -124,7 +124,7 @@ public class ArticleCommentControllerTest {
     }
 
     @Test
-    public void createArticleCommentTest() throws Exception {
+    public void testCreateArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
         UUID authorId = UUID.randomUUID();
 
@@ -151,7 +151,7 @@ public class ArticleCommentControllerTest {
     }
 
     @Test
-    public void updateArticleCommentTest() throws Exception {
+    public void testUpdateArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
@@ -174,7 +174,7 @@ public class ArticleCommentControllerTest {
     }
 
     @Test
-    public void patchArticleCommentTest() throws Exception {
+    public void testPatchArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
@@ -197,7 +197,7 @@ public class ArticleCommentControllerTest {
     }
 
     @Test
-    public void deleteArticleCommentTest() throws Exception {
+    public void testDeleteArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
 

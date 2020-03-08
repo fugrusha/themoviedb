@@ -41,7 +41,7 @@ public class GenreControllerTest {
     private GenreService genreService;
 
     @Test
-    public void getGenreByIdTest() throws Exception {
+    public void testGetGenreById() throws Exception {
         GenreReadDTO readDTO = createGenreReadDTO();
 
         Mockito.when(genreService.getGenre(readDTO.getId())).thenReturn(readDTO);
@@ -58,7 +58,7 @@ public class GenreControllerTest {
     }
 
     @Test
-    public void getAllGenresTest() throws Exception {
+    public void testGetAllGenres() throws Exception {
         GenreReadDTO genre1 = createGenreReadDTO();
         GenreReadDTO genre2 = createGenreReadDTO();
 
@@ -79,7 +79,7 @@ public class GenreControllerTest {
     }
 
     @Test
-    public void getExtendedGenreTest() throws Exception {
+    public void testGetExtendedGenre() throws Exception {
         MovieReadDTO m1 = createMovieReadDTO();
         MovieReadDTO m2 = createMovieReadDTO();
         GenreReadExtendedDTO extendedDTO = createGenreReadExtendedDTO(List.of(m1, m2));
@@ -98,7 +98,7 @@ public class GenreControllerTest {
     }
 
     @Test
-    public void getGenreByWrongIdTest() throws Exception {
+    public void testGetGenreByWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
 
         EntityNotFoundException ex = new EntityNotFoundException(Movie.class, wrongId);
@@ -114,7 +114,7 @@ public class GenreControllerTest {
     }
 
     @Test
-    public void createGenreTest() throws Exception {
+    public void testCreateGenre() throws Exception {
         GenreCreateDTO createDTO = new GenreCreateDTO();
         createDTO.setGenreName("genre name");
         createDTO.setDescription("some description");
@@ -135,7 +135,7 @@ public class GenreControllerTest {
     }
 
     @Test
-    public void patchGenreTest() throws Exception {
+    public void testPatchGenre() throws Exception {
         GenrePatchDTO patchDTO = new GenrePatchDTO();
         patchDTO.setGenreName("new genre");
         patchDTO.setDescription("new text description");
@@ -156,7 +156,7 @@ public class GenreControllerTest {
     }
 
     @Test
-    public void updateGenreTest() throws Exception {
+    public void testUpdateGenre() throws Exception {
         GenrePutDTO putDTO = new GenrePutDTO();
         putDTO.setGenreName("new genre");
         putDTO.setDescription("new text description");
@@ -177,7 +177,7 @@ public class GenreControllerTest {
     }
 
     @Test
-    public void deleteGenreTest() throws Exception {
+    public void testDeleteGenre() throws Exception {
         UUID genreId = UUID.randomUUID();
 
         mockMvc.perform(delete("/api/v1/genres/{id}", genreId))

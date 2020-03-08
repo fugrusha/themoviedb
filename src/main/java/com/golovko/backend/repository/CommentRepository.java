@@ -18,7 +18,7 @@ public interface CommentRepository extends CrudRepository<Comment, UUID> {
 
     @Query("select c from Comment c where c.targetObjectId = :targetId"
             + " order by c.createdAt asc")
-    List<Comment> findByTargetIdOrderByCreatedAtAsc(UUID targetId);
+    List<Comment> findAllByTargetIdOrderByCreatedAtAsc(UUID targetId);
 
     @Query("select c from Comment c where c.targetObjectId = :targetId"
             + " and c.status = :status"

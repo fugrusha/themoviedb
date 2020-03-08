@@ -44,7 +44,7 @@ public class ComplaintServiceTest {
     private TransactionTemplate transactionTemplate;
 
     @Test
-    public void getComplaintTest() {
+    public void testGetComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
 
@@ -56,7 +56,7 @@ public class ComplaintServiceTest {
     }
 
     @Test
-    public void getAllUserComplaintsTest() {
+    public void testGetAllUserComplaints() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
@@ -71,12 +71,12 @@ public class ComplaintServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getComplaintWrongIdTest() {
+    public void testGetComplaintWrongId() {
         complaintService.getComplaint(UUID.randomUUID(), UUID.randomUUID());
     }
 
     @Test
-    public void createComplaintTest() {
+    public void testCreateComplaint() {
         ApplicationUser author = testObjectFactory.createUser();
         Movie targetObject = testObjectFactory.createMovie();
 
@@ -101,7 +101,7 @@ public class ComplaintServiceTest {
     }
 
     @Test
-    public void patchComplaintTest() {
+    public void testPatchComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
 
@@ -122,7 +122,7 @@ public class ComplaintServiceTest {
     }
 
     @Test
-    public void patchComplaintEmptyPatchTest() {
+    public void testPatchComplaintEmptyPatch() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
 
@@ -143,7 +143,7 @@ public class ComplaintServiceTest {
     }
 
     @Test
-    public void updateComplaintTest() {
+    public void testUpdateComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
 
@@ -164,7 +164,7 @@ public class ComplaintServiceTest {
     }
 
     @Test
-    public void deleteComplaintTest() {
+    public void testDeleteComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
         Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
         complaintService.deleteComplaint(user.getId(), complaint.getId());
@@ -173,7 +173,7 @@ public class ComplaintServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteComplaintNotFoundTest() {
+    public void testDeleteComplaintNotFound() {
         complaintService.deleteComplaint(UUID.randomUUID(), UUID.randomUUID());
     }
 

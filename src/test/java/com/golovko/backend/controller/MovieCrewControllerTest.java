@@ -45,7 +45,7 @@ public class MovieCrewControllerTest {
     private MovieCrewService movieCrewService;
 
     @Test
-    public void getMovieCrewTest() throws Exception {
+    public void testGetMovieCrew() throws Exception {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
 
         Mockito.when(movieCrewService.getMovieCrew(readDTO.getMovieId(), readDTO.getId())).thenReturn(readDTO);
@@ -63,7 +63,7 @@ public class MovieCrewControllerTest {
     }
 
     @Test
-    public void getMovieCrewExtendedTest() throws Exception {
+    public void testGetMovieCrewExtended() throws Exception {
         PersonReadDTO personReadDTO = createPersonReadDTO();
         MovieReadDTO movieReadDTO = createMovieReadDTO();
         MovieCrewReadExtendedDTO readDTO = createMovieCrewReadExtendedDTO(personReadDTO, movieReadDTO);
@@ -84,7 +84,7 @@ public class MovieCrewControllerTest {
     }
 
     @Test
-    public void getListOfMovieCrewTest() throws Exception {
+    public void testGetAllMovieCrews() throws Exception {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
@@ -102,7 +102,7 @@ public class MovieCrewControllerTest {
     }
 
     @Test
-    public void getMovieCrewWrongIdTest() throws Exception {
+    public void testGetMovieCrewWrongId() throws Exception {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
@@ -119,7 +119,7 @@ public class MovieCrewControllerTest {
     }
 
     @Test
-    public void createMovieCrewTest() throws Exception {
+    public void testCreateMovieCrew() throws Exception {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
@@ -142,7 +142,7 @@ public class MovieCrewControllerTest {
     }
 
     @Test
-    public void updateMovieCrewTest() throws Exception {
+    public void testUpdateMovieCrew() throws Exception {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
@@ -165,7 +165,7 @@ public class MovieCrewControllerTest {
     }
 
     @Test
-    public void patchMovieCrewTest() throws Exception {
+    public void testPatchMovieCrew() throws Exception {
         MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
         patchDTO.setMovieCrewType(MovieCrewType.COMPOSER);
         patchDTO.setDescription("New text");
@@ -188,11 +188,11 @@ public class MovieCrewControllerTest {
     }
 
     @Test
-    public void deleteMovieCrewTest() throws Exception {
+    public void testDeleteMovieCrew() throws Exception {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-crews/{id}", movieId, id.toString()))
+        mockMvc.perform(delete("/api/v1/movies/{movieId}/movie-crews/{id}", movieId, id))
                 .andExpect(status().is2xxSuccessful());
 
         Mockito.verify(movieCrewService).deleteMovieCrew(movieId, id);

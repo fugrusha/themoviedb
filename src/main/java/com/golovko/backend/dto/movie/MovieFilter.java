@@ -13,6 +13,8 @@ public class MovieFilter {
 
     private UUID personId;
 
+    private Set<UUID> genreIds;
+
     private Set<MovieCrewType> movieCrewTypes;
 
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)

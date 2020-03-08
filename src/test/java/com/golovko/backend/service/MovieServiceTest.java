@@ -3,6 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.job.UpdateAverageRatingOfMoviesJob;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
@@ -13,19 +14,24 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from genre_movie",
+        "delete from genre",
+        "delete from rating",
+        "delete from application_user",
         "delete from genre_movie",
         "delete from genre",
         "delete from movie_cast",
@@ -45,10 +51,10 @@ public class MovieServiceTest {
     private TestObjectFactory testObjectFactory;
 
     @Autowired
-    private TransactionTemplate transactionTemplate;
+    private UpdateAverageRatingOfMoviesJob updateAverageRatingOfMoviesJob;
 
     @Test
-    public void getMovieTest() {
+    public void testGetMovieById() {
         Movie movie = testObjectFactory.createMovie();
 
         MovieReadDTO readDTO = movieService.getMovie(movie.getId());
@@ -56,12 +62,12 @@ public class MovieServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void getMovieWrongIdTest() {
+    public void testGetMovieWrongId() {
         movieService.getMovie(UUID.randomUUID());
     }
 
     @Test
-    public void getMovieExtendedTest() {
+    public void testGetMovieExtended() {
         Genre genre = testObjectFactory.createGenre("Horror");
         Movie movie = testObjectFactory.createMovie();
         Person person1 = testObjectFactory.createPerson();
@@ -83,9 +89,8 @@ public class MovieServiceTest {
         assertThat(extendedDTO.getMovieCrews()).extracting("id").containsExactlyInAnyOrder(movieCrew.getId());
     }
 
-
     @Test
-    public void createMovieTest() {
+    public void testCreateMovie() {
         MovieCreateDTO createDTO = new MovieCreateDTO();
         createDTO.setMovieTitle("title");
         createDTO.setDescription("description");
@@ -102,7 +107,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void patchMovieTest() {
+    public void testPatchMovie() {
         Movie movie = testObjectFactory.createMovie();
 
         MoviePatchDTO patchDTO = new MoviePatchDTO();
@@ -121,23 +126,23 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void patchMovieEmptyPatchTest() {
+    public void testPatchMovieEmptyPatch() {
         Movie movie = testObjectFactory.createMovie();
 
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         MovieReadDTO readDTO = movieService.patchMovie(movie.getId(), patchDTO);
 
-        assertThat(readDTO).hasNoNullFieldsOrProperties();
+        assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRating");
 
         Movie movieAfterUpdate = movieRepository.findById(readDTO.getId()).get();
 
-        assertThat(movieAfterUpdate).hasNoNullFieldsOrProperties();
+        assertThat(movieAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRating");
         assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate,
                 "movieCrews", "movieCasts", "genres");
     }
 
     @Test
-    public void updateMovieTest() {
+    public void testUpdateMovie() {
         Movie movie = testObjectFactory.createMovie();
 
         MoviePutDTO updateDTO = new MoviePutDTO();
@@ -157,7 +162,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void deleteMovieTest() {
+    public void testDeleteMovie() {
         Movie movie = testObjectFactory.createMovie();
         movieService.deleteMovie(movie.getId());
 
@@ -165,22 +170,15 @@ public class MovieServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void deleteMovieNotFoundTest() {
+    public void testDeleteMovieNotFound() {
         movieService.deleteMovie(UUID.randomUUID());
     }
 
     @Test
-    public void getMoviesWithEmptyFilterTest() {
-        Person person1 = testObjectFactory.createPerson();
-        Person person2 = testObjectFactory.createPerson();
+    public void testGetMoviesWithEmptyFilter() {
         Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
         Movie m2 = createMovie(LocalDate.of(1992, 5, 4));
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
-        createMovie(LocalDate.of(1944, 5, 4));
-
-        testObjectFactory.createMovieCrew(person2, m1);
-        testObjectFactory.createMovieCrew(person2, m2);
-        testObjectFactory.createMovieCrew(person1, m3);
 
         MovieFilter filter = new MovieFilter();
         assertThat(movieService.getMovies(filter)).extracting("id")
@@ -188,7 +186,20 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getMoviesByPersonTest() {
+    public void testGetMoviesWithEmptySetsOfFilter() {
+        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = createMovie(LocalDate.of(1992, 5, 4));
+        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
+
+        MovieFilter filter = new MovieFilter();
+        filter.setGenreIds(new HashSet<UUID>());
+        filter.setMovieCrewTypes(new HashSet<MovieCrewType>());
+        assertThat(movieService.getMovies(filter)).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
+    }
+
+    @Test
+    public void testGetMoviesByPerson() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
@@ -207,7 +218,7 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getMoviesByPartTypesTest() {
+    public void testGetMoviesByPartTypes() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
@@ -228,7 +239,26 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getMoviesByReleasedIntervalTest() {
+    public void testGetMoviesByGenreIds() {
+        Genre genre1 = testObjectFactory.createGenre("comedy");
+        Genre genre2 = testObjectFactory.createGenre("horror");
+        UUID genreId = genre1.getId();
+
+        Movie m1 = testObjectFactory.createMovie();
+        m1.setGenres(Set.of(genre1));
+        Movie m2 = testObjectFactory.createMovie();
+        m2.setGenres(Set.of(genre2));
+        movieRepository.saveAll(List.of(m1, m2));
+
+        MovieFilter filter = new MovieFilter();
+        filter.setGenreIds(Set.of(genreId));
+
+        assertThat(movieService.getMovies(filter)).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId());
+    }
+
+    @Test
+    public void testGetMoviesByReleasedInterval() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
@@ -248,11 +278,14 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void getMoviesByAllFiltersTest() {
+    public void testGetMoviesByAllFilters() {
+        Genre genre = testObjectFactory.createGenre("comedy");
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
         Movie m1 = createMovie(LocalDate.of(1992, 5, 4)); // no
         Movie m2 = createMovie(LocalDate.of(1990, 5, 4)); // yes
+        m2.setGenres(Set.of(genre));
+        movieRepository.save(m2);
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4)); // no
         Movie m4 = createMovie(LocalDate.of(1987, 5, 4));
 
@@ -266,9 +299,25 @@ public class MovieServiceTest {
         filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
         filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
         filter.setReleasedTo(LocalDate.of(1992, 5, 4));
+        filter.setGenreIds(Set.of(genre.getId()));
         List<MovieReadDTO> filteredMovies = movieService.getMovies(filter);
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(filteredMovies).extracting("id")
                 .containsExactlyInAnyOrder(m2.getId());
+    }
+
+    @Test
+    public void testCalcAverageRatingOfMovie() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        ApplicationUser u2 = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        testObjectFactory.createRating(3, u1, movie.getId(), MOVIE);
+        testObjectFactory.createRating(6, u2, movie.getId(), MOVIE);
+
+        movieService.updateAverageRatingOfMovie(movie.getId());
+
+        movie = movieRepository.findById(movie.getId()).get();
+        Assert.assertEquals(4.5, movie.getAverageRating(), Double.MIN_NORMAL);
     }
 
     private Movie createMovie(LocalDate releasedDate) {
@@ -280,11 +329,5 @@ public class MovieServiceTest {
         movie.setAverageRating(5.0);
         movie = movieRepository.save(movie);
         return movie;
-    }
-
-    private void inTransaction (Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
     }
 }

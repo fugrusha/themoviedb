@@ -29,7 +29,7 @@ public class ApplicationUserRepositoryTest {
     private TestObjectFactory testObjectFactory;
 
     @Test
-    public void testSave() {
+    public void testSaveUser() {
         ApplicationUser user = testObjectFactory.createUser();
 
         assertNotNull(user.getId());
@@ -37,7 +37,7 @@ public class ApplicationUserRepositoryTest {
     }
 
     @Test
-    public void testCreateAtIsSet() {
+    public void testCreatedAtIsSet() {
         ApplicationUser user = testObjectFactory.createUser();
 
         Instant createdAtBeforeReload = user.getCreatedAt();
@@ -51,7 +51,7 @@ public class ApplicationUserRepositoryTest {
     }
 
     @Test
-    public void testModifiedAtIsSet() {
+    public void testUpdatedAtIsSet() {
         ApplicationUser user = testObjectFactory.createUser();
 
         Instant modifiedAtBeforeReload = user.getUpdatedAt();

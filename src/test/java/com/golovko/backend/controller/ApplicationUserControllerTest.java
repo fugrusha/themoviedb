@@ -43,7 +43,7 @@ public class ApplicationUserControllerTest {
     private ApplicationUserService applicationUserService;
 
     @Test
-    public void testGetUserTest() throws Exception {
+    public void testGetUser() throws Exception {
         UserReadDTO user = createUserReadDTO();
 
         Mockito.when(applicationUserService.getUser(user.getId())).thenReturn(user);
@@ -166,7 +166,7 @@ public class ApplicationUserControllerTest {
     public void testDeleteUser() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mvc.perform(delete("/api/v1/users/{id}", id.toString()))
+        mvc.perform(delete("/api/v1/users/{id}", id))
                 .andExpect(status().isOk());
 
         Mockito.verify(applicationUserService).deleteUser(id);

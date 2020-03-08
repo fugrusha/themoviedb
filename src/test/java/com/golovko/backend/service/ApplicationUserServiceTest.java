@@ -36,7 +36,7 @@ public class ApplicationUserServiceTest {
     private TestObjectFactory testObjectFactory;
 
     @Test
-    public void testGetUser() {
+    public void testGetUserById() {
         ApplicationUser user = testObjectFactory.createUser();
 
         UserReadDTO readDTO = applicationUserService.getUser(user.getId());

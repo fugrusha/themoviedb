@@ -44,7 +44,7 @@ public class MovieCommentControllerTest {
     private MockMvc mockMvc;
 
     @Test
-    public void getMovieCommentByIdTest() throws Exception {
+    public void testGetMovieCommentById() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, movieId);
@@ -63,7 +63,7 @@ public class MovieCommentControllerTest {
     }
 
     @Test
-    public void getAllMovieCommentsTest() throws Exception {
+    public void testGetAllMovieComments() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, movieId);
@@ -85,7 +85,7 @@ public class MovieCommentControllerTest {
     }
 
     @Test
-    public void getAllPublishedMovieCommentsTest() throws Exception {
+    public void testGetAllPublishedMovieComments() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, movieId);
@@ -107,7 +107,7 @@ public class MovieCommentControllerTest {
     }
 
     @Test
-    public void getMovieCommentByWrongIdTest() throws Exception {
+    public void testGetMovieCommentByWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
@@ -124,7 +124,7 @@ public class MovieCommentControllerTest {
     }
 
     @Test
-    public void createMovieCommentTest() throws Exception {
+    public void testCreateMovieComment() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID authorId = UUID.randomUUID();
 
@@ -151,7 +151,7 @@ public class MovieCommentControllerTest {
     }
 
     @Test
-    public void updateMovieCommentTest() throws Exception {
+    public void testUpdateMovieComment() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, movieId);
@@ -174,7 +174,7 @@ public class MovieCommentControllerTest {
     }
 
     @Test
-    public void patchMovieCommentTest() throws Exception {
+    public void testPatchMovieComment() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
         CommentReadDTO readDTO = createCommentReadDTO(userId, movieId);
@@ -197,7 +197,7 @@ public class MovieCommentControllerTest {
     }
 
     @Test
-    public void deleteMovieCommentTest() throws Exception {
+    public void testDeleteMovieCommentTest() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID commentId = UUID.randomUUID();
 
