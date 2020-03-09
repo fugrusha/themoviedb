@@ -18,10 +18,10 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         StringBuilder sb = new StringBuilder();
         sb.append("select m from Movie m");
 
-        if (filter.getGenreIds() != null
+        if (filter.getGenreNames() != null
                 || filter.getMovieCrewTypes() != null
                 || filter.getPersonId() != null) {
-            if (filter.getGenreIds() != null && !filter.getGenreIds().isEmpty()) {
+            if (filter.getGenreNames() != null && !filter.getGenreNames().isEmpty()) {
                 sb.append(" join m.genres g");
             }
             if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()
@@ -32,8 +32,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
 
         sb.append(" where 1=1");
 
-        if (filter.getGenreIds() != null && !filter.getGenreIds().isEmpty()) {
-            sb.append(" and g.id in (:genreIds)");
+        if (filter.getGenreNames() != null && !filter.getGenreNames().isEmpty()) {
+            sb.append(" and g.genreName in (:genreNames)");
         }
         if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()) {
             sb.append(" and mcr.movieCrewType in (:movieCrewTypes)");
@@ -56,8 +56,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()) {
             query.setParameter("movieCrewTypes", filter.getMovieCrewTypes());
         }
-        if (filter.getGenreIds() != null && !filter.getGenreIds().isEmpty()) {
-            query.setParameter("genreIds", filter.getGenreIds());
+        if (filter.getGenreNames() != null && !filter.getGenreNames().isEmpty()) {
+            query.setParameter("genreNames", filter.getGenreNames());
         }
         if (filter.getReleasedFrom() != null) {
             query.setParameter("releasedFrom", filter.getReleasedFrom());

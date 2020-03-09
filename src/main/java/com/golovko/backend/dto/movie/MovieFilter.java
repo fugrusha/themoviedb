@@ -13,7 +13,7 @@ public class MovieFilter {
 
     private UUID personId;
 
-    private Set<UUID> genreIds;
+    private Set<String> genreNames;
 
     private Set<MovieCrewType> movieCrewTypes;
 

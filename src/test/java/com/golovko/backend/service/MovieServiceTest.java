@@ -192,7 +192,7 @@ public class MovieServiceTest {
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
 
         MovieFilter filter = new MovieFilter();
-        filter.setGenreIds(new HashSet<UUID>());
+        filter.setGenreNames(new HashSet<String>());
         filter.setMovieCrewTypes(new HashSet<MovieCrewType>());
         assertThat(movieService.getMovies(filter)).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
@@ -239,10 +239,9 @@ public class MovieServiceTest {
     }
 
     @Test
-    public void testGetMoviesByGenreIds() {
-        Genre genre1 = testObjectFactory.createGenre("comedy");
-        Genre genre2 = testObjectFactory.createGenre("horror");
-        UUID genreId = genre1.getId();
+    public void testGetMoviesByGenreNames() {
+        Genre genre1 = testObjectFactory.createGenre("Comedy");
+        Genre genre2 = testObjectFactory.createGenre("Horror");
 
         Movie m1 = testObjectFactory.createMovie();
         m1.setGenres(Set.of(genre1));
@@ -251,7 +250,7 @@ public class MovieServiceTest {
         movieRepository.saveAll(List.of(m1, m2));
 
         MovieFilter filter = new MovieFilter();
-        filter.setGenreIds(Set.of(genreId));
+        filter.setGenreNames(Set.of(genre1.getGenreName()));
 
         assertThat(movieService.getMovies(filter)).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId());
@@ -279,9 +278,11 @@ public class MovieServiceTest {
 
     @Test
     public void testGetMoviesByAllFilters() {
-        Genre genre = testObjectFactory.createGenre("comedy");
+        Genre genre = testObjectFactory.createGenre("Comedy");
+
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
+
         Movie m1 = createMovie(LocalDate.of(1992, 5, 4)); // no
         Movie m2 = createMovie(LocalDate.of(1990, 5, 4)); // yes
         m2.setGenres(Set.of(genre));
@@ -299,7 +300,8 @@ public class MovieServiceTest {
         filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
         filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
         filter.setReleasedTo(LocalDate.of(1992, 5, 4));
-        filter.setGenreIds(Set.of(genre.getId()));
+        filter.setGenreNames(Set.of(genre.getGenreName()));
+
         List<MovieReadDTO> filteredMovies = movieService.getMovies(filter);
         assertThat(filteredMovies).extracting("id")
                 .containsExactlyInAnyOrder(m2.getId());
