@@ -1,10 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
-import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
-import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
-import com.golovko.backend.dto.complaint.ComplaintPutDTO;
-import com.golovko.backend.dto.complaint.ComplaintReadDTO;
+import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -19,7 +16,9 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.ComplaintType.*;
@@ -175,6 +174,179 @@ public class ComplaintServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteComplaintNotFound() {
         complaintService.deleteComplaint(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    @Test
+    public void testGetComplaintsWithEmptyFilter() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint c2 = testObjectFactory.createComplaint(user, SPAM, TargetObjectType.COMMENT);
+        Complaint c3 = testObjectFactory.createComplaint(user, VIOLENCE, TargetObjectType.MOVIE);
+
+        ComplaintFilter filter = new ComplaintFilter();
+
+        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
+    }
+
+    @Test
+    public void testGetComplaintsWithEmptySetsOfFilter() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint c2 = testObjectFactory.createComplaint(user, SPAM, TargetObjectType.COMMENT);
+        Complaint c3 = testObjectFactory.createComplaint(user, VIOLENCE, TargetObjectType.MOVIE);
+
+        ComplaintFilter filter = new ComplaintFilter();
+        filter.setComplaintTypes(new HashSet<ComplaintType>());
+        filter.setStatuses(new HashSet<ComplaintStatus>());
+        filter.setTargetObjectTypes(new HashSet<TargetObjectType>());
+
+        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByStatus() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint c2 = testObjectFactory.createComplaint(user, SPAM, TargetObjectType.COMMENT);
+        Complaint c3 = testObjectFactory.createComplaint(user, VIOLENCE, TargetObjectType.MOVIE);
+
+        c1.setComplaintStatus(ComplaintStatus.DUPLICATE);
+        c2.setComplaintStatus(ComplaintStatus.CLOSED);
+        c3.setComplaintStatus(ComplaintStatus.DUPLICATE);
+        complaintRepository.saveAll(List.of(c1, c2, c3));
+
+        ComplaintFilter filter = new ComplaintFilter();
+        filter.setStatuses(Set.of(ComplaintStatus.DUPLICATE));
+
+        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c3.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByAuthor() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        ApplicationUser user3 = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint c2 = testObjectFactory.createComplaint(user1, SPAM, TargetObjectType.COMMENT);
+        testObjectFactory.createComplaint(user2, VIOLENCE, TargetObjectType.MOVIE);
+        testObjectFactory.createComplaint(user3, VIOLENCE, TargetObjectType.MOVIE);
+        testObjectFactory.createComplaint(user3, VIOLENCE, TargetObjectType.MOVIE);
+
+        ComplaintFilter filter = new ComplaintFilter();
+        filter.setAuthorId(user1.getId());
+
+        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByModerator() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser moderator1 = testObjectFactory.createUser();
+        ApplicationUser moderator2 = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint c2 = testObjectFactory.createComplaint(user1, SPAM, TargetObjectType.COMMENT);
+        Complaint c3 = testObjectFactory.createComplaint(user1, VIOLENCE, TargetObjectType.MOVIE);
+        testObjectFactory.createComplaint(user1, VIOLENCE, TargetObjectType.MOVIE); // without moderator
+
+        c1.setModerator(moderator1);
+        c2.setModerator(moderator1);
+        c3.setModerator(moderator2);
+        complaintRepository.saveAll(List.of(c1, c2, c3));
+
+        ComplaintFilter filter = new ComplaintFilter();
+        filter.setModeratorId(moderator1.getId());
+
+        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByComplaintType() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+
+        Complaint c1 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.COMMENT);
+        Complaint c2 = testObjectFactory.createComplaint(user1, VIOLENCE, TargetObjectType.MOVIE);
+        testObjectFactory.createComplaint(user2, MISPRINT, TargetObjectType.MOVIE);
+        testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
+
+        ComplaintFilter filter = new ComplaintFilter();
+        filter.setComplaintTypes(Set.of(SPAM, VIOLENCE));
+
+        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByTargetObjectType() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+
+        Complaint c1 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.COMMENT);
+        Complaint c2 = testObjectFactory.createComplaint(user1, VIOLENCE, TargetObjectType.MOVIE);
+        testObjectFactory.createComplaint(user2, MISPRINT, TargetObjectType.PERSON);
+        testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.MOVIE_CAST);
+
+        ComplaintFilter filter = new ComplaintFilter();
+        filter.setTargetObjectTypes(Set.of(TargetObjectType.COMMENT, TargetObjectType.MOVIE));
+
+        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByAllFilters() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        ApplicationUser moder1 = testObjectFactory.createUser();
+
+        Complaint c1 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.MOVIE);
+        c1.setModerator(moder1);
+        c1.setComplaintStatus(ComplaintStatus.CLOSED);
+
+        Complaint c2 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.MOVIE);
+        c2.setModerator(moder1);
+        c2.setComplaintStatus(ComplaintStatus.DUPLICATE); // wrong status
+
+
+        Complaint c3 = testObjectFactory.createComplaint(user1, SPAM, TargetObjectType.MOVIE);  // wrong author
+        c3.setModerator(moder1);
+        c3.setComplaintStatus(ComplaintStatus.CLOSED);
+
+        testObjectFactory.createComplaint(user2, VIOLENCE, TargetObjectType.COMMENT); // wrong complaintType
+        testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.MOVIE); // without moderator
+
+        complaintRepository.saveAll(List.of(c1, c2, c3));
+
+        ComplaintFilter filter = new ComplaintFilter();
+        filter.setAuthorId(user2.getId());
+        filter.setModeratorId(moder1.getId());
+        filter.setStatuses(Set.of(ComplaintStatus.CLOSED));
+        filter.setComplaintTypes(Set.of(SPAM));
+        filter.setTargetObjectTypes(Set.of(TargetObjectType.MOVIE));
+
+        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId());
     }
 
     private void inTransaction (Runnable runnable) {

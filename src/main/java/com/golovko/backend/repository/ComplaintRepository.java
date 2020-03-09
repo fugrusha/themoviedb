@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ComplaintRepository extends CrudRepository<Complaint, UUID> {
+public interface ComplaintRepository extends CrudRepository<Complaint, UUID>, ComplaintRepositoryCustom {
 
     Complaint findByIdAndAuthorId(UUID id, UUID authorId);
 

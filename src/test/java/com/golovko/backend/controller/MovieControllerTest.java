@@ -224,6 +224,8 @@ public class MovieControllerTest {
 
         List<MovieReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(movieService).getMovies(filter);
     }
 
     private MovieReadDTO createMovieReadDTO() {
