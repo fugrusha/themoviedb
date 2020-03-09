@@ -33,7 +33,7 @@ public class MovieCastService {
     @Autowired
     private RepositoryHelper repoHelper;
 
-    public List<MovieCastReadDTO> getListOfMovieCast(UUID movieId) {
+    public List<MovieCastReadDTO> getAllMovieCasts(UUID movieId) {
         List<MovieCast> allMovieCasts = movieCastRepository.findByMovieId(movieId);
         return allMovieCasts.stream().map(translationService::toRead).collect(Collectors.toList());
     }

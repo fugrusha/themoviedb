@@ -88,9 +88,9 @@ public class MovieCrewControllerTest {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
-        List<MovieCrewReadDTO> listOfMoviePart = List.of(readDTO);
+        List<MovieCrewReadDTO> expectedResult = List.of(readDTO);
 
-        Mockito.when(movieCrewService.getAllMovieCrews(movieId)).thenReturn(listOfMoviePart);
+        Mockito.when(movieCrewService.getAllMovieCrews(movieId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews", movieId))
@@ -98,7 +98,7 @@ public class MovieCrewControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         List<MovieCrewReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assert.assertEquals(listOfMoviePart, actualResult);
+        Assert.assertEquals(expectedResult, actualResult);
     }
 
     @Test

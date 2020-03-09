@@ -32,7 +32,7 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE_CREW;
         "delete from movie",
         "delete from movie_crew"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class UpdateAverageRatingOfMovieCrewsTest {
+public class UpdateAverageRatingOfMovieCrewsJobTest {
 
     @Autowired
     private UpdateAverageRatingOfMovieCrewsJob updateAverageRatingOfMovieCrewsJob;

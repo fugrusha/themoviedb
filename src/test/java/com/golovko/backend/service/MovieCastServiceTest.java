@@ -83,9 +83,9 @@ public class MovieCastServiceTest {
         Movie movie = testObjectFactory.createMovie();
         MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
 
-        List<MovieCastReadDTO> resultList = movieCastService.getListOfMovieCast(movie.getId());
+        List<MovieCastReadDTO> result = movieCastService.getAllMovieCasts(movie.getId());
 
-        Assertions.assertThat(resultList).extracting(MovieCastReadDTO::getId)
+        Assertions.assertThat(result).extracting(MovieCastReadDTO::getId)
                 .containsExactlyInAnyOrder(movieCast.getId());
     }
 

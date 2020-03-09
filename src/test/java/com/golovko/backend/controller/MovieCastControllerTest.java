@@ -90,9 +90,9 @@ public class MovieCastControllerTest {
         UUID personId = UUID.randomUUID();
         MovieCastReadDTO readDTO = createMovieCastReadDTO(movieId, personId);
 
-        List<MovieCastReadDTO> listOfMovieCast = List.of(readDTO);
+        List<MovieCastReadDTO> expectedResult = List.of(readDTO);
 
-        Mockito.when(movieCastService.getListOfMovieCast(movieId)).thenReturn(listOfMovieCast);
+        Mockito.when(movieCastService.getAllMovieCasts(movieId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-casts", movieId))
@@ -100,7 +100,7 @@ public class MovieCastControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         List<MovieCastReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assert.assertEquals(listOfMovieCast, actualResult);
+        Assert.assertEquals(expectedResult, actualResult);
     }
 
     @Test

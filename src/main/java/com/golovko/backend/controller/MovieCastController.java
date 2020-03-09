@@ -17,7 +17,7 @@ public class MovieCastController {
 
     @GetMapping
     public List<MovieCastReadDTO> getListOfMovieCast(@PathVariable UUID movieId) {
-        return movieCastService.getListOfMovieCast(movieId);
+        return movieCastService.getAllMovieCasts(movieId);
     }
 
     @GetMapping("/{id}")
