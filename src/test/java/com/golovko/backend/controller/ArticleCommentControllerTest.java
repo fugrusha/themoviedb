@@ -2,8 +2,8 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
-import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
@@ -111,7 +111,7 @@ public class ArticleCommentControllerTest {
         UUID wrongId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();
 
-        EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
+        EntityNotFoundException exception = new EntityNotFoundException(Comment.class, wrongId, articleId);
 
         Mockito.when(commentService.getComment(articleId, wrongId)).thenThrow(exception);
 

@@ -2,7 +2,10 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golovko.backend.domain.*;
+import com.golovko.backend.domain.ComplaintStatus;
+import com.golovko.backend.domain.ComplaintType;
+import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -92,7 +95,7 @@ public class ComplaintControllerTest {
         UUID wrongId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
 
-        EntityNotFoundException ex = new EntityNotFoundException(Movie.class, wrongId, ApplicationUser.class, userId);
+        EntityNotFoundException ex = new EntityNotFoundException(Movie.class, wrongId, userId);
 
         Mockito.when(complaintService.getComplaint(userId, wrongId)).thenThrow(ex);
 

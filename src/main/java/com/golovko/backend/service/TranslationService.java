@@ -101,7 +101,9 @@ public class TranslationService {
         dto.setAverageRating(movieCrew.getAverageRating());
         dto.setMovieCrewType(movieCrew.getMovieCrewType());
         dto.setMovieId(movieCrew.getMovie().getId());
-        dto.setPersonId(movieCrew.getPerson().getId());
+        if (movieCrew.getPerson() != null) {
+            dto.setPersonId(movieCrew.getPerson().getId());
+        }
         dto.setCreatedAt(movieCrew.getCreatedAt());
         dto.setUpdatedAt(movieCrew.getUpdatedAt());
         return dto;
@@ -114,7 +116,9 @@ public class TranslationService {
         dto.setAverageRating(movieCast.getAverageRating());
         dto.setMovieCrewType(movieCast.getMovieCrewType());
         dto.setMovieId(movieCast.getMovie().getId());
-        dto.setPersonId(movieCast.getPerson().getId());
+        if (movieCast.getPerson() != null) {
+            dto.setPersonId(movieCast.getPerson().getId());
+        }
         dto.setCharacter(movieCast.getCharacter());
         dto.setCreatedAt(movieCast.getCreatedAt());
         dto.setUpdatedAt(movieCast.getUpdatedAt());
@@ -285,7 +289,9 @@ public class TranslationService {
         MovieCrew movieCrew = new MovieCrew();
         movieCrew.setDescription(createDTO.getDescription());
         movieCrew.setMovieCrewType(createDTO.getMovieCrewType());
-        movieCrew.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
+        if (createDTO.getPersonId() != null) {
+            movieCrew.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
+        }
         return movieCrew;
     }
 
@@ -293,7 +299,9 @@ public class TranslationService {
         MovieCast movieCast = new MovieCast();
         movieCast.setDescription(createDTO.getDescription());
         movieCast.setCharacter(createDTO.getCharacter());
-        movieCast.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
+        if (createDTO.getPersonId() != null) {
+            movieCast.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
+        }
         return movieCast;
     }
 

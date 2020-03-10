@@ -95,7 +95,7 @@ public class MovieCrewService {
         if (moviePart != null) {
             return moviePart;
         } else {
-            throw new EntityNotFoundException(MovieCrew.class, id, Movie.class, movieId);
+            throw new EntityNotFoundException(MovieCrew.class, id, movieId);
         }
     }
 }

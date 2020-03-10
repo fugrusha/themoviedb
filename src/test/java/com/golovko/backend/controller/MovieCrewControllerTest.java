@@ -3,7 +3,6 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
-import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCrew;
 import com.golovko.backend.domain.MovieCrewType;
 import com.golovko.backend.dto.movie.MovieReadDTO;
@@ -106,7 +105,7 @@ public class MovieCrewControllerTest {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        EntityNotFoundException ex = new EntityNotFoundException(MovieCrew.class, id, Movie.class, movieId);
+        EntityNotFoundException ex = new EntityNotFoundException(MovieCrew.class, id, movieId);
 
         Mockito.when(movieCrewService.getMovieCrew(movieId, id)).thenThrow(ex);
 

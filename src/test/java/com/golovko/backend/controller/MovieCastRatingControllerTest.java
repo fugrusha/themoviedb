@@ -2,7 +2,7 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.Rating;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
@@ -95,7 +95,7 @@ public class MovieCastRatingControllerTest {
         UUID wrongId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
 
-        EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
+        EntityNotFoundException exception = new EntityNotFoundException(Rating.class, wrongId, movieCastId);
 
         Mockito.when(ratingService.getRating(movieCastId, wrongId)).thenThrow(exception);
 

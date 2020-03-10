@@ -127,6 +127,28 @@ public class MovieCastServiceTest {
         Assert.assertEquals(readDTO.getPersonId(), person.getId());
     }
 
+    @Test
+    public void testCreateMovieCastWithoutPerson() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCastCreateDTO createDTO = new MovieCastCreateDTO();
+        createDTO.setPersonId(null);
+        createDTO.setDescription("Some text");
+        createDTO.setCharacter("vally");
+
+        MovieCastReadDTO readDTO = movieCastService.createMovieCast(createDTO, movie.getId());
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+        Assert.assertNull(readDTO.getPersonId());
+
+        MovieCast movieCast = movieCastRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCast,
+                "movieId", "personId");
+        Assert.assertEquals(readDTO.getMovieId(), movie.getId());
+        Assert.assertNull(movieCast.getPerson());
+    }
+
     @Test(expected = EntityNotFoundException.class)
     public void testCreateMovieCastWrongPersonId() {
         Movie movie = testObjectFactory.createMovie();

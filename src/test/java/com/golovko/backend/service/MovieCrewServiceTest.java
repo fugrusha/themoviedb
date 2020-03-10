@@ -108,6 +108,27 @@ public class MovieCrewServiceTest {
         Assert.assertEquals(readDTO.getPersonId(), movieCrew.getPerson().getId());
     }
 
+    @Test
+    public void testCreateMovieCrewWithoutPerson() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
+        createDTO.setPersonId(null);
+        createDTO.setDescription("Some text");
+
+        MovieCrewReadDTO readDTO = movieCrewService.createMovieCrew(createDTO, movie.getId());
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+        Assert.assertNull(readDTO.getPersonId());
+
+        MovieCrew movieCrew = movieCrewRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCrew,
+                "movieId", "personId");
+        Assert.assertEquals(readDTO.getMovieId(), movie.getId());
+        Assert.assertNull(movieCrew.getPerson());
+    }
+
     @Test(expected = EntityNotFoundException.class)
     public void testCreateMovieCrewWrongPersonId() {
         Movie movie = testObjectFactory.createMovie();

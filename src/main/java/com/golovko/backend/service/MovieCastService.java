@@ -96,7 +96,7 @@ public class MovieCastService {
         if (movieCast != null) {
             return movieCast;
         } else {
-            throw new EntityNotFoundException(MovieCast.class, id, Movie.class, movieId);
+            throw new EntityNotFoundException(MovieCast.class, id, movieId);
         }
     }
 }

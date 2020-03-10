@@ -1,6 +1,5 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Rating;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
@@ -70,7 +69,7 @@ public class RatingService {
         if (rating != null) {
             return rating;
         } else {
-            throw new EntityNotFoundException(Rating.class, ratingId, Movie.class, targetId);
+            throw new EntityNotFoundException(Rating.class, ratingId, targetId);
         }
     }
 }

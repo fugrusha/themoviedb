@@ -12,8 +12,8 @@ public class EntityNotFoundException extends RuntimeException {
         super(String.format("Entity %s with id=%s is not found!", entityClass.getSimpleName(), id));
     }
 
-    public EntityNotFoundException(Class entityClass, UUID id, Class targetEntityClass, UUID targetId) {
-        super(String.format("Entity %s with id=%s is not found for entity %s with id=%s!",
-                entityClass.getSimpleName(), id, targetEntityClass.getSimpleName(), targetId));
+    public EntityNotFoundException(Class entityClass, UUID id, UUID targetId) {
+        super(String.format("There is no %s with id=%s for entity with id=%s!",
+                entityClass.getSimpleName(), id, targetId));
     }
 }
