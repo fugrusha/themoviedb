@@ -32,8 +32,8 @@ public class Rating {
     private ApplicationUser author;
 
     @Enumerated(EnumType.STRING)
-    private TargetObjectType targetObjectType;
+    private TargetObjectType ratedObjectType;
 
     @Column(nullable = false)
-    private UUID targetObjectId;
+    private UUID ratedObjectId;
 }

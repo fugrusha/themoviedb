@@ -11,6 +11,10 @@ import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.dto.genre.*;
+import com.golovko.backend.dto.like.LikeCreateDTO;
+import com.golovko.backend.dto.like.LikePatchDTO;
+import com.golovko.backend.dto.like.LikePutDTO;
+import com.golovko.backend.dto.like.LikeReadDTO;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.dto.moviecrew.*;
@@ -171,8 +175,20 @@ public class TranslationService {
         dto.setAuthorId(rating.getAuthor().getId());
         dto.setCreatedAt(rating.getCreatedAt());
         dto.setUpdatedAt(rating.getUpdatedAt());
-        dto.setTargetObjectId(rating.getTargetObjectId());
-        dto.setTargetObjectType(rating.getTargetObjectType());
+        dto.setRatedObjectId(rating.getRatedObjectId());
+        dto.setRatedObjectType(rating.getRatedObjectType());
+        return dto;
+    }
+
+    public LikeReadDTO toRead(Like like) {
+        LikeReadDTO dto = new LikeReadDTO();
+        dto.setId(like.getId());
+        dto.setMeLiked(like.getMeLiked());
+        dto.setAuthorId(like.getAuthor().getId());
+        dto.setCreatedAt(like.getCreatedAt());
+        dto.setUpdatedAt(like.getUpdatedAt());
+        dto.setLikedObjectId(like.getLikedObjectId());
+        dto.setLikedObjectType(like.getLikedObjectType());
         return dto;
     }
 
@@ -333,8 +349,16 @@ public class TranslationService {
         Rating rating = new Rating();
         rating.setRating(createDTO.getRating());
         rating.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId()));
-        rating.setTargetObjectType(createDTO.getTargetObjectType());
+        rating.setRatedObjectType(createDTO.getRatedObjectType());
         return rating;
+    }
+
+    public Like toEntity(LikeCreateDTO createDTO) {
+        Like like = new Like();
+        like.setMeLiked(createDTO.getMeLiked());
+        like.setLikedObjectType(createDTO.getLikedObjectType());
+        like.setLikedObjectId(createDTO.getLikedObjectId());
+        return like;
     }
 
     /*
@@ -448,6 +472,12 @@ public class TranslationService {
         }
     }
 
+    public void patchEntity(LikePatchDTO patchDTO, Like like) {
+        if (patchDTO.getMeLiked() != null) {
+            like.setMeLiked(patchDTO.getMeLiked());
+        }
+    }
+
     /*
     updateEntity methods
      */
@@ -506,5 +536,9 @@ public class TranslationService {
 
     public void updateEntity(RatingPutDTO putDTO, Rating rating) {
         rating.setRating(putDTO.getRating());
+    }
+
+    public void updateEntity(LikePutDTO updateDTO, Like like) {
+        like.setMeLiked(updateDTO.getMeLiked());
     }
 }

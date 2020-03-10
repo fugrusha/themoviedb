@@ -1,4 +1,4 @@
-package com.golovko.backend.dto.rating;
+package com.golovko.backend.dto.like;
 
 import com.golovko.backend.domain.TargetObjectType;
 import lombok.Data;
@@ -7,11 +7,11 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Data
-public class RatingReadDTO {
+public class LikeReadDTO {
 
     private UUID id;
 
-    private Integer rating;
+    private Boolean meLiked;
 
     private Instant createdAt;
 
@@ -19,7 +19,7 @@ public class RatingReadDTO {
 
     private UUID authorId;
 
-    private TargetObjectType ratedObjectType;
+    private TargetObjectType likedObjectType;
 
-    private UUID ratedObjectId;
+    private UUID likedObjectId;
 }

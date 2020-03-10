@@ -23,7 +23,7 @@ public class RatingService {
     @Autowired
     private TranslationService translationService;
 
-    public List<RatingReadDTO> getAllRatingsByMovieId(UUID targetId) {
+    public List<RatingReadDTO> getAllRatingsByTargetObjectId(UUID targetId) {
         List<Rating> ratings = ratingRepository.findAllByTargetId(targetId);
         return ratings.stream().map(translationService::toRead).collect(Collectors.toList());
     }
@@ -35,7 +35,7 @@ public class RatingService {
 
     public RatingReadDTO createRating(UUID movieId, RatingCreateDTO createDTO) {
         Rating rating = translationService.toEntity(createDTO);
-        rating.setTargetObjectId(movieId);
+        rating.setRatedObjectId(movieId);
 
         rating = ratingRepository.save(rating);
         return translationService.toRead(rating);

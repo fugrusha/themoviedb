@@ -71,7 +71,7 @@ public class MovieRatingControllerTest {
 
         List<RatingReadDTO> expectedResult = List.of(r1, r2);
 
-        Mockito.when(ratingService.getAllRatingsByMovieId(movieId)).thenReturn(expectedResult);
+        Mockito.when(ratingService.getAllRatingsByTargetObjectId(movieId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/ratings/", movieId))
@@ -82,7 +82,7 @@ public class MovieRatingControllerTest {
         Assertions.assertThat(actualResult).extracting(RatingReadDTO::getId)
                 .containsExactlyInAnyOrder(r1.getId(), r2.getId());
 
-        Mockito.verify(ratingService).getAllRatingsByMovieId(movieId);
+        Mockito.verify(ratingService).getAllRatingsByTargetObjectId(movieId);
     }
 
     @Test
@@ -110,7 +110,7 @@ public class MovieRatingControllerTest {
         RatingCreateDTO createDTO = new RatingCreateDTO();
         createDTO.setRating(6);
         createDTO.setAuthorId(authorId);
-        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE);
 
         RatingReadDTO readDTO = createRatingReadDTO(7, authorId, movieId);
 
@@ -191,10 +191,8 @@ public class MovieRatingControllerTest {
         dto.setId(UUID.randomUUID());
         dto.setRating(rating);
         dto.setAuthorId(authorId);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        dto.setTargetObjectType(TargetObjectType.MOVIE);
-        dto.setTargetObjectId(targetObjectId);
+        dto.setRatedObjectType(TargetObjectType.MOVIE);
+        dto.setRatedObjectId(targetObjectId);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;

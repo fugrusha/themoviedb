@@ -1,4 +1,4 @@
-id;rating;author_id;target_object_type;target_object_id;created_at;updated_at
+id;rating;author_id;rated_object_type;rated_object_id;created_at;updated_at
 14f8fcfa-fb10-420c-aaa9-2e9d537b1e28;6;8b6e2eb5-48d0-4b4f-8d34-f6c3293139a3;MOVIE;950b4f87-7afc-40f4-bda8-cbb091a30206;2018-11-01T11:00:12;2020-01-01T11:00:12
 7f88af14-9ef6-4400-8938-97dd4c8347aa;4;8b6e2eb5-48d0-4b4f-8d34-f6c3293139a3;MOVIE;075b603c-2547-4fc8-92f3-175b9cdedfc5;2018-11-01T11:00:12;2020-01-01T11:00:12
 d6a9b085-8c68-42cd-bd46-3061de0cfa5b;5;e524949e-c49d-4402-bee4-8866ed732981;MOVIE;3d640474-a4cf-4c15-8c4d-e7b97d8fedf4;2018-11-01T11:00:12;2020-01-01T11:00:12

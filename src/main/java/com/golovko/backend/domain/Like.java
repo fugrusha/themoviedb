@@ -8,28 +8,19 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.*;
+import java.util.UUID;
 
 @Entity
-@Setter
 @Getter
+@Setter
 @EntityListeners(AuditingEntityListener.class)
-public class ApplicationUser {
+public class Like {
 
     @Id
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    @Column(nullable = false, unique = true)
-    private String username;
-
-    @Column(nullable = false)
-    private String password;
-
-    @Column(nullable = false, unique = true)
-    private String email;
-
-    private Boolean isBlocked = false;
+    private Boolean meLiked;
 
     @CreatedDate
     private Instant createdAt;
@@ -37,9 +28,13 @@ public class ApplicationUser {
     @LastModifiedDate
     private Instant updatedAt;
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Article> articles = new ArrayList<>();
+    @ManyToOne
+    @JoinColumn(nullable = false, updatable = false)
+    private ApplicationUser author;
 
-    @OneToMany(mappedBy = "author")
-    private Set<Like> likes = new HashSet<>();
+    @Enumerated(EnumType.STRING)
+    private TargetObjectType likedObjectType;
+
+    @Column(nullable = false)
+    private UUID likedObjectId;
 }

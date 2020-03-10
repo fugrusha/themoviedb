@@ -20,7 +20,7 @@ public class MovieCastRatingController {
 
     @GetMapping
     public List<RatingReadDTO> getAllRatingsByMovieCastId(@PathVariable UUID movieCastId) {
-        return ratingService.getAllRatingsByMovieId(movieCastId);
+        return ratingService.getAllRatingsByTargetObjectId(movieCastId);
     }
 
     @GetMapping("/{id}")

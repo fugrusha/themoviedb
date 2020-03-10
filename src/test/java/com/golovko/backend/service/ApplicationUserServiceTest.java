@@ -80,7 +80,7 @@ public class ApplicationUserServiceTest {
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO,
-                "password", "articles");
+                "password", "articles", "likes");
     }
 
     @Test
@@ -96,7 +96,7 @@ public class ApplicationUserServiceTest {
 
         Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
-                "password", "articles");
+                "password", "articles", "likes");
     }
 
     @Test
@@ -114,7 +114,7 @@ public class ApplicationUserServiceTest {
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
-                "password", "articles");
+                "password", "articles", "likes");
     }
 
     @Test

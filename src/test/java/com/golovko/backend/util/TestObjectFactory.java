@@ -41,6 +41,9 @@ public class TestObjectFactory {
     @Autowired
     private RatingRepository ratingRepository;
 
+    @Autowired
+    private LikeRepository likeRepository;
+
     public Movie createMovie() {
         Movie movie = new Movie();
         movie.setMovieTitle("Title of the Movie");
@@ -174,9 +177,18 @@ public class TestObjectFactory {
     ) {
         Rating rating = new Rating();
         rating.setRating(starRating);
-        rating.setTargetObjectId(targetObjectId);
-        rating.setTargetObjectType(targetObjectType);
+        rating.setRatedObjectId(targetObjectId);
+        rating.setRatedObjectType(targetObjectType);
         rating.setAuthor(author);
         return ratingRepository.save(rating);
+    }
+
+    public Like createLike(Boolean meLiked, ApplicationUser author, UUID likedObjectId) {
+        Like like = new Like();
+        like.setMeLiked(meLiked);
+        like.setAuthor(author);
+        like.setLikedObjectType(TargetObjectType.ARTICLE);
+        like.setLikedObjectId(likedObjectId);
+        return likeRepository.save(like);
     }
 }
