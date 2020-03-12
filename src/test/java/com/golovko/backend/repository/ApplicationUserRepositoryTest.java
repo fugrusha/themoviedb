@@ -19,7 +19,8 @@ import static org.junit.Assert.assertTrue;
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Sql(statements = "delete from application_user", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {"delete from user_role", "delete from application_user"},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ApplicationUserRepositoryTest {
 
     @Autowired

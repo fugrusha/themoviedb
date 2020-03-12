@@ -11,6 +11,7 @@
             <column name="password" type="string"/>
             <column name="email" type="string"/>
             <column name="is_blocked" type="boolean"/>
+            <column name="user_role" type="string"/>
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
         </loadUpdateData>
@@ -135,6 +136,14 @@
             <column name="rated_object_id" type="uuid"/>
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load user roles" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="user_role" file="db/data/user-role.csv"
+                        separator=";" primaryKey="user_id, user_role">
+            <column name="user_id" type="uuid"/>
+            <column name="user_role" type="string"/>
         </loadUpdateData>
     </changeSet>
 

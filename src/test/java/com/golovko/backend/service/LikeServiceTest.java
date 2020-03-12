@@ -28,7 +28,11 @@ import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from like", "delete from article", "delete from application_user"},
+@Sql(statements = {
+        "delete from like",
+        "delete from article",
+        "delete from user_role",
+        "delete from application_user"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class LikeServiceTest {
 
@@ -142,7 +146,7 @@ public class LikeServiceTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void testDeleteComplaintNotFound() {
+    public void testDeleteLikeNotFound() {
         likeService.deleteLike(UUID.randomUUID(), UUID.randomUUID());
     }
 }

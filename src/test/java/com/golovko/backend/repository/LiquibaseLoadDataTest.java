@@ -21,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
         "delete from comment",
         "delete from complaint",
         "delete from article",
+        "delete from user_role",
         "delete from application_user",
         "delete from movie_cast",
         "delete from movie_crew",

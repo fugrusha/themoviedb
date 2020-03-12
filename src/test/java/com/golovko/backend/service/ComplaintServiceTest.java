@@ -27,7 +27,10 @@ import static com.golovko.backend.domain.ComplaintType.*;
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-@Sql(statements = {"delete from complaint", "delete from application_user"},
+@Sql(statements = {
+        "delete from complaint",
+        "delete from user_role",
+        "delete from application_user"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ComplaintServiceTest {
 

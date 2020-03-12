@@ -15,6 +15,10 @@ import com.golovko.backend.dto.like.LikeCreateDTO;
 import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
+import com.golovko.backend.dto.misprint.MisprintCreateDTO;
+import com.golovko.backend.dto.misprint.MisprintPatchDTO;
+import com.golovko.backend.dto.misprint.MisprintPutDTO;
+import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.dto.moviecrew.*;
@@ -51,6 +55,7 @@ public class TranslationService {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setIsBlocked(user.getIsBlocked());
+        dto.setUserRole(user.getUserRole());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
@@ -189,6 +194,33 @@ public class TranslationService {
         dto.setUpdatedAt(like.getUpdatedAt());
         dto.setLikedObjectId(like.getLikedObjectId());
         dto.setLikedObjectType(like.getLikedObjectType());
+        return dto;
+    }
+
+    public MisprintReadDTO toRead(Misprint misprint) {
+        MisprintReadDTO dto = new MisprintReadDTO();
+        dto.setId(misprint.getId());
+        dto.setStartIndex(misprint.getStartIndex());
+        dto.setEndIndex(misprint.getEndIndex());
+        dto.setReplaceTo(misprint.getReplaceTo());
+        dto.setStatus(misprint.getStatus());
+        dto.setAuthorId(misprint.getAuthor().getId());
+        dto.setCreatedAt(misprint.getCreatedAt());
+        dto.setUpdatedAt(misprint.getUpdatedAt());
+        dto.setTargetObjectId(misprint.getTargetObjectId());
+        dto.setTargetObjectType(misprint.getTargetObjectType());
+        if (misprint.getModerator() != null) {
+            dto.setModeratorId(misprint.getModerator().getId());
+        }
+        if (misprint.getFixedAt() != null) {
+            dto.setFixedAt(misprint.getFixedAt());
+        }
+        if (misprint.getReplacedWith() != null) {
+            dto.setReplacedWith(misprint.getReplacedWith());
+        }
+        if (misprint.getReason() != null) {
+            dto.setReason(misprint.getReason());
+        }
         return dto;
     }
 
@@ -361,6 +393,16 @@ public class TranslationService {
         return like;
     }
 
+    public Misprint toEntity(MisprintCreateDTO createDTO) {
+        Misprint misprint = new Misprint();
+        misprint.setStartIndex(createDTO.getStartIndex());
+        misprint.setEndIndex(createDTO.getEndIndex());
+        misprint.setReplaceTo(createDTO.getReplaceTo());
+        misprint.setTargetObjectId(createDTO.getTargetObjectId());
+        misprint.setTargetObjectType(createDTO.getTargetObjectType());
+        return misprint;
+    }
+
     /*
     patchEntity methods
      */
@@ -478,6 +520,18 @@ public class TranslationService {
         }
     }
 
+    public void patchEntity(MisprintPatchDTO patchDTO, Misprint misprint) {
+        if (patchDTO.getStartIndex() != null) {
+            misprint.setStartIndex(patchDTO.getStartIndex());
+        }
+        if (patchDTO.getEndIndex() != null) {
+            misprint.setEndIndex(patchDTO.getEndIndex());
+        }
+        if (patchDTO.getReplaceTo() != null) {
+            misprint.setReplaceTo(patchDTO.getReplaceTo());
+        }
+    }
+
     /*
     updateEntity methods
      */
@@ -540,5 +594,11 @@ public class TranslationService {
 
     public void updateEntity(LikePutDTO updateDTO, Like like) {
         like.setMeLiked(updateDTO.getMeLiked());
+    }
+
+    public void updateEntity(MisprintPutDTO updateDTO, Misprint misprint) {
+        misprint.setStartIndex(updateDTO.getStartIndex());
+        misprint.setEndIndex(updateDTO.getEndIndex());
+        misprint.setReplaceTo(updateDTO.getReplaceTo());
     }
 }

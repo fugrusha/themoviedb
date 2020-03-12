@@ -20,7 +20,7 @@ import java.util.List;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from article", "delete from application_user"},
+@Sql(statements = {"delete from article", "delete from user_role", "delete from application_user"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ArticleRepositoryTest {
 

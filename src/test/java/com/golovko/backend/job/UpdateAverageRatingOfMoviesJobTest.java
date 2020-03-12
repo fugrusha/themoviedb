@@ -25,6 +25,7 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 @ActiveProfiles("test")
 @Sql(statements = {
         "delete from rating",
+        "delete from user_role",
         "delete from application_user",
         "delete from movie"
     }, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)

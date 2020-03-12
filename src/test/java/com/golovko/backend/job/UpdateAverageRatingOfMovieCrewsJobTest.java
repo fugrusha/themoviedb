@@ -27,6 +27,7 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE_CREW;
 @ActiveProfiles("test")
 @Sql(statements = {
         "delete from rating",
+        "delete from user_role",
         "delete from application_user",
         "delete from person",
         "delete from movie",

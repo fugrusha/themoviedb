@@ -31,6 +31,11 @@ public class ApplicationUser {
 
     private Boolean isBlocked = false;
 
+    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<UserRole> userRole = new HashSet<UserRole>();
+
     @CreatedDate
     private Instant createdAt;
 

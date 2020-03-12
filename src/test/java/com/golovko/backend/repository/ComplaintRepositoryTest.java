@@ -15,7 +15,6 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.golovko.backend.domain.ComplaintType.CHILD_ABUSE;
@@ -26,7 +25,11 @@ import static com.golovko.backend.domain.TargetObjectType.PERSON;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from movie", "delete from complaint", "delete from application_user"},
+@Sql(statements = {
+        "delete from movie",
+        "delete from complaint",
+        "delete from user_role",
+        "delete from application_user"},
     executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ComplaintRepositoryTest {
 
@@ -37,7 +40,7 @@ public class ComplaintRepositoryTest {
     private ComplaintRepository complaintRepository;
 
     @Test
-    public void testGetComplaintsByUserId() {
+    public void testGetComplaintsByAuthorId() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, PERSON);
@@ -47,11 +50,12 @@ public class ComplaintRepositoryTest {
 
         List<Complaint> result = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(user1.getId());
 
-        Assertions.assertThat(result).extracting(Complaint::getId).isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
+        Assertions.assertThat(result).extracting(Complaint::getId)
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
     @Test
-    public void testGetComplaintByIdAndUserId() {
+    public void testGetComplaintByIdAndAuthorId() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, PERSON);
