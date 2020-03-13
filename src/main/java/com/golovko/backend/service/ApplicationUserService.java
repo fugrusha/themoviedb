@@ -61,14 +61,15 @@ public class ApplicationUserService {
         applicationUserRepository.delete(repoHelper.getEntityById(ApplicationUser.class, id));
     }
 
-    // TODO test it
     public void ban(UUID id) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
         user.setIsBlocked(true);
+        applicationUserRepository.save(user);
     }
-    // TODO test it
+
     public void pardon(UUID id) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
         user.setIsBlocked(false);
+        applicationUserRepository.save(user);
     }
 }

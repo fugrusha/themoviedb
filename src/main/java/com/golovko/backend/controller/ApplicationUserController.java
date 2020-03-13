@@ -43,13 +43,11 @@ public class ApplicationUserController {
     }
 
     @PostMapping("/{id}/ban")
-    @ResponseBody     // TODO test it
     public void banUser(@PathVariable UUID id) {
         applicationUserService.ban(id);
     }
 
     @PostMapping("/{id}/pardon")
-    @ResponseBody     // TODO test it
     public void pardonUser(@PathVariable UUID id) {
         applicationUserService.pardon(id);
     }

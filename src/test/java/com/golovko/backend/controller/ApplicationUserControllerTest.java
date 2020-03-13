@@ -172,6 +172,26 @@ public class ApplicationUserControllerTest {
         Mockito.verify(applicationUserService).deleteUser(id);
     }
 
+    @Test
+    public void testBanUser() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mvc.perform(post("/api/v1/users/{id}/ban", id))
+                .andExpect(status().isOk());
+
+        Mockito.verify(applicationUserService).ban(id);
+    }
+
+    @Test
+    public void testPardonUser() throws Exception {
+        UUID id = UUID.randomUUID();
+
+        mvc.perform(post("/api/v1/users/{id}/pardon", id))
+                .andExpect(status().isOk());
+
+        Mockito.verify(applicationUserService).pardon(id);
+    }
+
     private UserReadDTO createUserReadDTO() {
         UserReadDTO readDTO = new UserReadDTO();
         readDTO.setId(UUID.randomUUID());

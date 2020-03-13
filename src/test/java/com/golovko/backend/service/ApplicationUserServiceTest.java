@@ -130,4 +130,26 @@ public class ApplicationUserServiceTest {
     public void testDeleteUserNotFound() {
         applicationUserService.deleteUser(UUID.randomUUID());
     }
+
+    @Test
+    public void testBanUser() {
+        ApplicationUser user = testObjectFactory.createUser();
+
+        applicationUserService.ban(user.getId());
+
+        ApplicationUser bannedUser = applicationUserRepository.findById(user.getId()).get();
+        Assert.assertEquals(true, bannedUser.getIsBlocked());
+    }
+
+    @Test
+    public void testPardonUser() {
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setIsBlocked(true);
+        applicationUserRepository.save(user);
+
+        applicationUserService.pardon(user.getId());
+
+        ApplicationUser unBannedUser = applicationUserRepository.findById(user.getId()).get();
+        Assert.assertEquals(false, unBannedUser.getIsBlocked());
+    }
 }
