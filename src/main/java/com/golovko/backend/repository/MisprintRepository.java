@@ -21,7 +21,7 @@ public interface MisprintRepository extends CrudRepository<Misprint, UUID> {
     Misprint findByIdAndTargetObjectId(UUID id, UUID targetObjectId);
 
     @Query("select m from Misprint m where m.targetObjectId = :targetObjectId"
-        + " and m.misprintText = :misprintText"
-        + " and m.status = :status")
+            + " and m.misprintText = :misprintText"
+            + " and m.status = :status")
     List<Misprint> findSimilarMisprints(UUID targetObjectId, String misprintText, ComplaintStatus status);
 }

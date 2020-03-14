@@ -232,6 +232,11 @@ public class MisprintServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), m1.getAuthor().getId());
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetMisprintByTargetIdNotFound() {
+        misprintService.getMisprintByTargetId(UUID.randomUUID(), UUID.randomUUID());
+    }
+
     @Test
     public void testReplaceMisprintInText() {
         String textBeforeUpdate = "simply dummy text of the printing and typesetting industry.";

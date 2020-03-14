@@ -149,11 +149,11 @@ public class MisprintService {
 
     public void closeSimilarMisprints(MisprintConfirmDTO dto, String misprintText) {
         misprintRepository.findSimilarMisprints(dto.getTargetObjectId(), misprintText, ComplaintStatus.INITIATED)
-        .forEach(m -> {
-            setStatusClosedAndSave(dto, m);
+                .forEach(m -> {
+                    setStatusClosedAndSave(dto, m);
 
-            log.info("And misprint with id={} saved successfully", m.getId());
-        });
+                    log.info("And misprint with id={} saved successfully", m.getId());
+                });
     }
 
     private void setStatusClosedAndSave(MisprintConfirmDTO dto, Misprint misprint) {
@@ -172,55 +172,56 @@ public class MisprintService {
 
     public String getTextWithMisprintFromEntity(Misprint misprint) {
         switch (misprint.getTargetObjectType()) {
-            case MOVIE:
-                Movie movie = repoHelper.getEntityById(Movie.class, misprint.getTargetObjectId());
-                return movie.getDescription();
-            case ARTICLE:
-                Article article = repoHelper.getEntityById(Article.class, misprint.getTargetObjectId());
-                return article.getText();
-            case PERSON:
-                Person person = repoHelper.getEntityById(Person.class, misprint.getTargetObjectId());
-                return person.getBio();
-            case MOVIE_CAST:
-                MovieCast movieCast = repoHelper.getEntityById(MovieCast.class, misprint.getTargetObjectId());
-                return movieCast.getDescription();
-            case MOVIE_CREW:
-                MovieCrew movieCrew = repoHelper.getEntityById(MovieCrew.class, misprint.getTargetObjectId());
-                return movieCrew.getDescription();
-            default:
-                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                        String.format("It is not allowed to fix misprint in %s entity",
-                                misprint.getTargetObjectType()));
+          case MOVIE:
+              Movie movie = repoHelper.getEntityById(Movie.class, misprint.getTargetObjectId());
+              return movie.getDescription();
+          case ARTICLE:
+              Article article = repoHelper.getEntityById(Article.class, misprint.getTargetObjectId());
+              return article.getText();
+          case PERSON:
+              Person person = repoHelper.getEntityById(Person.class, misprint.getTargetObjectId());
+              return person.getBio();
+          case MOVIE_CAST:
+              MovieCast movieCast = repoHelper.getEntityById(MovieCast.class, misprint.getTargetObjectId());
+              return movieCast.getDescription();
+          case MOVIE_CREW:
+              MovieCrew movieCrew = repoHelper.getEntityById(MovieCrew.class, misprint.getTargetObjectId());
+              return movieCrew.getDescription();
+          default:
+              throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                      String.format("It is not allowed to fix misprint in %s entity",
+                              misprint.getTargetObjectType()));
         }
     }
 
     public void saveNewTextToEntity(Misprint misprint, String newText) {
         switch (misprint.getTargetObjectType()) {
-            case MOVIE:
-                Movie movie = repoHelper.getReferenceIfExist(Movie.class, misprint.getTargetObjectId());
-                movie.setDescription(newText);
-                movieRepository.save(movie);
-                break;
-            case ARTICLE:
-                Article article = repoHelper.getReferenceIfExist(Article.class, misprint.getTargetObjectId());
-                article.setText(newText);
-                articleRepository.save(article);
-                break;
-            case PERSON:
-                Person person = repoHelper.getReferenceIfExist(Person.class, misprint.getTargetObjectId());
-                person.setBio(newText);
-                personRepository.save(person);
-                break;
-            case MOVIE_CAST:
-                MovieCast movieCast = repoHelper.getReferenceIfExist(MovieCast.class, misprint.getTargetObjectId());
-                movieCast.setDescription(newText);
-                movieCastRepository.save(movieCast);
-                break;
-            case MOVIE_CREW:
-                MovieCrew movieCrew = repoHelper.getReferenceIfExist(MovieCrew.class, misprint.getTargetObjectId());
-                movieCrew.setDescription(newText);
-                movieCrewRepository.save(movieCrew);
-                break;
+          case MOVIE:
+              Movie movie = repoHelper.getReferenceIfExist(Movie.class, misprint.getTargetObjectId());
+              movie.setDescription(newText);
+              movieRepository.save(movie);
+              break;
+          case ARTICLE:
+              Article article = repoHelper.getReferenceIfExist(Article.class, misprint.getTargetObjectId());
+              article.setText(newText);
+              articleRepository.save(article);
+              break;
+          case PERSON:
+              Person person = repoHelper.getReferenceIfExist(Person.class, misprint.getTargetObjectId());
+              person.setBio(newText);
+              personRepository.save(person);
+              break;
+          case MOVIE_CAST:
+              MovieCast movieCast = repoHelper.getReferenceIfExist(MovieCast.class, misprint.getTargetObjectId());
+              movieCast.setDescription(newText);
+              movieCastRepository.save(movieCast);
+              break;
+          case MOVIE_CREW:
+              MovieCrew movieCrew = repoHelper.getReferenceIfExist(MovieCrew.class, misprint.getTargetObjectId());
+              movieCrew.setDescription(newText);
+              movieCrewRepository.save(movieCrew);
+              break;
+          default:
         }
     }
 
