@@ -28,6 +28,8 @@ public class Person {
     @Column(nullable = false)
     private String lastName;
 
+    private String bio;
+
     @Enumerated(EnumType.STRING)
     private Gender gender;
 

@@ -1,23 +1,23 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Article;
-import com.golovko.backend.domain.ComplaintStatus;
-import com.golovko.backend.domain.Misprint;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.exception.UnprocessableEntityException;
-import com.golovko.backend.repository.ArticleRepository;
-import com.golovko.backend.repository.MisprintRepository;
-import com.golovko.backend.repository.RepositoryHelper;
+import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.repository.*;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 public class MisprintService {
 
@@ -32,6 +32,18 @@ public class MisprintService {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private MovieRepository movieRepository;
+
+    @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
+    private MovieCastRepository movieCastRepository;
+
+    @Autowired
+    private MovieCrewRepository movieCrewRepository;
 
     public MisprintReadDTO getMisprintComplaint(UUID userId, UUID id) {
         Misprint misprint = getMisprintByUserId(id, userId);
@@ -85,40 +97,23 @@ public class MisprintService {
         misprintRepository.delete(getMisprintByUserId(id, userId));
     }
 
-    public List<MisprintReadDTO> getMisprintsByTargetId(UUID targetObjectId) {
+    public List<MisprintReadDTO> getAllMisprintsByTargetId(UUID targetObjectId) {
         List<Misprint> misprints = misprintRepository.findAllByTargetObjectId(targetObjectId);
 
         return misprints.stream().map(translationService::toRead).collect(Collectors.toList());
     }
 
-    public MisprintReadDTO getMisprintById(UUID targetObjectId, UUID id) {
-        Misprint misprint = misprintRepository.findByIdAndTargetObjectId(id, targetObjectId);
+    public MisprintReadDTO getMisprintByTargetId(UUID targetObjectId, UUID id) {
+        Misprint misprint = getMisprintByTargetIdRequired(id, targetObjectId);
 
         return translationService.toRead(misprint);
     }
 
-    public MisprintReadDTO confirmModeration(UUID targetObjectId, UUID id, MisprintConfirmDTO dto) {
-        Misprint misprint = misprintRepository.findByIdAndTargetObjectId(id, targetObjectId);
+    public MisprintReadDTO rejectModeration(UUID id, MisprintRejectDTO dto) {
+        Misprint misprint = repoHelper.getEntityById(Misprint.class, id);
 
         if (!misprint.getStatus().equals(ComplaintStatus.INITIATED)) {
-            throw new UnprocessableEntityException(Misprint.class, id);
-        } else {
-            replaceMisprint(targetObjectId, dto);
-
-            misprint.setReplacedWith(dto.getReplaceTo());
-            misprint.setFixedAt(Instant.now());
-            misprint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
-            misprintRepository.save(misprint);
-
-            return translationService.toRead(misprint);
-        }
-    }
-
-    public MisprintReadDTO rejectModeration(UUID targetObjectId, UUID id, MisprintRejectDTO dto) {
-        Misprint misprint = misprintRepository.findByIdAndTargetObjectId(id, targetObjectId);
-
-        if (!misprint.getStatus().equals(ComplaintStatus.INITIATED)) {
-            throw new UnprocessableEntityException(Misprint.class, id);
+            throw new EntityWrongStatusException(Misprint.class, id);
         } else {
             misprint.setStatus(dto.getStatus());
             misprint.setReason(dto.getReason());
@@ -130,17 +125,116 @@ public class MisprintService {
         }
     }
 
-    public void replaceMisprint(UUID targetObjectId, MisprintConfirmDTO dto) {
-        Article article = repoHelper.getEntityById(Article.class, targetObjectId);
+    @Transactional
+    public MisprintReadDTO confirmModeration(UUID id, MisprintConfirmDTO dto) {
+        Misprint misprint = repoHelper.getEntityById(Misprint.class, id);
 
-        String articleText = article.getText();
+        if (!misprint.getStatus().equals(ComplaintStatus.INITIATED)) {
+            throw new EntityWrongStatusException(Misprint.class, id);
+        } else {
+            String text = getTextWithMisprintFromEntity(misprint);
+            String misprintText = misprint.getMisprintText();
 
-        String newArticleText = articleText.substring(0, dto.getStartIndex())
-                + dto.getReplaceTo()
-                + articleText.substring(dto.getEndIndex() + 1);
+            String newText = replaceMisprint(text, misprintText, dto);
 
-        article.setText(newArticleText);
-        articleRepository.save(article);
+            saveNewTextToEntity(misprint, newText);
+
+            setStatusClosedAndSave(dto, misprint);
+
+            closeSimilarMisprints(dto, misprintText);
+
+            return translationService.toRead(misprint);
+        }
+    }
+
+    public void closeSimilarMisprints(MisprintConfirmDTO dto, String misprintText) {
+        misprintRepository.findSimilarMisprints(dto.getTargetObjectId(), misprintText, ComplaintStatus.INITIATED)
+        .forEach(m -> {
+            setStatusClosedAndSave(dto, m);
+
+            log.info("And misprint with id={} saved successfully", m.getId());
+        });
+    }
+
+    private void setStatusClosedAndSave(MisprintConfirmDTO dto, Misprint misprint) {
+        try {
+            misprint.setReplacedWith(dto.getReplaceTo());
+            misprint.setFixedAt(Instant.now());
+            misprint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
+            misprint.setStatus(ComplaintStatus.CLOSED);
+            misprintRepository.save(misprint);
+
+            log.info("Misprint with id={} saved successfully", misprint.getId());
+        } catch (Exception e) {
+            log.error("Failed to update Misprint: {}", misprint.getId(), e);
+        }
+    }
+
+    public String getTextWithMisprintFromEntity(Misprint misprint) {
+        switch (misprint.getTargetObjectType()) {
+            case MOVIE:
+                Movie movie = repoHelper.getEntityById(Movie.class, misprint.getTargetObjectId());
+                return movie.getDescription();
+            case ARTICLE:
+                Article article = repoHelper.getEntityById(Article.class, misprint.getTargetObjectId());
+                return article.getText();
+            case PERSON:
+                Person person = repoHelper.getEntityById(Person.class, misprint.getTargetObjectId());
+                return person.getBio();
+            case MOVIE_CAST:
+                MovieCast movieCast = repoHelper.getEntityById(MovieCast.class, misprint.getTargetObjectId());
+                return movieCast.getDescription();
+            case MOVIE_CREW:
+                MovieCrew movieCrew = repoHelper.getEntityById(MovieCrew.class, misprint.getTargetObjectId());
+                return movieCrew.getDescription();
+            default:
+                throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                        String.format("It is not allowed to fix misprint in %s entity",
+                                misprint.getTargetObjectType()));
+        }
+    }
+
+    public void saveNewTextToEntity(Misprint misprint, String newText) {
+        switch (misprint.getTargetObjectType()) {
+            case MOVIE:
+                Movie movie = repoHelper.getReferenceIfExist(Movie.class, misprint.getTargetObjectId());
+                movie.setDescription(newText);
+                movieRepository.save(movie);
+                break;
+            case ARTICLE:
+                Article article = repoHelper.getReferenceIfExist(Article.class, misprint.getTargetObjectId());
+                article.setText(newText);
+                articleRepository.save(article);
+                break;
+            case PERSON:
+                Person person = repoHelper.getReferenceIfExist(Person.class, misprint.getTargetObjectId());
+                person.setBio(newText);
+                personRepository.save(person);
+                break;
+            case MOVIE_CAST:
+                MovieCast movieCast = repoHelper.getReferenceIfExist(MovieCast.class, misprint.getTargetObjectId());
+                movieCast.setDescription(newText);
+                movieCastRepository.save(movieCast);
+                break;
+            case MOVIE_CREW:
+                MovieCrew movieCrew = repoHelper.getReferenceIfExist(MovieCrew.class, misprint.getTargetObjectId());
+                movieCrew.setDescription(newText);
+                movieCrewRepository.save(movieCrew);
+                break;
+        }
+    }
+
+    public String replaceMisprint(String text, String misprintText, MisprintConfirmDTO dto) {
+
+        if (misprintText.equals(text.substring(dto.getStartIndex(), dto.getEndIndex()))) {
+            return text.substring(0, dto.getStartIndex())
+                    + dto.getReplaceTo()
+                    + text.substring(dto.getEndIndex());
+        } else {
+            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
+                    "Text could not be replaced."
+                            + " The text of mistake does not match with the text passed between indexes");
+        }
     }
 
     private Misprint getMisprintByUserId(UUID id, UUID userId) {
@@ -153,4 +247,13 @@ public class MisprintService {
         }
     }
 
+    private Misprint getMisprintByTargetIdRequired(UUID id, UUID targetObjectId) {
+        Misprint misprint = misprintRepository.findByIdAndTargetObjectId(id, targetObjectId);
+
+        if (misprint != null) {
+            return misprint;
+        } else {
+            throw new EntityNotFoundException(Misprint.class, id, targetObjectId);
+        }
+    }
 }

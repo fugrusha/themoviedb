@@ -12,9 +12,7 @@ public class MisprintReadDTO {
 
     private UUID id;
 
-    private Integer startIndex;
-
-    private Integer endIndex;
+    private String misprintText;
 
     private String replaceTo;
 

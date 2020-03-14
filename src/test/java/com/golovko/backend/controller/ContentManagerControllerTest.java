@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.Misprint;
@@ -7,11 +8,10 @@ import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.misprint.MisprintRejectDTO;
-import com.golovko.backend.exception.UnprocessableEntityException;
+import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.service.MisprintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -23,6 +23,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -44,24 +45,18 @@ public class ContentManagerControllerTest {
 
     @Test
     public void testConfirmModeration() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        UUID targetObjectId = UUID.randomUUID();
-
-        MisprintReadDTO readDTO = createMistakeReadDTO(userId, targetObjectId, moderatorId);
+        MisprintReadDTO readDTO = createMistakeReadDTO();
 
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
-        confirmDTO.setModeratorId(moderatorId);
+        confirmDTO.setModeratorId(UUID.randomUUID());
         confirmDTO.setStartIndex(5);
         confirmDTO.setEndIndex(20);
         confirmDTO.setReplaceTo("new text");
 
-        Mockito.when(misprintService.confirmModeration(targetObjectId, readDTO.getId(), confirmDTO))
-                .thenReturn(readDTO);
+        Mockito.when(misprintService.confirmModeration(readDTO.getId(), confirmDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/articles/{articleId}/misprints/{id}/confirm",
-                        targetObjectId, readDTO.getId())
+                .perform(post("/api/v1/misprints/{id}/confirm", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(confirmDTO)))
                 .andExpect(status().isOk())
@@ -70,28 +65,23 @@ public class ContentManagerControllerTest {
         MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(misprintService).confirmModeration(targetObjectId, readDTO.getId(), confirmDTO);
+        Mockito.verify(misprintService).confirmModeration(readDTO.getId(), confirmDTO);
     }
 
     @Test
     public void testRejectModeration() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        UUID targetObjectId = UUID.randomUUID();
-
-        MisprintReadDTO readDTO = createMistakeReadDTO(userId, targetObjectId, moderatorId);
+        MisprintReadDTO readDTO = createMistakeReadDTO();
 
         MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
-        rejectDTO.setModeratorId(moderatorId);
+        rejectDTO.setModeratorId(UUID.randomUUID());
         rejectDTO.setStatus(ComplaintStatus.CLOSED);
         rejectDTO.setReason("whatever");
 
-        Mockito.when(misprintService.rejectModeration(targetObjectId, readDTO.getId(), rejectDTO))
+        Mockito.when(misprintService.rejectModeration(readDTO.getId(), rejectDTO))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/articles/{articleId}/misprints/{id}/reject",
-                        targetObjectId, readDTO.getId())
+                .perform(post("/api/v1/misprints/{id}/reject", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(rejectDTO)))
                 .andExpect(status().isOk())
@@ -100,14 +90,11 @@ public class ContentManagerControllerTest {
         MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(misprintService).rejectModeration(targetObjectId, readDTO.getId(), rejectDTO);
+        Mockito.verify(misprintService).rejectModeration(readDTO.getId(), rejectDTO);
     }
 
-    @Ignore
     @Test
     public void testRejectMisprintStatusCode422() throws Exception {
-        UUID articleId = UUID.randomUUID();
-        UUID targetObjectId = UUID.randomUUID();
         UUID misprintId = UUID.randomUUID();
 
         MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
@@ -115,24 +102,22 @@ public class ContentManagerControllerTest {
         rejectDTO.setStatus(ComplaintStatus.CLOSED);
         rejectDTO.setReason("whatever");
 
-        UnprocessableEntityException ex = new UnprocessableEntityException(Misprint.class, misprintId);
+        EntityWrongStatusException ex = new EntityWrongStatusException(Misprint.class, misprintId);
 
-        Mockito.when(misprintService.rejectModeration(articleId, targetObjectId, rejectDTO)).thenThrow(ex);
+        Mockito.when(misprintService.rejectModeration(misprintId, rejectDTO)).thenThrow(ex);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/articles/{articleId}/misprints/{id}/reject",
-                        targetObjectId, misprintId))
+                .perform(post("/api/v1/misprints/{id}/reject", misprintId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(rejectDTO)))
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn().getResponse().getContentAsString();
 
         Assert.assertTrue(resultJson.contains(ex.getMessage()));
     }
 
-    @Ignore
     @Test
-    public void testConfirmMisprintStatusCode422() throws Exception {
-        UUID articleId = UUID.randomUUID();
-        UUID targetObjectId = UUID.randomUUID();
+    public void testConfirmMisprintStatusCode422() throws Exception { ;
         UUID misprintId = UUID.randomUUID();
 
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
@@ -141,32 +126,201 @@ public class ContentManagerControllerTest {
         confirmDTO.setEndIndex(20);
         confirmDTO.setReplaceTo("new text");
 
-        UnprocessableEntityException ex = new UnprocessableEntityException(Misprint.class, misprintId);
+        EntityWrongStatusException ex = new EntityWrongStatusException(Misprint.class, misprintId);
 
-        Mockito.when(misprintService.confirmModeration(articleId, targetObjectId, confirmDTO)).thenThrow(ex);
+        Mockito.when(misprintService.confirmModeration(misprintId, confirmDTO)).thenThrow(ex);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/articles/{articleId}/misprints/{id}/confirm",
-                        targetObjectId, misprintId))
+                .perform(post("/api/v1/misprints/{id}/confirm", misprintId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(confirmDTO)))
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn().getResponse().getContentAsString();
 
         Assert.assertTrue(resultJson.contains(ex.getMessage()));
     }
 
-    private MisprintReadDTO createMistakeReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {
+    @Test
+    public void testGetAllMisprintsByArticleId() throws Exception {
+        UUID articleId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+        List<MisprintReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(misprintService.getAllMisprintsByTargetId(articleId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/{articleId}/misprints/", articleId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+    }
+
+    @Test
+    public void testGetAllMisprintsByMovieId() throws Exception {
+        UUID movieId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+        List<MisprintReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(misprintService.getAllMisprintsByTargetId(movieId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies/{movieId}/misprints/", movieId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+    }
+
+    @Test
+    public void testGetAllMisprintsByPersonId() throws Exception {
+        UUID personId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+        List<MisprintReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(misprintService.getAllMisprintsByTargetId(personId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/persons/{personId}/misprints/", personId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+    }
+
+    @Test
+    public void testGetAllMisprintsByMovieCastId() throws Exception {
+        UUID movieCastId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+        List<MisprintReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(misprintService.getAllMisprintsByTargetId(movieCastId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movie-casts/{movieCastId}/misprints/", movieCastId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+    }
+
+    @Test
+    public void testGetAllMisprintsByMovieCrewId() throws Exception {
+        UUID movieCrewId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+        List<MisprintReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(misprintService.getAllMisprintsByTargetId(movieCrewId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movie-crews/{movieCrew}/misprints/", movieCrewId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+    }
+
+    @Test
+    public void testGetMisprintsByArticleIdAndMisprintId() throws Exception {
+        UUID articleId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+
+        Mockito.when(misprintService.getMisprintByTargetId(articleId, readDTO.getId())).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/{articleId}/misprints/{id}",
+                        articleId, readDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
+        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testGetAllMisprintsByMovieIdAndMisprintId() throws Exception {
+        UUID movieId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+
+        Mockito.when(misprintService.getMisprintByTargetId(movieId, readDTO.getId())).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies/{movieId}/misprints/{id}",
+                        movieId, readDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
+        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testGetAllMisprintsByPersonIdAndMisprintId() throws Exception {
+        UUID personId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+
+        Mockito.when(misprintService.getMisprintByTargetId(personId, readDTO.getId())).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/persons/{personId}/misprints/{id}",
+                        personId, readDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
+        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testGetAllMisprintsByMovieCastIdAndMisprintId() throws Exception {
+        UUID movieCastId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+
+        Mockito.when(misprintService.getMisprintByTargetId(movieCastId, readDTO.getId())).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movie-casts/{movieCastId}/misprints/{id}",
+                        movieCastId, readDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
+        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testGetAllMisprintsByMovieCrewIdAndMisprintId() throws Exception {
+        UUID movieCrewId = UUID.randomUUID();
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+
+        Mockito.when(misprintService.getMisprintByTargetId(movieCrewId, readDTO.getId())).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movie-crews/{movieCrewId}/misprints/{id}",
+                        movieCrewId, readDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
+        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    private MisprintReadDTO createMistakeReadDTO() {
         MisprintReadDTO dto = new MisprintReadDTO();
         dto.setId(UUID.randomUUID());
-        dto.setStartIndex(5);
-        dto.setEndIndex(20);
         dto.setReplaceTo("replace to this");
         dto.setStatus(ComplaintStatus.INITIATED);
-        dto.setAuthorId(authorId);
+        dto.setAuthorId(UUID.randomUUID());
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         dto.setTargetObjectType(TargetObjectType.ARTICLE);
-        dto.setTargetObjectId(parentId);
-        dto.setModeratorId(moderatorId);
+        dto.setTargetObjectId(UUID.randomUUID());
+        dto.setModeratorId(UUID.randomUUID());
         return dto;
     }
 }

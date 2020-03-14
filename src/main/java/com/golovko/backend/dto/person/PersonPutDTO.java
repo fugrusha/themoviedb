@@ -10,5 +10,7 @@ public class PersonPutDTO {
 
     private String lastName;
 
+    private String bio;
+
     private Gender gender;
 }

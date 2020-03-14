@@ -1,0 +1,24 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="add column misprint_text to misprint" author="andrew">
+        <addColumn tableName="misprint">
+            <column name="misprint_text" type="varchar(150)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="drop columns in misprint" author="andrew">
+        <dropColumn tableName="misprint" columnName="start_index"/>
+        <dropColumn tableName="misprint" columnName="end_index"/>
+    </changeSet>
+
+    <changeSet id="add bio column to person" author="andrew">
+        <addColumn tableName="person">
+            <column name="bio" type="varchar(1000)"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

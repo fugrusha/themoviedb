@@ -62,6 +62,7 @@ public class TestObjectFactory {
         Person person = new Person();
         person.setFirstName("Anna");
         person.setLastName("Popova");
+        person.setBio("some text");
         person.setGender(Gender.FEMALE);
         return personRepository.save(person);
     }
@@ -112,11 +113,11 @@ public class TestObjectFactory {
     public Misprint createMisprint(
             UUID targetObjectId,
             TargetObjectType targetObjectType,
-            ApplicationUser author
+            ApplicationUser author,
+            String misprintText
     ) {
         Misprint misprint = new Misprint();
-        misprint.setStartIndex(2);
-        misprint.setEndIndex(6);
+        misprint.setMisprintText(misprintText);
         misprint.setReplaceTo("Some report text");
         misprint.setStatus(ComplaintStatus.INITIATED);
         misprint.setAuthor(author);

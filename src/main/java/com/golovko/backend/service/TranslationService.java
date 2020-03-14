@@ -97,6 +97,7 @@ public class TranslationService {
         dto.setId(person.getId());
         dto.setFirstName(person.getFirstName());
         dto.setLastName(person.getLastName());
+        dto.setBio(person.getBio());
         dto.setGender(person.getGender());
         dto.setCreatedAt(person.getCreatedAt());
         dto.setUpdatedAt(person.getUpdatedAt());
@@ -200,8 +201,7 @@ public class TranslationService {
     public MisprintReadDTO toRead(Misprint misprint) {
         MisprintReadDTO dto = new MisprintReadDTO();
         dto.setId(misprint.getId());
-        dto.setStartIndex(misprint.getStartIndex());
-        dto.setEndIndex(misprint.getEndIndex());
+        dto.setMisprintText(misprint.getMisprintText());
         dto.setReplaceTo(misprint.getReplaceTo());
         dto.setStatus(misprint.getStatus());
         dto.setAuthorId(misprint.getAuthor().getId());
@@ -329,6 +329,7 @@ public class TranslationService {
         Person person = new Person();
         person.setFirstName(createDTO.getFirstName());
         person.setLastName(createDTO.getLastName());
+        person.setBio(createDTO.getBio());
         person.setGender(createDTO.getGender());
         return person;
     }
@@ -395,8 +396,7 @@ public class TranslationService {
 
     public Misprint toEntity(MisprintCreateDTO createDTO) {
         Misprint misprint = new Misprint();
-        misprint.setStartIndex(createDTO.getStartIndex());
-        misprint.setEndIndex(createDTO.getEndIndex());
+        misprint.setMisprintText(createDTO.getMisprintText());
         misprint.setReplaceTo(createDTO.getReplaceTo());
         misprint.setTargetObjectId(createDTO.getTargetObjectId());
         misprint.setTargetObjectType(createDTO.getTargetObjectType());
@@ -464,6 +464,9 @@ public class TranslationService {
         if (patchDTO.getLastName() != null) {
             person.setLastName(patchDTO.getLastName());
         }
+        if (patchDTO.getBio() != null) {
+            person.setBio(patchDTO.getBio());
+        }
         if (patchDTO.getGender() != null) {
             person.setGender(patchDTO.getGender());
         }
@@ -521,11 +524,8 @@ public class TranslationService {
     }
 
     public void patchEntity(MisprintPatchDTO patchDTO, Misprint misprint) {
-        if (patchDTO.getStartIndex() != null) {
-            misprint.setStartIndex(patchDTO.getStartIndex());
-        }
-        if (patchDTO.getEndIndex() != null) {
-            misprint.setEndIndex(patchDTO.getEndIndex());
+        if (patchDTO.getMisprintText() != null) {
+            misprint.setMisprintText(patchDTO.getMisprintText());
         }
         if (patchDTO.getReplaceTo() != null) {
             misprint.setReplaceTo(patchDTO.getReplaceTo());
@@ -558,6 +558,7 @@ public class TranslationService {
     public void updateEntity(PersonPutDTO updateDTO, Person person) {
         person.setFirstName(updateDTO.getFirstName());
         person.setLastName(updateDTO.getLastName());
+        person.setBio(updateDTO.getBio());
         person.setGender(updateDTO.getGender());
     }
 
@@ -597,8 +598,7 @@ public class TranslationService {
     }
 
     public void updateEntity(MisprintPutDTO updateDTO, Misprint misprint) {
-        misprint.setStartIndex(updateDTO.getStartIndex());
-        misprint.setEndIndex(updateDTO.getEndIndex());
+        misprint.setMisprintText(updateDTO.getMisprintText());
         misprint.setReplaceTo(updateDTO.getReplaceTo());
     }
 }

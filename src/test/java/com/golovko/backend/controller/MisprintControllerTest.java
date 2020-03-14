@@ -107,8 +107,7 @@ public class MisprintControllerTest {
     @Test
     public void testCreateMisprintComplaint() throws Exception {
         MisprintCreateDTO createDTO = new MisprintCreateDTO();
-        createDTO.setStartIndex(5);
-        createDTO.setEndIndex(15);
+        createDTO.setMisprintText("misprint");
         createDTO.setReplaceTo("Text to replace");
         createDTO.setTargetObjectType(TargetObjectType.MOVIE);
         createDTO.setTargetObjectId(UUID.randomUUID());
@@ -141,8 +140,7 @@ public class MisprintControllerTest {
         MisprintReadDTO readDTO = createMistakeReadDTO(userId, targetObjectId, moderatorId);
 
         MisprintPatchDTO patchDTO = new MisprintPatchDTO();
-        patchDTO.setStartIndex(45);
-        patchDTO.setEndIndex(65);
+        patchDTO.setMisprintText("misprint");
         patchDTO.setReplaceTo("another text");
 
         Mockito.when(misprintService.patchMisprintComplaint(userId, readDTO.getId(), patchDTO))
@@ -168,8 +166,7 @@ public class MisprintControllerTest {
         MisprintReadDTO readDTO = createMistakeReadDTO(userId, targetObjectId, moderatorId);
 
         MisprintPutDTO updateDTO = new MisprintPutDTO();
-        updateDTO.setStartIndex(45);
-        updateDTO.setEndIndex(65);
+        updateDTO.setMisprintText("misprint");
         updateDTO.setReplaceTo("new title");
 
         Mockito.when(misprintService.updateMisprintComplaint(userId, readDTO.getId(), updateDTO))
@@ -200,8 +197,7 @@ public class MisprintControllerTest {
     private MisprintReadDTO createMistakeReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {
         MisprintReadDTO dto = new MisprintReadDTO();
         dto.setId(UUID.randomUUID());
-        dto.setStartIndex(5);
-        dto.setEndIndex(20);
+        dto.setMisprintText("misprint");
         dto.setReplaceTo("replace to this");
         dto.setStatus(ComplaintStatus.INITIATED);
         dto.setAuthorId(authorId);

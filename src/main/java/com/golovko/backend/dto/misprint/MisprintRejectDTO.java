@@ -13,4 +13,6 @@ public class MisprintRejectDTO {
     private String reason;
 
     private UUID moderatorId;
+
+    private UUID targetObjectId;
 }

@@ -8,9 +8,7 @@ import java.util.UUID;
 @Data
 public class MisprintCreateDTO {
 
-    private Integer startIndex;
-
-    private Integer endIndex;
+    private String misprintText;
 
     private String replaceTo;
 

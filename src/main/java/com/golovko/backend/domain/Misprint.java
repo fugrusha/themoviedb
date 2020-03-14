@@ -20,9 +20,7 @@ public class Misprint {
     @GeneratedValue(generator = "UUID")
     private UUID id;
 
-    private Integer startIndex;
-
-    private Integer endIndex;
+    private String misprintText;
 
     private String replaceTo;
 

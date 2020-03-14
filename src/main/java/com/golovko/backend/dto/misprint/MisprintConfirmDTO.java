@@ -14,4 +14,6 @@ public class MisprintConfirmDTO {
     private String replaceTo;
 
     private UUID moderatorId;
+
+    private UUID targetObjectId;
 }
