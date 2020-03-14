@@ -15,6 +15,8 @@ public class PersonReadDTO {
 
     private String lastName;
 
+    private String bio;
+
     private Gender gender;
 
     private Instant createdAt;

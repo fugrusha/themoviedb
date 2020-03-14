@@ -22,7 +22,11 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from rating", "delete from movie", "delete from application_user"},
+@Sql(statements = {
+        "delete from rating",
+        "delete from movie",
+        "delete from user_role",
+        "delete from application_user"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class RatingRepositoryTest {
 

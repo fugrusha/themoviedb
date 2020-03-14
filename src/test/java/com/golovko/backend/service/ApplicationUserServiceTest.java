@@ -23,7 +23,8 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from application_user"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {"delete from user_role", "delete from application_user"},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ApplicationUserServiceTest {
 
     @Autowired
@@ -80,7 +81,7 @@ public class ApplicationUserServiceTest {
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO,
-                "password", "articles");
+                "password", "articles", "likes");
     }
 
     @Test
@@ -96,7 +97,7 @@ public class ApplicationUserServiceTest {
 
         Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
-                "password", "articles");
+                "password", "articles", "likes");
     }
 
     @Test
@@ -114,7 +115,7 @@ public class ApplicationUserServiceTest {
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
-                "password", "articles");
+                "password", "articles", "likes");
     }
 
     @Test
@@ -128,5 +129,27 @@ public class ApplicationUserServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteUserNotFound() {
         applicationUserService.deleteUser(UUID.randomUUID());
+    }
+
+    @Test
+    public void testBanUser() {
+        ApplicationUser user = testObjectFactory.createUser();
+
+        applicationUserService.ban(user.getId());
+
+        ApplicationUser bannedUser = applicationUserRepository.findById(user.getId()).get();
+        Assert.assertEquals(true, bannedUser.getIsBlocked());
+    }
+
+    @Test
+    public void testPardonUser() {
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setIsBlocked(true);
+        applicationUserRepository.save(user);
+
+        applicationUserService.pardon(user.getId());
+
+        ApplicationUser unBannedUser = applicationUserRepository.findById(user.getId()).get();
+        Assert.assertEquals(false, unBannedUser.getIsBlocked());
     }
 }

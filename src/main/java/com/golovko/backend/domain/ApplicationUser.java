@@ -8,9 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity
 @Setter
@@ -33,6 +31,11 @@ public class ApplicationUser {
 
     private Boolean isBlocked = false;
 
+    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
+    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<UserRole> userRole = new HashSet<UserRole>();
+
     @CreatedDate
     private Instant createdAt;
 
@@ -41,4 +44,7 @@ public class ApplicationUser {
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Article> articles = new ArrayList<>();
+
+    @OneToMany(mappedBy = "author")
+    private Set<Like> likes = new HashSet<>();
 }

@@ -12,12 +12,12 @@ import java.util.UUID;
 public interface RatingRepository extends CrudRepository<Rating, UUID> {
 
     @Query("select r from Rating r where r.id = :ratingId"
-            + " and r.targetObjectId = :targetId")
-    Rating findByIdAndTargetId(UUID ratingId, UUID targetId);
+            + " and r.ratedObjectId = :ratedObjectId")
+    Rating findByIdAndTargetId(UUID ratingId, UUID ratedObjectId);
 
-    @Query("select r from Rating r where r.targetObjectId = :targetId")
-    List<Rating> findAllByTargetId(UUID targetId);
+    @Query("select r from Rating r where r.ratedObjectId = :ratedObjectId")
+    List<Rating> findAllByTargetId(UUID ratedObjectId);
 
-    @Query("select avg(r.rating) from Rating r where r.targetObjectId = :targetObjectId")
-    Double calcAverageRating(UUID targetObjectId);
+    @Query("select avg(r.rating) from Rating r where r.ratedObjectId = :ratedObjectId")
+    Double calcAverageRating(UUID ratedObjectId);
 }

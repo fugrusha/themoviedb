@@ -60,6 +60,7 @@ public class PersonControllerTest {
         PersonCreateDTO createDTO = new PersonCreateDTO();
         createDTO.setFirstName("Max");
         createDTO.setLastName("Popov");
+        createDTO.setBio("some text");
         createDTO.setGender(Gender.MALE);
 
         PersonReadDTO readDTO = createPersonReadDTO();
@@ -86,6 +87,7 @@ public class PersonControllerTest {
         PersonPatchDTO patchDTO = new PersonPatchDTO();
         patchDTO.setFirstName("Lolita");
         patchDTO.setLastName("Bulgakova");
+        patchDTO.setBio("some text");
         patchDTO.setGender(Gender.FEMALE);
 
         Mockito.when(personService.patchPerson(readDTO.getId(), patchDTO)).thenReturn(readDTO);
@@ -109,6 +111,7 @@ public class PersonControllerTest {
         PersonPutDTO updateDTO = new PersonPutDTO();
         updateDTO.setFirstName("Lolita");
         updateDTO.setLastName("Bulgakova");
+        updateDTO.setBio("some text");
         updateDTO.setGender(Gender.FEMALE);
 
         Mockito.when(personService.updatePerson(readDTO.getId(), updateDTO)).thenReturn(readDTO);
@@ -140,6 +143,7 @@ public class PersonControllerTest {
         dto.setId(UUID.randomUUID());
         dto.setFirstName("Max");
         dto.setLastName("Popov");
+        dto.setBio("some text");
         dto.setGender(Gender.MALE);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));

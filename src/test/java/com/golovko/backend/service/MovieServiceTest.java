@@ -31,6 +31,7 @@ import static org.assertj.core.api.Assertions.assertThat;
         "delete from genre_movie",
         "delete from genre",
         "delete from rating",
+        "delete from user_role",
         "delete from application_user",
         "delete from genre_movie",
         "delete from genre",

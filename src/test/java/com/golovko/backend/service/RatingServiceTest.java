@@ -29,7 +29,11 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = {"delete from rating", "delete from movie", "delete from application_user"},
+@Sql(statements = {
+        "delete from rating",
+        "delete from movie",
+        "delete from user_role",
+        "delete from application_user"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class RatingServiceTest {
 
@@ -70,7 +74,7 @@ public class RatingServiceTest {
         Rating r3 = testObjectFactory.createRating(4, user1, movie2.getId(), MOVIE);
         Rating r4 = testObjectFactory.createRating(5, user2, movie2.getId(), MOVIE);
 
-        List<RatingReadDTO> ratings = ratingService.getAllRatingsByMovieId(movie1.getId());
+        List<RatingReadDTO> ratings = ratingService.getAllRatingsByTargetObjectId(movie1.getId());
 
         Assertions.assertThat(ratings).extracting("id").containsExactlyInAnyOrder(r1.getId(), r2.getId());
     }
@@ -83,7 +87,7 @@ public class RatingServiceTest {
         RatingCreateDTO createDTO = new RatingCreateDTO();
         createDTO.setRating(6);
         createDTO.setAuthorId(author.getId());
-        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE);
 
         RatingReadDTO readDTO = ratingService.createRating(movie.getId(), createDTO);
 

@@ -1,6 +1,5 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Rating;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
@@ -24,7 +23,7 @@ public class RatingService {
     @Autowired
     private TranslationService translationService;
 
-    public List<RatingReadDTO> getAllRatingsByMovieId(UUID targetId) {
+    public List<RatingReadDTO> getAllRatingsByTargetObjectId(UUID targetId) {
         List<Rating> ratings = ratingRepository.findAllByTargetId(targetId);
         return ratings.stream().map(translationService::toRead).collect(Collectors.toList());
     }
@@ -36,7 +35,7 @@ public class RatingService {
 
     public RatingReadDTO createRating(UUID movieId, RatingCreateDTO createDTO) {
         Rating rating = translationService.toEntity(createDTO);
-        rating.setTargetObjectId(movieId);
+        rating.setRatedObjectId(movieId);
 
         rating = ratingRepository.save(rating);
         return translationService.toRead(rating);
@@ -70,7 +69,7 @@ public class RatingService {
         if (rating != null) {
             return rating;
         } else {
-            throw new EntityNotFoundException(Rating.class, ratingId, Movie.class, targetId);
+            throw new EntityNotFoundException(Rating.class, ratingId, targetId);
         }
     }
 }

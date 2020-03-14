@@ -11,6 +11,7 @@
             <column name="password" type="string"/>
             <column name="email" type="string"/>
             <column name="is_blocked" type="boolean"/>
+            <column name="user_role" type="string"/>
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
         </loadUpdateData>
@@ -35,6 +36,7 @@
             <column name="id" type="uuid"/>
             <column name="first_name" type="string"/>
             <column name="last_name" type="string"/>
+            <column name="bio" type="string"/>
             <column name="gender" type="string"/>
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
@@ -131,10 +133,36 @@
             <column name="id" type="uuid"/>
             <column name="rating" type="numeric"/>
             <column name="author_id" type="uuid"/>
+            <column name="rated_object_type" type="string"/>
+            <column name="rated_object_id" type="uuid"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load user roles" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="user_role" file="db/data/user-role.csv"
+                        separator=";" primaryKey="user_id, user_role">
+            <column name="user_id" type="uuid"/>
+            <column name="user_role" type="string"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load misprints" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="misprint" file="db/data/misprints.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="misprint_text" type="string"/>
+            <column name="replace_to" type="string"/>
+            <column name="status" type="string"/>
+            <column name="author_id" type="uuid"/>
+            <column name="moderator_id" type="uuid"/>
+            <column name="replaced_with" type="string"/>
+            <column name="reason" type="string"/>
             <column name="target_object_type" type="string"/>
             <column name="target_object_id" type="uuid"/>
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
+            <column name="fixed_at" type="timestamp"/>
         </loadUpdateData>
     </changeSet>
 

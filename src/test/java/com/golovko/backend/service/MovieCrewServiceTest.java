@@ -26,6 +26,7 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE_CREW;
 @ActiveProfiles("test")
 @Sql(statements = {
         "delete from rating",
+        "delete from user_role",
         "delete from application_user",
         "delete from person",
         "delete from movie",
@@ -106,6 +107,27 @@ public class MovieCrewServiceTest {
                 "movieId", "personId");
         Assert.assertEquals(readDTO.getMovieId(), movieCrew.getMovie().getId());
         Assert.assertEquals(readDTO.getPersonId(), movieCrew.getPerson().getId());
+    }
+
+    @Test
+    public void testCreateMovieCrewWithoutPerson() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
+        createDTO.setPersonId(null);
+        createDTO.setDescription("Some text");
+
+        MovieCrewReadDTO readDTO = movieCrewService.createMovieCrew(createDTO, movie.getId());
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+        Assert.assertNull(readDTO.getPersonId());
+
+        MovieCrew movieCrew = movieCrewRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(movieCrew,
+                "movieId", "personId");
+        Assert.assertEquals(readDTO.getMovieId(), movie.getId());
+        Assert.assertNull(movieCrew.getPerson());
     }
 
     @Test(expected = EntityNotFoundException.class)

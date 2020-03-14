@@ -1,6 +1,5 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.Article;
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
@@ -78,7 +77,7 @@ public class CommentService {
         if (comment != null) {
             return comment;
         } else {
-            throw new EntityNotFoundException(Comment.class, commentId, Article.class, targetObjectId);
+            throw new EntityNotFoundException(Comment.class, commentId, targetObjectId);
         }
     }
 }

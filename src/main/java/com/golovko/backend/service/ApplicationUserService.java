@@ -1,6 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.dto.user.UserCreateDTO;
 import com.golovko.backend.dto.user.UserPatchDTO;
 import com.golovko.backend.dto.user.UserPutDTO;
@@ -25,24 +26,26 @@ public class ApplicationUserService {
     private RepositoryHelper repoHelper;
 
     public UserReadDTO getUser(UUID id) {
-        ApplicationUser applicationUser = repoHelper.getEntityById(ApplicationUser.class, id);
-        return translationService.toRead(applicationUser);
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+        return translationService.toRead(user);
     }
 
     public UserReadDTO createUser(UserCreateDTO createDTO) {
-        ApplicationUser applicationUser = translationService.toEntity(createDTO);
+        ApplicationUser user = translationService.toEntity(createDTO);
 
-        applicationUser = applicationUserRepository.save(applicationUser);
-        return translationService.toRead(applicationUser);
+        user.getUserRole().add(UserRole.USER);
+
+        user = applicationUserRepository.save(user);
+        return translationService.toRead(user);
     }
 
     public UserReadDTO patchUser(UUID id, UserPatchDTO patch) {
-        ApplicationUser applicationUser = repoHelper.getEntityById(ApplicationUser.class, id);
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
-        translationService.patchEntity(patch, applicationUser);
+        translationService.patchEntity(patch, user);
 
-        applicationUser = applicationUserRepository.save(applicationUser);
-        return translationService.toRead(applicationUser);
+        user = applicationUserRepository.save(user);
+        return translationService.toRead(user);
     }
 
     public UserReadDTO updateUser(UUID id, UserPutDTO update) {
@@ -56,5 +59,17 @@ public class ApplicationUserService {
 
     public void deleteUser(UUID id) {
         applicationUserRepository.delete(repoHelper.getEntityById(ApplicationUser.class, id));
+    }
+
+    public void ban(UUID id) {
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+        user.setIsBlocked(true);
+        applicationUserRepository.save(user);
+    }
+
+    public void pardon(UUID id) {
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+        user.setIsBlocked(false);
+        applicationUserRepository.save(user);
     }
 }

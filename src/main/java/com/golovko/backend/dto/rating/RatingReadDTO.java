@@ -19,7 +19,7 @@ public class RatingReadDTO {
 
     private UUID authorId;
 
-    private TargetObjectType targetObjectType;
+    private TargetObjectType ratedObjectType;
 
-    private UUID targetObjectId;
+    private UUID ratedObjectId;
 }

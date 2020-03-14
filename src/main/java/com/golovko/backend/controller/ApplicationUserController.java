@@ -41,4 +41,14 @@ public class ApplicationUserController {
     public void deleteUser(@PathVariable UUID id) {
         applicationUserService.deleteUser(id);
     }
+
+    @PostMapping("/{id}/ban")
+    public void banUser(@PathVariable UUID id) {
+        applicationUserService.ban(id);
+    }
+
+    @PostMapping("/{id}/pardon")
+    public void pardonUser(@PathVariable UUID id) {
+        applicationUserService.pardon(id);
+    }
 }

@@ -26,6 +26,7 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE_CAST;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from user_role",
         "delete from rating",
         "delete from application_user",
         "delete from person",

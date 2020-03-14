@@ -12,5 +12,5 @@ public class RatingCreateDTO {
 
     private UUID authorId;
 
-    private TargetObjectType targetObjectType;
+    private TargetObjectType ratedObjectType;
 }

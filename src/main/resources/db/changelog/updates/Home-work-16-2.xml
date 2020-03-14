@@ -1,0 +1,34 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create like table" author="andrew">
+        <createTable tableName="like">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="me_liked" type="boolean"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+            <column name="liked_object_id" type="uuid"/>
+            <column name="liked_object_type" type="varchar(30)"/>
+            <column name="author_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_like_application_user_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="false"
+                        deleteCascade="true"
+                />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="rename targetId columns" author="andrew">
+        <renameColumn tableName="rating" oldColumnName="target_object_id" newColumnName="rated_object_id"/>
+        <renameColumn tableName="rating" oldColumnName="target_object_type" newColumnName="rated_object_type"/>
+    </changeSet>
+
+</databaseChangeLog>

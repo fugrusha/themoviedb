@@ -11,6 +11,14 @@ import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.dto.genre.*;
+import com.golovko.backend.dto.like.LikeCreateDTO;
+import com.golovko.backend.dto.like.LikePatchDTO;
+import com.golovko.backend.dto.like.LikePutDTO;
+import com.golovko.backend.dto.like.LikeReadDTO;
+import com.golovko.backend.dto.misprint.MisprintCreateDTO;
+import com.golovko.backend.dto.misprint.MisprintPatchDTO;
+import com.golovko.backend.dto.misprint.MisprintPutDTO;
+import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.dto.moviecrew.*;
@@ -47,6 +55,7 @@ public class TranslationService {
         dto.setUsername(user.getUsername());
         dto.setEmail(user.getEmail());
         dto.setIsBlocked(user.getIsBlocked());
+        dto.setUserRole(user.getUserRole());
         dto.setCreatedAt(user.getCreatedAt());
         dto.setUpdatedAt(user.getUpdatedAt());
         return dto;
@@ -88,6 +97,7 @@ public class TranslationService {
         dto.setId(person.getId());
         dto.setFirstName(person.getFirstName());
         dto.setLastName(person.getLastName());
+        dto.setBio(person.getBio());
         dto.setGender(person.getGender());
         dto.setCreatedAt(person.getCreatedAt());
         dto.setUpdatedAt(person.getUpdatedAt());
@@ -101,7 +111,9 @@ public class TranslationService {
         dto.setAverageRating(movieCrew.getAverageRating());
         dto.setMovieCrewType(movieCrew.getMovieCrewType());
         dto.setMovieId(movieCrew.getMovie().getId());
-        dto.setPersonId(movieCrew.getPerson().getId());
+        if (movieCrew.getPerson() != null) {
+            dto.setPersonId(movieCrew.getPerson().getId());
+        }
         dto.setCreatedAt(movieCrew.getCreatedAt());
         dto.setUpdatedAt(movieCrew.getUpdatedAt());
         return dto;
@@ -114,7 +126,9 @@ public class TranslationService {
         dto.setAverageRating(movieCast.getAverageRating());
         dto.setMovieCrewType(movieCast.getMovieCrewType());
         dto.setMovieId(movieCast.getMovie().getId());
-        dto.setPersonId(movieCast.getPerson().getId());
+        if (movieCast.getPerson() != null) {
+            dto.setPersonId(movieCast.getPerson().getId());
+        }
         dto.setCharacter(movieCast.getCharacter());
         dto.setCreatedAt(movieCast.getCreatedAt());
         dto.setUpdatedAt(movieCast.getUpdatedAt());
@@ -167,8 +181,46 @@ public class TranslationService {
         dto.setAuthorId(rating.getAuthor().getId());
         dto.setCreatedAt(rating.getCreatedAt());
         dto.setUpdatedAt(rating.getUpdatedAt());
-        dto.setTargetObjectId(rating.getTargetObjectId());
-        dto.setTargetObjectType(rating.getTargetObjectType());
+        dto.setRatedObjectId(rating.getRatedObjectId());
+        dto.setRatedObjectType(rating.getRatedObjectType());
+        return dto;
+    }
+
+    public LikeReadDTO toRead(Like like) {
+        LikeReadDTO dto = new LikeReadDTO();
+        dto.setId(like.getId());
+        dto.setMeLiked(like.getMeLiked());
+        dto.setAuthorId(like.getAuthor().getId());
+        dto.setCreatedAt(like.getCreatedAt());
+        dto.setUpdatedAt(like.getUpdatedAt());
+        dto.setLikedObjectId(like.getLikedObjectId());
+        dto.setLikedObjectType(like.getLikedObjectType());
+        return dto;
+    }
+
+    public MisprintReadDTO toRead(Misprint misprint) {
+        MisprintReadDTO dto = new MisprintReadDTO();
+        dto.setId(misprint.getId());
+        dto.setMisprintText(misprint.getMisprintText());
+        dto.setReplaceTo(misprint.getReplaceTo());
+        dto.setStatus(misprint.getStatus());
+        dto.setAuthorId(misprint.getAuthor().getId());
+        dto.setCreatedAt(misprint.getCreatedAt());
+        dto.setUpdatedAt(misprint.getUpdatedAt());
+        dto.setTargetObjectId(misprint.getTargetObjectId());
+        dto.setTargetObjectType(misprint.getTargetObjectType());
+        if (misprint.getModerator() != null) {
+            dto.setModeratorId(misprint.getModerator().getId());
+        }
+        if (misprint.getFixedAt() != null) {
+            dto.setFixedAt(misprint.getFixedAt());
+        }
+        if (misprint.getReplacedWith() != null) {
+            dto.setReplacedWith(misprint.getReplacedWith());
+        }
+        if (misprint.getReason() != null) {
+            dto.setReason(misprint.getReason());
+        }
         return dto;
     }
 
@@ -277,6 +329,7 @@ public class TranslationService {
         Person person = new Person();
         person.setFirstName(createDTO.getFirstName());
         person.setLastName(createDTO.getLastName());
+        person.setBio(createDTO.getBio());
         person.setGender(createDTO.getGender());
         return person;
     }
@@ -285,7 +338,9 @@ public class TranslationService {
         MovieCrew movieCrew = new MovieCrew();
         movieCrew.setDescription(createDTO.getDescription());
         movieCrew.setMovieCrewType(createDTO.getMovieCrewType());
-        movieCrew.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
+        if (createDTO.getPersonId() != null) {
+            movieCrew.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
+        }
         return movieCrew;
     }
 
@@ -293,7 +348,9 @@ public class TranslationService {
         MovieCast movieCast = new MovieCast();
         movieCast.setDescription(createDTO.getDescription());
         movieCast.setCharacter(createDTO.getCharacter());
-        movieCast.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
+        if (createDTO.getPersonId() != null) {
+            movieCast.setPerson(repoHelper.getReferenceIfExist(Person.class, createDTO.getPersonId()));
+        }
         return movieCast;
     }
 
@@ -325,8 +382,25 @@ public class TranslationService {
         Rating rating = new Rating();
         rating.setRating(createDTO.getRating());
         rating.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId()));
-        rating.setTargetObjectType(createDTO.getTargetObjectType());
+        rating.setRatedObjectType(createDTO.getRatedObjectType());
         return rating;
+    }
+
+    public Like toEntity(LikeCreateDTO createDTO) {
+        Like like = new Like();
+        like.setMeLiked(createDTO.getMeLiked());
+        like.setLikedObjectType(createDTO.getLikedObjectType());
+        like.setLikedObjectId(createDTO.getLikedObjectId());
+        return like;
+    }
+
+    public Misprint toEntity(MisprintCreateDTO createDTO) {
+        Misprint misprint = new Misprint();
+        misprint.setMisprintText(createDTO.getMisprintText());
+        misprint.setReplaceTo(createDTO.getReplaceTo());
+        misprint.setTargetObjectId(createDTO.getTargetObjectId());
+        misprint.setTargetObjectType(createDTO.getTargetObjectType());
+        return misprint;
     }
 
     /*
@@ -390,6 +464,9 @@ public class TranslationService {
         if (patchDTO.getLastName() != null) {
             person.setLastName(patchDTO.getLastName());
         }
+        if (patchDTO.getBio() != null) {
+            person.setBio(patchDTO.getBio());
+        }
         if (patchDTO.getGender() != null) {
             person.setGender(patchDTO.getGender());
         }
@@ -440,6 +517,21 @@ public class TranslationService {
         }
     }
 
+    public void patchEntity(LikePatchDTO patchDTO, Like like) {
+        if (patchDTO.getMeLiked() != null) {
+            like.setMeLiked(patchDTO.getMeLiked());
+        }
+    }
+
+    public void patchEntity(MisprintPatchDTO patchDTO, Misprint misprint) {
+        if (patchDTO.getMisprintText() != null) {
+            misprint.setMisprintText(patchDTO.getMisprintText());
+        }
+        if (patchDTO.getReplaceTo() != null) {
+            misprint.setReplaceTo(patchDTO.getReplaceTo());
+        }
+    }
+
     /*
     updateEntity methods
      */
@@ -466,6 +558,7 @@ public class TranslationService {
     public void updateEntity(PersonPutDTO updateDTO, Person person) {
         person.setFirstName(updateDTO.getFirstName());
         person.setLastName(updateDTO.getLastName());
+        person.setBio(updateDTO.getBio());
         person.setGender(updateDTO.getGender());
     }
 
@@ -498,5 +591,14 @@ public class TranslationService {
 
     public void updateEntity(RatingPutDTO putDTO, Rating rating) {
         rating.setRating(putDTO.getRating());
+    }
+
+    public void updateEntity(LikePutDTO updateDTO, Like like) {
+        like.setMeLiked(updateDTO.getMeLiked());
+    }
+
+    public void updateEntity(MisprintPutDTO updateDTO, Misprint misprint) {
+        misprint.setMisprintText(updateDTO.getMisprintText());
+        misprint.setReplaceTo(updateDTO.getReplaceTo());
     }
 }

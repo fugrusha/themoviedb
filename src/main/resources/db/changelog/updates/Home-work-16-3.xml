@@ -1,0 +1,68 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create misprint table" author="andrew">
+        <createTable tableName="misprint">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="start_index" type="int"/>
+            <column name="end_index" type="int"/>
+            <column name="replace_to" type="varchar(150)"/>
+            <column name="reason" type="varchar(150)"/>
+            <column name="replaced_with" type="varchar(150)"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+            <column name="fixed_at" type="timestamp"/>
+            <column name="status" type="varchar(30)"/>
+            <column name="target_object_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="target_object_type" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="author_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_misprint_application_user_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="false"
+                />
+            </column>
+            <column name="moderator_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_misprint_moderator_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="true"
+                />
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="create user_role table" author="andrew">
+        <createTable tableName="user_role">
+            <column name="user_id" type="uuid">
+                <constraints
+                        foreignKeyName="fk_user_role_application_user_id"
+                        referencedTableName="application_user"
+                        referencedColumnNames="id"
+                        nullable="false"
+                />
+            </column>
+            <column name="user_role" type="varchar(100)"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add composite unique constraint to user_role table" author="andrew">
+        <addUniqueConstraint
+                columnNames="user_id, user_role"
+                constraintName="composite_constraint_user_role"
+                tableName="user_role"
+        />
+    </changeSet>
+
+</databaseChangeLog>

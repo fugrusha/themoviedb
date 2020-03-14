@@ -15,12 +15,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 @ActiveProfiles("test")
 @TestPropertySource(properties = "spring.liquibase.change-log=classpath:db/changelog/db.changelog-master.xml")
 @Sql(statements = {
+        "delete from misprint",
         "delete from rating",
         "delete from genre_movie",
         "delete from genre",
         "delete from comment",
         "delete from complaint",
         "delete from article",
+        "delete from user_role",
         "delete from application_user",
         "delete from movie_cast",
         "delete from movie_crew",
@@ -60,6 +62,9 @@ public class LiquibaseLoadDataTest {
     @Autowired
     private RatingRepository ratingRepository;
 
+    @Autowired
+    private MisprintRepository misprintRepository;
+
     @Test
     public void testLoadData() {
         Assert.assertTrue(applicationUserRepository.count() > 0);
@@ -72,5 +77,6 @@ public class LiquibaseLoadDataTest {
         Assert.assertTrue(commentRepository.count() > 0);
         Assert.assertTrue(genreRepository.count() > 0);
         Assert.assertTrue(ratingRepository.count() > 0);
+        Assert.assertTrue(misprintRepository.count() > 0);
     }
 }

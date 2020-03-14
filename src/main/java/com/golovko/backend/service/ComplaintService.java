@@ -4,11 +4,13 @@ import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.dto.complaint.*;
+import com.golovko.backend.dto.moderator.ModeratorDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -73,13 +75,36 @@ public class ComplaintService {
         complaintRepository.delete(getComplaintByUserId(id, userId));
     }
 
+    @Transactional
+    public ComplaintReadDTO takeForModeration(UUID complaintId, ModeratorDTO dto) {
+        ApplicationUser moderator = repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId());
+        Complaint complaint = repoHelper.getReferenceIfExist(Complaint.class, complaintId);
+
+        complaint.setModerator(moderator);
+        complaint.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        complaint = complaintRepository.save(complaint);
+
+        return translationService.toRead(complaint);
+    }
+
+    @Transactional
+    public ComplaintReadDTO changeStatus(UUID id, ModeratorDTO dto) {
+        Complaint complaint = repoHelper.getReferenceIfExist(Complaint.class, id);
+
+        complaint.setComplaintStatus(dto.getComplaintStatus());
+        complaint = complaintRepository.save(complaint);
+
+        return translationService.toRead(complaint);
+    }
+
     private Complaint getComplaintByUserId(UUID id, UUID userId) {
         Complaint complaint = complaintRepository.findByIdAndAuthorId(id, userId);
 
         if (complaint != null) {
             return complaint;
         } else {
-            throw new EntityNotFoundException(Complaint.class, id, ApplicationUser.class, userId);
+            throw new EntityNotFoundException(Complaint.class, id, userId);
         }
     }
+
 }

@@ -1,5 +1,6 @@
 package com.golovko.backend.exception.handler;
 
+import com.golovko.backend.exception.EntityWrongStatusException;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -30,4 +31,12 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(errorInfo, new HttpHeaders(), httpStatus);
     }
 
+    @ExceptionHandler(EntityWrongStatusException.class)
+    public ResponseEntity<Object> handleUnprocessableEntityException(EntityWrongStatusException e) {
+        ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(e.getClass(), ResponseStatus.class);
+        HttpStatus httpStatus = status != null ? status.code() : HttpStatus.INTERNAL_SERVER_ERROR;
+        ErrorInfo errorInfo = new ErrorInfo(httpStatus, e.getClass(), e.getMessage());
+
+        return new ResponseEntity<>(errorInfo, new HttpHeaders(), httpStatus);
+    }
 }

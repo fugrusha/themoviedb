@@ -55,6 +55,7 @@ public class PersonServiceTest {
         PersonCreateDTO createDTO = new PersonCreateDTO();
         createDTO.setFirstName("Max");
         createDTO.setLastName("Popov");
+        createDTO.setBio("some text");
         createDTO.setGender(Gender.MALE);
 
         PersonReadDTO readDTO = personService.createPerson(createDTO);
@@ -73,6 +74,7 @@ public class PersonServiceTest {
         PersonPatchDTO patchDTO = new PersonPatchDTO();
         patchDTO.setFirstName("Lolita");
         patchDTO.setLastName("Bulgakova");
+        patchDTO.setBio("some bio");
         patchDTO.setGender(Gender.FEMALE);
 
         PersonReadDTO readDTO = personService.patchPerson(person.getId(), patchDTO);
@@ -107,6 +109,7 @@ public class PersonServiceTest {
         PersonPutDTO updateDTO = new PersonPutDTO();
         updateDTO.setFirstName("Lolita");
         updateDTO.setLastName("Bulgakova");
+        updateDTO.setBio("some text");
         updateDTO.setGender(Gender.FEMALE);
 
         PersonReadDTO readDTO = personService.updatePerson(person.getId(), updateDTO);
