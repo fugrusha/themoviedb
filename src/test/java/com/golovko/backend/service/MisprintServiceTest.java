@@ -18,7 +18,9 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.*;
@@ -86,7 +88,7 @@ public class MisprintServiceTest {
         testObjectFactory.createMisprint(movie.getId(), MOVIE, user2, "misprint");
         testObjectFactory.createMisprint(movie.getId(), MOVIE, user2, "misprint");
 
-        List<MisprintReadDTO> misprints = misprintService.getAllMisprintComplaints(user1.getId());
+        List<MisprintReadDTO> misprints = misprintService.getAllUserMisprintComplaints(user1.getId());
 
         Assertions.assertThat(misprints).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
@@ -565,5 +567,168 @@ public class MisprintServiceTest {
         Assert.assertEquals(readDTO.getModeratorId(), updatedMisprint2.getModerator().getId());
         Assert.assertEquals(readDTO.getReplacedWith(), updatedMisprint2.getReplacedWith());
         Assert.assertEquals(readDTO.getFixedAt(), updatedMisprint2.getFixedAt());
+    }
+
+    @Test
+    public void testGetMisprintsWithEmptyFilter() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+        Misprint m3 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+
+        MisprintFilter filter = new MisprintFilter();
+
+        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
+    }
+
+    @Test
+    public void testGetMisprintsWithEmptySetsOfFilter() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+        Misprint m3 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+
+        MisprintFilter filter = new MisprintFilter();
+        filter.setStatuses(new HashSet<ComplaintStatus>());
+        filter.setTargetObjectTypes(new HashSet<TargetObjectType>());
+
+        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
+    }
+
+    @Test
+    public void testGetMisprintsByStatus() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+        Misprint m3 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user, "misprint");
+
+        m1.setStatus(ComplaintStatus.DUPLICATE);
+        m2.setStatus(ComplaintStatus.CLOSED);
+        m3.setStatus(ComplaintStatus.DUPLICATE);
+        misprintRepository.saveAll(List.of(m1, m2, m3));
+
+        MisprintFilter filter = new MisprintFilter();
+        filter.setStatuses(Set.of(ComplaintStatus.DUPLICATE));
+
+        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId(), m3.getId());
+    }
+
+    @Test
+    public void testGetMisprintsByAuthor() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        ApplicationUser user3 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user2, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user2, "misprint");
+        testObjectFactory.createMisprint(article.getId(), ARTICLE, user3, "misprint");
+        testObjectFactory.createMisprint(article.getId(), ARTICLE, user3, "misprint");
+
+        MisprintFilter filter = new MisprintFilter();
+        filter.setAuthorId(user2.getId());
+
+        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId(), m2.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByModerator() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser moderator1 = testObjectFactory.createUser();
+        ApplicationUser moderator2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        Misprint m3 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint"); // without moderator
+
+        m1.setModerator(moderator1);
+        m2.setModerator(moderator1);
+        m3.setModerator(moderator2);
+        misprintRepository.saveAll(List.of(m1, m2, m3));
+
+        MisprintFilter filter = new MisprintFilter();
+        filter.setModeratorId(moderator1.getId());
+
+        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId(), m2.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByTargetObjectType() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(person.getId(), PERSON, user2, "misprint");
+        testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+
+        MisprintFilter filter = new MisprintFilter();
+        filter.setTargetObjectTypes(Set.of(PERSON, ARTICLE));
+
+        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId(), m2.getId());
+    }
+
+    @Test
+    public void testGetComplaintsByAllFilters() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        ApplicationUser moder1 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Person person = testObjectFactory.createPerson();
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        m1.setModerator(moder1);
+
+        Misprint m2 = testObjectFactory.createMisprint(person.getId(), PERSON, user1, "misprint");
+        m2.setModerator(moder1);// wrong type
+
+        Misprint m3 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user2, "misprint");
+        m3.setModerator(moder1);  // wrong author
+
+        Misprint m4 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        m4.setStatus(ComplaintStatus.CLOSED); // wrong status
+
+        testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint"); // without moderator
+
+        misprintRepository.saveAll(List.of(m1, m2, m3, m4));
+
+        MisprintFilter filter = new MisprintFilter();
+        filter.setAuthorId(user1.getId());
+        filter.setModeratorId(moder1.getId());
+        filter.setStatuses(Set.of(ComplaintStatus.INITIATED));
+        filter.setTargetObjectTypes(Set.of(ARTICLE));
+
+        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(m1.getId());
     }
 }

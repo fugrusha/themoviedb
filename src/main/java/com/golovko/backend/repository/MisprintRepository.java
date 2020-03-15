@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface MisprintRepository extends CrudRepository<Misprint, UUID> {
+public interface MisprintRepository extends CrudRepository<Misprint, UUID>, MisprintRepositoryCustom {
 
     Misprint findByIdAndAuthorId(UUID id, UUID authorId);
 

@@ -19,6 +19,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.List;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -43,6 +44,19 @@ public class PersonServiceTest {
         PersonReadDTO readDTO = personService.getPerson(person.getId());
 
         Assertions.assertThat(readDTO).isEqualToComparingFieldByField(person);
+    }
+
+    @Test
+    public void testGetAllPersons() {
+        Person p1 = createPerson("Akulova");
+        Person p2 = createPerson("Moldovan");
+        Person p3 = createPerson("Hefner");
+        Person p4 = createPerson("Buzova");
+
+        List<PersonReadDTO> result = personService.getAllPersons();
+
+        Assertions.assertThat(result).extracting("id")
+                .containsExactly(p1.getId(), p4.getId(), p3.getId(), p2.getId());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -132,5 +146,14 @@ public class PersonServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeletePersonNotFound() {
         personService.deletePerson(UUID.randomUUID());
+    }
+
+    private Person createPerson(String lastName) {
+        Person person = new Person();
+        person.setFirstName("Anna");
+        person.setLastName(lastName);
+        person.setBio("some text");
+        person.setGender(Gender.FEMALE);
+        return personRepository.save(person);
     }
 }

@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.dto.person.PersonCreateDTO;
@@ -20,6 +21,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -53,6 +55,27 @@ public class PersonControllerTest {
 
         Assertions.assertThat(actualPerson).isEqualToComparingFieldByField(readDTO);
         Mockito.verify(personService).getPerson(readDTO.getId());
+    }
+
+    @Test
+    public void testGetAllPersons() throws Exception {
+        PersonReadDTO p1 = createPersonReadDTO();
+        PersonReadDTO p2 = createPersonReadDTO();
+        PersonReadDTO p3 = createPersonReadDTO();
+
+        List<PersonReadDTO> expectedResult = List.of(p1, p2, p3);
+
+        Mockito.when(personService.getAllPersons()).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/persons"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<PersonReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(personService).getAllPersons();
     }
 
     @Test

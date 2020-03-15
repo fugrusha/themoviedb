@@ -25,7 +25,7 @@ public class MisprintController {
 
     @GetMapping
     public List<MisprintReadDTO> getAllReportedMisprintComplaints(@PathVariable UUID userId) {
-        return misprintService.getAllMisprintComplaints(userId);
+        return misprintService.getAllUserMisprintComplaints(userId);
     }
 
     @PostMapping
