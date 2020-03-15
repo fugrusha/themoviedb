@@ -33,6 +33,8 @@ public class Person {
     @Enumerated(EnumType.STRING)
     private Gender gender;
 
+    private Double averageRatingByRoles;
+
     @CreatedDate
     private Instant createdAt;
 

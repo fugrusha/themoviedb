@@ -34,8 +34,6 @@ public class LikeRepositoryTest {
     @Autowired
     private LikeRepository likeRepository;
 
-    // TODO add test for createdAt, updatedAt and repo methods
-
     @Test
     public void testCreatedAtIsSet() {
         ApplicationUser user = testObjectFactory.createUser();

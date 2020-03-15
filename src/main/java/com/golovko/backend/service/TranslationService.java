@@ -99,6 +99,7 @@ public class TranslationService {
         dto.setLastName(person.getLastName());
         dto.setBio(person.getBio());
         dto.setGender(person.getGender());
+        dto.setAverageRatingByRoles(person.getAverageRatingByRoles());
         dto.setCreatedAt(person.getCreatedAt());
         dto.setUpdatedAt(person.getUpdatedAt());
         return dto;

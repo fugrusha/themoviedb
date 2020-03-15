@@ -12,9 +12,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
@@ -27,6 +32,9 @@ public class PersonRepositoryTest {
 
     @Autowired
     private TestObjectFactory testObjectFactory;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {
@@ -69,6 +77,19 @@ public class PersonRepositoryTest {
 
         Assertions.assertThat(result).extracting("id")
                 .containsExactly(p1.getId(), p4.getId(), p3.getId(), p2.getId());
+    }
+
+    @Test
+    public void testGetIdsOfPersons() {
+        Set<UUID> expectedResult = new HashSet<>();
+        expectedResult.add(testObjectFactory.createPerson().getId());
+        expectedResult.add(testObjectFactory.createPerson().getId());
+        expectedResult.add(testObjectFactory.createPerson().getId());
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Set<UUID> actualResult = personRepository.getIdsOfPersons().collect(Collectors.toSet());
+            Assert.assertEquals(expectedResult, actualResult);
+        });
     }
 
     private Person createPerson(String lastName) {

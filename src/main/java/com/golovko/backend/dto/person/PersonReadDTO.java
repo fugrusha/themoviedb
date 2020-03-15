@@ -19,6 +19,8 @@ public class PersonReadDTO {
 
     private Gender gender;
 
+    private Double averageRatingByRoles;
+
     private Instant createdAt;
 
     private Instant updatedAt;
