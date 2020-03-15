@@ -153,7 +153,7 @@ public class MisprintService {
         }
     }
 
-    public void closeSimilarMisprints(MisprintConfirmDTO dto, String misprintText) {
+    private void closeSimilarMisprints(MisprintConfirmDTO dto, String misprintText) {
         misprintRepository.findSimilarMisprints(dto.getTargetObjectId(), misprintText, ComplaintStatus.INITIATED)
                 .forEach(m -> {
                     setStatusClosedAndSave(dto, m);

@@ -20,6 +20,6 @@ public interface MovieCastRepository extends CrudRepository<MovieCast, UUID> {
     Stream<UUID> getIdsOfMovieCasts();
 
     @Query("select avg(mc.averageRating) from MovieCast mc"
-            +" where mc.person.id = :personId")
+            + " where mc.person.id = :personId")
     Double calcAverageRatingOfPerson(UUID personId);
 }

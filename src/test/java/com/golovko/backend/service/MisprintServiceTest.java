@@ -8,7 +8,6 @@ import com.golovko.backend.repository.*;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -524,10 +523,10 @@ public class MisprintServiceTest {
         Assert.assertEquals(updatedMisprint.getStatus(), rejectDTO.getStatus());
     }
 
-    @Ignore
     @Test
     public void testCloseSimilarMisprints() {
-        ApplicationUser user = testObjectFactory.createUser();
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
         ApplicationUser moderator = testObjectFactory.createUser();
 
         String textBeforeUpdate = "simply dummy text";
@@ -537,14 +536,15 @@ public class MisprintServiceTest {
         person.setBio(textBeforeUpdate);
         personRepository.save(person);
 
-        Misprint m1 = testObjectFactory.createMisprint(person.getId(), PERSON, user, "dummy");
-        Misprint m2 = testObjectFactory.createMisprint(person.getId(), PERSON, user, "dummy");
+        Misprint m1 = testObjectFactory.createMisprint(person.getId(), PERSON, user1, "dummy");
+        Misprint m2 = testObjectFactory.createMisprint(person.getId(), PERSON, user2, "dummy");
 
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
         confirmDTO.setModeratorId(moderator.getId());
         confirmDTO.setStartIndex(7);
         confirmDTO.setEndIndex(12);
         confirmDTO.setReplaceTo("REPLACED_TEXT");
+        confirmDTO.setTargetObjectId(person.getId());
 
         MisprintReadDTO readDTO = misprintService.confirmModeration(m1.getId(), confirmDTO);
 
@@ -566,7 +566,6 @@ public class MisprintServiceTest {
 
         Assert.assertEquals(readDTO.getModeratorId(), updatedMisprint2.getModerator().getId());
         Assert.assertEquals(readDTO.getReplacedWith(), updatedMisprint2.getReplacedWith());
-        Assert.assertEquals(readDTO.getFixedAt(), updatedMisprint2.getFixedAt());
     }
 
     @Test
@@ -650,7 +649,7 @@ public class MisprintServiceTest {
     }
 
     @Test
-    public void testGetComplaintsByModerator() {
+    public void testGetMisprintsByModerator() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser moderator1 = testObjectFactory.createUser();
         ApplicationUser moderator2 = testObjectFactory.createUser();
@@ -676,7 +675,7 @@ public class MisprintServiceTest {
     }
 
     @Test
-    public void testGetComplaintsByTargetObjectType() {
+    public void testGetMisprintsByTargetObjectType() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -697,7 +696,7 @@ public class MisprintServiceTest {
     }
 
     @Test
-    public void testGetComplaintsByAllFilters() {
+    public void testGetMisprintsByAllFilters() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         ApplicationUser moder1 = testObjectFactory.createUser();
