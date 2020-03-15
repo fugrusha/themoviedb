@@ -45,13 +45,19 @@ public class MisprintService {
     @Autowired
     private MovieCrewRepository movieCrewRepository;
 
+    public List<MisprintReadDTO> getAllMisprints(MisprintFilter filter) {
+        List<Misprint> misprints = misprintRepository.findByFilter(filter);
+
+        return misprints.stream().map(translationService::toRead).collect(Collectors.toList());
+    }
+
     public MisprintReadDTO getMisprintComplaint(UUID userId, UUID id) {
         Misprint misprint = getMisprintByUserId(id, userId);
 
         return translationService.toRead(misprint);
     }
 
-    public List<MisprintReadDTO> getAllMisprintComplaints(UUID userId) {
+    public List<MisprintReadDTO> getAllUserMisprintComplaints(UUID userId) {
         List<Misprint> misprints = misprintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
 
         return misprints.stream().map(translationService::toRead).collect(Collectors.toList());

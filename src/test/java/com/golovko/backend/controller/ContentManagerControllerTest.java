@@ -6,6 +6,7 @@ import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.Misprint;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
+import com.golovko.backend.dto.misprint.MisprintFilter;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.misprint.MisprintRejectDTO;
 import com.golovko.backend.exception.EntityWrongStatusException;
@@ -24,6 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -308,6 +310,35 @@ public class ContentManagerControllerTest {
 
         MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testGetMisprintsWithFilter() throws Exception {
+        MisprintFilter filter = new MisprintFilter();
+        filter.setAuthorId(UUID.randomUUID());
+        filter.setModeratorId(UUID.randomUUID());
+        filter.setStatuses(Set.of(ComplaintStatus.INITIATED));
+        filter.setTargetObjectTypes(Set.of(TargetObjectType.ARTICLE));
+
+        MisprintReadDTO readDTO = createMistakeReadDTO();
+
+        List<MisprintReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(misprintService.getAllMisprints(filter)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/misprints")
+                .param("moderatorId", filter.getModeratorId().toString())
+                .param("authorId", filter.getAuthorId().toString())
+                .param("statuses", "INITIATED")
+                .param("targetObjectTypes", "ARTICLE"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(misprintService).getAllMisprints(filter);
     }
 
     private MisprintReadDTO createMistakeReadDTO() {

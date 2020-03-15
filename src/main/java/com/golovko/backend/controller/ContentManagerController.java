@@ -1,6 +1,7 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
+import com.golovko.backend.dto.misprint.MisprintFilter;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.misprint.MisprintRejectDTO;
 import com.golovko.backend.service.MisprintService;
@@ -31,6 +32,11 @@ public class ContentManagerController {
             @RequestBody MisprintRejectDTO dto
     ) {
         return misprintService.rejectModeration(id, dto);
+    }
+
+    @GetMapping("/misprints")
+    public List<MisprintReadDTO> getAllMisprints(MisprintFilter filter) {
+        return misprintService.getAllMisprints(filter);
     }
 
     @GetMapping("/articles/{articleId}/misprints/")

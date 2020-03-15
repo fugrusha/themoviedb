@@ -73,7 +73,7 @@ public class MisprintControllerTest {
 
         List<MisprintReadDTO> expectedResult = List.of(m1, m2);
 
-        Mockito.when(misprintService.getAllMisprintComplaints(userId)).thenReturn(expectedResult);
+        Mockito.when(misprintService.getAllUserMisprintComplaints(userId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/users/{userId}/misprints/", userId))
@@ -84,7 +84,7 @@ public class MisprintControllerTest {
         Assertions.assertThat(actualResult).extracting(MisprintReadDTO::getId)
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
 
-        Mockito.verify(misprintService).getAllMisprintComplaints(userId);
+        Mockito.verify(misprintService).getAllUserMisprintComplaints(userId);
     }
 
     @Test
