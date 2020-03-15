@@ -8,7 +8,7 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import java.util.List;
 
-public class MisprintRepositoryCustomImpl implements MisprintRepositoryCustom{
+public class MisprintRepositoryCustomImpl implements MisprintRepositoryCustom {
 
     @PersistenceContext
     private EntityManager entityManager;
