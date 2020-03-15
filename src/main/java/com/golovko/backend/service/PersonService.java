@@ -10,7 +10,9 @@ import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 public class PersonService {
@@ -24,7 +26,10 @@ public class PersonService {
     @Autowired
     private RepositoryHelper repoHelper;
 
-    // TODO add getAllPersons
+    public List<PersonReadDTO> getAllPersons() {
+        List<Person> people = personRepository.findAllPeople();
+        return people.stream().map(translationService::toRead).collect(Collectors.toList());
+    }
 
     public PersonReadDTO getPerson(UUID id) {
         Person person = repoHelper.getEntityById(Person.class, id);

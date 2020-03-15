@@ -1,7 +1,9 @@
 package com.golovko.backend.repository;
 
+import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.util.TestObjectFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -12,6 +14,7 @@ import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
+import java.util.List;
 
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
@@ -55,4 +58,25 @@ public class PersonRepositoryTest {
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
     }
 
+    @Test
+    public void testGetPersonOrderByLastNameAsc() {
+        Person p1 = createPerson("Akulova");
+        Person p2 = createPerson("Moldovan");
+        Person p3 = createPerson("Hefner");
+        Person p4 = createPerson("Buzova");
+
+        List<Person> result = personRepository.findAllPeople();
+
+        Assertions.assertThat(result).extracting("id")
+                .containsExactly(p1.getId(), p4.getId(), p3.getId(), p2.getId());
+    }
+
+    private Person createPerson(String lastName) {
+        Person person = new Person();
+        person.setFirstName("Anna");
+        person.setLastName(lastName);
+        person.setBio("some text");
+        person.setGender(Gender.FEMALE);
+        return personRepository.save(person);
+    }
 }

@@ -8,6 +8,7 @@ import com.golovko.backend.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,7 +23,10 @@ public class PersonController {
         return personService.getPerson(id);
     }
 
-    // TODO list of persons
+    @GetMapping
+    public List<PersonReadDTO> getAllPersons() {
+        return personService.getAllPersons();
+    }
 
     @PostMapping
     public PersonReadDTO createPerson(@RequestBody PersonCreateDTO createDTO) {
