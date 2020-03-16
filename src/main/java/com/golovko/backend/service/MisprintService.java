@@ -163,17 +163,13 @@ public class MisprintService {
     }
 
     private void setStatusClosedAndSave(MisprintConfirmDTO dto, Misprint misprint) {
-        try {
-            misprint.setReplacedWith(dto.getReplaceTo());
-            misprint.setFixedAt(Instant.now());
-            misprint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
-            misprint.setStatus(ComplaintStatus.CLOSED);
-            misprintRepository.save(misprint);
+        misprint.setReplacedWith(dto.getReplaceTo());
+        misprint.setFixedAt(Instant.now());
+        misprint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
+        misprint.setStatus(ComplaintStatus.CLOSED);
+        misprintRepository.save(misprint);
 
-            log.info("Misprint with id={} saved successfully", misprint.getId());
-        } catch (Exception e) {
-            log.error("Failed to update Misprint: {}", misprint.getId(), e);
-        }
+        log.info("Misprint with id={} saved successfully", misprint.getId());
     }
 
     public String getTextWithMisprintFromEntity(Misprint misprint) {
@@ -203,27 +199,27 @@ public class MisprintService {
     public void saveNewTextToEntity(Misprint misprint, String newText) {
         switch (misprint.getTargetObjectType()) {
           case MOVIE:
-              Movie movie = repoHelper.getReferenceIfExist(Movie.class, misprint.getTargetObjectId());
+              Movie movie = repoHelper.getEntityById(Movie.class, misprint.getTargetObjectId());
               movie.setDescription(newText);
               movieRepository.save(movie);
               break;
           case ARTICLE:
-              Article article = repoHelper.getReferenceIfExist(Article.class, misprint.getTargetObjectId());
+              Article article = repoHelper.getEntityById(Article.class, misprint.getTargetObjectId());
               article.setText(newText);
               articleRepository.save(article);
               break;
           case PERSON:
-              Person person = repoHelper.getReferenceIfExist(Person.class, misprint.getTargetObjectId());
+              Person person = repoHelper.getEntityById(Person.class, misprint.getTargetObjectId());
               person.setBio(newText);
               personRepository.save(person);
               break;
           case MOVIE_CAST:
-              MovieCast movieCast = repoHelper.getReferenceIfExist(MovieCast.class, misprint.getTargetObjectId());
+              MovieCast movieCast = repoHelper.getEntityById(MovieCast.class, misprint.getTargetObjectId());
               movieCast.setDescription(newText);
               movieCastRepository.save(movieCast);
               break;
           case MOVIE_CREW:
-              MovieCrew movieCrew = repoHelper.getReferenceIfExist(MovieCrew.class, misprint.getTargetObjectId());
+              MovieCrew movieCrew = repoHelper.getEntityById(MovieCrew.class, misprint.getTargetObjectId());
               movieCrew.setDescription(newText);
               movieCrewRepository.save(movieCrew);
               break;
