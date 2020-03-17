@@ -82,6 +82,7 @@ public class MovieCrewService {
     public void deleteMovieCrew(UUID movieId, UUID id) {
         movieCrewRepository.delete(getMovieCrewByMovieIdRequired(id, movieId));
         commentRepository.deleteCommentsByTargetObjectId(id, TargetObjectType.MOVIE_CREW);
+        ratingRepository.deleteRatingsByRatedObjectId(id, TargetObjectType.MOVIE_CREW);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

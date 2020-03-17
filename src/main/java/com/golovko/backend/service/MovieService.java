@@ -86,6 +86,7 @@ public class MovieService {
         movieRepository.delete(repoHelper.getEntityById(Movie.class, id));
         commentRepository.deleteCommentsByTargetObjectId(id, MOVIE);
         likeRepository.deleteLikesByTargetObjectId(id, MOVIE);
+        ratingRepository.deleteRatingsByRatedObjectId(id, MOVIE);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

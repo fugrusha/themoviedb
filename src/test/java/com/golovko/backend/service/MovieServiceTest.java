@@ -7,6 +7,7 @@ import com.golovko.backend.job.UpdateAverageRatingOfMoviesJob;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.MovieRepository;
+import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -57,6 +58,9 @@ public class MovieServiceTest {
 
     @Autowired
     private LikeRepository likeRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
 
     @Autowired
     private TestObjectFactory testObjectFactory;
@@ -197,6 +201,9 @@ public class MovieServiceTest {
         Like like1 = testObjectFactory.createLike(true, user, movie.getId(), MOVIE);
         Like like2 = testObjectFactory.createLike(true, author, movie.getId(), MOVIE);
 
+        Rating r1 = testObjectFactory.createRating(5, user, movie.getId(), MOVIE);
+        Rating r2 = testObjectFactory.createRating(5, author, movie.getId(), MOVIE);
+
         movieService.deleteMovie(movie.getId());
 
         Assert.assertFalse(movieRepository.existsById(movie.getId()));
@@ -206,6 +213,9 @@ public class MovieServiceTest {
 
         Assert.assertFalse(likeRepository.existsById(like1.getId()));
         Assert.assertFalse(likeRepository.existsById(like2.getId()));
+
+        Assert.assertFalse(ratingRepository.existsById(r1.getId()));
+        Assert.assertFalse(ratingRepository.existsById(r2.getId()));
     }
 
     @Test

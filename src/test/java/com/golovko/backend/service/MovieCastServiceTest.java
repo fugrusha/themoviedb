@@ -6,6 +6,7 @@ import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieCastRepository;
 import com.golovko.backend.repository.MovieRepository;
+import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -42,6 +43,9 @@ public class MovieCastServiceTest {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
 
     @Autowired
     private MovieRepository movieRepository;
@@ -248,12 +252,17 @@ public class MovieCastServiceTest {
         Comment c1 = testObjectFactory.createComment(author, mc.getId(), CommentStatus.APPROVED, MOVIE_CAST);
         Comment c2 = testObjectFactory.createComment(author, mc.getId(), CommentStatus.APPROVED, MOVIE_CAST);
 
+        Rating r1 = testObjectFactory.createRating(5, author, mc.getId(), MOVIE_CAST);
+
         movieCastService.deleteMovieCast(mc.getId(), movie.getId());
 
         Assert.assertTrue(movieRepository.existsById(movie.getId()));
         Assert.assertFalse(movieCastRepository.existsById(mc.getId()));
+
         Assert.assertFalse(commentRepository.existsById(c1.getId()));
         Assert.assertFalse(commentRepository.existsById(c2.getId()));
+
+        Assert.assertFalse(ratingRepository.existsById(r1.getId()));
     }
 
     @Test

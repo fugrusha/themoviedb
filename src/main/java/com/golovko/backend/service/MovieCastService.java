@@ -83,6 +83,7 @@ public class MovieCastService {
     public void deleteMovieCast(UUID id, UUID movieId) {
         movieCastRepository.delete(getMovieCastByMovieIdRequired(id, movieId));
         commentRepository.deleteCommentsByTargetObjectId(id, TargetObjectType.MOVIE_CAST);
+        ratingRepository.deleteRatingsByRatedObjectId(id, TargetObjectType.MOVIE_CAST);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
