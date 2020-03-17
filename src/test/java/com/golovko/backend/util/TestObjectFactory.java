@@ -234,4 +234,18 @@ public class TestObjectFactory {
         like.setLikedObjectId(likedObjectId);
         return likeRepository.save(like);
     }
+
+    public Like createLike(
+            Boolean meLiked,
+            ApplicationUser author,
+            UUID likedObjectId,
+            TargetObjectType targetType
+    ) {
+        Like like = new Like();
+        like.setMeLiked(meLiked);
+        like.setAuthor(author);
+        like.setLikedObjectType(targetType);
+        like.setLikedObjectId(likedObjectId);
+        return likeRepository.save(like);
+    }
 }

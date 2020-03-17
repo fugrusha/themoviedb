@@ -1,15 +1,13 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Article;
-import com.golovko.backend.domain.ArticleStatus;
-import com.golovko.backend.domain.Comment;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
+import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -26,11 +24,13 @@ import java.util.UUID;
 
 import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
+import static com.golovko.backend.domain.TargetObjectType.COMMENT;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from like",
         "delete from comment",
         "delete from article",
         "delete from user_role",
@@ -46,6 +46,9 @@ public class CommentServiceTest {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
 
     @Test
     public void testGetCommentById() {
@@ -189,5 +192,20 @@ public class CommentServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteCommentNotFound() {
         commentService.deleteComment(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    @Test
+    public void testDeleteCommentsWithLikes() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+
+        Like like = testObjectFactory.createLike(true, user1, c.getId(), COMMENT);
+
+        commentService.deleteComment(article.getId(), c.getId());
+
+        Assert.assertFalse(commentRepository.existsById(c.getId()));
+        Assert.assertFalse(likeRepository.existsById(like.getId()));
     }
 }

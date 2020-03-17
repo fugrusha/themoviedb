@@ -139,7 +139,7 @@ public class CommentRepositoryTest {
         Comment c3 = testObjectFactory.createComment(user2, movie.getId(), NEED_MODERATION, MOVIE); // another type
 
         inTransaction(() -> {
-            commentRepository.deleteCommentByTargetObjectId(article1.getId(), ARTICLE);
+            commentRepository.deleteCommentsByTargetObjectId(article1.getId(), ARTICLE);
 
             Assert.assertTrue(commentRepository.existsById(c2.getId()));
             Assert.assertTrue(commentRepository.existsById(c3.getId()));
@@ -147,7 +147,7 @@ public class CommentRepositoryTest {
         });
     }
 
-    private void inTransaction (Runnable runnable) {
+    private void inTransaction(Runnable runnable) {
         transactionTemplate.executeWithoutResult(status -> {
             runnable.run();
         });

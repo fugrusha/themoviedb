@@ -2,10 +2,10 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Article;
 import com.golovko.backend.domain.ArticleStatus;
-import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.CommentRepository;
+import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +16,8 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
+
 @Service
 public class ArticleService {
 
@@ -24,6 +26,9 @@ public class ArticleService {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
 
     @Autowired
     private TranslationService translationService;
@@ -76,6 +81,7 @@ public class ArticleService {
     @Transactional(propagation = Propagation.REQUIRED)
     public void deleteArticle(UUID id) {
         articleRepository.delete(repoHelper.getEntityById(Article.class, id));
-        commentRepository.deleteCommentByTargetObjectId(id, TargetObjectType.ARTICLE);
+        commentRepository.deleteCommentsByTargetObjectId(id, ARTICLE);
+        likeRepository.deleteLikesByTargetObjectId(id, ARTICLE);
     }
 }

@@ -5,6 +5,7 @@ import com.golovko.backend.dto.article.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.CommentRepository;
+import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -25,6 +26,7 @@ import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from like",
         "delete from comment",
         "delete from article",
         "delete from user_role",
@@ -40,6 +42,9 @@ public class ArticleServiceTest {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
 
     @Autowired
     private TestObjectFactory testObjectFactory;
@@ -185,11 +190,17 @@ public class ArticleServiceTest {
         Comment c1 = testObjectFactory.createComment(user, article.getId(), CommentStatus.APPROVED, ARTICLE);
         Comment c2 = testObjectFactory.createComment(user, article.getId(), CommentStatus.APPROVED, ARTICLE);
 
+        Like like1 = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
+        Like like2 = testObjectFactory.createLike(true, author, article.getId(), ARTICLE);
+
         articleService.deleteArticle(article.getId());
 
         Assert.assertFalse(articleRepository.existsById(article.getId()));
+
         Assert.assertFalse(commentRepository.existsById(c1.getId()));
         Assert.assertFalse(commentRepository.existsById(c2.getId()));
 
+        Assert.assertFalse(likeRepository.existsById(like1.getId()));
+        Assert.assertFalse(likeRepository.existsById(like2.getId()));
     }
 }

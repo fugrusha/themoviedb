@@ -5,6 +5,7 @@ import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.job.UpdateAverageRatingOfMoviesJob;
 import com.golovko.backend.repository.CommentRepository;
+import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
@@ -29,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from like",
         "delete from comment",
         "delete from genre_movie",
         "delete from genre",
@@ -52,6 +54,9 @@ public class MovieServiceTest {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
 
     @Autowired
     private TestObjectFactory testObjectFactory;
@@ -183,16 +188,24 @@ public class MovieServiceTest {
     @Test
     public void testDeleteMovieWithCompositeItems() {
         ApplicationUser author = testObjectFactory.createUser();
+        ApplicationUser user = testObjectFactory.createUser();
 
         Movie movie = testObjectFactory.createMovie();
         Comment c1 = testObjectFactory.createComment(author, movie.getId(), CommentStatus.APPROVED, MOVIE);
         Comment c2 = testObjectFactory.createComment(author, movie.getId(), CommentStatus.APPROVED, MOVIE);
 
+        Like like1 = testObjectFactory.createLike(true, user, movie.getId(), MOVIE);
+        Like like2 = testObjectFactory.createLike(true, author, movie.getId(), MOVIE);
+
         movieService.deleteMovie(movie.getId());
 
         Assert.assertFalse(movieRepository.existsById(movie.getId()));
+
         Assert.assertFalse(commentRepository.existsById(c1.getId()));
         Assert.assertFalse(commentRepository.existsById(c2.getId()));
+
+        Assert.assertFalse(likeRepository.existsById(like1.getId()));
+        Assert.assertFalse(likeRepository.existsById(like2.getId()));
     }
 
     @Test

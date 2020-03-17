@@ -1,10 +1,7 @@
 package com.golovko.backend.repository;
 
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Article;
-import com.golovko.backend.domain.ArticleStatus;
-import com.golovko.backend.domain.Like;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -14,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 
@@ -21,6 +19,7 @@ import java.time.Instant;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from movie",
         "delete from like",
         "delete from article",
         "delete from user_role",
@@ -33,6 +32,9 @@ public class LikeRepositoryTest {
 
     @Autowired
     private LikeRepository likeRepository;
+
+    @Autowired
+    TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {
@@ -84,5 +86,32 @@ public class LikeRepositoryTest {
         Like savedLike = likeRepository.findByIdAndUserId(like.getId(), user1.getId());
 
         Assert.assertEquals(like.getId(), savedLike.getId());
+    }
+
+    @Test
+    public void testDeleteLikesByLikedObjectId() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Article a2 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        Like like1 = testObjectFactory.createLike(true, user1, a1.getId(), TargetObjectType.ARTICLE);
+        Like like2 = testObjectFactory.createLike(true, user1, a2.getId(), TargetObjectType.ARTICLE);
+        Like like3 = testObjectFactory.createLike(true, user2, movie.getId(), TargetObjectType.MOVIE);
+
+        inTransaction(() -> {
+            likeRepository.deleteLikesByTargetObjectId(a1.getId(), TargetObjectType.ARTICLE);
+
+            Assert.assertFalse(likeRepository.existsById(like1.getId()));
+            Assert.assertTrue(likeRepository.existsById(like2.getId()));
+            Assert.assertTrue(likeRepository.existsById(like3.getId()));
+        });
+    }
+
+    private void inTransaction(Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
     }
 }

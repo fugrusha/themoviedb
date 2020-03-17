@@ -30,5 +30,5 @@ public interface CommentRepository extends CrudRepository<Comment, UUID> {
     @Modifying
     @Query("delete from Comment c where c.targetObjectId = :targetId"
             + " and c.targetObjectType = :targetType")
-    void deleteCommentByTargetObjectId(UUID targetId, TargetObjectType targetType);
+    void deleteCommentsByTargetObjectId(UUID targetId, TargetObjectType targetType);
 }

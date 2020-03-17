@@ -8,18 +8,26 @@ import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
+import com.golovko.backend.repository.LikeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import static com.golovko.backend.domain.TargetObjectType.COMMENT;
 
 @Service
 public class CommentService {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private LikeRepository likeRepository;
 
     @Autowired
     private TranslationService translationService;
@@ -67,8 +75,10 @@ public class CommentService {
         return translationService.toRead(comment);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteComment(UUID targetObjectId, UUID id) {
         commentRepository.delete(getCommentRequired(targetObjectId, id));
+        likeRepository.deleteLikesByTargetObjectId(id, COMMENT);
     }
 
     private Comment getCommentRequired(UUID targetObjectId, UUID commentId) {
