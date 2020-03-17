@@ -2,8 +2,10 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCast;
+import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieCastRepository;
 import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.repository.RepositoryHelper;
@@ -26,6 +28,9 @@ public class MovieCastService {
 
     @Autowired
     private RatingRepository ratingRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private TranslationService translationService;
@@ -74,8 +79,10 @@ public class MovieCastService {
         return translationService.toRead(movieCast);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteMovieCast(UUID id, UUID movieId) {
         movieCastRepository.delete(getMovieCastByMovieIdRequired(id, movieId));
+        commentRepository.deleteCommentByTargetObjectId(id, TargetObjectType.MOVIE_CAST);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

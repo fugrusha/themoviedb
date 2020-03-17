@@ -22,6 +22,7 @@ public class ModeratorController {
     @Autowired
     private ComplaintService complaintService;
 
+    // TODO
     @GetMapping("/comments")
     public List<CommentReadDTO> getAllComments() {
         return null;

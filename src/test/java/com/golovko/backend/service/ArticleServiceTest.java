@@ -1,11 +1,10 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Article;
-import com.golovko.backend.domain.ArticleStatus;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -20,10 +19,16 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.util.List;
 import java.util.UUID;
 
+import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
+
 @SpringBootTest
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
-@Sql(statements = {"delete from article", "delete from user_role",  "delete from application_user"},
+@Sql(statements = {
+        "delete from comment",
+        "delete from article",
+        "delete from user_role",
+        "delete from application_user"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class ArticleServiceTest {
 
@@ -32,6 +37,9 @@ public class ArticleServiceTest {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private TestObjectFactory testObjectFactory;
@@ -166,5 +174,22 @@ public class ArticleServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteArticleNotFound() {
         articleService.deleteArticle(UUID.randomUUID());
+    }
+
+    @Test
+    public void testDeleteArticleWithCompositeItems() {
+        ApplicationUser author = testObjectFactory.createUser();
+        ApplicationUser user = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+
+        Comment c1 = testObjectFactory.createComment(user, article.getId(), CommentStatus.APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user, article.getId(), CommentStatus.APPROVED, ARTICLE);
+
+        articleService.deleteArticle(article.getId());
+
+        Assert.assertFalse(articleRepository.existsById(article.getId()));
+        Assert.assertFalse(commentRepository.existsById(c1.getId()));
+        Assert.assertFalse(commentRepository.existsById(c2.getId()));
+
     }
 }

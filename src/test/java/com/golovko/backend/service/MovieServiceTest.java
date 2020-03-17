@@ -4,6 +4,7 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.job.UpdateAverageRatingOfMoviesJob;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
@@ -28,6 +29,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from comment",
         "delete from genre_movie",
         "delete from genre",
         "delete from rating",
@@ -47,6 +49,9 @@ public class MovieServiceTest {
 
     @Autowired
     private MovieRepository movieRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private TestObjectFactory testObjectFactory;
@@ -173,6 +178,21 @@ public class MovieServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteMovieNotFound() {
         movieService.deleteMovie(UUID.randomUUID());
+    }
+
+    @Test
+    public void testDeleteMovieWithCompositeItems() {
+        ApplicationUser author = testObjectFactory.createUser();
+
+        Movie movie = testObjectFactory.createMovie();
+        Comment c1 = testObjectFactory.createComment(author, movie.getId(), CommentStatus.APPROVED, MOVIE);
+        Comment c2 = testObjectFactory.createComment(author, movie.getId(), CommentStatus.APPROVED, MOVIE);
+
+        movieService.deleteMovie(movie.getId());
+
+        Assert.assertFalse(movieRepository.existsById(movie.getId()));
+        Assert.assertFalse(commentRepository.existsById(c1.getId()));
+        Assert.assertFalse(commentRepository.existsById(c2.getId()));
     }
 
     @Test

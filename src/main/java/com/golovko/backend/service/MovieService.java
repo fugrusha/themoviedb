@@ -1,7 +1,9 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.movie.*;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.repository.RepositoryHelper;
@@ -24,6 +26,9 @@ public class MovieService {
 
     @Autowired
     private RatingRepository ratingRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private TranslationService translationService;
@@ -75,8 +80,10 @@ public class MovieService {
         return translationService.toRead(movie);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteMovie(UUID id) {
         movieRepository.delete(repoHelper.getEntityById(Movie.class, id));
+        commentRepository.deleteCommentByTargetObjectId(id, TargetObjectType.MOVIE);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
