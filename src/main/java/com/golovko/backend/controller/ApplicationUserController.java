@@ -1,9 +1,6 @@
 package com.golovko.backend.controller;
 
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserPutDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.service.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -43,12 +40,28 @@ public class ApplicationUserController {
     }
 
     @PostMapping("/{id}/ban")
-    public void banUser(@PathVariable UUID id) {
-        applicationUserService.ban(id);
+    public UserReadDTO banUser(@PathVariable UUID id) {
+        return applicationUserService.ban(id);
     }
 
     @PostMapping("/{id}/pardon")
-    public void pardonUser(@PathVariable UUID id) {
-        applicationUserService.pardon(id);
+    public UserReadDTO pardonUser(@PathVariable UUID id) {
+        return applicationUserService.pardon(id);
+    }
+
+    @PostMapping("/{id}/add-user-role")
+    public UserReadDTO addUserRole(
+            @PathVariable UUID id,
+            @RequestBody UserRoleDTO dto
+    ) {
+        return applicationUserService.addUserRole(id, dto);
+    }
+
+    @PostMapping("/{id}/remove-user-role")
+    public UserReadDTO removeUserRole(
+            @PathVariable UUID id,
+            @RequestBody UserRoleDTO dto
+    ) {
+        return applicationUserService.removeUserRole(id, dto);
     }
 }

@@ -2,10 +2,8 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserPutDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.domain.UserRole;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ApplicationUserService;
@@ -174,22 +172,78 @@ public class ApplicationUserControllerTest {
 
     @Test
     public void testBanUser() throws Exception {
-        UUID id = UUID.randomUUID();
+        UserReadDTO readDTO = createUserReadDTO();
 
-        mvc.perform(post("/api/v1/users/{id}/ban", id))
-                .andExpect(status().isOk());
+        Mockito.when(applicationUserService.ban(readDTO.getId())).thenReturn(readDTO);
 
-        Mockito.verify(applicationUserService).ban(id);
+        String resultJson = mvc.perform(post("/api/v1/users/{id}/ban", readDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadDTO actualResult = objectMapper.readValue(resultJson, UserReadDTO.class);
+        Assert.assertEquals(actualResult, readDTO);
+
+        Mockito.verify(applicationUserService).ban(readDTO.getId());
     }
 
     @Test
     public void testPardonUser() throws Exception {
-        UUID id = UUID.randomUUID();
+        UserReadDTO readDTO = createUserReadDTO();
 
-        mvc.perform(post("/api/v1/users/{id}/pardon", id))
-                .andExpect(status().isOk());
+        Mockito.when(applicationUserService.pardon(readDTO.getId())).thenReturn(readDTO);
 
-        Mockito.verify(applicationUserService).pardon(id);
+        String resultJson = mvc.perform(post("/api/v1/users/{id}/pardon", readDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadDTO actualResult = objectMapper.readValue(resultJson, UserReadDTO.class);
+        Assert.assertEquals(actualResult, readDTO);
+
+        Mockito.verify(applicationUserService).pardon(readDTO.getId());
+    }
+
+    @Test
+    public void testAddUserRole() throws Exception {
+        UserReadDTO readDTO = createUserReadDTO();
+
+        UserRoleDTO userRoleDTO = new UserRoleDTO();
+        userRoleDTO.setUserRole(UserRole.MODERATOR);
+
+        Mockito.when(applicationUserService.addUserRole(readDTO.getId(), userRoleDTO)).thenReturn(readDTO);
+
+        String resultJson = mvc
+                .perform(post("/api/v1/users/{id}/add-user-role", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRoleDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
+        Assert.assertEquals(readDTO, actualUser);
+
+        Mockito.verify(applicationUserService).addUserRole(readDTO.getId(), userRoleDTO);
+    }
+
+    @Test
+    public void testRemoveUserRole() throws Exception {
+        UserReadDTO readDTO = createUserReadDTO();
+
+        UserRoleDTO userRoleDTO = new UserRoleDTO();
+        userRoleDTO.setUserRole(UserRole.MODERATOR);
+
+        Mockito.when(applicationUserService.removeUserRole(readDTO.getId(), userRoleDTO)).thenReturn(readDTO);
+
+        String resultJson = mvc
+                .perform(post("/api/v1/users/{id}/remove-user-role", readDTO.getId())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRoleDTO)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
+        Assert.assertEquals(readDTO, actualUser);
+
+        Mockito.verify(applicationUserService).removeUserRole(readDTO.getId(), userRoleDTO);
     }
 
     private UserReadDTO createUserReadDTO() {

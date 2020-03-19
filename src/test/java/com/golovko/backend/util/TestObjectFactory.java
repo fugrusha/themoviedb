@@ -79,6 +79,18 @@ public class TestObjectFactory {
         return applicationUserRepository.save(user);
     }
 
+
+    public ApplicationUser createUser(Set<UserRole> userRoles) {
+        ApplicationUser user = new ApplicationUser();
+        user.setUsername("Vitalka");
+        user.setPassword("123456");
+        user.setEmail("vetal@gmail.com");
+        user.setIsBlocked(false);
+        user.setTrustLevel(7.0);
+        user.setUserRole(userRoles);
+        return applicationUserRepository.save(user);
+    }
+
     public Complaint createComplaint(
             ApplicationUser user,
             ComplaintType complaintType,

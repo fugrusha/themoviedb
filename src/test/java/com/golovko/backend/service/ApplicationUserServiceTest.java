@@ -1,6 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
@@ -15,6 +16,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.Set;
 import java.util.UUID;
 
 @RunWith(SpringRunner.class)
@@ -132,7 +134,9 @@ public class ApplicationUserServiceTest {
     public void testBanUser() {
         ApplicationUser user = testObjectFactory.createUser();
 
-        applicationUserService.ban(user.getId());
+        UserReadDTO readDTO = applicationUserService.ban(user.getId());
+
+        Assert.assertEquals(true, readDTO.getIsBlocked());
 
         ApplicationUser bannedUser = applicationUserRepository.findById(user.getId()).get();
         Assert.assertEquals(true, bannedUser.getIsBlocked());
@@ -144,7 +148,9 @@ public class ApplicationUserServiceTest {
         user.setIsBlocked(true);
         applicationUserRepository.save(user);
 
-        applicationUserService.pardon(user.getId());
+        UserReadDTO readDTO = applicationUserService.pardon(user.getId());
+
+        Assert.assertEquals(false, readDTO.getIsBlocked());
 
         ApplicationUser unBannedUser = applicationUserRepository.findById(user.getId()).get();
         Assert.assertEquals(false, unBannedUser.getIsBlocked());
@@ -165,5 +171,37 @@ public class ApplicationUserServiceTest {
 
         ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
         Assert.assertEquals(updatedUser.getTrustLevel(), trustLevelDTO.getTrustLevel());
+    }
+
+    @Test
+    public void testAddUserRole() {
+        ApplicationUser user = testObjectFactory.createUser(Set.of(UserRole.USER));
+
+        UserRoleDTO userRoleDTO = new UserRoleDTO();
+        userRoleDTO.setUserRole(UserRole.MODERATOR);
+
+        UserReadDTO actualResult = applicationUserService.addUserRole(user.getId(), userRoleDTO);
+
+        Assertions.assertThat(actualResult).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(actualResult.getUserRole()).contains(UserRole.MODERATOR);
+
+        ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
+        Assertions.assertThat(updatedUser.getUserRole()).contains(UserRole.MODERATOR, UserRole.USER);
+    }
+
+    @Test
+    public void testRemoveUserRole() {
+        ApplicationUser user = testObjectFactory.createUser(Set.of(UserRole.USER, UserRole.CONTENT_MANAGER));
+
+        UserRoleDTO userRoleDTO = new UserRoleDTO();
+        userRoleDTO.setUserRole(UserRole.CONTENT_MANAGER);
+
+        UserReadDTO actualResult = applicationUserService.removeUserRole(user.getId(), userRoleDTO);
+
+        Assertions.assertThat(actualResult).hasNoNullFieldsOrProperties();
+        Assert.assertFalse(actualResult.getUserRole().contains(UserRole.CONTENT_MANAGER));
+
+        ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
+        Assert.assertFalse(updatedUser.getUserRole().contains(UserRole.CONTENT_MANAGER));
     }
 }

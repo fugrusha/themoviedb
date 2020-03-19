@@ -59,22 +59,44 @@ public class ApplicationUserService {
         applicationUserRepository.delete(repoHelper.getEntityById(ApplicationUser.class, id));
     }
 
-    public void ban(UUID id) {
+    public UserReadDTO ban(UUID id) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
         user.setIsBlocked(true);
         applicationUserRepository.save(user);
+
+        return translationService.translate(user, UserReadDTO.class);
     }
 
-    public void pardon(UUID id) {
+    public UserReadDTO pardon(UUID id) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
         user.setIsBlocked(false);
         applicationUserRepository.save(user);
+
+        return translationService.translate(user, UserReadDTO.class);
     }
 
     public UserReadDTO changeTrustLevel(UUID id, UserTrustLevelDTO dto) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
         user.setTrustLevel(dto.getTrustLevel());
         applicationUserRepository.save(user);
+
+        return translationService.translate(user, UserReadDTO.class);
+    }
+
+    public UserReadDTO addUserRole(UUID id, UserRoleDTO dto) {
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+
+        user.getUserRole().add(dto.getUserRole());
+        user = applicationUserRepository.save(user);
+
+        return translationService.translate(user, UserReadDTO.class);
+    }
+
+    public UserReadDTO removeUserRole(UUID id, UserRoleDTO dto) {
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+
+        user.getUserRole().remove(dto.getUserRole());
+        user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);
     }
