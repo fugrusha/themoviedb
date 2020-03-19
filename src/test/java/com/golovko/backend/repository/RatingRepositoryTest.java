@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.List;
@@ -35,6 +36,9 @@ public class RatingRepositoryTest {
 
     @Autowired
     private RatingRepository ratingRepository;
+
+    @Autowired
+    TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {
@@ -116,5 +120,28 @@ public class RatingRepositoryTest {
 
         Assertions.assertThat(ratings).extracting("id")
                 .containsExactlyInAnyOrder(r1.getId(), r2.getId(), r3.getId());
+    }
+
+    @Test
+    public void testDeleteRatingsByRatedObjectId() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Movie m2 = testObjectFactory.createMovie();
+
+        Rating r1 = testObjectFactory.createRating(3, u1, m1.getId(), MOVIE);
+        Rating r2 = testObjectFactory.createRating(3, u1, m2.getId(), MOVIE);
+
+        inTransaction(() -> {
+            ratingRepository.deleteRatingsByRatedObjectId(m1.getId(), MOVIE);
+
+            Assert.assertFalse(ratingRepository.existsById(r1.getId()));
+            Assert.assertTrue(ratingRepository.existsById(r2.getId()));
+        });
+    }
+
+    private void inTransaction(Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
     }
 }

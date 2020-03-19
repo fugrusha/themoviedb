@@ -1,9 +1,6 @@
 package com.golovko.backend.repository;
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Article;
-import com.golovko.backend.domain.ArticleStatus;
-import com.golovko.backend.domain.Comment;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -14,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.List;
@@ -21,11 +19,13 @@ import java.util.UUID;
 
 import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
+import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from movie",
         "delete from comment",
         "delete from article",
         "delete from user_role",
@@ -38,6 +38,9 @@ public class CommentRepositoryTest {
 
     @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {
@@ -121,5 +124,32 @@ public class CommentRepositoryTest {
 
         Assertions.assertThat(comments).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testDeleteCommentsByTargetObjectId() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Article article2 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user2, article1.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, article2.getId(), APPROVED, ARTICLE); // another id
+        Comment c3 = testObjectFactory.createComment(user2, movie.getId(), NEED_MODERATION, MOVIE); // another type
+
+        inTransaction(() -> {
+            commentRepository.deleteCommentsByTargetObjectId(article1.getId(), ARTICLE);
+
+            Assert.assertTrue(commentRepository.existsById(c2.getId()));
+            Assert.assertTrue(commentRepository.existsById(c3.getId()));
+            Assert.assertFalse(commentRepository.existsById(c1.getId()));
+        });
+    }
+
+    private void inTransaction(Runnable runnable) {
+        transactionTemplate.executeWithoutResult(status -> {
+            runnable.run();
+        });
     }
 }

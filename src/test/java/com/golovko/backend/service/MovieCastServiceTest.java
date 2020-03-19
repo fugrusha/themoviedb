@@ -1,12 +1,12 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.MovieCast;
-import com.golovko.backend.domain.Person;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieCastRepository;
+import com.golovko.backend.repository.MovieRepository;
+import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -28,6 +28,7 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE_CAST;
 @RunWith(SpringRunner.class)
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from comment",
         "delete from rating",
         "delete from user_role",
         "delete from application_user",
@@ -39,6 +40,15 @@ public class MovieCastServiceTest {
 
     @Autowired
     private MovieCastRepository movieCastRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
+
+    @Autowired
+    private MovieRepository movieRepository;
 
     @Autowired
     private TestObjectFactory testObjectFactory;
@@ -230,6 +240,29 @@ public class MovieCastServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testGetMovieCastWrongId() {
         movieCastService.getMovieCast(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    @Test
+    public void testDeleteMovieCastWithCompositeItems() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieCast mc = testObjectFactory.createMovieCast(person, movie);
+
+        ApplicationUser author = testObjectFactory.createUser();
+        Comment c1 = testObjectFactory.createComment(author, mc.getId(), CommentStatus.APPROVED, MOVIE_CAST);
+        Comment c2 = testObjectFactory.createComment(author, mc.getId(), CommentStatus.APPROVED, MOVIE_CAST);
+
+        Rating r1 = testObjectFactory.createRating(5, author, mc.getId(), MOVIE_CAST);
+
+        movieCastService.deleteMovieCast(mc.getId(), movie.getId());
+
+        Assert.assertTrue(movieRepository.existsById(movie.getId()));
+        Assert.assertFalse(movieCastRepository.existsById(mc.getId()));
+
+        Assert.assertFalse(commentRepository.existsById(c1.getId()));
+        Assert.assertFalse(commentRepository.existsById(c2.getId()));
+
+        Assert.assertFalse(ratingRepository.existsById(r1.getId()));
     }
 
     @Test

@@ -28,33 +28,35 @@ public class LikeService {
 
     public LikeReadDTO getLike(UUID userId, UUID id) {
         Like like = getLikeRequired(userId, id);
-        return translationService.toRead(like);
+
+        return translationService.translate(like, LikeReadDTO.class);
     }
 
     public LikeReadDTO createLike(UUID userId, LikeCreateDTO createDTO) {
-        Like like = translationService.toEntity(createDTO);
+        Like like = translationService.translate(createDTO, Like.class);
 
         like.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, userId));
         like = likeRepository.save(like);
-        return translationService.toRead(like);
+
+        return translationService.translate(like, LikeReadDTO.class);
     }
 
     public LikeReadDTO patchLike(UUID userId, UUID id, LikePatchDTO patchDTO) {
         Like like = getLikeRequired(userId, id);
 
-        translationService.patchEntity(patchDTO, like);
-
+        translationService.map(patchDTO, like);
         like = likeRepository.save(like);
-        return translationService.toRead(like);
+
+        return translationService.translate(like, LikeReadDTO.class);
     }
 
     public LikeReadDTO updateLike(UUID userId, UUID id, LikePutDTO updateDTO) {
         Like like = getLikeRequired(userId, id);
 
-        translationService.updateEntity(updateDTO, like);
-
+        translationService.map(updateDTO, like);
         like = likeRepository.save(like);
-        return translationService.toRead(like);
+
+        return translationService.translate(like, LikeReadDTO.class);
     }
 
     public void deleteLike(UUID userId, UUID id) {

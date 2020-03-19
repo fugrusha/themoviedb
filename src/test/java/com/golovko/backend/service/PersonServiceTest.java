@@ -1,6 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Gender;
+import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
@@ -25,7 +26,11 @@ import java.util.UUID;
 @RunWith(SpringRunner.class)
 @SpringBootTest
 @ActiveProfiles("test")
-@Sql(statements = "delete from person", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {
+        "delete from movie_cast",
+        "delete from movie",
+        "delete from person"},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class PersonServiceTest {
 
     @Autowired
@@ -107,11 +112,11 @@ public class PersonServiceTest {
 
         PersonReadDTO readDTO = personService.patchPerson(person.getId(), patchDTO);
 
-        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles");
 
         Person personAfterUpdate = personRepository.findById(readDTO.getId()).get();
 
-        Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles");
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate,
                         "movieCrews", "movieCast");
     }
@@ -148,11 +153,28 @@ public class PersonServiceTest {
         personService.deletePerson(UUID.randomUUID());
     }
 
+    @Test
+    public void testUpdateAverageRatingOfPerson() {
+        Person p1 = testObjectFactory.createPerson();
+        Movie m1 = testObjectFactory.createMovie();
+        Movie m2 = testObjectFactory.createMovie();
+
+        testObjectFactory.createMovieCast(p1, m1, 5.0);
+        testObjectFactory.createMovieCast(p1, m2, 3.0);
+
+        personService.updateAverageRatingOfPerson(p1.getId());
+
+        p1 = personRepository.findById(p1.getId()).get();
+
+        Assert.assertEquals(4.0, p1.getAverageRatingByRoles(), Double.MIN_NORMAL);
+    }
+
     private Person createPerson(String lastName) {
         Person person = new Person();
         person.setFirstName("Anna");
         person.setLastName(lastName);
         person.setBio("some text");
+        person.setAverageRatingByRoles(5.0);
         person.setGender(Gender.FEMALE);
         return personRepository.save(person);
     }

@@ -120,4 +120,22 @@ public class MovieCastRepositoryTest {
 
         Assert.assertEquals(mc1.getId(), actualResult.getId());
     }
+
+    @Test
+    public void testCalcAverageRatingOfPerson() {
+        Person p1 = testObjectFactory.createPerson();
+        Person p2 = testObjectFactory.createPerson();
+        Movie m1 = testObjectFactory.createMovie();
+        Movie m2 = testObjectFactory.createMovie();
+        Movie m3 = testObjectFactory.createMovie();
+
+        testObjectFactory.createMovieCast(p1, m1, 5.0);
+        testObjectFactory.createMovieCast(p2, m1, 2.0); // another person
+        testObjectFactory.createMovieCast(p1, m2, null); // without rating
+        testObjectFactory.createMovieCast(p1, m3, 3.0);
+
+        Double averageRating = movieCastRepository.calcAverageRatingOfPerson(p1.getId());
+
+        Assert.assertEquals(4.0, averageRating, Double.MIN_NORMAL);
+    }
 }

@@ -2,8 +2,10 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCrew;
+import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieCrewRepository;
 import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.repository.RepositoryHelper;
@@ -28,6 +30,9 @@ public class MovieCrewService {
     private RatingRepository ratingRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
     private TranslationService translationService;
 
     @Autowired
@@ -35,46 +40,57 @@ public class MovieCrewService {
 
     public List<MovieCrewReadDTO> getAllMovieCrews(UUID movieId) {
         List<MovieCrew> movieCrews = movieCrewRepository.findByMovieId(movieId);
-        return movieCrews.stream().map(translationService::toRead).collect(Collectors.toList());
+
+        return movieCrews.stream()
+                .map(m -> translationService.translate(m, MovieCrewReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public MovieCrewReadDTO getMovieCrew(UUID movieId, UUID id) {
-        return translationService.toRead(getMovieCrewByMovieIdRequired(id, movieId));
+        MovieCrew movieCrew = getMovieCrewByMovieIdRequired(id, movieId);
+
+        return translationService.translate(movieCrew, MovieCrewReadDTO.class);
     }
 
     @Transactional(readOnly = true)
     public MovieCrewReadExtendedDTO getExtendedMovieCrew(UUID movieId, UUID id) {
-        return translationService.toReadExtended(getMovieCrewByMovieIdRequired(id, movieId));
+        MovieCrew movieCrew = getMovieCrewByMovieIdRequired(id, movieId);
+
+        return translationService.translate(movieCrew, MovieCrewReadExtendedDTO.class);
     }
 
     public MovieCrewReadDTO createMovieCrew(MovieCrewCreateDTO createDTO, UUID movieId) {
-        MovieCrew movieCrew = translationService.toEntity(createDTO);
-        movieCrew.setMovie(repoHelper.getReferenceIfExist(Movie.class, movieId));
+        MovieCrew movieCrew = translationService.translate(createDTO, MovieCrew.class);
 
+        movieCrew.setMovie(repoHelper.getReferenceIfExist(Movie.class, movieId));
         movieCrew = movieCrewRepository.save(movieCrew);
-        return translationService.toRead(movieCrew);
+
+        return translationService.translate(movieCrew, MovieCrewReadDTO.class);
     }
 
     public MovieCrewReadDTO patchMovieCrew(UUID movieId, UUID id, MovieCrewPatchDTO patchDTO) {
         MovieCrew movieCrew = getMovieCrewByMovieIdRequired(id, movieId);
 
-        translationService.patchEntity(patchDTO, movieCrew);
-
+        translationService.map(patchDTO, movieCrew);
         movieCrew = movieCrewRepository.save(movieCrew);
-        return translationService.toRead(movieCrew);
+
+        return translationService.translate(movieCrew, MovieCrewReadDTO.class);
     }
 
     public MovieCrewReadDTO updateMovieCrew(UUID movieId, UUID id, MovieCrewPutDTO updateDTO) {
         MovieCrew movieCrew = getMovieCrewByMovieIdRequired(id, movieId);
 
-        translationService.updateEntity(updateDTO, movieCrew);
-
+        translationService.map(updateDTO, movieCrew);
         movieCrew = movieCrewRepository.save(movieCrew);
-        return translationService.toRead(movieCrew);
+
+        return translationService.translate(movieCrew, MovieCrewReadDTO.class);
     }
 
+    @Transactional(propagation = Propagation.REQUIRED)
     public void deleteMovieCrew(UUID movieId, UUID id) {
         movieCrewRepository.delete(getMovieCrewByMovieIdRequired(id, movieId));
+        commentRepository.deleteCommentsByTargetObjectId(id, TargetObjectType.MOVIE_CREW);
+        ratingRepository.deleteRatingsByRatedObjectId(id, TargetObjectType.MOVIE_CREW);
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)

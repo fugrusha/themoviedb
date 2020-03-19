@@ -143,6 +143,7 @@ public class MisprintRepositoryTest {
         Misprint m1 = createMisprint(movie1.getId(), MOVIE, user, "misprint", ComplaintStatus.INITIATED);
         Misprint m2 = createMisprint(movie1.getId(), MOVIE, user, "misprint", ComplaintStatus.INITIATED);
         createMisprint(movie1.getId(), MOVIE, user, "Misprint", ComplaintStatus.DUPLICATE);
+        createMisprint(movie1.getId(), MOVIE, user, "misprint", ComplaintStatus.DUPLICATE);
         createMisprint(movie2.getId(), MOVIE, user, "misprint", ComplaintStatus.INITIATED);
 
         List<Misprint> misprints = misprintRepository

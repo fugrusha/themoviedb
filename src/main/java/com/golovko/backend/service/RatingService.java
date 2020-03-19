@@ -25,38 +25,43 @@ public class RatingService {
 
     public List<RatingReadDTO> getAllRatingsByTargetObjectId(UUID targetId) {
         List<Rating> ratings = ratingRepository.findAllByTargetId(targetId);
-        return ratings.stream().map(translationService::toRead).collect(Collectors.toList());
+
+        return ratings.stream()
+                .map(r -> translationService.translate(r, RatingReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public RatingReadDTO getRating(UUID movieId, UUID id) {
         Rating rating = getRatingRequired(movieId, id);
-        return translationService.toRead(rating);
+
+        return translationService.translate(rating, RatingReadDTO.class);
     }
 
     public RatingReadDTO createRating(UUID movieId, RatingCreateDTO createDTO) {
-        Rating rating = translationService.toEntity(createDTO);
-        rating.setRatedObjectId(movieId);
+        Rating rating = translationService.translate(createDTO, Rating.class);
 
+        rating.setRatedObjectId(movieId);
         rating = ratingRepository.save(rating);
-        return translationService.toRead(rating);
+
+        return translationService.translate(rating, RatingReadDTO.class);
     }
 
     public RatingReadDTO patchRating(UUID movieId, UUID id, RatingPatchDTO patchDTO) {
         Rating rating = getRatingRequired(movieId, id);
 
-        translationService.patchEntity(patchDTO, rating);
-
+        translationService.map(patchDTO, rating);
         rating = ratingRepository.save(rating);
-        return translationService.toRead(rating);
+
+        return translationService.translate(rating, RatingReadDTO.class);
     }
 
     public RatingReadDTO updateRating(UUID movieId, UUID id, RatingPutDTO putDTO) {
         Rating rating = getRatingRequired(movieId, id);
 
-        translationService.updateEntity(putDTO, rating);
-
+        translationService.map(putDTO, rating);
         rating = ratingRepository.save(rating);
-        return translationService.toRead(rating);
+
+        return translationService.translate(rating, RatingReadDTO.class);
     }
 
     public void deleteRating(UUID movieId, UUID id) {

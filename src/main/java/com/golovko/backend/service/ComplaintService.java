@@ -30,45 +30,51 @@ public class ComplaintService {
 
     public List<ComplaintReadDTO> getAllComplaints(ComplaintFilter filter) {
         List<Complaint> complaints = complaintRepository.findByFilter(filter);
-        return complaints.stream().map(translationService::toRead).collect(Collectors.toList());
+
+        return complaints.stream()
+                .map(c -> translationService.translate(c, ComplaintReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public ComplaintReadDTO getComplaint(UUID userId, UUID id) {
         Complaint complaint = getComplaintByUserId(id, userId);
-        return translationService.toRead(complaint);
+        return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
     public List<ComplaintReadDTO> getUserComplaints(UUID userId) {
         List<Complaint> complaints = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
-        return complaints.stream().map(translationService::toRead).collect(Collectors.toList());
+
+        return complaints.stream()
+                .map(c -> translationService.translate(c, ComplaintReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public ComplaintReadDTO createComplaint(UUID userId, ComplaintCreateDTO createDTO) {
-        Complaint complaint = translationService.toEntity(createDTO);
+        Complaint complaint = translationService.translate(createDTO, Complaint.class);
 
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, userId));
-
         complaint = complaintRepository.save(complaint);
-        return translationService.toRead(complaint);
+
+        return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
     public ComplaintReadDTO patchComplaint(UUID userId, UUID id, ComplaintPatchDTO patchDTO) {
         Complaint complaint = getComplaintByUserId(id, userId);
 
-        translationService.patchEntity(patchDTO, complaint);
+        translationService.map(patchDTO, complaint);
         complaint = complaintRepository.save(complaint);
 
-        return translationService.toRead(complaint);
+        return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
     public ComplaintReadDTO updateComplaint(UUID userId, UUID id, ComplaintPutDTO updateDTO) {
         Complaint complaint = getComplaintByUserId(id, userId);
 
-        translationService.updateEntity(updateDTO, complaint);
+        translationService.map(updateDTO, complaint);
         complaint = complaintRepository.save(complaint);
 
-        return translationService.toRead(complaint);
+        return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
     public void deleteComplaint(UUID userId, UUID id) {
@@ -77,14 +83,13 @@ public class ComplaintService {
 
     @Transactional
     public ComplaintReadDTO takeForModeration(UUID complaintId, ModeratorDTO dto) {
-        ApplicationUser moderator = repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId());
         Complaint complaint = repoHelper.getReferenceIfExist(Complaint.class, complaintId);
 
-        complaint.setModerator(moderator);
+        complaint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
         complaint.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
         complaint = complaintRepository.save(complaint);
 
-        return translationService.toRead(complaint);
+        return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
     @Transactional
@@ -94,7 +99,7 @@ public class ComplaintService {
         complaint.setComplaintStatus(dto.getComplaintStatus());
         complaint = complaintRepository.save(complaint);
 
-        return translationService.toRead(complaint);
+        return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
     private Complaint getComplaintByUserId(UUID id, UUID userId) {

@@ -2,6 +2,8 @@ package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
+import com.golovko.backend.domain.TargetObjectType;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -24,4 +26,9 @@ public interface CommentRepository extends CrudRepository<Comment, UUID> {
             + " and c.status = :status"
             + " order by c.createdAt asc")
     List<Comment> findAllByStatusAndTarget(UUID targetId, CommentStatus status);
+
+    @Modifying
+    @Query("delete from Comment c where c.targetObjectId = :targetId"
+            + " and c.targetObjectType = :targetType")
+    void deleteCommentsByTargetObjectId(UUID targetId, TargetObjectType targetType);
 }

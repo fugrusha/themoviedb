@@ -1,6 +1,8 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Rating;
+import com.golovko.backend.domain.TargetObjectType;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
@@ -20,4 +22,9 @@ public interface RatingRepository extends CrudRepository<Rating, UUID> {
 
     @Query("select avg(r.rating) from Rating r where r.ratedObjectId = :ratedObjectId")
     Double calcAverageRating(UUID ratedObjectId);
+
+    @Modifying
+    @Query("delete from Rating r where r.ratedObjectId = :targetId"
+            + " and r.ratedObjectType = :targetType")
+    void deleteRatingsByRatedObjectId(UUID targetId, TargetObjectType targetType);
 }

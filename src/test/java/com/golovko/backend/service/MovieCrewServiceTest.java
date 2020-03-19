@@ -3,7 +3,10 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieCrewRepository;
+import com.golovko.backend.repository.MovieRepository;
+import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -25,6 +28,7 @@ import static com.golovko.backend.domain.TargetObjectType.MOVIE_CREW;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from comment",
         "delete from rating",
         "delete from user_role",
         "delete from application_user",
@@ -39,6 +43,15 @@ public class MovieCrewServiceTest {
 
     @Autowired
     private MovieCrewRepository movieCrewRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private RatingRepository ratingRepository;
+
+    @Autowired
+    private MovieRepository movieRepository;
 
     @Autowired
     private TestObjectFactory testObjectFactory;
@@ -226,6 +239,29 @@ public class MovieCrewServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testGetMovieCrewWrongId() {
         movieCrewService.getMovieCrew(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    @Test
+    public void testDeleteMovieCrewWithCompositeItems() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+
+        ApplicationUser author = testObjectFactory.createUser();
+        Comment c1 = testObjectFactory.createComment(author, movieCrew.getId(), CommentStatus.APPROVED, MOVIE_CREW);
+        Comment c2 = testObjectFactory.createComment(author, movieCrew.getId(), CommentStatus.APPROVED, MOVIE_CREW);
+
+        Rating r1 = testObjectFactory.createRating(5, author, movieCrew.getId(), MOVIE_CREW);
+
+        movieCrewService.deleteMovieCrew(movie.getId(), movieCrew.getId());
+
+        Assert.assertTrue(movieRepository.existsById(movie.getId()));
+        Assert.assertFalse(movieCrewRepository.existsById(movieCrew.getId()));
+
+        Assert.assertFalse(commentRepository.existsById(c1.getId()));
+        Assert.assertFalse(commentRepository.existsById(c2.getId()));
+
+        Assert.assertFalse(ratingRepository.existsById(r1.getId()));
     }
 
     @Test

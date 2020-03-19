@@ -63,6 +63,7 @@ public class TestObjectFactory {
         person.setFirstName("Anna");
         person.setLastName("Popova");
         person.setBio("some text");
+        person.setAverageRatingByRoles(null);
         person.setGender(Gender.FEMALE);
         return personRepository.save(person);
     }
@@ -131,6 +132,17 @@ public class TestObjectFactory {
         MovieCast movieCast = new MovieCast();
         movieCast.setDescription("Some text");
         movieCast.setAverageRating(null);
+        movieCast.setPerson(person);
+        movieCast.setMovie(movie);
+        movieCast.setMovieCrewType(MovieCrewType.CAST);
+        movieCast.setCharacter("Leon");
+        return movieCastRepository.save(movieCast);
+    }
+
+    public MovieCast createMovieCast(Person person, Movie movie, Double rating) {
+        MovieCast movieCast = new MovieCast();
+        movieCast.setDescription("Some text");
+        movieCast.setAverageRating(rating);
         movieCast.setPerson(person);
         movieCast.setMovie(movie);
         movieCast.setMovieCrewType(MovieCrewType.CAST);
@@ -219,6 +231,20 @@ public class TestObjectFactory {
         like.setMeLiked(meLiked);
         like.setAuthor(author);
         like.setLikedObjectType(TargetObjectType.ARTICLE);
+        like.setLikedObjectId(likedObjectId);
+        return likeRepository.save(like);
+    }
+
+    public Like createLike(
+            Boolean meLiked,
+            ApplicationUser author,
+            UUID likedObjectId,
+            TargetObjectType targetType
+    ) {
+        Like like = new Like();
+        like.setMeLiked(meLiked);
+        like.setAuthor(author);
+        like.setLikedObjectType(targetType);
         like.setLikedObjectId(likedObjectId);
         return likeRepository.save(like);
     }
