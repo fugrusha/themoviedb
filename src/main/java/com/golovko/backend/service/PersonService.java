@@ -36,40 +36,42 @@ public class PersonService {
 
     public List<PersonReadDTO> getAllPersons() {
         List<Person> people = personRepository.findAllPeople();
-        return people.stream().map(translationService::toRead).collect(Collectors.toList());
+
+        return people.stream()
+                .map(p -> translationService.translate(p, PersonReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public PersonReadDTO getPerson(UUID id) {
         Person person = repoHelper.getEntityById(Person.class, id);
-        return translationService.toRead(person);
+
+        return translationService.translate(person, PersonReadDTO.class);
     }
 
     public PersonReadDTO createPerson(PersonCreateDTO createDTO) {
-        Person person = translationService.toEntity(createDTO);
+        Person person = translationService.translate(createDTO, Person.class);
 
         person = personRepository.save(person);
 
-        return translationService.toRead(person);
+        return translationService.translate(person, PersonReadDTO.class);
     }
 
     public PersonReadDTO patchPerson(UUID id, PersonPatchDTO patchDTO) {
         Person person = repoHelper.getEntityById(Person.class, id);
 
-        translationService.patchEntity(patchDTO, person);
-
+        translationService.map(patchDTO, person);
         person = personRepository.save(person);
 
-        return translationService.toRead(person);
+        return translationService.translate(person, PersonReadDTO.class);
     }
 
     public PersonReadDTO updatePerson(UUID id, PersonPutDTO updateDTO) {
         Person person = repoHelper.getEntityById(Person.class, id);
 
-        translationService.updateEntity(updateDTO, person);
-
+        translationService.map(updateDTO, person);
         person = personRepository.save(person);
 
-        return translationService.toRead(person);
+        return translationService.translate(person, PersonReadDTO.class);
     }
 
     public void deletePerson(UUID id) {

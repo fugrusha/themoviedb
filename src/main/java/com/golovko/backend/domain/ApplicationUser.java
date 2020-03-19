@@ -2,23 +2,19 @@ package com.golovko.backend.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
-import java.time.Instant;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Entity
 @Setter
 @Getter
 @EntityListeners(AuditingEntityListener.class)
-public class ApplicationUser {
-
-    @Id
-    @GeneratedValue(generator = "UUID")
-    private UUID id;
+public class ApplicationUser extends AbstractEntity {
 
     @Column(nullable = false, unique = true)
     private String username;
@@ -35,12 +31,6 @@ public class ApplicationUser {
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)
     private Set<UserRole> userRole = new HashSet<UserRole>();
-
-    @CreatedDate
-    private Instant createdAt;
-
-    @LastModifiedDate
-    private Instant updatedAt;
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Article> articles = new ArrayList<>();

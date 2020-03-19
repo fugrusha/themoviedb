@@ -39,44 +39,51 @@ public class MovieCastService {
     private RepositoryHelper repoHelper;
 
     public List<MovieCastReadDTO> getAllMovieCasts(UUID movieId) {
-        List<MovieCast> allMovieCasts = movieCastRepository.findByMovieId(movieId);
-        return allMovieCasts.stream().map(translationService::toRead).collect(Collectors.toList());
+        List<MovieCast> movieCasts = movieCastRepository.findByMovieId(movieId);
+
+        return movieCasts.stream()
+                .map(m -> translationService.translate(m, MovieCastReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public MovieCastReadDTO getMovieCast(UUID id, UUID movieId) {
-        return translationService.toRead(getMovieCastByMovieIdRequired(id, movieId));
+        MovieCast movieCast = getMovieCastByMovieIdRequired(id, movieId);
+
+        return translationService.translate(movieCast, MovieCastReadDTO.class);
     }
 
     @Transactional(readOnly = true)
     public MovieCastReadExtendedDTO getMovieCastExtended(UUID id, UUID movieId) {
-        return translationService.toReadExtended(getMovieCastByMovieIdRequired(id, movieId));
+        MovieCast movieCast = getMovieCastByMovieIdRequired(id, movieId);
+
+        return translationService.translate(movieCast, MovieCastReadExtendedDTO.class);
     }
 
     public MovieCastReadDTO createMovieCast(MovieCastCreateDTO createDTO, UUID movieId) {
-        MovieCast movieCast = translationService.toEntity(createDTO);
+        MovieCast movieCast = translationService.translate(createDTO, MovieCast.class);
 
         movieCast.setMovie(repoHelper.getReferenceIfExist(Movie.class, movieId));
         movieCast = movieCastRepository.save(movieCast);
 
-        return translationService.toRead(movieCast);
+        return translationService.translate(movieCast, MovieCastReadDTO.class);
     }
 
     public MovieCastReadDTO updateMovieCast(MovieCastPutDTO updateDTO, UUID id, UUID movieId) {
         MovieCast movieCast = getMovieCastByMovieIdRequired(id, movieId);
 
-        translationService.updateEntity(updateDTO, movieCast);
-
+        translationService.map(updateDTO, movieCast);
         movieCast = movieCastRepository.save(movieCast);
-        return translationService.toRead(movieCast);
+
+        return translationService.translate(movieCast, MovieCastReadDTO.class);
     }
 
     public MovieCastReadDTO patchMovieCast(MovieCastPatchDTO patchDTO, UUID id, UUID movieId) {
         MovieCast movieCast = getMovieCastByMovieIdRequired(id, movieId);
 
-        translationService.patchEntity(patchDTO, movieCast);
-
+        translationService.map(patchDTO, movieCast);
         movieCast = movieCastRepository.save(movieCast);
-        return translationService.toRead(movieCast);
+
+        return translationService.translate(movieCast, MovieCastReadDTO.class);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

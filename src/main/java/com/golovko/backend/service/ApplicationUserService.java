@@ -27,34 +27,35 @@ public class ApplicationUserService {
 
     public UserReadDTO getUser(UUID id) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
-        return translationService.toRead(user);
+
+        return translationService.translate(user, UserReadDTO.class);
     }
 
     public UserReadDTO createUser(UserCreateDTO createDTO) {
-        ApplicationUser user = translationService.toEntity(createDTO);
+        ApplicationUser user = translationService.translate(createDTO, ApplicationUser.class);
 
         user.getUserRole().add(UserRole.USER);
-
         user = applicationUserRepository.save(user);
-        return translationService.toRead(user);
+
+        return translationService.translate(user, UserReadDTO.class);
     }
 
     public UserReadDTO patchUser(UUID id, UserPatchDTO patch) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
-        translationService.patchEntity(patch, user);
-
+        translationService.map(patch, user);
         user = applicationUserRepository.save(user);
-        return translationService.toRead(user);
+
+        return translationService.translate(user, UserReadDTO.class);
     }
 
     public UserReadDTO updateUser(UUID id, UserPutDTO update) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
-        translationService.updateEntity(update, user);
-
+        translationService.map(update, user);
         user = applicationUserRepository.save(user);
-        return translationService.toRead(user);
+
+        return translationService.translate(user, UserReadDTO.class);
     }
 
     public void deleteUser(UUID id) {

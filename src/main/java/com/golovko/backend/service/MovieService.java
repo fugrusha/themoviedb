@@ -39,46 +39,49 @@ public class MovieService {
 
     public MovieReadDTO getMovie(UUID id) {
         Movie movie = repoHelper.getEntityById(Movie.class, id);
-        return translationService.toRead(movie);
+
+        return translationService.translate(movie, MovieReadDTO.class);
     }
 
     public List<MovieReadDTO> getMovies(MovieFilter filter) {
         List<Movie> movies = movieRepository.findByFilter(filter);
-        return movies.stream().map(translationService::toRead).collect(Collectors.toList());
+
+        return movies.stream()
+                .map(m -> translationService.translate(m, MovieReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
     public MovieReadExtendedDTO getMovieExtended(UUID id) {
         Movie movie = repoHelper.getEntityById(Movie.class, id);
-        return translationService.toReadExtended(movie);
+
+        return translationService.translate(movie, MovieReadExtendedDTO.class);
     }
 
     public MovieReadDTO createMovie(MovieCreateDTO createDTO) {
-        Movie movie = translationService.toEntity(createDTO);
+        Movie movie = translationService.translate(createDTO, Movie.class);
 
         movie = movieRepository.save(movie);
 
-        return translationService.toRead(movie);
+        return translationService.translate(movie, MovieReadDTO.class);
     }
 
     public MovieReadDTO patchMovie(UUID id, MoviePatchDTO patchDTO) {
         Movie movie = repoHelper.getEntityById(Movie.class, id);
 
-        translationService.patchEntity(patchDTO, movie);
-
+        translationService.map(patchDTO, movie);
         movie = movieRepository.save(movie);
 
-        return translationService.toRead(movie);
+        return translationService.translate(movie, MovieReadDTO.class);
     }
 
     public MovieReadDTO updateMovie(UUID id, MoviePutDTO updateDTO) {
         Movie movie = repoHelper.getEntityById(Movie.class, id);
 
-        translationService.updateEntity(updateDTO, movie);
-
+        translationService.map(updateDTO, movie);
         movie = movieRepository.save(movie);
 
-        return translationService.toRead(movie);
+        return translationService.translate(movie, MovieReadDTO.class);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

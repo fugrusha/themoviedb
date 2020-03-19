@@ -38,44 +38,51 @@ public class ArticleService {
 
     public ArticleReadDTO getArticle(UUID id) {
         Article article = repoHelper.getEntityById(Article.class, id);
-        return translationService.toRead(article);
+
+        return translationService.translate(article, ArticleReadDTO.class);
     }
 
     @Transactional(readOnly = true)
     public ArticleReadExtendedDTO getArticleExtended(UUID id) {
         Article article = repoHelper.getEntityById(Article.class, id);
-        return translationService.toReadExtended(article);
+
+        return translationService.translate(article, ArticleReadExtendedDTO.class);
     }
+
+    // TODO add article filter for manager
 
     public List<ArticleReadDTO> getAllArticles() {
         List<Article> articles = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.PUBLISHED);
-        return articles.stream().map(translationService::toRead).collect(Collectors.toList());
+
+        return articles.stream()
+                .map(a -> translationService.translate(a, ArticleReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public ArticleReadDTO createArticle(ArticleCreateDTO createDTO) {
-        Article article = translationService.toEntity(createDTO);
+        Article article = translationService.translate(createDTO, Article.class);
 
         article = articleRepository.save(article);
 
-        return translationService.toRead(article);
+        return translationService.translate(article, ArticleReadDTO.class);
     }
 
     public ArticleReadDTO updateArticle(UUID id, ArticlePutDTO putDTO) {
         Article article = repoHelper.getEntityById(Article.class, id);
 
-        translationService.updateEntity(article, putDTO);
-
+        translationService.map(putDTO, article);
         article = articleRepository.save(article);
-        return translationService.toRead(article);
+
+        return translationService.translate(article, ArticleReadDTO.class);
     }
 
     public ArticleReadDTO patchArticle(UUID id, ArticlePatchDTO patchDTO) {
         Article article = repoHelper.getEntityById(Article.class, id);
 
-        translationService.patchEntity(article, patchDTO);
-
+        translationService.map(patchDTO, article);
         article = articleRepository.save(article);
-        return translationService.toRead(article);
+
+        return translationService.translate(article, ArticleReadDTO.class);
     }
 
     @Transactional(propagation = Propagation.REQUIRED)

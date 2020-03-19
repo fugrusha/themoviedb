@@ -48,29 +48,33 @@ public class MisprintService {
     public List<MisprintReadDTO> getAllMisprints(MisprintFilter filter) {
         List<Misprint> misprints = misprintRepository.findByFilter(filter);
 
-        return misprints.stream().map(translationService::toRead).collect(Collectors.toList());
+        return misprints.stream()
+                .map(m -> translationService.translate(m, MisprintReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public MisprintReadDTO getMisprintComplaint(UUID userId, UUID id) {
         Misprint misprint = getMisprintByUserId(id, userId);
 
-        return translationService.toRead(misprint);
+        return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
     public List<MisprintReadDTO> getAllUserMisprintComplaints(UUID userId) {
         List<Misprint> misprints = misprintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
 
-        return misprints.stream().map(translationService::toRead).collect(Collectors.toList());
+        return misprints.stream()
+                .map(m -> translationService.translate(m, MisprintReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public MisprintReadDTO createMisprintComplaint(UUID userId, MisprintCreateDTO createDTO) {
-        Misprint misprint = translationService.toEntity(createDTO);
+        Misprint misprint = translationService.translate(createDTO, Misprint.class);
 
         misprint.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, userId));
         misprint.setStatus(ComplaintStatus.INITIATED);
         misprint = misprintRepository.save(misprint);
 
-        return translationService.toRead(misprint);
+        return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
     public MisprintReadDTO patchMisprintComplaint(
@@ -80,10 +84,10 @@ public class MisprintService {
     ) {
         Misprint misprint = getMisprintByUserId(id, userId);
 
-        translationService.patchEntity(patchDTO, misprint);
+        translationService.map(patchDTO, misprint);
         misprint = misprintRepository.save(misprint);
 
-        return translationService.toRead(misprint);
+        return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
     public MisprintReadDTO updateMisprintComplaint(
@@ -93,10 +97,10 @@ public class MisprintService {
     ) {
         Misprint misprint = getMisprintByUserId(id, userId);
 
-        translationService.updateEntity(updateDTO, misprint);
+        translationService.map(updateDTO, misprint);
         misprint = misprintRepository.save(misprint);
 
-        return translationService.toRead(misprint);
+        return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
     public void deleteMisprintComplaint(UUID userId, UUID id) {
@@ -106,13 +110,15 @@ public class MisprintService {
     public List<MisprintReadDTO> getAllMisprintsByTargetId(UUID targetObjectId) {
         List<Misprint> misprints = misprintRepository.findAllByTargetObjectId(targetObjectId);
 
-        return misprints.stream().map(translationService::toRead).collect(Collectors.toList());
+        return misprints.stream()
+                .map(m -> translationService.translate(m, MisprintReadDTO.class))
+                .collect(Collectors.toList());
     }
 
     public MisprintReadDTO getMisprintByTargetId(UUID targetObjectId, UUID id) {
         Misprint misprint = getMisprintByTargetIdRequired(id, targetObjectId);
 
-        return translationService.toRead(misprint);
+        return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
     public MisprintReadDTO rejectModeration(UUID id, MisprintRejectDTO dto) {
@@ -127,7 +133,7 @@ public class MisprintService {
             misprint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
             misprintRepository.save(misprint);
 
-            return translationService.toRead(misprint);
+            return translationService.translate(misprint, MisprintReadDTO.class);
         }
     }
 
@@ -149,7 +155,7 @@ public class MisprintService {
 
             closeSimilarMisprints(dto, misprintText);
 
-            return translationService.toRead(misprint);
+            return translationService.translate(misprint, MisprintReadDTO.class);
         }
     }
 

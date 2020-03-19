@@ -112,6 +112,17 @@ public class ArticleServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), article.getAuthor().getId());
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateArticleWrongAuthor() {
+        ArticleCreateDTO createDTO = new ArticleCreateDTO();
+        createDTO.setTitle("Text title");
+        createDTO.setText("Some text");
+        createDTO.setStatus(ArticleStatus.DRAFT);
+        createDTO.setAuthorId(UUID.randomUUID());
+
+        articleService.createArticle(createDTO);
+    }
+
     @Test
     public void testUpdateArticle() {
         ArticlePutDTO updateDTO = new ArticlePutDTO();
