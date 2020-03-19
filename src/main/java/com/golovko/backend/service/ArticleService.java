@@ -49,9 +49,7 @@ public class ArticleService {
         return translationService.translate(article, ArticleReadExtendedDTO.class);
     }
 
-    // TODO add article filter for manager
-
-    public List<ArticleReadDTO> getAllArticles() {
+    public List<ArticleReadDTO> getAllPublishedArticles() {
         List<Article> articles = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.PUBLISHED);
 
         return articles.stream()
@@ -90,5 +88,13 @@ public class ArticleService {
         articleRepository.delete(repoHelper.getEntityById(Article.class, id));
         commentRepository.deleteCommentsByTargetObjectId(id, ARTICLE);
         likeRepository.deleteLikesByTargetObjectId(id, ARTICLE);
+    }
+
+    public List<ArticleReadDTO> getArticlesByFilter(ArticleManagerFilter filter) {
+        List<Article> articles = articleRepository.findByManagerFilter(filter);
+
+        return articles.stream()
+                .map(a -> translationService.translate(a, ArticleReadDTO.class))
+                .collect(Collectors.toList());
     }
 }

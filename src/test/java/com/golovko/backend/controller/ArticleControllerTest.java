@@ -71,7 +71,7 @@ public class ArticleControllerTest {
 
         List<ArticleReadDTO> expectedResult = List.of(a1, a2, a3, a4);
 
-        Mockito.when(articleService.getAllArticles()).thenReturn(expectedResult);
+        Mockito.when(articleService.getAllPublishedArticles()).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/articles/"))
@@ -82,7 +82,7 @@ public class ArticleControllerTest {
         Assertions.assertThat(actualResult).extracting(ArticleReadDTO::getId)
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId(), a4.getId());
 
-        Mockito.verify(articleService).getAllArticles();
+        Mockito.verify(articleService).getAllPublishedArticles();
     }
 
     @Test

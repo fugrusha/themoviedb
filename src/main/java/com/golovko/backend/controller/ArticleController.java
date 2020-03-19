@@ -20,9 +20,9 @@ public class ArticleController {
         return articleService.getArticle(id);
     }
 
-    @GetMapping
-    public List<ArticleReadDTO> getArticleList() {
-        return articleService.getAllArticles();
+    @GetMapping // TODO add filter by Person and by Movie
+    public List<ArticleReadDTO> getAllArticles() {
+        return articleService.getAllPublishedArticles();
     }
 
     @GetMapping("/{id}/extended")

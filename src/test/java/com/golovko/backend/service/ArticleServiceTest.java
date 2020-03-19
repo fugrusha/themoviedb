@@ -17,7 +17,9 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
@@ -86,7 +88,7 @@ public class ArticleServiceTest {
         testObjectFactory.createArticle(user2, ArticleStatus.NEED_MODERATION);
         testObjectFactory.createArticle(user2, ArticleStatus.DRAFT);
 
-        List<ArticleReadDTO> articles = articleService.getAllArticles();
+        List<ArticleReadDTO> articles = articleService.getAllPublishedArticles();
 
         Assertions.assertThat(articles).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId());
@@ -213,5 +215,90 @@ public class ArticleServiceTest {
 
         Assert.assertFalse(likeRepository.existsById(like1.getId()));
         Assert.assertFalse(likeRepository.existsById(like2.getId()));
+    }
+
+    @Test
+    public void testGetArticlesByEmptyFilter() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        Article a2 = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
+        Article a3 = testObjectFactory.createArticle(author, ArticleStatus.BLOCKED);
+
+        ArticleManagerFilter filter = new ArticleManagerFilter();
+
+        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId());
+    }
+
+    @Test
+    public void testGetArticlesByFilterWithEmptySet() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        Article a2 = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
+        Article a3 = testObjectFactory.createArticle(author, ArticleStatus.BLOCKED);
+
+        ArticleManagerFilter filter = new ArticleManagerFilter();
+        filter.setStatuses(new HashSet<ArticleStatus>());
+
+        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId());
+    }
+
+    @Test
+    public void testGetArticlesByAuthor() {
+        ApplicationUser author1 = testObjectFactory.createUser();
+        ApplicationUser author2 = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author1, ArticleStatus.PUBLISHED);
+        Article a2 = testObjectFactory.createArticle(author1, ArticleStatus.DRAFT);
+        testObjectFactory.createArticle(author2, ArticleStatus.BLOCKED);
+        testObjectFactory.createArticle(author2, ArticleStatus.PUBLISHED);
+
+        ArticleManagerFilter filter = new ArticleManagerFilter();
+        filter.setAuthorId(author1.getId());
+
+        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(a1.getId(), a2.getId());
+    }
+
+    @Test
+    public void testGetArticlesByStatus() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
+        testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        testObjectFactory.createArticle(author, ArticleStatus.BLOCKED);
+
+        ArticleManagerFilter filter = new ArticleManagerFilter();
+        filter.setStatuses(Set.of(ArticleStatus.DRAFT));
+
+        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(a1.getId());
+    }
+
+    @Test
+    public void testGetArticlesByAllFilters() {
+        ApplicationUser author1 = testObjectFactory.createUser();
+        ApplicationUser author2 = testObjectFactory.createUser();
+
+        Article a1 = testObjectFactory.createArticle(author1, ArticleStatus.DRAFT);
+        testObjectFactory.createArticle(author1, ArticleStatus.PUBLISHED);
+        testObjectFactory.createArticle(author1, ArticleStatus.BLOCKED);
+        testObjectFactory.createArticle(author2, ArticleStatus.DRAFT);
+
+        ArticleManagerFilter filter = new ArticleManagerFilter();
+        filter.setAuthorId(author1.getId());
+        filter.setStatuses(Set.of(ArticleStatus.DRAFT));
+
+        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(a1.getId());
     }
 }

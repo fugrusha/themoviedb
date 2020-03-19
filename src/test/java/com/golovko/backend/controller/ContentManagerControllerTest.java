@@ -2,14 +2,18 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.Misprint;
 import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.dto.article.ArticleManagerFilter;
+import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
 import com.golovko.backend.dto.misprint.MisprintFilter;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.misprint.MisprintRejectDTO;
 import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.service.ArticleService;
 import com.golovko.backend.service.MisprintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -44,6 +48,9 @@ public class ContentManagerControllerTest {
 
     @MockBean
     private MisprintService misprintService;
+
+    @MockBean
+    private ArticleService articleService;
 
     @Test
     public void testConfirmModeration() throws Exception {
@@ -341,6 +348,30 @@ public class ContentManagerControllerTest {
         Mockito.verify(misprintService).getAllMisprints(filter);
     }
 
+    @Test
+    public void testGetArticlesByFilter() throws Exception {
+        ArticleManagerFilter filter = new ArticleManagerFilter();
+        filter.setAuthorId(UUID.randomUUID());
+        filter.setStatuses(Set.of(ArticleStatus.DRAFT));
+
+        ArticleReadDTO readDTO = createArticleReadDTO(filter.getAuthorId());
+        List<ArticleReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(articleService.getArticlesByFilter(filter)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/filter")
+                .param("authorId", filter.getAuthorId().toString())
+                .param("statuses", "DRAFT"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(articleService).getArticlesByFilter(filter);
+    }
+
     private MisprintReadDTO createMistakeReadDTO() {
         MisprintReadDTO dto = new MisprintReadDTO();
         dto.setId(UUID.randomUUID());
@@ -352,6 +383,20 @@ public class ContentManagerControllerTest {
         dto.setTargetObjectType(TargetObjectType.ARTICLE);
         dto.setTargetObjectId(UUID.randomUUID());
         dto.setModeratorId(UUID.randomUUID());
+        return dto;
+    }
+
+    private ArticleReadDTO createArticleReadDTO(UUID authorId) {
+        ArticleReadDTO dto = new ArticleReadDTO();
+        dto.setId(UUID.randomUUID());
+        dto.setTitle("Title");
+        dto.setText("Some Text");
+        dto.setStatus(ArticleStatus.PUBLISHED);
+        dto.setAuthorId(authorId);
+        dto.setDislikesCount(555);
+        dto.setLikesCount(333);
+        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
+        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface ArticleRepository extends CrudRepository<Article, UUID> {
+public interface ArticleRepository extends CrudRepository<Article, UUID>, ArticleRepositoryCustom {
 
     List<Article> findByStatusOrderByCreatedAtDesc(ArticleStatus status);
 }

@@ -1,9 +1,12 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.article.ArticleManagerFilter;
+import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
 import com.golovko.backend.dto.misprint.MisprintFilter;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.misprint.MisprintRejectDTO;
+import com.golovko.backend.service.ArticleService;
 import com.golovko.backend.service.MisprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +20,9 @@ public class ContentManagerController {
 
     @Autowired
     private MisprintService misprintService;
+
+    @Autowired
+    private ArticleService articleService;
 
     @PostMapping("/misprints/{id}/confirm")
     public MisprintReadDTO confirmModeration(
@@ -88,4 +94,11 @@ public class ContentManagerController {
     public MisprintReadDTO getMisprintByMovieCrewId(@PathVariable UUID movieCrewId, @PathVariable UUID id) {
         return misprintService.getMisprintByTargetId(movieCrewId, id);
     }
+
+    @GetMapping("/articles/filter")
+    public List<ArticleReadDTO> getArticlesByFilter(ArticleManagerFilter filter) {
+        return articleService.getArticlesByFilter(filter);
+    }
+
+    // TODO change articleStatus
 }
