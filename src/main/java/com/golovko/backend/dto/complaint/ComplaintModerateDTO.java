@@ -1,4 +1,4 @@
-package com.golovko.backend.dto.moderator;
+package com.golovko.backend.dto.complaint;
 
 import com.golovko.backend.domain.ComplaintStatus;
 import lombok.Data;
@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.UUID;
 
 @Data
-public class ModeratorDTO {
+public class ComplaintModerateDTO {
 
     private UUID moderatorId;
 

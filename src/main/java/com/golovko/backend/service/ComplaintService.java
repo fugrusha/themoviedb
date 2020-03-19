@@ -4,7 +4,6 @@ import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.dto.complaint.*;
-import com.golovko.backend.dto.moderator.ModeratorDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.repository.RepositoryHelper;
@@ -82,20 +81,10 @@ public class ComplaintService {
     }
 
     @Transactional
-    public ComplaintReadDTO takeForModeration(UUID complaintId, ModeratorDTO dto) {
+    public ComplaintReadDTO moderateComplaint(UUID complaintId, ComplaintModerateDTO dto) {
         Complaint complaint = repoHelper.getReferenceIfExist(Complaint.class, complaintId);
 
         complaint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
-        complaint.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
-        complaint = complaintRepository.save(complaint);
-
-        return translationService.translate(complaint, ComplaintReadDTO.class);
-    }
-
-    @Transactional
-    public ComplaintReadDTO changeStatus(UUID id, ModeratorDTO dto) {
-        Complaint complaint = repoHelper.getReferenceIfExist(Complaint.class, id);
-
         complaint.setComplaintStatus(dto.getComplaintStatus());
         complaint = complaintRepository.save(complaint);
 

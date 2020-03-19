@@ -2,8 +2,8 @@ package com.golovko.backend.controller;
 
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.dto.complaint.ComplaintFilter;
+import com.golovko.backend.dto.complaint.ComplaintModerateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.dto.moderator.ModeratorDTO;
 import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/moderator")
+@RequestMapping("/api/v1")
 public class ModeratorController {
 
     // TODO take complaint for moderation
@@ -34,12 +34,10 @@ public class ModeratorController {
     }
 
     @PostMapping("/complaints/{id}/moderate")
-    public ComplaintReadDTO takeForModeration(@RequestParam UUID id, @RequestBody ModeratorDTO dto) {
-        return complaintService.takeForModeration(id, dto);
-    }
-
-    @PostMapping("/complaints/{id}/change-status")
-    public ComplaintReadDTO changeComplaintStatus(@RequestParam UUID id, @RequestBody ModeratorDTO dto) {
-        return complaintService.changeStatus(id, dto);
+    public ComplaintReadDTO moderateComplaint(
+            @PathVariable UUID id,
+            @RequestBody ComplaintModerateDTO dto
+    ) {
+        return complaintService.moderateComplaint(id, dto);
     }
 }

@@ -2,7 +2,6 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.complaint.*;
-import com.golovko.backend.dto.moderator.ModeratorDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -358,12 +357,13 @@ public class ComplaintServiceTest {
         ApplicationUser author = testObjectFactory.createUser();
         ApplicationUser moderator = testObjectFactory.createUser();
 
-        ModeratorDTO moderDTO = new ModeratorDTO();
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
         moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
 
         Complaint c1 = testObjectFactory.createComplaint(author, SPAM, TargetObjectType.MOVIE);
 
-        ComplaintReadDTO actualResult = complaintService.takeForModeration(c1.getId(), moderDTO);
+        ComplaintReadDTO actualResult = complaintService.moderateComplaint(c1.getId(), moderDTO);
 
         Assertions.assertThat(actualResult).hasNoNullFieldsOrProperties();
         Assert.assertEquals(moderator.getId(), actualResult.getModeratorId());
@@ -372,24 +372,6 @@ public class ComplaintServiceTest {
         c1 = complaintRepository.findById(c1.getId()).get();
         Assert.assertEquals(moderator.getId(), c1.getModerator().getId());
         Assert.assertEquals(c1.getComplaintStatus(), ComplaintStatus.UNDER_INVESTIGATION);
-    }
-
-    @Test
-    public void testChangeComplaintStatus() {
-        ModeratorDTO moderDTO = new ModeratorDTO();
-        moderDTO.setComplaintStatus(ComplaintStatus.CLOSED);
-
-        ApplicationUser author = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(author, SPAM, TargetObjectType.MOVIE);
-
-        ComplaintReadDTO actualResult = complaintService.changeStatus(c1.getId(), moderDTO);
-
-        Assertions.assertThat(actualResult).hasNoNullFieldsOrPropertiesExcept("moderatorId");
-        Assert.assertEquals(actualResult.getComplaintStatus(), ComplaintStatus.CLOSED);
-
-
-        Complaint updatedComplaint = complaintRepository.findById(c1.getId()).get();
-        Assert.assertEquals(updatedComplaint.getComplaintStatus(), ComplaintStatus.CLOSED);
     }
 
     private void inTransaction (Runnable runnable) {

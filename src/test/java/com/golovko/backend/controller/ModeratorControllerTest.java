@@ -6,12 +6,11 @@ import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.complaint.ComplaintFilter;
+import com.golovko.backend.dto.complaint.ComplaintModerateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
-import com.golovko.backend.dto.moderator.ModeratorDTO;
 import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -70,7 +69,7 @@ public class ModeratorControllerTest {
         Mockito.when(complaintService.getAllComplaints(filter)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/moderator/complaints")
+                .perform(get("/api/v1/complaints")
                 .param("moderatorId", filter.getModeratorId().toString())
                 .param("authorId", filter.getAuthorId().toString())
                 .param("statuses", "INITIATED")
@@ -86,55 +85,29 @@ public class ModeratorControllerTest {
         Mockito.verify(complaintService).getAllComplaints(filter);
     }
 
-    @Ignore
     @Test
-    public void testTakeComplaintForModeration() throws Exception {
-        ModeratorDTO moderDTO = new ModeratorDTO();
+    public void testModerateComplaint() throws Exception {
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
         moderDTO.setModeratorId(UUID.randomUUID());
+        moderDTO.setComplaintStatus(ComplaintStatus.CLOSED);
 
         UUID userId = UUID.randomUUID();
         ComplaintReadDTO complaintDTO = createComplaintReadDTO(userId, moderDTO.getModeratorId());
 
-        Mockito.when(complaintService.takeForModeration(complaintDTO.getId(), moderDTO))
+        Mockito.when(complaintService.moderateComplaint(complaintDTO.getId(), moderDTO))
                 .thenReturn(complaintDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/moderator/complaints/{id}/moderate", complaintDTO.getId())
+                .perform(post("/api/v1/complaints/{id}/moderate", complaintDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(moderDTO)))
-                .andDo(print())
-                .andExpect(status().is2xxSuccessful())
+                .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         ComplaintReadDTO actualResult = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(complaintDTO);
 
-        Mockito.verify(complaintService).takeForModeration(complaintDTO.getId(), moderDTO);
-    }
-
-    @Ignore
-    @Test
-    public void testChangeComplaintStatus() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, moderatorId);
-
-        ModeratorDTO moderatorDTO = new ModeratorDTO();
-        moderatorDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
-
-        Mockito.when(complaintService.changeStatus(readDTO.getId(), moderatorDTO)).thenReturn(readDTO);
-
-        String resultJson = mockMvc
-                .perform(post("/api/v1/moderator/complaints/{id}/change-status", readDTO.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(moderatorDTO)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        ComplaintReadDTO actualResult = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
-        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
-
-        Mockito.verify(complaintService).changeStatus(readDTO.getId(), moderatorDTO);
+        Mockito.verify(complaintService).moderateComplaint(complaintDTO.getId(), moderDTO);
     }
 
     private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID moderatorId) {

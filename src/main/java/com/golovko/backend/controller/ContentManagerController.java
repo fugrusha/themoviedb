@@ -99,6 +99,4 @@ public class ContentManagerController {
     public List<ArticleReadDTO> getArticlesByFilter(ArticleManagerFilter filter) {
         return articleService.getArticlesByFilter(filter);
     }
-
-    // TODO change articleStatus
 }
