@@ -25,6 +25,6 @@ public interface RatingRepository extends CrudRepository<Rating, UUID> {
 
     @Modifying
     @Query("delete from Rating r where r.ratedObjectId = :targetId"
-       + " and r.ratedObjectType = :targetType")
+            + " and r.ratedObjectType = :targetType")
     void deleteRatingsByRatedObjectId(UUID targetId, TargetObjectType targetType);
 }
