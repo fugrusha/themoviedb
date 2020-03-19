@@ -63,28 +63,6 @@ public class ArticleCommentControllerTest {
     }
 
     @Test
-    public void testGetAllArticleComments() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID articleId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
-
-        List<CommentReadDTO> expectedResult = List.of(readDTO);
-
-        Mockito.when(commentService.getAllComments(articleId)).thenReturn(expectedResult);
-
-        String resultJson = mockMvc
-                .perform(get("/api/v1/articles/{articleId}/comments/moderator", articleId))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<CommentReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting(CommentReadDTO::getId)
-                .containsExactlyInAnyOrder(readDTO.getId());
-
-        Mockito.verify(commentService).getAllComments(articleId);
-    }
-
-    @Test
     public void testGetAllPublishedArticleComments() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();

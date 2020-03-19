@@ -63,28 +63,6 @@ public class MovieCommentControllerTest {
     }
 
     @Test
-    public void testGetAllMovieComments() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, movieId);
-
-        List<CommentReadDTO> expectedResult = List.of(readDTO);
-
-        Mockito.when(commentService.getAllComments(movieId)).thenReturn(expectedResult);
-
-        String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{movieId}/comments/moderator", movieId))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        List<CommentReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting(CommentReadDTO::getId)
-                .containsExactlyInAnyOrder(readDTO.getId());
-
-        Mockito.verify(commentService).getAllComments(movieId);
-    }
-
-    @Test
     public void testGetAllPublishedMovieComments() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();

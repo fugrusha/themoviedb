@@ -2,13 +2,11 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
-import com.golovko.backend.dto.comment.CommentCreateDTO;
-import com.golovko.backend.dto.comment.CommentPatchDTO;
-import com.golovko.backend.dto.comment.CommentPutDTO;
-import com.golovko.backend.dto.comment.CommentReadDTO;
+import com.golovko.backend.dto.comment.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
+import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
@@ -32,14 +30,17 @@ public class CommentService {
     @Autowired
     private TranslationService translationService;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     public CommentReadDTO getComment(UUID targetObjectId, UUID id) {
         Comment comment = getCommentRequired(targetObjectId, id);
 
         return translationService.translate(comment, CommentReadDTO.class);
     }
 
-    public List<CommentReadDTO> getAllComments(UUID targetObjectId) {
-        List<Comment> comments = commentRepository.findAllByTargetIdOrderByCreatedAtAsc(targetObjectId);
+    public List<CommentReadDTO> getCommentsByFilter(CommentFilter filter) {
+        List<Comment> comments = commentRepository.findByFilter(filter);
 
         return comments.stream()
                 .map(c -> translationService.translate(c, CommentReadDTO.class))
@@ -56,7 +57,7 @@ public class CommentService {
 
     public CommentReadDTO createComment(UUID targetObjectId, CommentCreateDTO createDTO) {
         Comment comment = translationService.translate(createDTO, Comment.class);
-
+        // TODO check user's trustLevel
         comment.setStatus(CommentStatus.PENDING);
         comment.setTargetObjectId(targetObjectId);
         comment = commentRepository.save(comment);
@@ -86,6 +87,15 @@ public class CommentService {
     public void deleteComment(UUID targetObjectId, UUID id) {
         commentRepository.delete(getCommentRequired(targetObjectId, id));
         likeRepository.deleteLikesByTargetObjectId(id, COMMENT);
+    }
+
+    public CommentReadDTO changeStatus(UUID id, CommentStatusDTO dto) {
+        Comment comment = repoHelper.getEntityById(Comment.class, id);
+
+        comment.setStatus(dto.getStatus());
+        comment = commentRepository.save(comment);
+
+        return translationService.translate(comment, CommentReadDTO.class);
     }
 
     private Comment getCommentRequired(UUID targetObjectId, UUID commentId) {

@@ -11,5 +11,6 @@
     <include file="db/changelog/updates/Home-work-16-3.xml" />
     <include file="db/changelog/updates/Home-work-16-4.xml" />
     <include file="db/changelog/updates/Home-work-16-5.xml" />
+    <include file="db/changelog/updates/Home-work-17.xml" />
 
 </databaseChangeLog>

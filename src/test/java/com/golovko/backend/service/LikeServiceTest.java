@@ -82,6 +82,19 @@ public class LikeServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), like.getAuthor().getId());
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateLikeWrongUser() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setMeLiked(true);
+        createDTO.setLikedObjectType(ARTICLE);
+        createDTO.setLikedObjectId(article.getId());
+
+        likeService.createLike(UUID.randomUUID(), createDTO);
+    }
+
     @Test
     public void testPatchLike() {
         ApplicationUser user = testObjectFactory.createUser();

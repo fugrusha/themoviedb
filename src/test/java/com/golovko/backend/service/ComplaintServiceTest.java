@@ -102,6 +102,20 @@ public class ComplaintServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateComplaintWrongAuthor() {
+        Movie movie = testObjectFactory.createMovie();
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setTargetObjectId(movie.getId());
+
+        complaintService.createComplaint(UUID.randomUUID(), createDTO);
+    }
+
     @Test
     public void testPatchComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
@@ -353,7 +367,7 @@ public class ComplaintServiceTest {
     }
 
     @Test
-    public void testTakeComplaintForModeration() {
+    public void testModerateComplaint() {
         ApplicationUser author = testObjectFactory.createUser();
         ApplicationUser moderator = testObjectFactory.createUser();
 

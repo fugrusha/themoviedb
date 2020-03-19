@@ -27,6 +27,8 @@ public class ApplicationUser extends AbstractEntity {
 
     private Boolean isBlocked = false;
 
+    private Double trustLevel = 1.0;
+
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
     @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
     @Enumerated(EnumType.STRING)

@@ -74,6 +74,7 @@ public class TestObjectFactory {
         user.setPassword("123456");
         user.setEmail("vetal@gmail.com");
         user.setIsBlocked(false);
+        user.setTrustLevel(7.0);
         user.setUserRole(Set.of(UserRole.USER));
         return applicationUserRepository.save(user);
     }

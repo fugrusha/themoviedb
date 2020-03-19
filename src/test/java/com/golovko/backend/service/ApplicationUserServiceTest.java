@@ -1,10 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserPutDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.util.TestObjectFactory;
@@ -151,5 +148,22 @@ public class ApplicationUserServiceTest {
 
         ApplicationUser unBannedUser = applicationUserRepository.findById(user.getId()).get();
         Assert.assertEquals(false, unBannedUser.getIsBlocked());
+    }
+
+    @Test
+    public void testChangeTrustLevel() {
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setTrustLevel(9.0);
+        applicationUserRepository.save(user);
+
+        UserTrustLevelDTO trustLevelDTO = new UserTrustLevelDTO();
+        trustLevelDTO.setTrustLevel(2.0);
+
+        UserReadDTO actualResult = applicationUserService.changeTrustLevel(user.getId(), trustLevelDTO);
+
+        Assertions.assertThat(actualResult).hasNoNullFieldsOrProperties();
+
+        ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
+        Assert.assertEquals(updatedUser.getTrustLevel(), trustLevelDTO.getTrustLevel());
     }
 }

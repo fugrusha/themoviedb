@@ -25,16 +25,9 @@ public class MovieCastCommentController {
         return commentService.getComment(movieCastId, id);
     }
 
-    // for users
     @GetMapping
     public List<CommentReadDTO> getAllPublishedMovieCastComments(@PathVariable UUID movieCastId) {
         return commentService.getAllPublishedComments(movieCastId);
-    }
-
-    // for moderator
-    @GetMapping("/moderator")
-    public List<CommentReadDTO> getAllMovieCastComments(@PathVariable UUID movieCastId) {
-        return commentService.getAllComments(movieCastId);
     }
 
     @PostMapping

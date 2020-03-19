@@ -16,6 +16,8 @@ public class UserReadExtendedDTO {
 
     private Boolean isBlocked;
 
+    private Double trustLevel;
+
     private Instant createdAt;
 
     private Instant updatedAt;

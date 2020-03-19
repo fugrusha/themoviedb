@@ -1,10 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
-import com.golovko.backend.dto.comment.CommentCreateDTO;
-import com.golovko.backend.dto.comment.CommentPatchDTO;
-import com.golovko.backend.dto.comment.CommentPutDTO;
-import com.golovko.backend.dto.comment.CommentReadDTO;
+import com.golovko.backend.dto.comment.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
@@ -19,12 +16,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.CommentStatus.*;
-import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
-import static com.golovko.backend.domain.TargetObjectType.COMMENT;
+import static com.golovko.backend.domain.TargetObjectType.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -32,6 +30,7 @@ import static com.golovko.backend.domain.TargetObjectType.COMMENT;
 @Sql(statements = {
         "delete from like",
         "delete from comment",
+        "delete from movie",
         "delete from article",
         "delete from user_role",
         "delete from application_user"},
@@ -65,21 +64,6 @@ public class CommentServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testGetCommentWrongId() {
         commentService.getComment(UUID.randomUUID(), UUID.randomUUID());
-    }
-
-    @Test
-    public void testGetAllComments() {
-        ApplicationUser user1 = testObjectFactory.createUser();
-        ApplicationUser user2 = testObjectFactory.createUser();
-        Article article1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
-        Comment c1 = testObjectFactory.createComment(user1, article1.getId(), APPROVED, ARTICLE);
-        Comment c2 = testObjectFactory.createComment(user2, article1.getId(), BLOCKED, ARTICLE);
-        Comment c3 = testObjectFactory.createComment(user2, article1.getId(), PENDING, ARTICLE);
-
-        List<CommentReadDTO> comments = commentService.getAllComments(article1.getId());
-
-        Assertions.assertThat(comments).extracting("id")
-                .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
     }
 
     @Test
@@ -118,6 +102,19 @@ public class CommentServiceTest {
         Comment comment = commentRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(comment, "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), comment.getAuthor().getId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateCommentWrongCommentAuthor() {
+        ApplicationUser articleAuthor = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(articleAuthor, ArticleStatus.PUBLISHED);
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setTargetObjectType(ARTICLE);
+
+        commentService.createComment(article.getId(), createDTO);
     }
 
     @Test
@@ -207,5 +204,147 @@ public class CommentServiceTest {
 
         Assert.assertFalse(commentRepository.existsById(c.getId()));
         Assert.assertFalse(likeRepository.existsById(like.getId()));
+    }
+
+    @Test
+    public void testGetCommentsByEmptyFilter() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, article.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user, article.getId(), BLOCKED, ARTICLE);
+        Comment c3 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+
+        CommentFilter filter = new CommentFilter();
+
+        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
+    }
+
+    @Test
+    public void testGetCommentsByFilterWithEmptySets() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, article.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user, article.getId(), BLOCKED, ARTICLE);
+        Comment c3 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+
+        CommentFilter filter = new CommentFilter();
+        filter.setStatuses(new HashSet<CommentStatus>());
+        filter.setTypes(new HashSet<TargetObjectType>());
+
+        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
+    }
+
+    @Test
+    public void testGetCommentsByAuthor() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        testObjectFactory.createComment(user1, article.getId(), APPROVED, ARTICLE);
+        Comment c1 = testObjectFactory.createComment(user2, article.getId(), BLOCKED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, movie.getId(), APPROVED, MOVIE);
+
+        CommentFilter filter = new CommentFilter();
+        filter.setAuthorId(user2.getId());
+
+        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testGetCommentsByStatus() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        testObjectFactory.createComment(user1, article.getId(), BLOCKED, ARTICLE);
+        Comment c1 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, movie.getId(), APPROVED, MOVIE);
+
+        CommentFilter filter = new CommentFilter();
+        filter.setStatuses(Set.of(APPROVED));
+
+        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testGetCommentsByTargetObjectType() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        testObjectFactory.createComment(user1, article.getId(), BLOCKED, ARTICLE);
+        testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        Comment c1 = testObjectFactory.createComment(user2, movie.getId(), APPROVED, MOVIE);
+
+        CommentFilter filter = new CommentFilter();
+        filter.setTypes(Set.of(MOVIE));
+
+        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId());
+    }
+
+    @Test
+    public void testGetCommentsByAllFilters() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user1, movie.getId(), NEED_MODERATION, MOVIE);
+        testObjectFactory.createComment(user1, movie.getId(), BLOCKED, MOVIE); // wrong status
+        testObjectFactory.createComment(user1, article.getId(), NEED_MODERATION, ARTICLE); // wrong targetObjectType
+        testObjectFactory.createComment(user2, movie.getId(), NEED_MODERATION, MOVIE); // wrong user
+
+        CommentFilter filter = new CommentFilter();
+        filter.setStatuses(Set.of(NEED_MODERATION));
+        filter.setTypes(Set.of(MOVIE));
+        filter.setAuthorId(user1.getId());
+
+        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId());
+    }
+
+    @Test
+    public void testChangeCommentStatus() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), PENDING, MOVIE);
+
+        CommentStatusDTO statusDTO = new CommentStatusDTO();
+        statusDTO.setStatus(APPROVED);
+
+        CommentReadDTO actualResult = commentService.changeStatus(c1.getId(), statusDTO);
+
+        Assert.assertEquals(actualResult.getStatus(), statusDTO.getStatus());
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assertions.assertThat(actualResult).isEqualToIgnoringGivenFields(updatedComment, "authorId");
+        Assert.assertEquals(actualResult.getAuthorId(), updatedComment.getAuthor().getId());
+
+        Assert.assertEquals(updatedComment.getStatus(), statusDTO.getStatus());
     }
 }

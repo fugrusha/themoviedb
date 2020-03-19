@@ -18,6 +18,8 @@ public class UserReadDTO {
 
     private Boolean isBlocked;
 
+    private Double trustLevel;
+
     private Set<UserRole> userRole;
 
     private Instant createdAt;

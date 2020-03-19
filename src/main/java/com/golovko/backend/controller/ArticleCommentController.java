@@ -23,16 +23,9 @@ public class ArticleCommentController {
         return commentService.getComment(articleId, id);
     }
 
-    // for users
     @GetMapping
     public List<CommentReadDTO> getAllPublishedArticleComments(@PathVariable UUID articleId) {
         return commentService.getAllPublishedComments(articleId);
-    }
-
-    // for moderator
-    @GetMapping("/moderator")
-    public List<CommentReadDTO> getAllArticleComments(@PathVariable UUID articleId) {
-        return commentService.getAllComments(articleId);
     }
 
     @PostMapping

@@ -15,7 +15,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.UUID;
 
 import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
@@ -90,23 +89,6 @@ public class CommentRepositoryTest {
 
         Assertions.assertThat(expectedComment).isEqualToIgnoringGivenFields(actualComment, "author");
         Assert.assertEquals(user2.getId(), actualComment.getAuthor().getId());
-    }
-
-    @Test
-    public void testFindAllByTargetId() {
-        ApplicationUser user1 = testObjectFactory.createUser();
-        ApplicationUser user2 = testObjectFactory.createUser();
-        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
-
-        Comment c1 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
-        Comment c2 = testObjectFactory.createComment(user2, article.getId(), NEED_MODERATION, ARTICLE);
-        testObjectFactory.createComment(user2, UUID.randomUUID(), NEED_MODERATION, ARTICLE);
-        testObjectFactory.createComment(user2, UUID.randomUUID(), APPROVED, ARTICLE);
-
-        List<Comment> comments = commentRepository.findAllByTargetIdOrderByCreatedAtAsc(article.getId());
-
-        Assertions.assertThat(comments).extracting("id")
-                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
     @Test

@@ -2,10 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.UserRole;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserPutDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -72,5 +69,13 @@ public class ApplicationUserService {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
         user.setIsBlocked(false);
         applicationUserRepository.save(user);
+    }
+
+    public UserReadDTO changeTrustLevel(UUID id, UserTrustLevelDTO dto) {
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+        user.setTrustLevel(dto.getTrustLevel());
+        applicationUserRepository.save(user);
+
+        return translationService.translate(user, UserReadDTO.class);
     }
 }

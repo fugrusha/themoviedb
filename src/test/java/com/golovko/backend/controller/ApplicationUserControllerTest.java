@@ -198,6 +198,7 @@ public class ApplicationUserControllerTest {
         readDTO.setUsername("david");
         readDTO.setEmail("david101@email.com");
         readDTO.setIsBlocked(false);
+        readDTO.setTrustLevel(6.5);
         readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return readDTO;

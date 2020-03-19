@@ -1,9 +1,15 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.comment.CommentFilter;
 import com.golovko.backend.dto.comment.CommentReadDTO;
+import com.golovko.backend.dto.comment.CommentStatusDTO;
 import com.golovko.backend.dto.complaint.ComplaintFilter;
 import com.golovko.backend.dto.complaint.ComplaintModerateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.UserTrustLevelDTO;
+import com.golovko.backend.service.ApplicationUserService;
+import com.golovko.backend.service.CommentService;
 import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -15,17 +21,33 @@ import java.util.UUID;
 @RequestMapping("/api/v1")
 public class ModeratorController {
 
-    // TODO take complaint for moderation
-    // TODO change status of complaint
-    // TODO set trustLevel for users
-
     @Autowired
     private ComplaintService complaintService;
 
-    // TODO
+    @Autowired
+    private CommentService commentService;
+
+    @Autowired
+    private ApplicationUserService applicationUserService;
+
+    @PostMapping("/users/{id}/set-trust-level")
+    public UserReadDTO setTrustLevelToUser(
+            @PathVariable UUID id,
+            @RequestBody UserTrustLevelDTO dto) {
+        return applicationUserService.changeTrustLevel(id, dto);
+    }
+
     @GetMapping("/comments")
-    public List<CommentReadDTO> getAllComments() {
-        return null;
+    public List<CommentReadDTO> getCommentsByFilter(CommentFilter filter) {
+        return commentService.getCommentsByFilter(filter);
+    }
+
+    @PostMapping("/comments/{id}/change-status")
+    public CommentReadDTO changeCommentStatus(
+            @PathVariable UUID id,
+            @RequestBody CommentStatusDTO dto
+    ) {
+        return commentService.changeStatus(id, dto);
     }
 
     @GetMapping("/complaints")

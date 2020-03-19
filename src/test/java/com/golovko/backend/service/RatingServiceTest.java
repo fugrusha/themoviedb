@@ -99,6 +99,18 @@ public class RatingServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), rating.getAuthor().getId());
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateRatingWrongAuthor() {
+        Movie movie = testObjectFactory.createMovie();
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE);
+
+        ratingService.createRating(movie.getId(), createDTO);
+    }
+
     @Test
     public void testPatchRating() {
         ApplicationUser user = testObjectFactory.createUser();

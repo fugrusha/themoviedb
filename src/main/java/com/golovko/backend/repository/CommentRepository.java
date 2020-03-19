@@ -12,15 +12,11 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface CommentRepository extends CrudRepository<Comment, UUID> {
+public interface CommentRepository extends CrudRepository<Comment, UUID>, CommentRepositoryCustom {
 
     @Query("select c from Comment c where c.id = :commentId"
             + " and c.targetObjectId = :targetId")
     Comment findByIdAndTargetId(UUID commentId, UUID targetId);
-
-    @Query("select c from Comment c where c.targetObjectId = :targetId"
-            + " order by c.createdAt asc")
-    List<Comment> findAllByTargetIdOrderByCreatedAtAsc(UUID targetId);
 
     @Query("select c from Comment c where c.targetObjectId = :targetId"
             + " and c.status = :status"

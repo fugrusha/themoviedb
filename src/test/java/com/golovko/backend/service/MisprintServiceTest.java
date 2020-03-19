@@ -121,6 +121,19 @@ public class MisprintServiceTest {
         Assert.assertEquals(readDTO.getAuthorId(), misprint.getAuthor().getId());
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateMisprintWrongUser() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(MOVIE);
+        createDTO.setTargetObjectId(movie.getId());
+
+        misprintService.createMisprintComplaint(UUID.randomUUID(), createDTO);
+    }
+
     @Test
     public void testPatchMisprintComplaint() {
         ApplicationUser user = testObjectFactory.createUser();

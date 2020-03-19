@@ -11,6 +11,7 @@
             <column name="password" type="string"/>
             <column name="email" type="string"/>
             <column name="is_blocked" type="boolean"/>
+            <column name="trust_level" type="numeric"/>
             <column name="user_role" type="string"/>
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
