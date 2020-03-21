@@ -46,8 +46,8 @@ public class NotifyUserOnClosedMisprintListenerTest {
 
         applicationEventPublisher.publishEvent(event);
 
-        verify(notifyUserOnClosedMisprintListener).onEvent(event);
-        verify(userNotificationService).notifyOnMisprintStatusChangedToClosed(event.getMisprintId());
+        verify(notifyUserOnClosedMisprintListener, timeout(500)).onEvent(event);
+        verify(userNotificationService, timeout(500)).notifyOnMisprintStatusChangedToClosed(event.getMisprintId());
     }
 
     @Test
@@ -89,9 +89,8 @@ public class NotifyUserOnClosedMisprintListenerTest {
 
         latch.await();
 
-        Mockito.verify(notifyUserOnClosedMisprintListener, timeout(500)).onEvent(event);
-        Mockito.verify(userNotificationService, timeout(500))
-                .notifyOnMisprintStatusChangedToClosed(event.getMisprintId());
+        Mockito.verify(notifyUserOnClosedMisprintListener).onEvent(event);
+        Mockito.verify(userNotificationService).notifyOnMisprintStatusChangedToClosed(event.getMisprintId());
 
         Assert.assertEquals(Arrays.asList(1, 2), checklist);
     }
