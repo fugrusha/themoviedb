@@ -26,10 +26,10 @@ import java.util.UUID;
         "delete from person",
         "delete from movie"},
         executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class UpdateAverageRatingOfPersonJobTest {
+public class UpdateAverageRatingOfPersonMoviesJobTest {
 
     @Autowired
-    private UpdateAverageRatingOfPersonJob updateAverageRatingOfPersonJob;
+    private UpdateAverageRatingOfPersonMoviesJob updateAverageRatingOfPersonMoviesJob;
 
     @Autowired
     private PersonRepository personRepository;
@@ -41,28 +41,28 @@ public class UpdateAverageRatingOfPersonJobTest {
     private TestObjectFactory testObjectFactory;
 
     @Test
-    public void testUpdateAverageRatingOfPersonJob() {
+    public void testUpdateAverageRatingOfPersonMoviesJob() {
         Person p1 = testObjectFactory.createPerson();
-        Movie m1 = testObjectFactory.createMovie();
-        Movie m2 = testObjectFactory.createMovie();
+        Movie m1 = testObjectFactory.createMovie(3.0);
+        Movie m2 = testObjectFactory.createMovie(4.5);
 
-        testObjectFactory.createMovieCast(p1, m1, 5.0);
-        testObjectFactory.createMovieCast(p1, m2, 3.0);
+        testObjectFactory.createMovieCast(p1, m1);
+        testObjectFactory.createMovieCast(p1, m2);
 
-        updateAverageRatingOfPersonJob.updateAverageRating();
+        updateAverageRatingOfPersonMoviesJob.updateAverageRating();
 
         p1 = personRepository.findById(p1.getId()).get();
-        Assert.assertEquals(4.0, p1.getAverageRatingByRoles(), Double.MIN_NORMAL);
+        Assert.assertEquals(3.75, p1.getAverageRatingByMovies(), Double.MIN_NORMAL);
     }
 
     @Test
     public void testPersonUpdatedIndependently() {
         Person p1 = testObjectFactory.createPerson();
-        Movie m1 = testObjectFactory.createMovie();
-        Movie m2 = testObjectFactory.createMovie();
+        Movie m1 = testObjectFactory.createMovie(3.0);
+        Movie m2 = testObjectFactory.createMovie(4.5);
 
-        testObjectFactory.createMovieCast(p1, m1, 5.0);
-        testObjectFactory.createMovieCast(p1, m2, 3.0);
+        testObjectFactory.createMovieCast(p1, m1);
+        testObjectFactory.createMovieCast(p1, m2);
 
         UUID[] failedId = new UUID[1];
         Mockito.doAnswer(invocationOnMock -> {
@@ -71,15 +71,15 @@ public class UpdateAverageRatingOfPersonJobTest {
                 throw new RuntimeException();
             }
             return invocationOnMock.callRealMethod();
-        }).when(personService).updateAverageRatingOfPerson(Mockito.any());
+        }).when(personService).updateAverageRatingOfPersonMovies(Mockito.any());
 
-        updateAverageRatingOfPersonJob.updateAverageRating();
+        updateAverageRatingOfPersonMoviesJob.updateAverageRating();
 
         for (Person p : personRepository.findAll()) {
             if (p.getId().equals(failedId[0])) {
-                Assert.assertNull(p.getAverageRatingByRoles());
+                Assert.assertNull(p.getAverageRatingByMovies());
             } else {
-                Assert.assertNotNull(p.getAverageRatingByRoles());
+                Assert.assertNotNull(p.getAverageRatingByMovies());
             }
         }
     }

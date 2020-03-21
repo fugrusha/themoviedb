@@ -13,4 +13,9 @@ public interface MovieRepository extends CrudRepository<Movie, UUID>, MovieRepos
 
     @Query("select m.id from Movie m")
     Stream<UUID> getIdsOfMovies();
+
+    @Query("select avg(m.averageRating) from Movie m"
+            + " join m.movieCasts mc"
+            + " where mc.person.id = :personId")
+    Double calcAverageRatingOfPersonMovies(UUID personId);
 }

@@ -1,6 +1,7 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.Person;
 import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
@@ -21,7 +22,11 @@ import java.util.stream.Collectors;
 @ActiveProfiles("test")
 @RunWith(SpringRunner.class)
 @SpringBootTest
-@Sql(statements = "delete from movie", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@Sql(statements = {
+        "delete from movie_cast",
+        "delete from person",
+        "delete from movie"},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class MovieRepositoryTest {
 
     @Autowired
@@ -74,5 +79,25 @@ public class MovieRepositoryTest {
             Set<UUID> actualResult = movieRepository.getIdsOfMovies().collect(Collectors.toSet());
             Assert.assertEquals(expectedResult, actualResult);
         });
+    }
+
+    @Test
+    public void testCalcAverageRatingOfPersonMovies() {
+        Movie m1 = testObjectFactory.createMovie(5.0);
+        Movie m2 = testObjectFactory.createMovie(4.0);
+        Movie m3 = testObjectFactory.createMovie(null);
+        Movie m4 = testObjectFactory.createMovie(9.0);
+
+        Person p1 = testObjectFactory.createPerson();
+        Person p2 = testObjectFactory.createPerson();
+
+        testObjectFactory.createMovieCast(p1, m1);
+        testObjectFactory.createMovieCast(p1, m2);
+        testObjectFactory.createMovieCast(p1, m3);
+        testObjectFactory.createMovieCast(p2, m4); // wrong person
+        testObjectFactory.createMovieCast(p2, m3); // wrong person
+
+        Double result = movieRepository.calcAverageRatingOfPersonMovies(p1.getId());
+        Assert.assertEquals(4.5, result, Double.MIN_NORMAL);
     }
 }

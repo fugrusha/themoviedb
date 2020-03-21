@@ -6,6 +6,7 @@ import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.repository.MovieCastRepository;
+import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.PersonRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,9 @@ public class PersonService {
 
     @Autowired
     private MovieCastRepository movieCastRepository;
+
+    @Autowired
+    private MovieRepository movieRepository;
 
     @Autowired
     private TranslationService translationService;
@@ -79,7 +83,7 @@ public class PersonService {
     }
 
     @Transactional(propagation = Propagation.REQUIRES_NEW)
-    public void updateAverageRatingOfPerson(UUID personId) {
+    public void updateAverageRatingOfPersonRoles(UUID personId) {
         Double averageRating = movieCastRepository.calcAverageRatingOfPerson(personId);
         Person person = repoHelper.getEntityById(Person.class, personId);
 
@@ -87,6 +91,19 @@ public class PersonService {
                 person.getAverageRatingByRoles(), averageRating);
 
         person.setAverageRatingByRoles(averageRating);
+        personRepository.save(person);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateAverageRatingOfPersonMovies(UUID personId) {
+        Double averageRating = movieRepository.calcAverageRatingOfPersonMovies(personId);
+
+        Person person = repoHelper.getEntityById(Person.class, personId);
+
+        log.info("Setting new average rating by movies of person: {}. Old value={}, new value={}",
+                personId, person.getAverageRatingByMovies(), averageRating);
+
+        person.setAverageRatingByMovies(averageRating);
         personRepository.save(person);
     }
 }

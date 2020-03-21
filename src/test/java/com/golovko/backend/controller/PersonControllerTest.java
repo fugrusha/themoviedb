@@ -169,6 +169,7 @@ public class PersonControllerTest {
         dto.setBio("some text");
         dto.setGender(Gender.MALE);
         dto.setAverageRatingByRoles(5.0);
+        dto.setAverageRatingByMovies(9.0);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;

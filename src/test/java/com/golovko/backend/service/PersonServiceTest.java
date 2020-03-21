@@ -112,11 +112,13 @@ public class PersonServiceTest {
 
         PersonReadDTO readDTO = personService.patchPerson(person.getId(), patchDTO);
 
-        Assertions.assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles");
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles",
+                "averageRatingByMovies");
 
         Person personAfterUpdate = personRepository.findById(readDTO.getId()).get();
 
-        Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles");
+        Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles",
+                "averageRatingByMovies");
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate,
                         "movieCrews", "movieCast");
     }
@@ -162,11 +164,27 @@ public class PersonServiceTest {
         testObjectFactory.createMovieCast(p1, m1, 5.0);
         testObjectFactory.createMovieCast(p1, m2, 3.0);
 
-        personService.updateAverageRatingOfPerson(p1.getId());
+        personService.updateAverageRatingOfPersonRoles(p1.getId());
 
         p1 = personRepository.findById(p1.getId()).get();
 
         Assert.assertEquals(4.0, p1.getAverageRatingByRoles(), Double.MIN_NORMAL);
+    }
+
+    @Test
+    public void testUpdateAverageRatingOfPersonMovies() {
+        Movie m1 = testObjectFactory.createMovie(5.0);
+        Movie m2 = testObjectFactory.createMovie(4.0);
+        Person p1 = testObjectFactory.createPerson();
+
+        testObjectFactory.createMovieCast(p1, m1);
+        testObjectFactory.createMovieCast(p1, m2);
+
+        personService.updateAverageRatingOfPersonMovies(p1.getId());
+
+        p1 = personRepository.findById(p1.getId()).get();
+
+        Assert.assertEquals(4.5, p1.getAverageRatingByMovies(), Double.MIN_NORMAL);
     }
 
     private Person createPerson(String lastName) {

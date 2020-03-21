@@ -21,6 +21,8 @@ public class PersonReadDTO {
 
     private Double averageRatingByRoles;
 
+    private Double averageRatingByMovies;
+
     private Instant createdAt;
 
     private Instant updatedAt;

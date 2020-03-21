@@ -27,6 +27,8 @@ public class Person extends AbstractEntity {
 
     private Double averageRatingByRoles;
 
+    private Double averageRatingByMovies;
+
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MovieCrew> movieCrews = new HashSet<>();
 

@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-public class UpdateAverageRatingOfPersonJob {
+public class UpdateAverageRatingOfPersonMoviesJob {
 
     @Autowired
     private PersonRepository personRepository;
@@ -19,15 +19,15 @@ public class UpdateAverageRatingOfPersonJob {
     private PersonService personService;
 
     @Transactional(readOnly = true)
-    @Scheduled(cron = "${update.average.mark.of.person.job.cron}")
+    @Scheduled(cron = "${update.average.mark.of.person.movies.job.cron}")
     public void updateAverageRating() {
         log.info("Job started...");
 
         personRepository.getIdsOfPersons().forEach(personId -> {
             try {
-                personService.updateAverageRatingOfPerson(personId);
+                personService.updateAverageRatingOfPersonMovies(personId);
             } catch (Exception e) {
-                log.error("Failed to update average rating for person: {}", personId, e);
+                log.error("Failed to update average rating of person movies for person: {}", personId, e);
             }
         });
 

@@ -58,12 +58,23 @@ public class TestObjectFactory {
         return movieRepository.save(movie);
     }
 
+    public Movie createMovie(Double averageRating) {
+        Movie movie = new Movie();
+        movie.setMovieTitle("Title of the Movie");
+        movie.setDescription("movie description");
+        movie.setIsReleased(false);
+        movie.setReleaseDate(LocalDate.parse("1990-05-14"));
+        movie.setAverageRating(averageRating);
+        return movieRepository.save(movie);
+    }
+
     public Person createPerson() {
         Person person = new Person();
         person.setFirstName("Anna");
         person.setLastName("Popova");
         person.setBio("some text");
         person.setAverageRatingByRoles(null);
+        person.setAverageRatingByMovies(null);
         person.setGender(Gender.FEMALE);
         return personRepository.save(person);
     }
