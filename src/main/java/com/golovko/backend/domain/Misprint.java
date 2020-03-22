@@ -2,7 +2,6 @@ package com.golovko.backend.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.Instant;
@@ -11,7 +10,6 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class)
 public class Misprint extends AbstractEntity {
 
     private String misprintText;

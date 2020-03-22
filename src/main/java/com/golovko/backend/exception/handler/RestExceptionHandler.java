@@ -32,7 +32,7 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
     }
 
     @ExceptionHandler(EntityWrongStatusException.class)
-    public ResponseEntity<Object> handleUnprocessableEntityException(EntityWrongStatusException e) {
+    public ResponseEntity<Object> handleEntityWrongStatusException(EntityWrongStatusException e) {
         ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(e.getClass(), ResponseStatus.class);
         HttpStatus httpStatus = status != null ? status.code() : HttpStatus.INTERNAL_SERVER_ERROR;
         ErrorInfo errorInfo = new ErrorInfo(httpStatus, e.getClass(), e.getMessage());

@@ -27,4 +27,24 @@ public interface CommentRepository extends CrudRepository<Comment, UUID>, Commen
     @Query("delete from Comment c where c.targetObjectId = :targetId"
             + " and c.targetObjectType = :targetType")
     void deleteCommentsByTargetObjectId(UUID targetId, TargetObjectType targetType);
+
+    @Modifying
+    @Query("update Comment c set c.likesCount=(c.likesCount + 1)"
+            + " where c.id = :commentId")
+    void incrementLikesCountField(UUID commentId);
+
+    @Modifying
+    @Query("update Comment c set c.likesCount=(c.likesCount - 1)"
+            + " where c.id = :commentId")
+    void decrementLikesCountField(UUID commentId);
+
+    @Modifying
+    @Query("update Comment c set c.dislikesCount=(c.dislikesCount + 1)"
+            + " where c.id = :commentId")
+    void incrementDislikesCountField(UUID commentId);
+
+    @Modifying
+    @Query("update Comment c set c.dislikesCount=(c.dislikesCount - 1)"
+            + " where c.id = :commentId")
+    void decrementDislikesCountField(UUID commentId);
 }

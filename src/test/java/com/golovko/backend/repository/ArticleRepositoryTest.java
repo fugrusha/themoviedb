@@ -13,6 +13,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.List;
@@ -29,6 +30,9 @@ public class ArticleRepositoryTest {
 
     @Autowired
     private ArticleRepository articleRepository;
+
+    @Autowired
+    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {
@@ -79,5 +83,65 @@ public class ArticleRepositoryTest {
 
         Assertions.assertThat(articles).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId());
+    }
+
+    @Test
+    public void testIncrementLikesCountField() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        a1.setLikesCount(5);
+        articleRepository.save(a1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            articleRepository.incrementLikesCountField(a1.getId());
+        });
+
+        Article updatedArticle = articleRepository.findById(a1.getId()).get();
+        Assert.assertEquals((Integer) 6, updatedArticle.getLikesCount());
+    }
+
+    @Test
+    public void testDecrementLikesCountField() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        a1.setLikesCount(5);
+        articleRepository.save(a1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            articleRepository.decrementLikesCountField(a1.getId());
+        });
+
+        Article updatedArticle = articleRepository.findById(a1.getId()).get();
+        Assert.assertEquals((Integer) 4, updatedArticle.getLikesCount());
+    }
+
+    @Test
+    public void testIncrementDislikesCountField() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        a1.setDislikesCount(5);
+        articleRepository.save(a1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            articleRepository.incrementDislikesCountField(a1.getId());
+        });
+
+        Article updatedArticle = articleRepository.findById(a1.getId()).get();
+        Assert.assertEquals((Integer) 6, updatedArticle.getDislikesCount());
+    }
+
+    @Test
+    public void testDecrementDislikesCountField() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        a1.setDislikesCount(5);
+        articleRepository.save(a1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            articleRepository.decrementDislikesCountField(a1.getId());
+        });
+
+        Article updatedArticle = articleRepository.findById(a1.getId()).get();
+        Assert.assertEquals((Integer) 4, updatedArticle.getDislikesCount());
     }
 }

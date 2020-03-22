@@ -2,7 +2,6 @@ package com.golovko.backend.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -12,7 +11,6 @@ import java.util.Set;
 @Entity
 @Setter
 @Getter
-@EntityListeners(AuditingEntityListener.class)
 public class Movie extends AbstractEntity {
 
     @Column(nullable = false)
@@ -25,6 +23,10 @@ public class Movie extends AbstractEntity {
     private Boolean isReleased;
 
     private Double averageRating;
+
+    private Integer likesCount;
+
+    private Integer dislikesCount;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MovieCrew> movieCrews = new HashSet<MovieCrew>();

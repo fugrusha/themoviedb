@@ -100,4 +100,60 @@ public class MovieRepositoryTest {
         Double result = movieRepository.calcAverageRatingOfPersonMovies(p1.getId());
         Assert.assertEquals(4.5, result, Double.MIN_NORMAL);
     }
+
+    @Test
+    public void testIncrementLikesCountField() {
+        Movie m1 = testObjectFactory.createMovie();
+        m1.setLikesCount(5);
+        movieRepository.save(m1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            movieRepository.incrementLikesCountField(m1.getId());
+        });
+
+        Movie updatedMovie = movieRepository.findById(m1.getId()).get();
+        Assert.assertEquals((Integer) 6, updatedMovie.getLikesCount());
+    }
+
+    @Test
+    public void testDecrementLikesCountField() {
+        Movie m1 = testObjectFactory.createMovie();
+        m1.setLikesCount(5);
+        movieRepository.save(m1);
+
+        transactionTemplate.executeWithoutResult(status ->  {
+            movieRepository.decrementLikesCountField(m1.getId());
+        });
+
+        Movie updatedMovie = movieRepository.findById(m1.getId()).get();
+        Assert.assertEquals((Integer) 4, updatedMovie.getLikesCount());
+    }
+
+    @Test
+    public void testIncrementDislikesCountField() {
+        Movie m1 = testObjectFactory.createMovie();
+        m1.setDislikesCount(5);
+        movieRepository.save(m1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            movieRepository.incrementDislikesCountField(m1.getId());
+        });
+
+        Movie updatedMovie = movieRepository.findById(m1.getId()).get();
+        Assert.assertEquals((Integer) 6, updatedMovie.getDislikesCount());
+    }
+
+    @Test
+    public void testDecrementDislikesCountField() {
+        Movie m1 = testObjectFactory.createMovie();
+        m1.setDislikesCount(5);
+        movieRepository.save(m1);
+
+        transactionTemplate.executeWithoutResult(status ->  {
+            movieRepository.decrementDislikesCountField(m1.getId());
+        });
+
+        Movie updatedMovie = movieRepository.findById(m1.getId()).get();
+        Assert.assertEquals((Integer) 4, updatedMovie.getDislikesCount());
+    }
 }

@@ -89,6 +89,22 @@ public class LikeRepositoryTest {
     }
 
     @Test
+    public void testFindByUserIdAndLikedObjectId() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Movie movie1 = testObjectFactory.createMovie();
+        Movie movie2 = testObjectFactory.createMovie();
+
+        Like like = testObjectFactory.createLike(true, user1, movie1.getId());
+        testObjectFactory.createLike(true, user1, movie2.getId());
+        testObjectFactory.createLike(true, user2, movie1.getId()); // wrong user
+        testObjectFactory.createLike(true, user2, movie2.getId()); // wrong user
+
+        Like likeFromDb = likeRepository.findByUserIdAndLikedObjectId(user1.getId(), movie1.getId());
+        Assert.assertEquals(like.getId(), likeFromDb.getId());
+    }
+
+    @Test
     public void testDeleteLikesByLikedObjectId() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
@@ -100,18 +116,12 @@ public class LikeRepositoryTest {
         Like like2 = testObjectFactory.createLike(true, user1, a2.getId(), TargetObjectType.ARTICLE);
         Like like3 = testObjectFactory.createLike(true, user2, movie.getId(), TargetObjectType.MOVIE);
 
-        inTransaction(() -> {
-            likeRepository.deleteLikesByTargetObjectId(a1.getId(), TargetObjectType.ARTICLE);
-
-            Assert.assertFalse(likeRepository.existsById(like1.getId()));
-            Assert.assertTrue(likeRepository.existsById(like2.getId()));
-            Assert.assertTrue(likeRepository.existsById(like3.getId()));
-        });
-    }
-
-    private void inTransaction(Runnable runnable) {
         transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
+            likeRepository.deleteLikesByTargetObjectId(a1.getId(), TargetObjectType.ARTICLE);
         });
+
+        Assert.assertFalse(likeRepository.existsById(like1.getId()));
+        Assert.assertTrue(likeRepository.existsById(like2.getId()));
+        Assert.assertTrue(likeRepository.existsById(like3.getId()));
     }
 }

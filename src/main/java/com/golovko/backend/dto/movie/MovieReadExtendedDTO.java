@@ -25,6 +25,10 @@ public class MovieReadExtendedDTO {
 
     private Double averageRating;
 
+    private Integer likesCount;
+
+    private Integer dislikesCount;
+
     private Instant createdAt;
 
     private Instant updatedAt;

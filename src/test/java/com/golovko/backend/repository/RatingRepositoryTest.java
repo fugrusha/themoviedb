@@ -131,17 +131,11 @@ public class RatingRepositoryTest {
         Rating r1 = testObjectFactory.createRating(3, u1, m1.getId(), MOVIE);
         Rating r2 = testObjectFactory.createRating(3, u1, m2.getId(), MOVIE);
 
-        inTransaction(() -> {
-            ratingRepository.deleteRatingsByRatedObjectId(m1.getId(), MOVIE);
-
-            Assert.assertFalse(ratingRepository.existsById(r1.getId()));
-            Assert.assertTrue(ratingRepository.existsById(r2.getId()));
-        });
-    }
-
-    private void inTransaction(Runnable runnable) {
         transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
+            ratingRepository.deleteRatingsByRatedObjectId(m1.getId(), MOVIE);
         });
+
+        Assert.assertFalse(ratingRepository.existsById(r1.getId()));
+        Assert.assertTrue(ratingRepository.existsById(r2.getId()));
     }
 }

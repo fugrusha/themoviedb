@@ -147,12 +147,13 @@ public class MovieServiceTest {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         MovieReadDTO readDTO = movieService.patchMovie(movie.getId(), patchDTO);
 
-        assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRating");
+        assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRating", "likesCount", "dislikesCount");
 
-        Movie movieAfterUpdate = movieRepository.findById(readDTO.getId()).get();
+        Movie afterUpdate = movieRepository.findById(readDTO.getId()).get();
 
-        assertThat(movieAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRating");
-        assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate,
+        assertThat(afterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRating", "likesCount", "dislikesCount");
+
+        assertThat(movie).isEqualToIgnoringGivenFields(afterUpdate,
                 "movieCrews", "movieCasts", "genres");
     }
 

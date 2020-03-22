@@ -120,18 +120,80 @@ public class CommentRepositoryTest {
         Comment c2 = testObjectFactory.createComment(user2, article2.getId(), APPROVED, ARTICLE); // another id
         Comment c3 = testObjectFactory.createComment(user2, movie.getId(), NEED_MODERATION, MOVIE); // another type
 
-        inTransaction(() -> {
+        transactionTemplate.executeWithoutResult(status -> {
             commentRepository.deleteCommentsByTargetObjectId(article1.getId(), ARTICLE);
-
-            Assert.assertTrue(commentRepository.existsById(c2.getId()));
-            Assert.assertTrue(commentRepository.existsById(c3.getId()));
-            Assert.assertFalse(commentRepository.existsById(c1.getId()));
         });
+
+        Assert.assertTrue(commentRepository.existsById(c2.getId()));
+        Assert.assertTrue(commentRepository.existsById(c3.getId()));
+        Assert.assertFalse(commentRepository.existsById(c1.getId()));
     }
 
-    private void inTransaction(Runnable runnable) {
+    @Test
+    public void testIncrementLikesCountField() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+        c1.setLikesCount(5);
+        commentRepository.save(c1);
+
         transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
+            commentRepository.incrementLikesCountField(c1.getId());
         });
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assert.assertEquals((Integer) 6, updatedComment.getLikesCount());
+    }
+
+    @Test
+    public void testDecrementLikesCountField() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+        c1.setLikesCount(5);
+        commentRepository.save(c1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            commentRepository.decrementLikesCountField(c1.getId());
+        });
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assert.assertEquals((Integer) 4, updatedComment.getLikesCount());
+    }
+
+    @Test
+    public void testIncrementDislikesCountField() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+        c1.setDislikesCount(5);
+        commentRepository.save(c1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            commentRepository.incrementDislikesCountField(c1.getId());
+        });
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assert.assertEquals((Integer) 6, updatedComment.getDislikesCount());
+    }
+
+    @Test
+    public void testDecrementDislikesCountField() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+        c1.setDislikesCount(5);
+        commentRepository.save(c1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            commentRepository.decrementDislikesCountField(c1.getId());
+        });
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assert.assertEquals((Integer) 4, updatedComment.getDislikesCount());
     }
 }
