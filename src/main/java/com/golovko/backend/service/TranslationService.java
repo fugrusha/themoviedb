@@ -5,7 +5,6 @@ import com.golovko.backend.dto.article.ArticleCreateDTO;
 import com.golovko.backend.dto.article.ArticlePatchDTO;
 import com.golovko.backend.dto.article.ArticlePutDTO;
 import com.golovko.backend.dto.article.ArticleReadDTO;
-import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
@@ -108,9 +107,6 @@ public class TranslationService {
     private void configureForComment(Configuration c) {
         Configuration.Translation t = c.beanOfClass(Comment.class).translationTo(CommentReadDTO.class);
         t.srcProperty("author.id").translatesTo("authorId");
-
-        Configuration.Translation toEntity = c.beanOfClass(CommentCreateDTO.class).translationTo(Comment.class);
-        toEntity.srcProperty("authorId").translatesTo("author.id");
 
         c.beanOfClass(CommentPatchDTO.class).translationTo(Comment.class).mapOnlyNotNullProperties();
 

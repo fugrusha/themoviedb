@@ -9,6 +9,7 @@ import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
+import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.CommentService;
 import org.assertj.core.api.Assertions;
@@ -116,7 +117,7 @@ public class MovieCrewCommentControllerTest {
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("message text");
         createDTO.setAuthorId(authorId);
-        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CAST);
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
 
         CommentReadDTO readDTO = createCommentReadDTO(authorId, movieCrewId);
 
@@ -134,6 +135,32 @@ public class MovieCrewCommentControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
 
         Mockito.verify(commentService).createComment(movieCrewId, createDTO);
+    }
+
+    @Test
+    public void testCreateMovieCrewCommentBlockedUserException() throws Exception {
+        UUID movieCrewId = UUID.randomUUID();
+        UUID movieId = UUID.randomUUID();
+        UUID authorId = UUID.randomUUID();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(authorId);
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
+
+        BlockedUserException exception = new BlockedUserException(authorId);
+
+        Mockito.when(commentService.createComment(movieCrewId, createDTO)).thenThrow(exception);
+
+        String resultString = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
+                        movieId, movieCrewId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isForbidden())
+                .andReturn().getResponse().getContentAsString();
+
+        Assert.assertTrue(resultString.contains(exception.getMessage()));
     }
 
     @Test

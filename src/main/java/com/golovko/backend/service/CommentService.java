@@ -1,8 +1,10 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.dto.comment.*;
+import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
@@ -55,10 +57,21 @@ public class CommentService {
                 .collect(Collectors.toList());
     }
 
+    @Transactional
     public CommentReadDTO createComment(UUID targetObjectId, CommentCreateDTO createDTO) {
+        ApplicationUser user = repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId());
+
+        if (user.getIsBlocked()) throw new BlockedUserException(user.getId());
+
         Comment comment = translationService.translate(createDTO, Comment.class);
-        // TODO check user's trustLevel
-        comment.setStatus(CommentStatus.PENDING);
+
+        if (user.getTrustLevel() < 5) {
+            comment.setStatus(CommentStatus.PENDING);
+        } else {
+            comment.setStatus(CommentStatus.APPROVED);
+        }
+
+        comment.setAuthor(user);
         comment.setTargetObjectId(targetObjectId);
         comment = commentRepository.save(comment);
 

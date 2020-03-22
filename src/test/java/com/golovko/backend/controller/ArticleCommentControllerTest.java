@@ -9,6 +9,7 @@ import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
+import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.service.CommentService;
 import org.assertj.core.api.Assertions;
@@ -126,6 +127,31 @@ public class ArticleCommentControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
 
         Mockito.verify(commentService).createComment(articleId, createDTO);
+    }
+
+
+    @Test
+    public void testCreateArticleCommentBlockedUserException() throws Exception {
+        UUID articleId = UUID.randomUUID();
+        UUID authorId = UUID.randomUUID();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(authorId);
+        createDTO.setTargetObjectType(TargetObjectType.ARTICLE);
+
+        BlockedUserException exception = new BlockedUserException(authorId);
+
+        Mockito.when(commentService.createComment(articleId, createDTO)).thenThrow(exception);
+
+        String resultString = mockMvc
+                .perform(post("/api/v1/articles/{articleId}/comments/", articleId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isForbidden())
+                .andReturn().getResponse().getContentAsString();
+
+        Assert.assertTrue(resultString.contains(exception.getMessage()));
     }
 
     @Test

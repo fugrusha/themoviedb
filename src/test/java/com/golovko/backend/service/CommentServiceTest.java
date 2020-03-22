@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.comment.*;
+import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
@@ -115,6 +116,55 @@ public class CommentServiceTest {
         createDTO.setTargetObjectType(ARTICLE);
 
         commentService.createComment(article.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateCommentWithUserTrustLevelLessThanFive() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser(4.9, false);
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        CommentReadDTO readDTO = commentService.createComment(movie.getId(), createDTO);
+
+        Assert.assertEquals(readDTO.getStatus(), PENDING);
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assert.assertEquals(comment.getStatus(), PENDING);
+    }
+
+    @Test
+    public void testCreateCommentWithUserTrustLevelGraterThanFiveAndMore() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser(5.0, false);
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        CommentReadDTO readDTO = commentService.createComment(movie.getId(), createDTO);
+
+        Assert.assertEquals(readDTO.getStatus(), APPROVED);
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assert.assertEquals(comment.getStatus(), APPROVED);
+    }
+
+    @Test(expected = BlockedUserException.class)
+    public void testCreateCommentWithBlockedUser() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser(5.0, true);
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        commentService.createComment(movie.getId(), createDTO);
     }
 
     @Test

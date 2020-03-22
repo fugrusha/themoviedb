@@ -25,6 +25,7 @@ public class ApplicationUser extends AbstractEntity {
 
     private Boolean isBlocked = false;
 
+    @Column(nullable = false)
     private Double trustLevel = 1.0;
 
     @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
