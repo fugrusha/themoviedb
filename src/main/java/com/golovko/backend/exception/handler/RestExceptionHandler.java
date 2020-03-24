@@ -14,7 +14,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler({EntityWrongStatusException.class, Exception.class})
     public ResponseEntity<Object> handleException(Exception e) {
         ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(e.getClass(), ResponseStatus.class);
         HttpStatus httpStatus = status != null ? status.code() : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -28,15 +28,6 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String errorMsg = "Invalid type of " + e.getName() + ". It should be of type " + e.getRequiredType().getName();
 
         ErrorInfo errorInfo = new ErrorInfo(httpStatus, e.getClass(), errorMsg);
-        return new ResponseEntity<>(errorInfo, new HttpHeaders(), httpStatus);
-    }
-
-    @ExceptionHandler(EntityWrongStatusException.class)
-    public ResponseEntity<Object> handleEntityWrongStatusException(EntityWrongStatusException e) {
-        ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(e.getClass(), ResponseStatus.class);
-        HttpStatus httpStatus = status != null ? status.code() : HttpStatus.INTERNAL_SERVER_ERROR;
-        ErrorInfo errorInfo = new ErrorInfo(httpStatus, e.getClass(), e.getMessage());
-
         return new ResponseEntity<>(errorInfo, new HttpHeaders(), httpStatus);
     }
 }

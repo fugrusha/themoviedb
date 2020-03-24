@@ -61,7 +61,9 @@ public class CommentService {
     public CommentReadDTO createComment(UUID targetObjectId, CommentCreateDTO createDTO) {
         ApplicationUser user = repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId());
 
-        if (user.getIsBlocked()) throw new BlockedUserException(user.getId());
+        if (user.getIsBlocked()) {
+            throw new BlockedUserException(user.getId());
+        }
 
         Comment comment = translationService.translate(createDTO, Comment.class);
 
