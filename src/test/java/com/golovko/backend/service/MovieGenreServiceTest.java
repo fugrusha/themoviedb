@@ -1,42 +1,25 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Genre;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.repository.GenreRepository;
 import com.golovko.backend.repository.MovieRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Set;
 import java.util.UUID;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Sql(statements = {"delete from genre_movie", "delete from genre", "delete from movie"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MovieGenreServiceTest {
+public class MovieGenreServiceTest extends BaseTest {
 
     @Autowired
     private MovieRepository movieRepository;
 
     @Autowired
     private GenreRepository genreRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testAddGenreToMovie() {
@@ -71,12 +54,6 @@ public class MovieGenreServiceTest {
         inTransaction(() -> {
             Movie savedMovie = movieRepository.findById(movieId).get();
             Assert.assertEquals(0, savedMovie.getGenres().size());
-        });
-    }
-
-    private void inTransaction (Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
         });
     }
 }

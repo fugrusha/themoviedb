@@ -1,18 +1,12 @@
 package com.golovko.backend.repository;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -21,20 +15,10 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@ActiveProfiles("test")
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@Sql(statements = "delete from person", executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class PersonRepositoryTest {
+public class PersonRepositoryTest extends BaseTest {
 
     @Autowired
     private PersonRepository personRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {

@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -8,15 +9,9 @@ import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RatingRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -27,25 +22,7 @@ import java.util.UUID;
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from like",
-        "delete from comment",
-        "delete from genre_movie",
-        "delete from genre",
-        "delete from rating",
-        "delete from user_role",
-        "delete from application_user",
-        "delete from genre_movie",
-        "delete from genre",
-        "delete from movie_cast",
-        "delete from movie_crew",
-        "delete from person",
-        "delete from movie"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MovieServiceTest {
+public class MovieServiceTest extends BaseTest {
 
     @Autowired
     private MovieService movieService;
@@ -61,9 +38,6 @@ public class MovieServiceTest {
 
     @Autowired
     private RatingRepository ratingRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @Autowired
     private UpdateAverageRatingOfMoviesJob updateAverageRatingOfMoviesJob;

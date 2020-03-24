@@ -1,7 +1,6 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.domain.TargetObjectType;
@@ -15,14 +14,10 @@ import com.golovko.backend.service.CommentService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.Instant;
 import java.util.List;
@@ -31,18 +26,11 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(MovieCrewCommentController.class)
-public class MovieCrewCommentControllerTest {
+public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
     @MockBean
     private CommentService commentService;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MockMvc mockMvc;
 
     @Test
     public void testGetMovieCrewCommentById() throws Exception {

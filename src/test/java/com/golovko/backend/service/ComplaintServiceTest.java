@@ -1,20 +1,14 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.HashSet;
 import java.util.List;
@@ -23,27 +17,13 @@ import java.util.UUID;
 
 import static com.golovko.backend.domain.ComplaintType.*;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from complaint",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class ComplaintServiceTest {
+public class ComplaintServiceTest extends BaseTest {
 
     @Autowired
     private ComplaintService complaintService;
 
     @Autowired
     private ComplaintRepository complaintRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testGetComplaint() {
@@ -386,11 +366,5 @@ public class ComplaintServiceTest {
         c1 = complaintRepository.findById(c1.getId()).get();
         Assert.assertEquals(moderator.getId(), c1.getModerator().getId());
         Assert.assertEquals(c1.getComplaintStatus(), ComplaintStatus.UNDER_INVESTIGATION);
-    }
-
-    private void inTransaction (Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
     }
 }

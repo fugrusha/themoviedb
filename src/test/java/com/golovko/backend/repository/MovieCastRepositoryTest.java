@@ -1,19 +1,13 @@
 package com.golovko.backend.repository;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCast;
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.HashSet;
@@ -22,24 +16,13 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {"delete from person", "delete from movie", "delete from movie_cast"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MovieCastRepositoryTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class MovieCastRepositoryTest extends BaseTest {
 
     @Autowired
     private MovieRepository movieRepository;
 
     @Autowired
     private MovieCastRepository movieCastRepository;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {

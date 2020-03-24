@@ -167,4 +167,16 @@
         </loadUpdateData>
     </changeSet>
 
+    <changeSet id="load likes" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="like" file="db/data/likes.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="me_like" type="boolean"/>
+            <column name="author_id" type="uuid"/>
+            <column name="liked_object_type" type="string"/>
+            <column name="liked_object_id" type="uuid"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </loadUpdateData>
+    </changeSet>
+
 </databaseChangeLog>

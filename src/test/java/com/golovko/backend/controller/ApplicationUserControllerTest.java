@@ -1,6 +1,5 @@
 package com.golovko.backend.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.dto.user.*;
@@ -10,15 +9,11 @@ import com.golovko.backend.service.ApplicationUserService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
@@ -27,15 +22,8 @@ import java.util.UUID;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ApplicationUserController.class)
-public class ApplicationUserControllerTest {
-
-    @Autowired
-    private MockMvc mvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class ApplicationUserControllerTest extends BaseControllerTest {
 
     @MockBean
     private ApplicationUserService applicationUserService;
@@ -46,7 +34,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.getUser(user.getId())).thenReturn(user);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(get("/api/v1/users/{id}", user.getId()))
                 .andExpect(status().isOk())
                 .andReturn()
@@ -66,7 +54,7 @@ public class ApplicationUserControllerTest {
         EntityNotFoundException exception = new EntityNotFoundException(ApplicationUser.class, wrongId);
         Mockito.when(applicationUserService.getUser(wrongId)).thenThrow(exception);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(get("/api/v1/users/{id}", wrongId))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
@@ -85,7 +73,7 @@ public class ApplicationUserControllerTest {
                 MethodArgumentTypeMismatchException.class,
                 errorMsg);
 
-        String result = mvc
+        String result = mockMvc
                 .perform(get("/api/v1/users/{id}", invalidId))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
@@ -105,7 +93,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.createUser(createDTO)).thenReturn(readDTO);
 
-        String result = mvc
+        String result = mockMvc
                 .perform(post("/api/v1/users")
                 .content(objectMapper.writeValueAsString(createDTO))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -127,7 +115,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.patchUser(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(patch("/api/v1/users/{id}", readDTO.getId().toString())
                 .content(objectMapper.writeValueAsString(patchDTO))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -149,7 +137,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.updateUser(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(put("/api/v1/users/{id}", readDTO.getId().toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
@@ -164,7 +152,7 @@ public class ApplicationUserControllerTest {
     public void testDeleteUser() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mvc.perform(delete("/api/v1/users/{id}", id))
+        mockMvc.perform(delete("/api/v1/users/{id}", id))
                 .andExpect(status().isOk());
 
         Mockito.verify(applicationUserService).deleteUser(id);
@@ -176,7 +164,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.ban(readDTO.getId())).thenReturn(readDTO);
 
-        String resultJson = mvc.perform(post("/api/v1/users/{id}/ban", readDTO.getId()))
+        String resultJson = mockMvc.perform(post("/api/v1/users/{id}/ban", readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -192,7 +180,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.pardon(readDTO.getId())).thenReturn(readDTO);
 
-        String resultJson = mvc.perform(post("/api/v1/users/{id}/pardon", readDTO.getId()))
+        String resultJson = mockMvc.perform(post("/api/v1/users/{id}/pardon", readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -211,7 +199,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.addUserRole(readDTO.getId(), userRoleDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(post("/api/v1/users/{id}/add-user-role", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRoleDTO)))
@@ -233,7 +221,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.removeUserRole(readDTO.getId(), userRoleDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(post("/api/v1/users/{id}/remove-user-role", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRoleDTO)))

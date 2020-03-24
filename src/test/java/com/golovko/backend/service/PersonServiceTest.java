@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
@@ -9,38 +10,21 @@ import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from movie_cast",
-        "delete from movie",
-        "delete from person"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class PersonServiceTest {
+public class PersonServiceTest extends BaseTest {
 
     @Autowired
     private PersonService personService;
 
     @Autowired
     private PersonRepository personRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @Test
     public void testGetPerson() {

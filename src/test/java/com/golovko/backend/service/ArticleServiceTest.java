@@ -1,21 +1,16 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.HashSet;
 import java.util.List;
@@ -24,17 +19,7 @@ import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from like",
-        "delete from comment",
-        "delete from article",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class ArticleServiceTest {
+public class ArticleServiceTest extends BaseTest {
 
     @Autowired
     private ArticleService articleService;
@@ -47,9 +32,6 @@ public class ArticleServiceTest {
 
     @Autowired
     private LikeRepository likeRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @Test
     public void testGetArticleById() {

@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Genre;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.genre.*;
@@ -7,28 +8,16 @@ import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.GenreRepository;
 import com.golovko.backend.repository.MovieRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Sql(statements = {"delete from genre_movie", "delete from genre", "delete from movie"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class GenreServiceTest {
+public class GenreServiceTest extends BaseTest {
 
     @Autowired
     private GenreService genreService;
@@ -38,12 +27,6 @@ public class GenreServiceTest {
 
     @Autowired
     private MovieRepository movieRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testGetGenreById() {
@@ -171,11 +154,5 @@ public class GenreServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteGenreNotFound() {
         genreService.deleteGenre(UUID.randomUUID());
-    }
-
-    private void inTransaction (Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
     }
 }

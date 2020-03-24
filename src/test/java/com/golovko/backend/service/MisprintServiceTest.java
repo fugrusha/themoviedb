@@ -1,20 +1,15 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.repository.*;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
@@ -24,23 +19,7 @@ import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.*;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from movie_cast",
-        "delete from movie_crew",
-        "delete from person",
-        "delete from movie",
-        "delete from article",
-        "delete from misprint",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MisprintServiceTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class MisprintServiceTest extends BaseTest {
 
     @Autowired
     private MisprintService misprintService;

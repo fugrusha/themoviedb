@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.like.LikeCreateDTO;
 import com.golovko.backend.dto.like.LikePatchDTO;
@@ -11,16 +12,10 @@ import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.MovieRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
@@ -28,21 +23,7 @@ import java.util.UUID;
 import static com.golovko.backend.domain.CommentStatus.APPROVED;
 import static com.golovko.backend.domain.TargetObjectType.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from movie",
-        "delete from comment",
-        "delete from like",
-        "delete from article",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class LikeServiceTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class LikeServiceTest extends BaseTest {
 
     @Autowired
     private MovieRepository movieRepository;
