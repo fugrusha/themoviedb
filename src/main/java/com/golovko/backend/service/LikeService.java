@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.domain.ActionType;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Like;
 import com.golovko.backend.domain.TargetObjectType;
@@ -79,7 +80,7 @@ public class LikeService {
               articleRepository.incrementLikesCountField(likedObjectId);
               break;
           default:
-              throw new WrongTypeOfTargetObjectException("ADD LIKE", objectType);
+              throw new WrongTypeOfTargetObjectException(ActionType.ADD_LIKE, objectType);
         }
     }
 
@@ -95,7 +96,7 @@ public class LikeService {
               articleRepository.incrementDislikesCountField(likedObjectId);
               break;
           default:
-              throw new WrongTypeOfTargetObjectException("ADD DISLIKE", objectType);
+              throw new WrongTypeOfTargetObjectException(ActionType.ADD_DISLIKE, objectType);
         }
     }
 
@@ -142,7 +143,7 @@ public class LikeService {
               articleRepository.decrementLikesCountField(likedObjectId);
               break;
           default:
-              throw new WrongTypeOfTargetObjectException("REMOVE LIKE", objectType);
+              throw new WrongTypeOfTargetObjectException(ActionType.REMOVE_LIKE, objectType);
         }
     }
 
@@ -158,7 +159,7 @@ public class LikeService {
               articleRepository.decrementDislikesCountField(likedObjectId);
               break;
           default:
-              throw new WrongTypeOfTargetObjectException("REMOVE DISLIKE", objectType);
+              throw new WrongTypeOfTargetObjectException(ActionType.REMOVE_DISLIKE, objectType);
         }
     }
 

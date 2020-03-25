@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.domain.ActionType;
 import com.golovko.backend.domain.Like;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.like.LikeCreateDTO;
@@ -7,6 +8,7 @@ import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.WrongTypeOfTargetObjectException;
 import com.golovko.backend.service.LikeService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -83,6 +85,30 @@ public class LikeControllerTest extends BaseControllerTest {
 
         LikeReadDTO actualResult = objectMapper.readValue(resultJSON, LikeReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testCreateLikeWrongTypeOfTargetObjectException() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setLikedObjectId(UUID.randomUUID());
+        createDTO.setLikedObjectType(TargetObjectType.MOVIE_CAST);
+        createDTO.setMeLiked(true);
+
+        WrongTypeOfTargetObjectException exception =
+                new WrongTypeOfTargetObjectException(ActionType.ADD_LIKE, createDTO.getLikedObjectType());
+
+        Mockito.when(likeService.createLike(userId, createDTO)).thenThrow(exception);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/likes/", userId, createDTO)
+                .content(objectMapper.writeValueAsString(createDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn().getResponse().getContentAsString();
+
+        Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
     @Test
