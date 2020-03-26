@@ -8,6 +8,7 @@ import com.golovko.backend.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public class MovieCrewCommentController {
     @PostMapping
     public CommentReadDTO createMovieCrewComment(
             @PathVariable UUID movieCrewId,
-            @RequestBody CommentCreateDTO createDTO
+            @RequestBody @Valid CommentCreateDTO createDTO
     ) {
         return commentService.createComment(movieCrewId, createDTO);
     }
@@ -42,7 +43,7 @@ public class MovieCrewCommentController {
     public CommentReadDTO updateMovieCrewComment(
             @PathVariable UUID movieCrewId,
             @PathVariable UUID id,
-            @RequestBody CommentPutDTO putDTO
+            @RequestBody @Valid CommentPutDTO putDTO
     ) {
         return commentService.updateComment(movieCrewId, id, putDTO);
     }
@@ -51,7 +52,7 @@ public class MovieCrewCommentController {
     public CommentReadDTO patchMovieCrewComment(
             @PathVariable UUID movieCrewId,
             @PathVariable UUID id,
-            @RequestBody CommentPatchDTO patchDTO
+            @RequestBody @Valid CommentPatchDTO patchDTO
     ) {
         return commentService.patchComment(movieCrewId, id, patchDTO);
     }

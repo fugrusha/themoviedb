@@ -5,6 +5,7 @@ import com.golovko.backend.service.MovieCrewService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +33,7 @@ public class MovieCrewController {
 
     @PostMapping
     public MovieCrewReadDTO createMovieCrew(
-            @RequestBody MovieCrewCreateDTO createDTO,
+            @RequestBody @Valid MovieCrewCreateDTO createDTO,
             @PathVariable UUID movieId
     ) {
         return movieCrewService.createMovieCrew(createDTO, movieId);
@@ -42,7 +43,7 @@ public class MovieCrewController {
     public MovieCrewReadDTO patchMovieCrew(
             @PathVariable UUID movieId,
             @PathVariable UUID id,
-            @RequestBody MovieCrewPatchDTO patchDTO
+            @RequestBody @Valid MovieCrewPatchDTO patchDTO
     ) {
         return movieCrewService.patchMovieCrew(movieId, id, patchDTO);
     }
@@ -51,7 +52,7 @@ public class MovieCrewController {
     public MovieCrewReadDTO updateMovieCrew(
             @PathVariable UUID movieId,
             @PathVariable UUID id,
-            @RequestBody MovieCrewPutDTO updateDTO
+            @RequestBody @Valid MovieCrewPutDTO updateDTO
     ) {
         return movieCrewService.updateMovieCrew(movieId, id, updateDTO);
     }

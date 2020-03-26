@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.controller.validation.ControllerValidationUtil;
 import com.golovko.backend.dto.article.ArticleManagerFilter;
 import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
@@ -11,6 +12,7 @@ import com.golovko.backend.service.MisprintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -27,15 +29,17 @@ public class ContentManagerController {
     @PostMapping("/misprints/{id}/confirm")
     public MisprintReadDTO confirmModeration(
             @PathVariable UUID id,
-            @RequestBody MisprintConfirmDTO dto
+            @RequestBody @Valid MisprintConfirmDTO dto
     ) {
+        ControllerValidationUtil.validateLessThan(dto.getStartIndex(), dto.getEndIndex(),
+                "startIndex", "endIndex");
         return misprintService.confirmModeration(id, dto);
     }
 
     @PostMapping("/misprints/{id}/reject")
     public MisprintReadDTO rejectModeration(
             @PathVariable UUID id,
-            @RequestBody MisprintRejectDTO dto
+            @RequestBody @Valid MisprintRejectDTO dto
     ) {
         return misprintService.rejectModeration(id, dto);
     }

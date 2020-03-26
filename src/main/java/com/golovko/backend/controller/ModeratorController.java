@@ -14,6 +14,7 @@ import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public class ModeratorController {
     @PostMapping("/users/{id}/set-trust-level")
     public UserReadDTO setTrustLevelToUser(
             @PathVariable UUID id,
-            @RequestBody UserTrustLevelDTO dto) {
+            @RequestBody @Valid UserTrustLevelDTO dto) {
         return applicationUserService.changeTrustLevel(id, dto);
     }
 
@@ -45,7 +46,7 @@ public class ModeratorController {
     @PostMapping("/comments/{id}/change-status")
     public CommentReadDTO changeCommentStatus(
             @PathVariable UUID id,
-            @RequestBody CommentStatusDTO dto
+            @RequestBody @Valid CommentStatusDTO dto
     ) {
         return commentService.changeStatus(id, dto);
     }
@@ -58,7 +59,7 @@ public class ModeratorController {
     @PostMapping("/complaints/{id}/moderate")
     public ComplaintReadDTO moderateComplaint(
             @PathVariable UUID id,
-            @RequestBody ComplaintModerateDTO dto
+            @RequestBody @Valid ComplaintModerateDTO dto
     ) {
         return complaintService.moderateComplaint(id, dto);
     }

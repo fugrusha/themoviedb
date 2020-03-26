@@ -77,32 +77,6 @@ public class MisprintService {
         return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
-    public MisprintReadDTO patchMisprintComplaint(
-            UUID userId,
-            UUID id,
-            MisprintPatchDTO patchDTO
-    ) {
-        Misprint misprint = getMisprintByUserId(id, userId);
-
-        translationService.map(patchDTO, misprint);
-        misprint = misprintRepository.save(misprint);
-
-        return translationService.translate(misprint, MisprintReadDTO.class);
-    }
-
-    public MisprintReadDTO updateMisprintComplaint(
-            UUID userId,
-            UUID id,
-            MisprintPutDTO updateDTO
-    ) {
-        Misprint misprint = getMisprintByUserId(id, userId);
-
-        translationService.map(updateDTO, misprint);
-        misprint = misprintRepository.save(misprint);
-
-        return translationService.translate(misprint, MisprintReadDTO.class);
-    }
-
     public void deleteMisprintComplaint(UUID userId, UUID id) {
         misprintRepository.delete(getMisprintByUserId(id, userId));
     }

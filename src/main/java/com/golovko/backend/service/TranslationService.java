@@ -16,8 +16,6 @@ import com.golovko.backend.dto.genre.GenrePutDTO;
 import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
-import com.golovko.backend.dto.misprint.MisprintPatchDTO;
-import com.golovko.backend.dto.misprint.MisprintPutDTO;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MoviePutDTO;
@@ -142,10 +140,6 @@ public class TranslationService {
         Configuration.Translation t = c.beanOfClass(Misprint.class).translationTo(MisprintReadDTO.class);
         t.srcProperty("author.id").translatesTo("authorId");
         t.srcProperty("moderator.id").translatesTo("moderatorId");
-
-        c.beanOfClass(MisprintPatchDTO.class).translationTo(Misprint.class).mapOnlyNotNullProperties();
-
-        c.beanOfClass(MisprintPutDTO.class).translationTo(Misprint.class);
     }
 
     private void configureForMovieCast(Configuration c) {

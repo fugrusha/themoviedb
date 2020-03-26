@@ -10,6 +10,7 @@ import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.CommentService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -18,11 +19,13 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -143,6 +146,65 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testCreateArticleCommentNotNullValidationFailed() throws Exception {
+        UUID articleId = UUID.randomUUID();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/{articleId}/comments/", articleId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
+    }
+
+    @Test
+    public void testCreateArticleCommentMinSizeValidationFailed() throws Exception {
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("");
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setTargetObjectType(TargetObjectType.ARTICLE);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/{articleId}/comments/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
+    }
+
+    @Test
+    public void testCreateArticleCommentMaxSizeValidationFailed() throws Exception {
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("comment message".repeat(100));
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setTargetObjectType(TargetObjectType.ARTICLE);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/{articleId}/comments/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
+    }
+
+    @Test
     public void testUpdateArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -166,6 +228,44 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testUpdateArticleCommentMinSizeValidationFailed() throws Exception {
+        CommentPutDTO putDTO = new CommentPutDTO();
+        putDTO.setMessage("");
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/articles/{articleId}/comments/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateArticleCommentMaxSizeValidationFailed() throws Exception {
+        CommentPutDTO putDTO = new CommentPutDTO();;
+        putDTO.setMessage("comment message".repeat(100));
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/articles/{articleId}/comments/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
+    }
+
+    @Test
     public void testPatchArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -186,6 +286,42 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
 
         CommentReadDTO actualResult = objectMapper.readValue(resultJson, CommentReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testPatchArticleCommentMinSizeValidationFailed() throws Exception {
+        CommentPatchDTO patchDTO = new CommentPatchDTO();
+        patchDTO.setMessage("");
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/articles/{articleId}/comments/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
+    }
+
+    @Test
+    public void testPatchArticleCommentMaxSizeValidationFailed() throws Exception {
+        CommentPatchDTO patchDTO = new CommentPatchDTO();
+        patchDTO.setMessage("comment message".repeat(100));
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/articles/{articleId}/comments/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        objectMapper.readValue(resultJson, ErrorInfo.class);
+        Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
     @Test

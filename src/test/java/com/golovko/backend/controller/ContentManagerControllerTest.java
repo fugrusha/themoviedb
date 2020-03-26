@@ -11,7 +11,9 @@ import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
 import com.golovko.backend.dto.misprint.MisprintFilter;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.misprint.MisprintRejectDTO;
+import com.golovko.backend.exception.ControllerValidationException;
 import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ArticleService;
 import com.golovko.backend.service.MisprintService;
 import org.assertj.core.api.Assertions;
@@ -21,12 +23,14 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -49,6 +53,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         confirmDTO.setStartIndex(5);
         confirmDTO.setEndIndex(20);
         confirmDTO.setReplaceTo("new text");
+        confirmDTO.setTargetObjectId(UUID.randomUUID());
 
         Mockito.when(misprintService.confirmModeration(readDTO.getId(), confirmDTO)).thenReturn(readDTO);
 
@@ -66,6 +71,113 @@ public class ContentManagerControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testConfirmMisprintNotNullValidationException() throws Exception {
+        MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(confirmDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
+    }
+
+    @Test
+    public void testConfirmMisprintMinSizeValidationException() throws Exception {
+        MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
+        confirmDTO.setModeratorId(UUID.randomUUID());
+        confirmDTO.setStartIndex(5);
+        confirmDTO.setEndIndex(20);
+        confirmDTO.setReplaceTo("");
+        confirmDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(confirmDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
+    }
+
+    @Test
+    public void testConfirmMisprintMaxSizeValidationException() throws Exception {
+        MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
+        confirmDTO.setModeratorId(UUID.randomUUID());
+        confirmDTO.setStartIndex(5);
+        confirmDTO.setEndIndex(20);
+        confirmDTO.setReplaceTo("misprint".repeat(1000));
+        confirmDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(confirmDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
+    }
+
+    @Test
+    public void testConfirmMisprintNegativeIndexValidationException() throws Exception {
+        MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
+        confirmDTO.setModeratorId(UUID.randomUUID());
+        confirmDTO.setStartIndex(-5);
+        confirmDTO.setEndIndex(-20);
+        confirmDTO.setReplaceTo("new text");
+        confirmDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(confirmDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
+    }
+
+    @Test
+    public void testConfirmMisprintWrongIndexesValidationException() throws Exception {
+        MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
+        confirmDTO.setModeratorId(UUID.randomUUID());
+        confirmDTO.setStartIndex(20); // grater than end index
+        confirmDTO.setEndIndex(10);
+        confirmDTO.setReplaceTo("new text");
+        confirmDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(confirmDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo errorInfo = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(errorInfo.getMessage().contains("startIndex"));
+        Assert.assertTrue(errorInfo.getMessage().contains("endIndex"));
+        Assert.assertEquals(ControllerValidationException.class, errorInfo.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
+    }
+
+    @Test
     public void testRejectModeration() throws Exception {
         MisprintReadDTO readDTO = createMistakeReadDTO();
 
@@ -73,6 +185,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         rejectDTO.setModeratorId(UUID.randomUUID());
         rejectDTO.setStatus(ComplaintStatus.CLOSED);
         rejectDTO.setReason("whatever");
+        rejectDTO.setTargetObjectId(UUID.randomUUID());
 
         Mockito.when(misprintService.rejectModeration(readDTO.getId(), rejectDTO))
                 .thenReturn(readDTO);
@@ -91,6 +204,65 @@ public class ContentManagerControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testRejectMisprintNotNullValidationException() throws Exception {
+        MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/misprints/{id}/reject", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(rejectDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).rejectModeration(any(), any());
+    }
+
+    @Test
+    public void testRejectMisprintMaxSizeValidationException() throws Exception {
+        MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
+        rejectDTO.setModeratorId(UUID.randomUUID());
+        rejectDTO.setStatus(ComplaintStatus.CLOSED);
+        rejectDTO.setReason("whatever".repeat(100));
+        rejectDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/misprints/{id}/reject", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(rejectDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).rejectModeration(any(), any());
+    }
+
+    @Test
+    public void testRejectMisprintMinSizeValidationException() throws Exception {
+        MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
+        rejectDTO.setModeratorId(UUID.randomUUID());
+        rejectDTO.setStatus(ComplaintStatus.CLOSED);
+        rejectDTO.setReason("");
+        rejectDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/misprints/{id}/reject", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(rejectDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).rejectModeration(any(), any());
+    }
+
+    @Test
     public void testRejectMisprintStatusCode422() throws Exception {
         UUID misprintId = UUID.randomUUID();
 
@@ -98,6 +270,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         rejectDTO.setModeratorId(UUID.randomUUID());
         rejectDTO.setStatus(ComplaintStatus.CLOSED);
         rejectDTO.setReason("whatever");
+        rejectDTO.setTargetObjectId(UUID.randomUUID());
 
         EntityWrongStatusException ex = new EntityWrongStatusException(Misprint.class, misprintId);
 
@@ -122,6 +295,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         confirmDTO.setStartIndex(5);
         confirmDTO.setEndIndex(20);
         confirmDTO.setReplaceTo("new text");
+        confirmDTO.setTargetObjectId(UUID.randomUUID());
 
         EntityWrongStatusException ex = new EntityWrongStatusException(Misprint.class, misprintId);
 

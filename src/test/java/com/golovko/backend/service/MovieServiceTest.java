@@ -140,7 +140,6 @@ public class MovieServiceTest extends BaseTest {
         updateDTO.setDescription("some NEW description");
         updateDTO.setIsReleased(false);
         updateDTO.setReleaseDate(LocalDate.parse("1900-07-10"));
-        updateDTO.setAverageRating(5.5);
 
         MovieReadDTO readDTO = movieService.updateMovie(movie.getId(), updateDTO);
 

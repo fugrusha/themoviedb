@@ -5,10 +5,9 @@ import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.Misprint;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.misprint.MisprintCreateDTO;
-import com.golovko.backend.dto.misprint.MisprintPatchDTO;
-import com.golovko.backend.dto.misprint.MisprintPutDTO;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.MisprintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -17,11 +16,13 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -120,55 +121,62 @@ public class MisprintControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testPatchMisprintComplaint() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        UUID targetObjectId = UUID.randomUUID();
-
-        MisprintReadDTO readDTO = createMistakeReadDTO(userId, targetObjectId, moderatorId);
-
-        MisprintPatchDTO patchDTO = new MisprintPatchDTO();
-        patchDTO.setMisprintText("misprint");
-        patchDTO.setReplaceTo("another text");
-
-        Mockito.when(misprintService.patchMisprintComplaint(userId, readDTO.getId(), patchDTO))
-                .thenReturn(readDTO);
+    public void testCreateMisprintNotNullValidationException() throws Exception {
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/users/{userId}/misprints/{id}", userId, readDTO.getId())
-                .content(objectMapper.writeValueAsString(patchDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .perform(post("/api/v1/users/{userId}/misprints/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
-        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).createMisprintComplaint(any(), any());
     }
 
     @Test
-    public void testUpdateMisprintComplaint() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        UUID targetObjectId = UUID.randomUUID();
-
-        MisprintReadDTO readDTO = createMistakeReadDTO(userId, targetObjectId, moderatorId);
-
-        MisprintPutDTO updateDTO = new MisprintPutDTO();
-        updateDTO.setMisprintText("misprint");
-        updateDTO.setReplaceTo("new title");
-
-        Mockito.when(misprintService.updateMisprintComplaint(userId, readDTO.getId(), updateDTO))
-                .thenReturn(readDTO);
+    public void testCreateMisprintMinSizeValidationException() throws Exception {
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("");
+        createDTO.setReplaceTo("");
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setTargetObjectId(UUID.randomUUID());
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/users/{userId}/misprints/{id}", userId, readDTO.getId())
-                .content(objectMapper.writeValueAsString(updateDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
+                .perform(post("/api/v1/users/{userId}/misprints/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
-        MisprintReadDTO actualResult = objectMapper.readValue(resultJson, MisprintReadDTO.class);
-        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).createMisprintComplaint(any(), any());
+    }
+
+    @Test
+    public void testCreateMisprintMaxSizeValidationException() throws Exception {
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("text with misprint".repeat(100));
+        createDTO.setReplaceTo("new text".repeat(100));
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/misprints/", UUID.randomUUID())
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(misprintService, Mockito.never()).createMisprintComplaint(any(), any());
     }
 
     @Test

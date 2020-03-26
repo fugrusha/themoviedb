@@ -9,6 +9,7 @@ import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.WrongTypeOfTargetObjectException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.LikeService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -17,10 +18,12 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -102,13 +105,30 @@ public class LikeControllerTest extends BaseControllerTest {
         Mockito.when(likeService.createLike(userId, createDTO)).thenThrow(exception);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/users/{userId}/likes/", userId, createDTO)
+                .perform(post("/api/v1/users/{userId}/likes/", userId)
                 .content(objectMapper.writeValueAsString(createDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isUnprocessableEntity())
                 .andReturn().getResponse().getContentAsString();
 
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
+    }
+
+    @Test
+    public void testCreateLikeValidationException() throws Exception {
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/likes/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(likeService, Mockito.never()).createLike(any(), any());
     }
 
     @Test

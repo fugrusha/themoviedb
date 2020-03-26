@@ -114,68 +114,6 @@ public class MisprintServiceTest extends BaseTest {
     }
 
     @Test
-    public void testPatchMisprintComplaint() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
-
-        Misprint m1 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user, "misprint");
-
-        MisprintPatchDTO patchDTO = new MisprintPatchDTO();
-        patchDTO.setReplaceTo("another text");
-        patchDTO.setMisprintText("misprint");
-
-        MisprintReadDTO readDTO = misprintService.patchMisprintComplaint(user.getId(), m1.getId(), patchDTO);
-
-        Assertions.assertThat(patchDTO).isEqualToIgnoringGivenFields(readDTO,
-                "moderatorId", "authorId");
-
-        m1 = misprintRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(m1).isEqualToIgnoringGivenFields(readDTO, "moderator", "author");
-        Assert.assertEquals(readDTO.getAuthorId(), m1.getAuthor().getId());
-    }
-
-    @Test
-    public void testPatchMisprintComplaintEmptyPatch() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
-        Misprint m1 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user, "misprint");
-
-        MisprintPatchDTO patchDTO = new MisprintPatchDTO();
-
-        MisprintReadDTO readDTO = misprintService.patchMisprintComplaint(user.getId(), m1.getId(), patchDTO);
-
-        Assertions.assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("moderatorId", "fixedAt",
-                "replacedWith", "reason");
-
-        Misprint misprintAfterUpdate = misprintRepository.findById(readDTO.getId()).get();
-
-        Assertions.assertThat(misprintAfterUpdate).hasNoNullFieldsOrPropertiesExcept("moderator", "fixedAt",
-                "replacedWith", "reason");
-        Assertions.assertThat(misprintAfterUpdate).isEqualToIgnoringGivenFields(m1,"author", "moderator");
-        Assert.assertEquals(readDTO.getAuthorId(), misprintAfterUpdate.getAuthor().getId());
-    }
-
-    @Test
-    public void testUpdateMisprintComplaint() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
-        Misprint m1 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user, "misprint");
-
-        MisprintPutDTO updateDTO = new MisprintPutDTO();
-        updateDTO.setMisprintText("misprint");
-        updateDTO.setReplaceTo("new title");
-
-        MisprintReadDTO readDTO = misprintService.updateMisprintComplaint(user.getId(), m1.getId(), updateDTO);
-
-        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO,
-                "moderatorId", "authorId");
-
-        m1 = misprintRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(m1).isEqualToIgnoringGivenFields(readDTO, "moderator", "author");
-        Assert.assertEquals(readDTO.getAuthorId(), m1.getAuthor().getId());
-    }
-
-    @Test
     public void testDeleteMisprintComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
         Movie movie = testObjectFactory.createMovie();

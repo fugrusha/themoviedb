@@ -5,6 +5,7 @@ import com.golovko.backend.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -31,17 +32,23 @@ public class ArticleController {
     }
 
     @PostMapping
-    public ArticleReadDTO createArticle(@RequestBody ArticleCreateDTO createDTO) {
+    public ArticleReadDTO createArticle(@RequestBody @Valid ArticleCreateDTO createDTO) {
         return articleService.createArticle(createDTO);
     }
 
     @PutMapping("/{id}")
-    public ArticleReadDTO updateArticle(@PathVariable UUID id, @RequestBody ArticlePutDTO putDTO) {
+    public ArticleReadDTO updateArticle(
+            @PathVariable UUID id,
+            @RequestBody @Valid ArticlePutDTO putDTO
+    ) {
         return articleService.updateArticle(id, putDTO);
     }
 
     @PatchMapping("/{id}")
-    public ArticleReadDTO patchArticle(@PathVariable UUID id, @RequestBody ArticlePatchDTO patchDTO) {
+    public ArticleReadDTO patchArticle(
+            @PathVariable UUID id,
+            @RequestBody @Valid ArticlePatchDTO patchDTO
+    ) {
         return articleService.patchArticle(id, patchDTO);
     }
 

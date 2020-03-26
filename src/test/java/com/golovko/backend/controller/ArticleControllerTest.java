@@ -6,6 +6,7 @@ import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ArticleService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -14,11 +15,13 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -31,8 +34,7 @@ public class ArticleControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetArticleById() throws Exception {
-        UUID authorId = UUID.randomUUID();
-        ArticleReadDTO readDTO = createArticleReadDTO(authorId);
+        ArticleReadDTO readDTO = createArticleReadDTO();
 
         Mockito.when(articleService.getArticle(readDTO.getId())).thenReturn(readDTO);
 
@@ -50,12 +52,10 @@ public class ArticleControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetAllArticles() throws Exception {
-        UUID authorId1 = UUID.randomUUID();
-        UUID authorId2 = UUID.randomUUID();
-        ArticleReadDTO a1 = createArticleReadDTO(authorId1);
-        ArticleReadDTO a2 = createArticleReadDTO(authorId1);
-        ArticleReadDTO a3 = createArticleReadDTO(authorId2);
-        ArticleReadDTO a4 = createArticleReadDTO(authorId2);
+        ArticleReadDTO a1 = createArticleReadDTO();
+        ArticleReadDTO a2 = createArticleReadDTO();
+        ArticleReadDTO a3 = createArticleReadDTO();
+        ArticleReadDTO a4 = createArticleReadDTO();
 
         List<ArticleReadDTO> expectedResult = List.of(a1, a2, a3, a4);
 
@@ -109,14 +109,13 @@ public class ArticleControllerTest extends BaseControllerTest {
 
     @Test
     public void testCreateArticle() throws Exception {
-        UUID authorId = UUID.randomUUID();
-        ArticleReadDTO readDTO = createArticleReadDTO(authorId);
+        ArticleReadDTO readDTO = createArticleReadDTO();
 
         ArticleCreateDTO createDTO = new ArticleCreateDTO();
         createDTO.setTitle("Text title");
         createDTO.setText("Some text");
         createDTO.setStatus(ArticleStatus.DRAFT);
-        createDTO.setAuthorId(authorId);
+        createDTO.setAuthorId(UUID.randomUUID());
 
         Mockito.when(articleService.createArticle(createDTO)).thenReturn(readDTO);
 
@@ -134,9 +133,67 @@ public class ArticleControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testCreateArticleNotNullValidationFailed() throws Exception {
+        ArticleCreateDTO createDTO = new ArticleCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(articleService, Mockito.never()).createArticle(any());
+    }
+
+    @Test
+    public void testCreateArticleMinSizeValidationFailed() throws Exception {
+        ArticleCreateDTO createDTO = new ArticleCreateDTO();
+        createDTO.setTitle("");
+        createDTO.setText("");
+        createDTO.setStatus(ArticleStatus.DRAFT);
+        createDTO.setAuthorId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(articleService, Mockito.never()).createArticle(any());
+    }
+
+    @Test
+    public void testCreateArticleMaxSizeValidationFailed() throws Exception {
+        ArticleCreateDTO createDTO = new ArticleCreateDTO();
+        createDTO.setTitle("Text title".repeat(100));
+        createDTO.setText("Some text".repeat(1000));
+        createDTO.setStatus(ArticleStatus.DRAFT);
+        createDTO.setAuthorId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(articleService, Mockito.never()).createArticle(any());
+    }
+
+    @Test
     public void testUpdateArticle() throws Exception {
-        UUID authorId = UUID.randomUUID();
-        ArticleReadDTO readDTO = createArticleReadDTO(authorId);
+        ArticleReadDTO readDTO = createArticleReadDTO();
 
         ArticlePutDTO updateDTO = new ArticlePutDTO();
         updateDTO.setTitle("Title");
@@ -157,9 +214,48 @@ public class ArticleControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testUpdateArticleMinSizeValidationFailed() throws Exception {
+        ArticlePutDTO updateDTO = new ArticlePutDTO();
+        updateDTO.setTitle("");
+        updateDTO.setText("");
+        updateDTO.setStatus(ArticleStatus.DRAFT);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/articles/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(articleService, Mockito.never()).updateArticle(any(), any());
+    }
+
+    @Test
+    public void testUpdateArticleMaxSizeValidationFailed() throws Exception {
+        ArticlePutDTO updateDTO = new ArticlePutDTO();
+        updateDTO.setTitle("Text title".repeat(100));
+        updateDTO.setText("Some text".repeat(1000));
+        updateDTO.setStatus(ArticleStatus.DRAFT);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/articles/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(articleService, Mockito.never()).updateArticle(any(), any());
+    }
+
+    @Test
     public void testPatchArticle() throws Exception {
-        UUID authorId = UUID.randomUUID();
-        ArticleReadDTO readDTO = createArticleReadDTO(authorId);
+        ArticleReadDTO readDTO = createArticleReadDTO();
 
         ArticlePatchDTO patchDTO = new ArticlePatchDTO();
         patchDTO.setTitle("Article title");
@@ -180,6 +276,46 @@ public class ArticleControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testPatchArticleMinSizeValidationFailed() throws Exception {
+        ArticlePatchDTO patchDTO = new ArticlePatchDTO();
+        patchDTO.setTitle("");
+        patchDTO.setText("");
+        patchDTO.setStatus(ArticleStatus.DRAFT);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/articles/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(articleService, Mockito.never()).patchArticle(any(), any());
+    }
+
+    @Test
+    public void testPatchArticleMaxSizeValidationFailed() throws Exception {
+        ArticlePatchDTO patchDTO = new ArticlePatchDTO();
+        patchDTO.setTitle("Text title".repeat(100));
+        patchDTO.setText("Some text".repeat(1000));
+        patchDTO.setStatus(ArticleStatus.DRAFT);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/articles/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(articleService, Mockito.never()).patchArticle(any(), any());
+    }
+
+    @Test
     public void testDeleteArticle() throws Exception {
         UUID id = UUID.randomUUID();
 
@@ -189,13 +325,13 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).deleteArticle(id);
     }
 
-    private ArticleReadDTO createArticleReadDTO(UUID authorId) {
+    private ArticleReadDTO createArticleReadDTO() {
         ArticleReadDTO dto = new ArticleReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setTitle("Title");
         dto.setText("Some Text");
         dto.setStatus(ArticleStatus.PUBLISHED);
-        dto.setAuthorId(authorId);
+        dto.setAuthorId(UUID.randomUUID());
         dto.setDislikesCount(555);
         dto.setLikesCount(333);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));

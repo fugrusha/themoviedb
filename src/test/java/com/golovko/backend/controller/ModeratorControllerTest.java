@@ -13,6 +13,7 @@ import com.golovko.backend.dto.complaint.ComplaintModerateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.dto.user.UserTrustLevelDTO;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ApplicationUserService;
 import com.golovko.backend.service.CommentService;
 import com.golovko.backend.service.ComplaintService;
@@ -23,12 +24,14 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -113,6 +116,23 @@ public class ModeratorControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testModerateComplaintNotNUllValidationException() throws Exception {
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/complaints/{id}/moderate", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(moderDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).moderateComplaint(any(), any());
+    }
+
+    @Test
     public void testSetUserTrustLevel() throws Exception {
         UserTrustLevelDTO dto = new UserTrustLevelDTO();
         dto.setTrustLevel(6.5);
@@ -132,6 +152,59 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Assert.assertEquals(readDTO, actualResult);
 
         Mockito.verify(applicationUserService).changeTrustLevel(readDTO.getId(), dto);
+    }
+
+    @Test
+    public void testSetUserTrustLevelNotNullValidationException() throws Exception {
+        UserTrustLevelDTO dto = new UserTrustLevelDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/set-trust-level", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
+    }
+
+    @Test
+    public void testSetUserTrustLevelMaxValueValidationException() throws Exception {
+        UserTrustLevelDTO dto = new UserTrustLevelDTO();
+        dto.setTrustLevel(10.1);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/set-trust-level", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
+    }
+
+    @Test
+    public void testSetUserTrustLevelMinValueValidationException() throws Exception {
+        UserTrustLevelDTO dto = new UserTrustLevelDTO();
+        dto.setTrustLevel(0.9);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/set-trust-level", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
     }
 
     @Test
@@ -181,6 +254,23 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Assert.assertEquals(actualResult, readDTO);
 
         Mockito.verify(commentService).changeStatus(readDTO.getId(), statusDTO);
+    }
+
+    @Test
+    public void testChangeCommentStatusValidationException() throws Exception {
+        CommentStatusDTO statusDTO = new CommentStatusDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/comments/{id}/change-status", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(statusDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).changeStatus(any(), any());
     }
 
     private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID moderatorId) {

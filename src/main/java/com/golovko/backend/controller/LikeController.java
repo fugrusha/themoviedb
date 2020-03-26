@@ -8,6 +8,7 @@ import com.golovko.backend.service.LikeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
@@ -23,7 +24,10 @@ public class LikeController {
     }
 
     @PostMapping
-    public LikeReadDTO createLike(@PathVariable UUID userId, @RequestBody LikeCreateDTO createDTO) {
+    public LikeReadDTO createLike(
+            @PathVariable UUID userId,
+            @RequestBody @Valid LikeCreateDTO createDTO
+    ) {
         return likeService.createLike(userId, createDTO);
     }
 
@@ -31,7 +35,8 @@ public class LikeController {
     public LikeReadDTO patchLike(
             @PathVariable UUID userId,
             @PathVariable UUID id,
-            @RequestBody LikePatchDTO patchDTO) {
+            @RequestBody LikePatchDTO patchDTO
+    ) {
         return likeService.patchLike(userId, id, patchDTO);
     }
 
@@ -39,7 +44,8 @@ public class LikeController {
     public LikeReadDTO updateLike(
             @PathVariable UUID userId,
             @PathVariable UUID id,
-            @RequestBody LikePutDTO updateDTO) {
+            @RequestBody LikePutDTO updateDTO
+    ) {
         return likeService.updateLike(userId, id, updateDTO);
     }
 

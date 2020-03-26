@@ -10,6 +10,7 @@ import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -18,11 +19,13 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -35,18 +38,14 @@ public class ComplaintControllerTest extends BaseControllerTest {
     @Test
     public void testGetComplaintById() throws Exception {
         UUID userId = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId, moderatorId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId);
 
         Mockito.when(complaintService.getComplaint(userId, readDTO.getId())).thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/users/{userId}/complaints/{id}", userId, readDTO.getId()))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                .andReturn().getResponse().getContentAsString();
 
         ComplaintReadDTO actualComplaint = objectMapper.readValue(resultJson, ComplaintReadDTO.class);
         Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
@@ -56,18 +55,17 @@ public class ComplaintControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetAllUserComplaints() throws Exception {
-        UUID userId1 = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        ComplaintReadDTO c1 = createComplaintReadDTO(userId1, parentId, moderatorId);
-        ComplaintReadDTO c2 = createComplaintReadDTO(userId1, parentId, moderatorId);
+        UUID userId = UUID.randomUUID();
+
+        ComplaintReadDTO c1 = createComplaintReadDTO(userId);
+        ComplaintReadDTO c2 = createComplaintReadDTO(userId);
 
         List<ComplaintReadDTO> expectedResult = List.of(c1, c2);
 
-        Mockito.when(complaintService.getUserComplaints(userId1)).thenReturn(expectedResult);
+        Mockito.when(complaintService.getUserComplaints(userId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/users/{userId}/complaints/", userId1))
+                .perform(get("/api/v1/users/{userId}/complaints/", userId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -75,7 +73,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).extracting(ComplaintReadDTO::getId)
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
 
-        Mockito.verify(complaintService).getUserComplaints(userId1);
+        Mockito.verify(complaintService).getUserComplaints(userId);
     }
 
     @Test
@@ -105,10 +103,8 @@ public class ComplaintControllerTest extends BaseControllerTest {
         createDTO.setTargetObjectId(UUID.randomUUID());
 
         UUID userId = UUID.randomUUID();
-        UUID targetObjectId = createDTO.getTargetObjectId();
-        UUID moderatorId = UUID.randomUUID();
 
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, targetObjectId, moderatorId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId);
 
         Mockito.when(complaintService.createComplaint(userId, createDTO)).thenReturn(readDTO);
 
@@ -124,11 +120,70 @@ public class ComplaintControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testCreateComplaintNotNullValidationException() throws Exception {
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/complaints/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).createComplaint(any(), any());
+    }
+
+    @Test
+    public void testCreateComplaintMinSizeValidationException() throws Exception {
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("");
+        createDTO.setComplaintText("");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/complaints/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).createComplaint(any(), any());
+    }
+
+    @Test
+    public void testCreateComplaintMaxSizeValidationException() throws Exception {
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("complaint title".repeat(100));
+        createDTO.setComplaintText("complaint long text".repeat(100));
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setTargetObjectId(UUID.randomUUID());
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/complaints/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).createComplaint(any(), any());
+    }
+
+    @Test
     public void testPatchComplaint() throws Exception {
         UUID userId = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId, moderatorId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
@@ -150,11 +205,51 @@ public class ComplaintControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testPatchComplaintMinSizeValidationException() throws Exception {
+        ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
+        patchDTO.setComplaintTitle("");
+        patchDTO.setComplaintText("");
+        patchDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/users/{userId}/complaints/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).patchComplaint(any(), any(), any());
+    }
+
+    @Test
+    public void testPatchComplaintMaxSizeValidationException() throws Exception {
+        ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
+        patchDTO.setComplaintTitle("complaint title".repeat(100));
+        patchDTO.setComplaintText("complaint long text".repeat(100));
+        patchDTO.setComplaintType(ComplaintType.SPAM);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/users/{userId}/complaints/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).patchComplaint(any(), any(), any());
+    }
+
+    @Test
     public void testUpdateComplaint() throws Exception {
         UUID userId = UUID.randomUUID();
-        UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        ComplaintReadDTO readDTO = createComplaintReadDTO(userId, parentId, moderatorId);
+        ComplaintReadDTO readDTO = createComplaintReadDTO(userId);
 
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
@@ -176,6 +271,48 @@ public class ComplaintControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testUpdateComplaintMinSizeValidationException() throws Exception {
+        ComplaintPutDTO updateDTO = new ComplaintPutDTO();
+        updateDTO.setComplaintTitle("");
+        updateDTO.setComplaintText("");
+        updateDTO.setComplaintType(ComplaintType.CHILD_ABUSE);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/users/{userId}/complaints/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).updateComplaint(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateComplaintMaxSizeValidationException() throws Exception {
+        ComplaintPutDTO updateDTO = new ComplaintPutDTO();
+        updateDTO.setComplaintTitle("complaint title".repeat(100));
+        updateDTO.setComplaintText("complaint long text".repeat(100));
+        updateDTO.setComplaintType(ComplaintType.SPAM);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/users/{userId}/complaints/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).updateComplaint(any(), any(), any());
+    }
+
+    @Test
     public void testDeleteComplaint() throws Exception {
         UUID id = UUID.randomUUID();
         UUID userId = UUID.randomUUID();
@@ -186,7 +323,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService).deleteComplaint(userId, id);
     }
 
-    private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {
+    private ComplaintReadDTO createComplaintReadDTO(UUID authorId) {
         ComplaintReadDTO readDTO = new ComplaintReadDTO();
         readDTO.setId(UUID.randomUUID());
         readDTO.setComplaintTitle("Report 1");
@@ -197,8 +334,8 @@ public class ComplaintControllerTest extends BaseControllerTest {
         readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
         readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         readDTO.setTargetObjectType(TargetObjectType.PERSON);
-        readDTO.setTargetObjectId(parentId);
-        readDTO.setModeratorId(moderatorId);
+        readDTO.setTargetObjectId(UUID.randomUUID());
+        readDTO.setModeratorId(UUID.randomUUID());
         return readDTO;
     }
 }

@@ -5,6 +5,7 @@ import com.golovko.backend.service.MovieCastService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,7 +33,7 @@ public class MovieCastController {
 
     @PostMapping
     public MovieCastReadDTO createMovieCast(
-            @RequestBody MovieCastCreateDTO createDTO,
+            @RequestBody @Valid MovieCastCreateDTO createDTO,
             @PathVariable UUID movieId
     ) {
         return movieCastService.createMovieCast(createDTO, movieId);
@@ -40,7 +41,7 @@ public class MovieCastController {
 
     @PutMapping("/{id}")
     public MovieCastReadDTO updateMovieCast(
-            @RequestBody MovieCastPutDTO updateDTO,
+            @RequestBody @Valid MovieCastPutDTO updateDTO,
             @PathVariable UUID id,
             @PathVariable UUID movieId
     ) {
@@ -49,7 +50,7 @@ public class MovieCastController {
 
     @PatchMapping("/{id}")
     public MovieCastReadDTO patchMovieCast(
-            @RequestBody MovieCastPatchDTO patchDTO,
+            @RequestBody @Valid MovieCastPatchDTO patchDTO,
             @PathVariable UUID id,
             @PathVariable UUID movieId) {
         return movieCastService.patchMovieCast(patchDTO, id, movieId);

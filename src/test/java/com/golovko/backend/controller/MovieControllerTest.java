@@ -9,6 +9,7 @@ import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
 import com.golovko.backend.dto.moviecrew.MovieCrewReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.MovieService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -18,6 +19,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.time.LocalDate;
@@ -25,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -115,6 +118,65 @@ public class MovieControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testCreateMovieNotNullValidationException() throws Exception {
+        MovieCreateDTO createDTO = new MovieCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).createMovie(any());
+    }
+
+    @Test
+    public void testCreateMovieMinSizeValidationException() throws Exception {
+        MovieCreateDTO createDTO = new MovieCreateDTO();
+        createDTO.setMovieTitle("Guess Who".repeat(100));
+        createDTO.setDescription("12345".repeat(1000));
+        createDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
+        createDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).createMovie(any());
+    }
+
+    @Test
+    public void testCreateMovieMaxSizeValidationException() throws Exception {
+        MovieCreateDTO createDTO = new MovieCreateDTO();
+        createDTO.setMovieTitle("");
+        createDTO.setDescription("");
+        createDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
+        createDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).createMovie(any());
+    }
+
+    @Test
     public void testPatchMovie() throws Exception {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         patchDTO.setMovieTitle("title");
@@ -127,7 +189,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.when(movieService.patchMovie(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/movies/{id}", readDTO.getId().toString())
+                .perform(patch("/api/v1/movies/{id}", readDTO.getId())
                 .content(objectMapper.writeValueAsString(patchDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -138,20 +200,61 @@ public class MovieControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testPatchMovieMinSizeValidationException() throws Exception {
+        MoviePatchDTO patchDTO = new MoviePatchDTO();
+        patchDTO.setMovieTitle("");
+        patchDTO.setDescription("");
+        patchDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
+        patchDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
+    }
+
+    @Test
+    public void testPatchMovieMaxSizeValidationException() throws Exception {
+        MoviePatchDTO patchDTO = new MoviePatchDTO();
+        patchDTO.setMovieTitle("Guess Who".repeat(100));
+        patchDTO.setDescription("12345".repeat(1000));
+        patchDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
+        patchDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
+    }
+
+    @Test
     public void testUpdateMovie() throws Exception {
         MoviePutDTO updateDTO = new MoviePutDTO();
         updateDTO.setMovieTitle("new title");
         updateDTO.setDescription("some NEW description");
         updateDTO.setIsReleased(false);
         updateDTO.setReleaseDate(LocalDate.parse("1900-07-10"));
-        updateDTO.setAverageRating(5.5);
 
         MovieReadDTO readDTO = createMovieReadDTO();
 
         Mockito.when(movieService.updateMovie(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/movies/{id}", readDTO.getId().toString())
+                .perform(put("/api/v1/movies/{id}", readDTO.getId())
                 .content(objectMapper.writeValueAsString(updateDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -159,6 +262,48 @@ public class MovieControllerTest extends BaseControllerTest {
 
         MovieReadDTO actualMovie = objectMapper.readValue(resultJson, MovieReadDTO.class);
         Assert.assertEquals(readDTO, actualMovie);
+    }
+
+    @Test
+    public void testUpdateMovieMinSizeValidationException() throws Exception {
+        MoviePutDTO updateDTO = new MoviePutDTO();
+        updateDTO.setMovieTitle("");
+        updateDTO.setDescription("");
+        updateDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
+        updateDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
+    }
+
+    @Test
+    public void testUpdateMovieMaxSizeValidationException() throws Exception {
+        MoviePutDTO updateDTO = new MoviePutDTO();
+        updateDTO.setMovieTitle("Guess Who".repeat(100));
+        updateDTO.setDescription("12345".repeat(1000));
+        updateDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
+        updateDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
     }
 
     @Test
