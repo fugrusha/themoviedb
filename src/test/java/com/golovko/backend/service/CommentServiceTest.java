@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -377,5 +378,31 @@ public class CommentServiceTest extends BaseTest {
         Assert.assertEquals(actualResult.getAuthorId(), updatedComment.getAuthor().getId());
 
         Assert.assertEquals(updatedComment.getStatus(), statusDTO.getStatus());
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveCommentNotNullValidation() {
+        Comment comment = new Comment();
+        commentRepository.save(comment);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveCommentMaxSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment comment = testObjectFactory.createComment(user, movie.getId(), PENDING, MOVIE);
+        comment.setMessage("long message".repeat(100));
+        commentRepository.save(comment);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveCommentMinSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment comment = testObjectFactory.createComment(user, movie.getId(), PENDING, MOVIE);
+        comment.setMessage("");
+        commentRepository.save(comment);
     }
 }

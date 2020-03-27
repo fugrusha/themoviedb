@@ -11,6 +11,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -283,4 +284,35 @@ public class ArticleServiceTest extends BaseTest {
         Assertions.assertThat(actualResult).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId());
     }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveArticleNotNullValidation() {
+        Article article = new Article();
+        articleRepository.save(article);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveArticleMaxSizeValidation() {
+        ApplicationUser author = testObjectFactory.createUser();
+
+        Article article = new Article();
+        article.setTitle("article title".repeat(100));
+        article.setText("long long text".repeat(1000));
+        article.setStatus(ArticleStatus.DRAFT);
+        article.setAuthor(author);
+        articleRepository.save(article);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveArticleMinSizeValidation() {
+        ApplicationUser author = testObjectFactory.createUser();
+
+        Article article = new Article();
+        article.setTitle("");
+        article.setText("");
+        article.setStatus(ArticleStatus.DRAFT);
+        article.setAuthor(author);
+        articleRepository.save(article);
+    }
+
 }

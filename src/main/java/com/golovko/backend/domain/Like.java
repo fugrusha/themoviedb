@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Entity
@@ -11,15 +12,18 @@ import java.util.UUID;
 @Setter
 public class Like extends AbstractEntity {
 
+    @NotNull
     private Boolean meLiked;
 
+    @NotNull
     @ManyToOne
-    @JoinColumn(nullable = false, updatable = false)
+    @JoinColumn(updatable = false)
     private ApplicationUser author;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private TargetObjectType likedObjectType;
 
-    @Column(nullable = false)
+    @NotNull
     private UUID likedObjectId;
 }

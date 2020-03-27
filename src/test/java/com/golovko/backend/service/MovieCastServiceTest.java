@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.UUID;
@@ -179,7 +180,8 @@ public class MovieCastServiceTest extends BaseTest {
         MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
         patchDTO.setCharacter("New Character");
         patchDTO.setDescription("New text");
-        patchDTO.setPersonId(person.getId());;
+        patchDTO.setPersonId(person.getId());
+        ;
 
         MovieCastReadDTO readDTO = movieCastService.patchMovieCast(patchDTO, movieCast.getId(), movie.getId());
 
@@ -257,5 +259,57 @@ public class MovieCastServiceTest extends BaseTest {
 
         movieCast = movieCastRepository.findById(movieCast.getId()).get();
         Assert.assertEquals(4.5, movieCast.getAverageRating(), Double.MIN_NORMAL);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastNotNullException() {
+        MovieCast mc = new MovieCast();
+        movieCastRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastMaxSizeValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCast mc = new MovieCast();
+        mc.setDescription("Long long text".repeat(1000));
+        mc.setCharacter("Long long text".repeat(1000));
+        mc.setMovie(movie);
+        movieCastRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastMinSizeValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCast mc = new MovieCast();
+        mc.setDescription("");
+        mc.setCharacter("");
+        mc.setMovie(movie);
+        movieCastRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastMinRatingValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCast mc = new MovieCast();
+        mc.setDescription("text");
+        mc.setCharacter("text");
+        mc.setMovie(movie);
+        mc.setAverageRating(-0.01);
+        movieCastRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastMaxRatingValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCast mc = new MovieCast();
+        mc.setDescription("text");
+        mc.setCharacter("text");
+        mc.setMovie(movie);
+        mc.setAverageRating(10.01);
+        movieCastRepository.save(mc);
     }
 }

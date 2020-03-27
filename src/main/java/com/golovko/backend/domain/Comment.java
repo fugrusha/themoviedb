@@ -3,7 +3,12 @@ package com.golovko.backend.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.EnumType;
+import javax.persistence.Enumerated;
+import javax.persistence.ManyToOne;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.UUID;
 
 @Entity
@@ -11,8 +16,11 @@ import java.util.UUID;
 @Setter
 public class Comment extends AbstractEntity {
 
+    @NotNull
+    @Size(min = 1, max = 500)
     private String message;
 
+    @NotNull
     @Enumerated(value = EnumType.STRING)
     private CommentStatus status;
 
@@ -20,12 +28,14 @@ public class Comment extends AbstractEntity {
 
     private Integer dislikesCount;
 
+    @NotNull
     @ManyToOne
     private ApplicationUser author;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private TargetObjectType targetObjectType;
 
-    @Column(nullable = false)
+    @NotNull
     private UUID targetObjectId;
 }

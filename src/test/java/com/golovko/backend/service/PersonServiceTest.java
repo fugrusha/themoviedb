@@ -14,6 +14,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.UUID;
@@ -169,6 +170,56 @@ public class PersonServiceTest extends BaseTest {
         p1 = personRepository.findById(p1.getId()).get();
 
         Assert.assertEquals(4.5, p1.getAverageRatingByMovies(), Double.MIN_NORMAL);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonNotNullValidation() {
+        Person person = new Person();
+        personRepository.save(person);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonMaxSizeValidation() {
+        Person person = new Person();
+        person.setFirstName("very long text".repeat(100));
+        person.setLastName("very long text".repeat(100));
+        person.setBio("very long text".repeat(1000));
+        person.setGender(Gender.MALE);
+        personRepository.save(person);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonMinSizeValidation() {
+        Person person = new Person();
+        person.setFirstName("");
+        person.setLastName("");
+        person.setBio("");
+        person.setGender(Gender.MALE);
+        personRepository.save(person);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonMinRatingValidation() {
+        Person person = new Person();
+        person.setFirstName("Name");
+        person.setLastName("Surname");
+        person.setBio("bio");
+        person.setGender(Gender.MALE);
+        person.setAverageRatingByMovies(-0.01);
+        person.setAverageRatingByRoles(-0.01);
+        personRepository.save(person);;
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonMaxRatingValidation() {
+        Person person = new Person();
+        person.setFirstName("Name");
+        person.setLastName("Surname");
+        person.setBio("bio");
+        person.setGender(Gender.MALE);
+        person.setAverageRatingByMovies(10.01);
+        person.setAverageRatingByRoles(10.01);
+        personRepository.save(person);;
     }
 
     private Person createPerson(String lastName) {

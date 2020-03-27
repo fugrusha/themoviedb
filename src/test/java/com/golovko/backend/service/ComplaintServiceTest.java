@@ -9,6 +9,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.HashSet;
 import java.util.List;
@@ -366,5 +367,33 @@ public class ComplaintServiceTest extends BaseTest {
         c1 = complaintRepository.findById(c1.getId()).get();
         Assert.assertEquals(moderator.getId(), c1.getModerator().getId());
         Assert.assertEquals(c1.getComplaintStatus(), ComplaintStatus.UNDER_INVESTIGATION);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveComplaintNotNullValidation() {
+        Complaint complaint = new Complaint();
+        complaintRepository.save(complaint);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveComplaintMaxSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Complaint complaint = testObjectFactory.createComplaint(movie.getId(), TargetObjectType.MOVIE, user);
+        complaint.setComplaintTitle("very long title".repeat(100));
+        complaint.setComplaintText("long description of issue".repeat(1000));
+        complaintRepository.save(complaint);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveComplaintMinSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Complaint complaint = testObjectFactory.createComplaint(movie.getId(), TargetObjectType.MOVIE, user);
+        complaint.setComplaintTitle("");
+        complaint.setComplaintText("");
+        complaintRepository.save(complaint);
     }
 }

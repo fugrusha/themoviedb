@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.Set;
 import java.util.UUID;
@@ -193,5 +194,30 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
         Assert.assertFalse(updatedUser.getUserRole().contains(UserRole.CONTENT_MANAGER));
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveUserNotNullValidation() {
+        ApplicationUser user = new ApplicationUser();
+        applicationUserRepository.save(user);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveUserTrustLevelMinSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser(0.9, false);
+        applicationUserRepository.save(user);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveUserTrustLevelMaxSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser(11.0, false);
+        applicationUserRepository.save(user);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveUserWrongEmailValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setEmail("wrongemail");
+        applicationUserRepository.save(user);
     }
 }

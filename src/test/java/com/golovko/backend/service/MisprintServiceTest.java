@@ -10,6 +10,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashSet;
@@ -659,5 +660,47 @@ public class MisprintServiceTest extends BaseTest {
 
         Assertions.assertThat(actualResult).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId());
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMisprintNotNullValidation() {
+        Misprint misprint = new Misprint();
+        misprintRepository.save(misprint);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMisprintMinSizeValidation() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Misprint misprint = new Misprint();
+        misprint.setMisprintText("");
+        misprint.setReplaceTo("");
+        misprint.setReplacedWith("");
+        misprint.setReason("");
+        misprint.setAuthor(user1);
+        misprint.setStatus(ComplaintStatus.CLOSED);
+        misprint.setTargetObjectId(movie.getId());
+        misprint.setTargetObjectType(MOVIE);
+
+        misprintRepository.save(misprint);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMisprintMaxSizeValidation() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Misprint misprint = new Misprint();
+        misprint.setMisprintText("long text".repeat(100));
+        misprint.setReplaceTo("long text".repeat(100));
+        misprint.setReplacedWith("long text".repeat(100));
+        misprint.setReason("long text".repeat(100));
+        misprint.setAuthor(user1);
+        misprint.setStatus(ComplaintStatus.CLOSED);
+        misprint.setTargetObjectId(movie.getId());
+        misprint.setTargetObjectType(MOVIE);
+
+        misprintRepository.save(misprint);
     }
 }

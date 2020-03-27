@@ -15,6 +15,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.UUID;
@@ -162,5 +163,37 @@ public class RatingServiceTest extends BaseTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteRatingNotFound() {
         ratingService.deleteRating(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveRatingNotNullValidation() {
+        Rating rating = new Rating();
+        ratingRepository.save(rating);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveRatingMinRatingValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Rating rating = new Rating();
+        rating.setRating(0);
+        rating.setRatedObjectId(movie.getId());
+        rating.setRatedObjectType(MOVIE);
+        rating.setAuthor(user);
+        ratingRepository.save(rating);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveRatingMaxRatingValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Rating rating = new Rating();
+        rating.setRating(11);
+        rating.setRatedObjectId(movie.getId());
+        rating.setRatedObjectType(MOVIE);
+        rating.setAuthor(user);
+        ratingRepository.save(rating);
     }
 }

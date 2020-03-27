@@ -16,6 +16,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
@@ -430,5 +431,11 @@ public class LikeServiceTest extends BaseTest {
 
         Article updatedArticle = articleRepository.findById(a1.getId()).get();
         Assert.assertEquals(updatedArticle.getDislikesCount(), (Integer) 4);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveLikeNotNullValidation() {
+        Like like = new Like();
+        likeRepository.save(like);
     }
 }

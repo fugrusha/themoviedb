@@ -57,13 +57,11 @@ public class RatingRepositoryTest extends BaseTest {
     public void testCalcAverageRating() {
         ApplicationUser u1 = testObjectFactory.createUser();
         ApplicationUser u2 = testObjectFactory.createUser();
-        ApplicationUser u3 = testObjectFactory.createUser();
         Movie m1 = testObjectFactory.createMovie();
         Movie m2 = testObjectFactory.createMovie();
 
         testObjectFactory.createRating(3, u1, m1.getId(), MOVIE);
         testObjectFactory.createRating(6, u2, m1.getId(), MOVIE);
-        testObjectFactory.createRating((Integer)null, u3, m1.getId(), MOVIE);  // no mark
         testObjectFactory.createRating(3, u1, m2.getId(), MOVIE);  // another movie
 
         Assert.assertEquals(4.5, ratingRepository.calcAverageRating(m1.getId()), Double.MIN_NORMAL);

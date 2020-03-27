@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.Set;
@@ -154,5 +155,27 @@ public class GenreServiceTest extends BaseTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteGenreNotFound() {
         genreService.deleteGenre(UUID.randomUUID());
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveGenreNotNullValidation() {
+        Genre genre = new Genre();
+        genreRepository.save(genre);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveGenreMinSizeValidation() {
+        Genre genre = new Genre();
+        genre.setGenreName("");
+        genre.setDescription("");
+        genreRepository.save(genre);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveGenreMaxSizeValidation() {
+        Genre genre = new Genre();
+        genre.setGenreName("very long genre name".repeat(100));
+        genre.setDescription("very long genre name".repeat(1000));
+        genreRepository.save(genre);
     }
 }

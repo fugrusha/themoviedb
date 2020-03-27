@@ -12,6 +12,7 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.UUID;
@@ -105,6 +106,7 @@ public class MovieCrewServiceTest extends BaseTest {
         MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
         createDTO.setPersonId(null);
         createDTO.setDescription("Some text");
+        createDTO.setMovieCrewType(MovieCrewType.DIRECTOR);
 
         MovieCrewReadDTO readDTO = movieCrewService.createMovieCrew(createDTO, movie.getId());
 
@@ -256,5 +258,58 @@ public class MovieCrewServiceTest extends BaseTest {
 
         movieCrew = movieCrewRepository.findById(movieCrew.getId()).get();
         Assert.assertEquals(4.5, movieCrew.getAverageRating(), Double.MIN_NORMAL);
+    }
+
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewNotNullException() {
+        MovieCrew mc = new MovieCrew();
+        movieCrewRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewMaxSizeValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrew mc = new MovieCrew();
+        mc.setDescription("Long long text".repeat(1000));
+        mc.setMovieCrewType(MovieCrewType.DIRECTOR);
+        mc.setMovie(movie);
+        movieCrewRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewMinSizeValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrew mc = new MovieCrew();
+        mc.setDescription("");
+        mc.setMovieCrewType(MovieCrewType.DIRECTOR);
+        mc.setMovie(movie);
+        movieCrewRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewMinRatingValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrew mc = new MovieCrew();
+        mc.setDescription("text");
+        mc.setMovieCrewType(MovieCrewType.DIRECTOR);
+        mc.setMovie(movie);
+        mc.setAverageRating(-0.01);
+        movieCrewRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewMaxRatingValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrew mc = new MovieCrew();
+        mc.setDescription("text");
+        mc.setMovieCrewType(MovieCrewType.DIRECTOR);
+        mc.setMovie(movie);
+        mc.setAverageRating(10.01);
+        movieCrewRepository.save(mc);
     }
 }

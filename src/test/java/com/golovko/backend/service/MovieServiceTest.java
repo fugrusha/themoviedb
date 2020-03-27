@@ -12,6 +12,7 @@ import com.golovko.backend.repository.RatingRepository;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -338,6 +339,54 @@ public class MovieServiceTest extends BaseTest {
 
         movie = movieRepository.findById(movie.getId()).get();
         Assert.assertEquals(4.5, movie.getAverageRating(), Double.MIN_NORMAL);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieNotNullValidation() {
+        Movie movie = new Movie();
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieMaxSizeValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("movie title".repeat(100));
+        movie.setDescription("movie title".repeat(1000));
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieMinSizeValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("");
+        movie.setDescription("");
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieMinRatingValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("text");
+        movie.setDescription("text");
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movie.setAverageRating(-0.01);
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieMaxRatingValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("text");
+        movie.setDescription("text");
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movie.setAverageRating(10.01);
+        movieRepository.save(movie);
     }
 
     private Movie createMovie(LocalDate releasedDate) {
