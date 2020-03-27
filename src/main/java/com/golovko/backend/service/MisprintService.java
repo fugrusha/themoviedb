@@ -14,6 +14,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -231,12 +232,7 @@ public class MisprintService {
     }
 
     private Misprint getMisprintByTargetIdRequired(UUID id, UUID targetObjectId) {
-        Misprint misprint = misprintRepository.findByIdAndTargetObjectId(id, targetObjectId);
-
-        if (misprint != null) {
-            return misprint;
-        } else {
-            throw new EntityNotFoundException(Misprint.class, id, targetObjectId);
-        }
+        return Optional.ofNullable(misprintRepository.findByIdAndTargetObjectId(id, targetObjectId))
+                .orElseThrow(() -> new EntityNotFoundException(Misprint.class, id, targetObjectId));
     }
 }

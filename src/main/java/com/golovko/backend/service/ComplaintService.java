@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -92,13 +93,7 @@ public class ComplaintService {
     }
 
     private Complaint getComplaintByUserId(UUID id, UUID userId) {
-        Complaint complaint = complaintRepository.findByIdAndAuthorId(id, userId);
-
-        if (complaint != null) {
-            return complaint;
-        } else {
-            throw new EntityNotFoundException(Complaint.class, id, userId);
-        }
+        return Optional.ofNullable(complaintRepository.findByIdAndAuthorId(id, userId))
+                .orElseThrow(() -> new EntityNotFoundException(Complaint.class, id, userId));
     }
-
 }

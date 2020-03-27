@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -69,12 +70,7 @@ public class RatingService {
     }
 
     private Rating getRatingRequired(UUID targetId, UUID ratingId) {
-        Rating rating = ratingRepository.findByIdAndTargetId(ratingId, targetId);
-
-        if (rating != null) {
-            return rating;
-        } else {
-            throw new EntityNotFoundException(Rating.class, ratingId, targetId);
-        }
+        return Optional.ofNullable(ratingRepository.findByIdAndTargetId(ratingId, targetId))
+                .orElseThrow(() -> new EntityNotFoundException(Rating.class, ratingId, targetId));
     }
 }

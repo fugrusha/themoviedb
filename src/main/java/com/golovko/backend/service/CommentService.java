@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -114,12 +115,7 @@ public class CommentService {
     }
 
     private Comment getCommentRequired(UUID targetObjectId, UUID commentId) {
-        Comment comment = commentRepository.findByIdAndTargetId(commentId, targetObjectId);
-
-        if (comment != null) {
-            return comment;
-        } else {
-            throw new EntityNotFoundException(Comment.class, commentId, targetObjectId);
-        }
+        return Optional.ofNullable(commentRepository.findByIdAndTargetId(commentId, targetObjectId))
+                .orElseThrow(() -> new EntityNotFoundException(Comment.class, commentId, targetObjectId));
     }
 }

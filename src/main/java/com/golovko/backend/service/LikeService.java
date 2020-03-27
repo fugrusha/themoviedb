@@ -18,6 +18,7 @@ import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -164,12 +165,7 @@ public class LikeService {
     }
 
     private Like getLikeRequired(UUID userId, UUID likeId) {
-        Like like = likeRepository.findByIdAndUserId(likeId, userId);
-
-        if (like != null) {
-            return like;
-        } else {
-            throw new EntityNotFoundException(Like.class, likeId, userId);
-        }
+        return Optional.ofNullable(likeRepository.findByIdAndUserId(likeId, userId))
+                .orElseThrow(() -> new EntityNotFoundException(Like.class, likeId, userId));
     }
 }
