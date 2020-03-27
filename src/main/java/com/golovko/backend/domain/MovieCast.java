@@ -33,6 +33,7 @@ public class MovieCast extends AbstractEntity {
     @Size(min = 1, max = 50)
     private String character;
 
+    @NotNull
     @Column(updatable = false)
     @Enumerated(EnumType.STRING)
     private MovieCrewType movieCrewType = MovieCrewType.CAST;
