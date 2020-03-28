@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
@@ -10,13 +11,13 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.golovko.backend.domain.TargetObjectType.*;
 
@@ -510,9 +511,9 @@ public class MisprintServiceTest extends BaseTest {
 
         MisprintFilter filter = new MisprintFilter();
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
     }
 
@@ -529,9 +530,9 @@ public class MisprintServiceTest extends BaseTest {
         filter.setStatuses(new HashSet<ComplaintStatus>());
         filter.setTargetObjectTypes(new HashSet<TargetObjectType>());
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
     }
 
@@ -552,9 +553,9 @@ public class MisprintServiceTest extends BaseTest {
         MisprintFilter filter = new MisprintFilter();
         filter.setStatuses(Set.of(ComplaintStatus.DUPLICATE));
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m3.getId());
     }
 
@@ -573,9 +574,9 @@ public class MisprintServiceTest extends BaseTest {
         MisprintFilter filter = new MisprintFilter();
         filter.setAuthorId(user2.getId());
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -599,9 +600,9 @@ public class MisprintServiceTest extends BaseTest {
         MisprintFilter filter = new MisprintFilter();
         filter.setModeratorId(moderator1.getId());
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -620,9 +621,9 @@ public class MisprintServiceTest extends BaseTest {
         MisprintFilter filter = new MisprintFilter();
         filter.setTargetObjectTypes(Set.of(PERSON, ARTICLE));
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -656,9 +657,9 @@ public class MisprintServiceTest extends BaseTest {
         filter.setStatuses(Set.of(ComplaintStatus.INITIATED));
         filter.setTargetObjectTypes(Set.of(ARTICLE));
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId());
     }
 
@@ -702,5 +703,25 @@ public class MisprintServiceTest extends BaseTest {
         misprint.setTargetObjectType(MOVIE);
 
         misprintRepository.save(misprint);
+    }
+
+    @Test
+    public void testGetMisprintsWithFilterWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+
+        MisprintFilter filter = new MisprintFilter();
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Assertions.assertThat(misprintService.getMisprintsByFilter(filter, pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
+
     }
 }

@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ArticleRepository;
@@ -11,12 +12,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
 
@@ -209,9 +210,9 @@ public class ArticleServiceTest extends BaseTest {
 
         ArticleManagerFilter filter = new ArticleManagerFilter();
 
-        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+        PageResult<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId());
     }
 
@@ -225,9 +226,9 @@ public class ArticleServiceTest extends BaseTest {
         ArticleManagerFilter filter = new ArticleManagerFilter();
         filter.setStatuses(new HashSet<ArticleStatus>());
 
-        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+        PageResult<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId());
     }
 
@@ -243,9 +244,9 @@ public class ArticleServiceTest extends BaseTest {
         ArticleManagerFilter filter = new ArticleManagerFilter();
         filter.setAuthorId(author1.getId());
 
-        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+        PageResult<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId());
     }
 
@@ -259,9 +260,9 @@ public class ArticleServiceTest extends BaseTest {
         ArticleManagerFilter filter = new ArticleManagerFilter();
         filter.setStatuses(Set.of(ArticleStatus.DRAFT));
 
-        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+        PageResult<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId());
     }
 
@@ -279,10 +280,28 @@ public class ArticleServiceTest extends BaseTest {
         filter.setAuthorId(author1.getId());
         filter.setStatuses(Set.of(ArticleStatus.DRAFT));
 
-        List<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter);
+        PageResult<ArticleReadDTO> actualResult = articleService.getArticlesByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId());
+    }
+
+    @Test
+    public void testGetArticlesWithEmptyFilterWithPagingAndSorting() {
+        ApplicationUser author = testObjectFactory.createUser();
+
+        Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        a1.setTitle("Begin ....");
+        Article a2 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        a2.setTitle("Mandatory ....");
+        Article a3 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
+        a3.setTitle("From ....");
+        articleRepository.saveAll(List.of(a1, a2, a3));
+
+        ArticleManagerFilter filter = new ArticleManagerFilter();
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by(Sort.Direction.DESC, "title"));
+        Assertions.assertThat(articleService.getArticlesByFilter(filter, pageRequest).getData())
+                .extracting("id").isEqualTo(Arrays.asList(a2.getId(), a3.getId()));
     }
 
     @Test(expected = TransactionSystemException.class)

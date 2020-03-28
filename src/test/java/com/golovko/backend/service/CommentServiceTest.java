@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
 import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -11,12 +12,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.*;
@@ -250,9 +251,9 @@ public class CommentServiceTest extends BaseTest {
 
         CommentFilter filter = new CommentFilter();
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
     }
 
@@ -270,9 +271,9 @@ public class CommentServiceTest extends BaseTest {
         filter.setStatuses(new HashSet<CommentStatus>());
         filter.setTypes(new HashSet<TargetObjectType>());
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
     }
 
@@ -290,9 +291,9 @@ public class CommentServiceTest extends BaseTest {
         CommentFilter filter = new CommentFilter();
         filter.setAuthorId(user2.getId());
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
@@ -310,9 +311,9 @@ public class CommentServiceTest extends BaseTest {
         CommentFilter filter = new CommentFilter();
         filter.setStatuses(Set.of(APPROVED));
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
@@ -330,9 +331,9 @@ public class CommentServiceTest extends BaseTest {
         CommentFilter filter = new CommentFilter();
         filter.setTypes(Set.of(MOVIE));
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId());
     }
 
@@ -353,9 +354,9 @@ public class CommentServiceTest extends BaseTest {
         filter.setTypes(Set.of(MOVIE));
         filter.setAuthorId(user1.getId());
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId());
     }
 
@@ -404,5 +405,25 @@ public class CommentServiceTest extends BaseTest {
         Comment comment = testObjectFactory.createComment(user, movie.getId(), PENDING, MOVIE);
         comment.setMessage("");
         commentRepository.save(comment);
+    }
+
+    @Test
+    public void testGetCommentsWithFilterWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        testObjectFactory.createComment(user1, article.getId(), BLOCKED, ARTICLE);
+        Comment c1 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, movie.getId(), APPROVED, MOVIE);
+
+        CommentFilter filter = new CommentFilter();
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "status, targetObjectType"));
+
+        Assertions.assertThat(commentService.getCommentsByFilter(filter, pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
     }
 }

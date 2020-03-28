@@ -1,5 +1,6 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.CommentFilter;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.dto.comment.CommentStatusDTO;
@@ -12,10 +13,10 @@ import com.golovko.backend.service.ApplicationUserService;
 import com.golovko.backend.service.CommentService;
 import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -39,8 +40,8 @@ public class ModeratorController {
     }
 
     @GetMapping("/comments")
-    public List<CommentReadDTO> getCommentsByFilter(CommentFilter filter) {
-        return commentService.getCommentsByFilter(filter);
+    public PageResult<CommentReadDTO> getCommentsByFilter(CommentFilter filter, Pageable pageable) {
+        return commentService.getCommentsByFilter(filter, pageable);
     }
 
     @PostMapping("/comments/{id}/change-status")
@@ -52,8 +53,8 @@ public class ModeratorController {
     }
 
     @GetMapping("/complaints")
-    public List<ComplaintReadDTO> getAllComplaints(ComplaintFilter filter) {
-        return complaintService.getAllComplaints(filter);
+    public PageResult<ComplaintReadDTO> getAllComplaints(ComplaintFilter filter, Pageable pageable) {
+        return complaintService.getAllComplaints(filter, pageable);
     }
 
     @PostMapping("/complaints/{id}/moderate")

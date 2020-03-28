@@ -2,12 +2,15 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Article;
 import com.golovko.backend.domain.ArticleStatus;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,11 +93,9 @@ public class ArticleService {
         likeRepository.deleteLikesByTargetObjectId(id, ARTICLE);
     }
 
-    public List<ArticleReadDTO> getArticlesByFilter(ArticleManagerFilter filter) {
-        List<Article> articles = articleRepository.findByManagerFilter(filter);
+    public PageResult<ArticleReadDTO> getArticlesByFilter(ArticleManagerFilter filter, Pageable pageable) {
+        Page<Article> articles = articleRepository.findByManagerFilter(filter, pageable);
 
-        return articles.stream()
-                .map(a -> translationService.translate(a, ArticleReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(articles, ArticleReadDTO.class);
     }
 }

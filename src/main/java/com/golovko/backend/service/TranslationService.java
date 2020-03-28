@@ -1,6 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.ArticleCreateDTO;
 import com.golovko.backend.dto.article.ArticlePatchDTO;
 import com.golovko.backend.dto.article.ArticlePutDTO;
@@ -41,9 +42,11 @@ import org.bitbucket.brunneng.ot.Configuration;
 import org.bitbucket.brunneng.ot.ObjectTranslator;
 import org.bitbucket.brunneng.ot.exceptions.TranslationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -208,5 +211,18 @@ public class TranslationService {
             log.warn(e.getMessage());
             throw (RuntimeException) e.getCause();
         }
+    }
+
+    public <E, T> PageResult<T> toPageResult(Page<E> page, Class<T> targetClass) {
+        PageResult<T> result = new PageResult<>();
+        result.setPage(page.getNumber());
+        result.setPageSize(page.getSize());
+        result.setTotalPages(page.getTotalPages());
+        result.setTotalElements(page.getTotalElements());
+        result.setData(page.getContent()
+                .stream()
+                .map(e -> translate(e, targetClass))
+                .collect(Collectors.toList()));
+        return result;
     }
 }

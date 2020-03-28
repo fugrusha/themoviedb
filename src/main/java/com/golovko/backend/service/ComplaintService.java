@@ -3,11 +3,14 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintStatus;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,12 +31,10 @@ public class ComplaintService {
     @Autowired
     private RepositoryHelper repoHelper;
 
-    public List<ComplaintReadDTO> getAllComplaints(ComplaintFilter filter) {
-        List<Complaint> complaints = complaintRepository.findByFilter(filter);
+    public PageResult<ComplaintReadDTO> getAllComplaints(ComplaintFilter filter, Pageable pageable) {
+        Page<Complaint> complaints = complaintRepository.findByFilter(filter, pageable);
 
-        return complaints.stream()
-                .map(c -> translationService.translate(c, ComplaintReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(complaints, ComplaintReadDTO.class);
     }
 
     public ComplaintReadDTO getComplaint(UUID userId, UUID id) {

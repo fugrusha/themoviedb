@@ -1,6 +1,7 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.controller.validation.ControllerValidationUtil;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.ArticleManagerFilter;
 import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
@@ -10,6 +11,7 @@ import com.golovko.backend.dto.misprint.MisprintRejectDTO;
 import com.golovko.backend.service.ArticleService;
 import com.golovko.backend.service.MisprintService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -45,8 +47,8 @@ public class ContentManagerController {
     }
 
     @GetMapping("/misprints")
-    public List<MisprintReadDTO> getAllMisprints(MisprintFilter filter) {
-        return misprintService.getAllMisprints(filter);
+    public PageResult<MisprintReadDTO> getAllMisprints(MisprintFilter filter, Pageable pageable) {
+        return misprintService.getMisprintsByFilter(filter, pageable);
     }
 
     @GetMapping("/articles/{articleId}/misprints/")
@@ -100,7 +102,7 @@ public class ContentManagerController {
     }
 
     @GetMapping("/articles/filter")
-    public List<ArticleReadDTO> getArticlesByFilter(ArticleManagerFilter filter) {
-        return articleService.getArticlesByFilter(filter);
+    public PageResult<ArticleReadDTO> getArticlesByFilter(ArticleManagerFilter filter, Pageable pageable) {
+        return articleService.getArticlesByFilter(filter, pageable);
     }
 }

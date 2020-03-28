@@ -1,17 +1,18 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
@@ -43,12 +44,10 @@ public class MovieService {
         return translationService.translate(movie, MovieReadDTO.class);
     }
 
-    public List<MovieReadDTO> getMovies(MovieFilter filter) {
-        List<Movie> movies = movieRepository.findByFilter(filter);
+    public PageResult<MovieReadDTO> getMovies(MovieFilter filter, Pageable pageable) {
+        Page<Movie> movies = movieRepository.findByFilter(filter, pageable);
 
-        return movies.stream()
-                .map(m -> translationService.translate(m, MovieReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(movies, MovieReadDTO.class);
     }
 
     @Transactional(readOnly = true)

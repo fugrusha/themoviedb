@@ -3,6 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
 import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -10,6 +11,8 @@ import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
@@ -42,12 +45,10 @@ public class CommentService {
         return translationService.translate(comment, CommentReadDTO.class);
     }
 
-    public List<CommentReadDTO> getCommentsByFilter(CommentFilter filter) {
-        List<Comment> comments = commentRepository.findByFilter(filter);
+    public PageResult<CommentReadDTO> getCommentsByFilter(CommentFilter filter, Pageable pageable) {
+        Page<Comment> comments = commentRepository.findByFilter(filter, pageable);
 
-        return comments.stream()
-                .map(c -> translationService.translate(c, CommentReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(comments, CommentReadDTO.class);
     }
 
     public List<CommentReadDTO> getAllPublishedComments(UUID targetObjectId) {

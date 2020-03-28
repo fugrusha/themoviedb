@@ -9,16 +9,17 @@ import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RatingRepository;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -200,7 +201,7 @@ public class MovieServiceTest extends BaseTest {
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
 
         MovieFilter filter = new MovieFilter();
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
     }
 
@@ -213,7 +214,7 @@ public class MovieServiceTest extends BaseTest {
         MovieFilter filter = new MovieFilter();
         filter.setGenreNames(new HashSet<String>());
         filter.setMovieCrewTypes(new HashSet<MovieCrewType>());
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
     }
 
@@ -232,7 +233,7 @@ public class MovieServiceTest extends BaseTest {
 
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(person2.getId());
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -252,7 +253,7 @@ public class MovieServiceTest extends BaseTest {
 
         MovieFilter filter = new MovieFilter();
         filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
-        List<MovieReadDTO> filteredMovies = movieService.getMovies(filter);
+        List<MovieReadDTO> filteredMovies = movieService.getMovies(filter, Pageable.unpaged()).getData();
         assertThat(filteredMovies).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
@@ -271,7 +272,7 @@ public class MovieServiceTest extends BaseTest {
         MovieFilter filter = new MovieFilter();
         filter.setGenreNames(Set.of(genre1.getGenreName()));
 
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId());
     }
 
@@ -291,7 +292,7 @@ public class MovieServiceTest extends BaseTest {
         MovieFilter filter = new MovieFilter();
         filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
         filter.setReleasedTo(LocalDate.of(1992, 5, 4));
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m2.getId(), m3.getId());
     }
 
@@ -321,7 +322,7 @@ public class MovieServiceTest extends BaseTest {
         filter.setReleasedTo(LocalDate.of(1992, 5, 4));
         filter.setGenreNames(Set.of(genre.getGenreName()));
 
-        List<MovieReadDTO> filteredMovies = movieService.getMovies(filter);
+        List<MovieReadDTO> filteredMovies = movieService.getMovies(filter, Pageable.unpaged()).getData();
         assertThat(filteredMovies).extracting("id")
                 .containsExactlyInAnyOrder(m2.getId());
     }
@@ -387,6 +388,21 @@ public class MovieServiceTest extends BaseTest {
         movie.setReleaseDate(LocalDate.of(2019, 5, 12));
         movie.setAverageRating(10.01);
         movieRepository.save(movie);
+    }
+
+    @Test
+    public void testGetMoviesWithFilterWithPagingAndSorting() {
+        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = createMovie(LocalDate.of(1990, 5, 4));
+        createMovie(LocalDate.of(1980, 5, 4));
+
+        MovieFilter filter = new MovieFilter();
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.DESC, "releaseDate"));
+
+        Assertions.assertThat(movieService.getMovies(filter, pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
     }
 
     private Movie createMovie(LocalDate releasedDate) {

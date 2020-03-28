@@ -1,12 +1,15 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -46,12 +49,10 @@ public class MisprintService {
     @Autowired
     private MovieCrewRepository movieCrewRepository;
 
-    public List<MisprintReadDTO> getAllMisprints(MisprintFilter filter) {
-        List<Misprint> misprints = misprintRepository.findByFilter(filter);
+    public PageResult<MisprintReadDTO> getMisprintsByFilter(MisprintFilter filter, Pageable pageable) {
+        Page<Misprint> misprints = misprintRepository.findByFilter(filter, pageable);
 
-        return misprints.stream()
-                .map(m -> translationService.translate(m, MisprintReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(misprints, MisprintReadDTO.class);
     }
 
     public MisprintReadDTO getMisprintComplaint(UUID userId, UUID id) {
@@ -222,13 +223,8 @@ public class MisprintService {
     }
 
     private Misprint getMisprintByUserId(UUID id, UUID userId) {
-        Misprint misprint = misprintRepository.findByIdAndAuthorId(id, userId);
-
-        if (misprint != null) {
-            return misprint;
-        } else {
-            throw new EntityNotFoundException(Misprint.class, id, userId);
-        }
+            return Optional.ofNullable(misprintRepository.findByIdAndAuthorId(id, userId))
+                    .orElseThrow(() -> new EntityNotFoundException(Misprint.class, id, userId));
     }
 
     private Misprint getMisprintByTargetIdRequired(UUID id, UUID targetObjectId) {

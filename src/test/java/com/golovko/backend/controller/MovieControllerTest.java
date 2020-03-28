@@ -4,6 +4,7 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCrewType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.genre.GenreReadDTO;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
@@ -17,6 +18,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -341,9 +344,11 @@ public class MovieControllerTest extends BaseControllerTest {
         movieCrewReadDTO.setAverageRating(5.4);
         movieCrewReadDTO.setDescription("Some text");
 
-        List<MovieReadDTO> expectedResult = List.of(movieReadDTO);
+        PageResult<MovieReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(movieReadDTO));
 
-        Mockito.when(movieService.getMovies(filter)).thenReturn(expectedResult);
+        Mockito.when(movieService.getMovies(filter, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc.perform(get("/api/v1/movies")
             .param("personId", filter.getPersonId().toString())
@@ -355,10 +360,41 @@ public class MovieControllerTest extends BaseControllerTest {
             .andExpect(status().isOk())
             .andReturn().getResponse().getContentAsString();
 
-        List<MovieReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assert.assertEquals(expectedResult, actualResult);
+        PageResult<MovieReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
 
-        Mockito.verify(movieService).getMovies(filter);
+        Mockito.verify(movieService).getMovies(filter, PageRequest.of(0, defaultPageSize));
+    }
+
+    @Test
+    public void testGetMoviesWithPagingAndSorting() throws Exception {
+        MovieReadDTO readDTO = createMovieReadDTO();
+        MovieFilter filter = new MovieFilter();
+
+        int page = 1;
+        int size = 25;
+
+        PageResult<MovieReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(100);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "releaseDate"));
+
+        Mockito.when(movieService.getMovies(filter, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies")
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "releaseDate,desc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MovieReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     private MovieReadDTO createMovieReadDTO() {
