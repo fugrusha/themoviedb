@@ -1,7 +1,6 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieCrew;
 import com.golovko.backend.domain.MovieCrewType;
@@ -9,36 +8,28 @@ import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.MovieCrewService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(MovieCrewController.class)
-public class MovieCrewControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class MovieCrewControllerTest extends BaseControllerTest {
 
     @MockBean
     private MovieCrewService movieCrewService;
@@ -141,6 +132,61 @@ public class MovieCrewControllerTest {
     }
 
     @Test
+    public void testCreateMovieCrewNotNullValidationException() throws Exception {
+        MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-crews", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieCrewService, Mockito.never()).createMovieCrew(any(), any());
+    }
+
+    @Test
+    public void testCreateMovieCrewMinSizeValidationException() throws Exception {
+        MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
+        createDTO.setPersonId(UUID.randomUUID());
+        createDTO.setDescription("");
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-crews", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieCrewService, Mockito.never()).createMovieCrew(any(), any());
+    }
+
+    @Test
+    public void testCreateMovieCrewMaxSizeValidationException() throws Exception {
+        MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
+        createDTO.setPersonId(UUID.randomUUID());
+        createDTO.setDescription("Some long long text".repeat(100));
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-crews", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieCrewService, Mockito.never()).createMovieCrew(any(), any());
+    }
+
+    @Test
     public void testUpdateMovieCrew() throws Exception {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
@@ -161,6 +207,46 @@ public class MovieCrewControllerTest {
 
         MovieCrewReadDTO actualMovieParticipation = objectMapper.readValue(resultJson, MovieCrewReadDTO.class);
         Assertions.assertThat(actualMovieParticipation).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testUpdateMovieCrewMinSizeValidationException() throws Exception {
+        MovieCrewPutDTO updateDTO = new MovieCrewPutDTO();
+        updateDTO.setPersonId(UUID.randomUUID());
+        updateDTO.setDescription("");
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{movieId}/movie-crews/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieCrewService, Mockito.never()).updateMovieCrew(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateMovieCrewMaxSizeValidationException() throws Exception {
+        MovieCrewPutDTO updateDTO = new MovieCrewPutDTO();
+        updateDTO.setPersonId(UUID.randomUUID());
+        updateDTO.setDescription("Some long long text".repeat(100));
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{movieId}/movie-crews/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieCrewService, Mockito.never()).updateMovieCrew(any(), any(), any());
     }
 
     @Test
@@ -187,6 +273,46 @@ public class MovieCrewControllerTest {
     }
 
     @Test
+    public void testPatchMovieCrewMinSizeValidationException() throws Exception {
+        MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
+        patchDTO.setPersonId(UUID.randomUUID());
+        patchDTO.setDescription("");
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{movieId}/movie-crews/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieCrewService, Mockito.never()).patchMovieCrew(any(), any(), any());
+    }
+
+    @Test
+    public void testPatchMovieCrewMaxSizeValidationException() throws Exception {
+        MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
+        patchDTO.setPersonId(UUID.randomUUID());
+        patchDTO.setDescription("Some long long text".repeat(100));
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{movieId}/movie-crews/{id}",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieCrewService, Mockito.never()).patchMovieCrew(any(), any(), any());
+    }
+
+    @Test
     public void testDeleteMovieCrew() throws Exception {
         UUID id = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
@@ -196,7 +322,6 @@ public class MovieCrewControllerTest {
 
         Mockito.verify(movieCrewService).deleteMovieCrew(movieId, id);
     }
-
 
     private PersonReadDTO createPersonReadDTO() {
         PersonReadDTO dto = new PersonReadDTO();

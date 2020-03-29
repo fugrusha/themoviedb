@@ -2,26 +2,28 @@ package com.golovko.backend.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
 import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class)
 public class Like extends AbstractEntity {
 
+    @NotNull
     private Boolean meLiked;
 
+    @NotNull
     @ManyToOne
-    @JoinColumn(nullable = false, updatable = false)
+    @JoinColumn(updatable = false)
     private ApplicationUser author;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private TargetObjectType likedObjectType;
 
-    @Column(nullable = false)
+    @NotNull
     private UUID likedObjectId;
 }

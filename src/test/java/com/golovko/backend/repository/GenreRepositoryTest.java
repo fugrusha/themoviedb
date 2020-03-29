@@ -1,28 +1,16 @@
 package com.golovko.backend.repository;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Genre;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.Instant;
 import java.util.List;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {"delete from genre"}, executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class GenreRepositoryTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class GenreRepositoryTest extends BaseTest {
 
     @Autowired
     private GenreRepository genreRepository;

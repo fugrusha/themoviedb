@@ -2,36 +2,45 @@ package com.golovko.backend.domain;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 import java.util.UUID;
 
 @Entity
 @Getter
 @Setter
-@EntityListeners(AuditingEntityListener.class)
 public class Complaint extends AbstractEntity {
 
+    @NotNull
+    @Size(min = 1, max = 128)
     private String complaintTitle;
 
+    @NotNull
+    @Size(min = 1, max = 1000)
     private String complaintText;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ComplaintType complaintType;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private ComplaintStatus complaintStatus;
 
+    @NotNull
     @ManyToOne
     private ApplicationUser author;
 
     @ManyToOne
     private ApplicationUser moderator;
 
+    @NotNull
     @Enumerated(EnumType.STRING)
     private TargetObjectType targetObjectType;
 
+    @NotNull
     @Column(nullable = false)
     private UUID targetObjectId;
 }

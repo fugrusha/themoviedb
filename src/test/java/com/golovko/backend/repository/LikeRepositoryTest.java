@@ -1,40 +1,18 @@
 package com.golovko.backend.repository;
 
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
-import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from movie",
-        "delete from like",
-        "delete from article",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class LikeRepositoryTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class LikeRepositoryTest extends BaseTest {
 
     @Autowired
     private LikeRepository likeRepository;
-
-    @Autowired
-    TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {
@@ -89,6 +67,22 @@ public class LikeRepositoryTest {
     }
 
     @Test
+    public void testFindByUserIdAndLikedObjectId() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Movie movie1 = testObjectFactory.createMovie();
+        Movie movie2 = testObjectFactory.createMovie();
+
+        Like like = testObjectFactory.createLike(true, user1, movie1.getId());
+        testObjectFactory.createLike(true, user1, movie2.getId());
+        testObjectFactory.createLike(true, user2, movie1.getId()); // wrong user
+        testObjectFactory.createLike(true, user2, movie2.getId()); // wrong user
+
+        Like likeFromDb = likeRepository.findByUserIdAndLikedObjectId(user1.getId(), movie1.getId());
+        Assert.assertEquals(like.getId(), likeFromDb.getId());
+    }
+
+    @Test
     public void testDeleteLikesByLikedObjectId() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
@@ -100,18 +94,12 @@ public class LikeRepositoryTest {
         Like like2 = testObjectFactory.createLike(true, user1, a2.getId(), TargetObjectType.ARTICLE);
         Like like3 = testObjectFactory.createLike(true, user2, movie.getId(), TargetObjectType.MOVIE);
 
-        inTransaction(() -> {
-            likeRepository.deleteLikesByTargetObjectId(a1.getId(), TargetObjectType.ARTICLE);
-
-            Assert.assertFalse(likeRepository.existsById(like1.getId()));
-            Assert.assertTrue(likeRepository.existsById(like2.getId()));
-            Assert.assertTrue(likeRepository.existsById(like3.getId()));
-        });
-    }
-
-    private void inTransaction(Runnable runnable) {
         transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
+            likeRepository.deleteLikesByTargetObjectId(a1.getId(), TargetObjectType.ARTICLE);
         });
+
+        Assert.assertFalse(likeRepository.existsById(like1.getId()));
+        Assert.assertTrue(likeRepository.existsById(like2.getId()));
+        Assert.assertTrue(likeRepository.existsById(like3.getId()));
     }
 }

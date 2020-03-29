@@ -16,6 +16,10 @@ public interface LikeRepository extends CrudRepository<Like, UUID> {
             + " and l.author.id = :userId")
     Like findByIdAndUserId(UUID likeId, UUID userId);
 
+    @Query("select l from Like l where l.author.id = :userId"
+            + " and l.likedObjectId = :likedObjectId")
+    Like findByUserIdAndLikedObjectId(UUID userId, UUID likedObjectId);
+
     @Modifying
     @Query("delete from Like l where l.likedObjectId = :targetId"
             + " and l.likedObjectType = :targetType")

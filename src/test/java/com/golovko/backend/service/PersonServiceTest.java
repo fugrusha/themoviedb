@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
@@ -9,38 +10,22 @@ import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from movie_cast",
-        "delete from movie",
-        "delete from person"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class PersonServiceTest {
+public class PersonServiceTest extends BaseTest {
 
     @Autowired
     private PersonService personService;
 
     @Autowired
     private PersonRepository personRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @Test
     public void testGetPerson() {
@@ -185,6 +170,56 @@ public class PersonServiceTest {
         p1 = personRepository.findById(p1.getId()).get();
 
         Assert.assertEquals(4.5, p1.getAverageRatingByMovies(), Double.MIN_NORMAL);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonNotNullValidation() {
+        Person person = new Person();
+        personRepository.save(person);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonMaxSizeValidation() {
+        Person person = new Person();
+        person.setFirstName("very long text".repeat(100));
+        person.setLastName("very long text".repeat(100));
+        person.setBio("very long text".repeat(1000));
+        person.setGender(Gender.MALE);
+        personRepository.save(person);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonMinSizeValidation() {
+        Person person = new Person();
+        person.setFirstName("");
+        person.setLastName("");
+        person.setBio("");
+        person.setGender(Gender.MALE);
+        personRepository.save(person);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonMinRatingValidation() {
+        Person person = new Person();
+        person.setFirstName("Name");
+        person.setLastName("Surname");
+        person.setBio("bio");
+        person.setGender(Gender.MALE);
+        person.setAverageRatingByMovies(-0.01);
+        person.setAverageRatingByRoles(-0.01);
+        personRepository.save(person);;
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSavePersonMaxRatingValidation() {
+        Person person = new Person();
+        person.setFirstName("Name");
+        person.setLastName("Surname");
+        person.setBio("bio");
+        person.setGender(Gender.MALE);
+        person.setAverageRatingByMovies(10.01);
+        person.setAverageRatingByRoles(10.01);
+        personRepository.save(person);;
     }
 
     private Person createPerson(String lastName) {

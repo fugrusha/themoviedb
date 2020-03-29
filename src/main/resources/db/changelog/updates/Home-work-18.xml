@@ -1,0 +1,69 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="add constraints to application_user" author="andrew">
+        <addNotNullConstraint tableName="application_user" columnName="is_blocked"/>
+        <addNotNullConstraint tableName="application_user" columnName="trust_level"/>
+    </changeSet>
+
+    <changeSet id="add constraints to article" author="andrew">
+        <addNotNullConstraint tableName="article" columnName="article_status"/>
+        <addNotNullConstraint tableName="article" columnName="text"/>
+    </changeSet>
+
+    <changeSet id="add constraints to comment" author="andrew">
+        <addNotNullConstraint tableName="comment" columnName="status"/>
+        <addNotNullConstraint tableName="comment" columnName="target_object_type"/>
+        <addNotNullConstraint tableName="comment" columnName="target_object_id"/>
+    </changeSet>
+
+    <changeSet id="add constraints to complaint" author="andrew">
+        <addNotNullConstraint tableName="complaint" columnName="target_object_type"/>
+    </changeSet>
+
+    <changeSet id="add constraints to like" author="andrew">
+        <addNotNullConstraint tableName="like" columnName="me_liked"/>
+        <addNotNullConstraint tableName="like" columnName="liked_object_type"/>
+        <addNotNullConstraint tableName="like" columnName="liked_object_id"/>
+    </changeSet>
+
+    <changeSet id="add constraints to misprint" author="andrew">
+        <addNotNullConstraint tableName="misprint" columnName="misprint_text"/>
+        <addNotNullConstraint tableName="misprint" columnName="replace_to"/>
+        <addNotNullConstraint tableName="misprint" columnName="status"/>
+    </changeSet>
+
+    <changeSet id="add constraints to movie" author="andrew">
+        <addNotNullConstraint tableName="movie" columnName="release_date"/>
+        <addNotNullConstraint tableName="movie" columnName="description"/>
+        <addNotNullConstraint tableName="movie" columnName="is_released"/>
+    </changeSet>
+
+    <changeSet id="add constraints to movie_cast" author="andrew">
+        <addNotNullConstraint tableName="movie_cast" columnName="description"/>
+        <addNotNullConstraint tableName="movie_cast" columnName="movie_id"/>
+        <addNotNullConstraint tableName="movie_cast" columnName="character"/>
+        <addNotNullConstraint tableName="movie_cast" columnName="movie_crew_type"/>
+    </changeSet>
+
+    <changeSet id="add constraints to movie_crew" author="andrew">
+        <addNotNullConstraint tableName="movie_crew" columnName="description"/>
+        <addNotNullConstraint tableName="movie_crew" columnName="movie_id"/>
+        <addNotNullConstraint tableName="movie_crew" columnName="movie_crew_type"/>
+    </changeSet>
+
+    <changeSet id="add constraints to person" author="andrew">
+        <addNotNullConstraint tableName="person" columnName="bio"/>
+        <addNotNullConstraint tableName="person" columnName="gender"/>
+    </changeSet>
+
+    <changeSet id="add constraints to rating" author="andrew">
+        <addNotNullConstraint tableName="rating" columnName="rating"/>
+        <addNotNullConstraint tableName="rating" columnName="rated_object_type"/>
+        <addNotNullConstraint tableName="rating" columnName="rated_object_id"/>
+    </changeSet>
+
+</databaseChangeLog>

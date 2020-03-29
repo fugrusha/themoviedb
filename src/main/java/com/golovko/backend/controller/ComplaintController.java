@@ -8,6 +8,7 @@ import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class ComplaintController {
         return complaintService.getComplaint(userId, id);
     }
 
-    @GetMapping
+    @GetMapping // TODO pagination
     public List<ComplaintReadDTO> getAllUserComplaints(@PathVariable UUID userId) {
         return complaintService.getUserComplaints(userId);
     }
@@ -31,7 +32,7 @@ public class ComplaintController {
     @PostMapping
     public ComplaintReadDTO createComplaint(
             @PathVariable UUID userId,
-            @RequestBody ComplaintCreateDTO createDTO
+            @RequestBody @Valid ComplaintCreateDTO createDTO
     ) {
         return complaintService.createComplaint(userId, createDTO);
     }
@@ -40,7 +41,7 @@ public class ComplaintController {
     public ComplaintReadDTO patchComplaint(
             @PathVariable UUID userId,
             @PathVariable UUID id,
-            @RequestBody ComplaintPatchDTO patchDTO) {
+            @RequestBody @Valid ComplaintPatchDTO patchDTO) {
         return complaintService.patchComplaint(userId, id, patchDTO);
     }
 
@@ -48,7 +49,7 @@ public class ComplaintController {
     public ComplaintReadDTO updateComplaint(
             @PathVariable UUID userId,
             @PathVariable UUID id,
-            @RequestBody ComplaintPutDTO updateDTO) {
+            @RequestBody @Valid ComplaintPutDTO updateDTO) {
         return complaintService.updateComplaint(userId, id, updateDTO);
     }
 

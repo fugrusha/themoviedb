@@ -1,11 +1,11 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.ArticleCreateDTO;
 import com.golovko.backend.dto.article.ArticlePatchDTO;
 import com.golovko.backend.dto.article.ArticlePutDTO;
 import com.golovko.backend.dto.article.ArticleReadDTO;
-import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
@@ -17,8 +17,6 @@ import com.golovko.backend.dto.genre.GenrePutDTO;
 import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
-import com.golovko.backend.dto.misprint.MisprintPatchDTO;
-import com.golovko.backend.dto.misprint.MisprintPutDTO;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.movie.MoviePatchDTO;
 import com.golovko.backend.dto.movie.MoviePutDTO;
@@ -44,9 +42,11 @@ import org.bitbucket.brunneng.ot.Configuration;
 import org.bitbucket.brunneng.ot.ObjectTranslator;
 import org.bitbucket.brunneng.ot.exceptions.TranslationException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -109,9 +109,6 @@ public class TranslationService {
         Configuration.Translation t = c.beanOfClass(Comment.class).translationTo(CommentReadDTO.class);
         t.srcProperty("author.id").translatesTo("authorId");
 
-        Configuration.Translation toEntity = c.beanOfClass(CommentCreateDTO.class).translationTo(Comment.class);
-        toEntity.srcProperty("authorId").translatesTo("author.id");
-
         c.beanOfClass(CommentPatchDTO.class).translationTo(Comment.class).mapOnlyNotNullProperties();
 
         c.beanOfClass(CommentPutDTO.class).translationTo(Comment.class);
@@ -146,10 +143,6 @@ public class TranslationService {
         Configuration.Translation t = c.beanOfClass(Misprint.class).translationTo(MisprintReadDTO.class);
         t.srcProperty("author.id").translatesTo("authorId");
         t.srcProperty("moderator.id").translatesTo("moderatorId");
-
-        c.beanOfClass(MisprintPatchDTO.class).translationTo(Misprint.class).mapOnlyNotNullProperties();
-
-        c.beanOfClass(MisprintPutDTO.class).translationTo(Misprint.class);
     }
 
     private void configureForMovieCast(Configuration c) {
@@ -218,5 +211,18 @@ public class TranslationService {
             log.warn(e.getMessage());
             throw (RuntimeException) e.getCause();
         }
+    }
+
+    public <E, T> PageResult<T> toPageResult(Page<E> page, Class<T> targetClass) {
+        PageResult<T> result = new PageResult<>();
+        result.setPage(page.getNumber());
+        result.setPageSize(page.getSize());
+        result.setTotalPages(page.getTotalPages());
+        result.setTotalElements(page.getTotalElements());
+        result.setData(page.getContent()
+                .stream()
+                .map(e -> translate(e, targetClass))
+                .collect(Collectors.toList()));
+        return result;
     }
 }

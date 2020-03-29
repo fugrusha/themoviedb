@@ -1,39 +1,27 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.Set;
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {"delete from user_role", "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class ApplicationUserServiceTest {
+public class ApplicationUserServiceTest extends BaseTest {
 
     @Autowired
     private ApplicationUserRepository applicationUserRepository;
 
     @Autowired
     private ApplicationUserService applicationUserService;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @Test
     public void testGetUserById() {
@@ -58,7 +46,8 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.createUser(create);
 
-        Assertions.assertThat(create).isEqualToIgnoringGivenFields(readDTO, "password");
+        Assertions.assertThat(create).isEqualToIgnoringGivenFields(readDTO,
+                "password", "passwordConfirmation");
         Assert.assertNotNull(readDTO.getId());
 
         ApplicationUser applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
@@ -76,11 +65,12 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patch);
 
-        Assertions.assertThat(patch).isEqualToIgnoringGivenFields(readDTO, "password");
+        Assertions.assertThat(patch).isEqualToIgnoringGivenFields(readDTO,
+                "password", "passwordConfirmation");
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO,
-                "password", "articles", "likes");
+                "password", "passwordConfirmation", "articles", "likes");
     }
 
     @Test
@@ -96,7 +86,7 @@ public class ApplicationUserServiceTest {
 
         Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
-                "password", "articles", "likes");
+                "password", "passwordConfirmation", "articles", "likes");
     }
 
     @Test
@@ -110,11 +100,12 @@ public class ApplicationUserServiceTest {
 
         UserReadDTO readDTO = applicationUserService.updateUser(user.getId(), updateDTO);
 
-        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO, "password");
+        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO,
+                "password","passwordConfirmation");
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
-                "password", "articles", "likes");
+                "password", "passwordConfirmation", "articles", "likes");
     }
 
     @Test
@@ -203,5 +194,30 @@ public class ApplicationUserServiceTest {
 
         ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
         Assert.assertFalse(updatedUser.getUserRole().contains(UserRole.CONTENT_MANAGER));
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveUserNotNullValidation() {
+        ApplicationUser user = new ApplicationUser();
+        applicationUserRepository.save(user);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveUserTrustLevelMinSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser(0.9, false);
+        applicationUserRepository.save(user);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveUserTrustLevelMaxSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser(11.0, false);
+        applicationUserRepository.save(user);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveUserWrongEmailValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setEmail("wrongemail");
+        applicationUserRepository.save(user);
     }
 }

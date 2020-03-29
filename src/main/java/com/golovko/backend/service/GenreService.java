@@ -24,6 +24,7 @@ public class GenreService {
     @Autowired
     private RepositoryHelper repoHelper;
 
+    // TODO pagination
     public List<GenreReadDTO> getAllGenres() {
         List<Genre> genres = genreRepository.findAllByOrderByGenreNameAsc();
 

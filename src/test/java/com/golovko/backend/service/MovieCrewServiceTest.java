@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -7,36 +8,18 @@ import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieCrewRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RatingRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE_CREW;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from comment",
-        "delete from rating",
-        "delete from user_role",
-        "delete from application_user",
-        "delete from person",
-        "delete from movie",
-        "delete from movie_crew"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MovieCrewServiceTest {
+public class MovieCrewServiceTest extends BaseTest {
 
     @Autowired
     private MovieCrewService movieCrewService;
@@ -52,12 +35,6 @@ public class MovieCrewServiceTest {
 
     @Autowired
     private MovieRepository movieRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testGetMovieCrew() {
@@ -129,6 +106,7 @@ public class MovieCrewServiceTest {
         MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
         createDTO.setPersonId(null);
         createDTO.setDescription("Some text");
+        createDTO.setMovieCrewType(MovieCrewType.DIRECTOR);
 
         MovieCrewReadDTO readDTO = movieCrewService.createMovieCrew(createDTO, movie.getId());
 
@@ -282,9 +260,56 @@ public class MovieCrewServiceTest {
         Assert.assertEquals(4.5, movieCrew.getAverageRating(), Double.MIN_NORMAL);
     }
 
-    private void inTransaction (Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewNotNullException() {
+        MovieCrew mc = new MovieCrew();
+        movieCrewRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewMaxSizeValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrew mc = new MovieCrew();
+        mc.setDescription("Long long text".repeat(1000));
+        mc.setMovieCrewType(MovieCrewType.DIRECTOR);
+        mc.setMovie(movie);
+        movieCrewRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewMinSizeValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrew mc = new MovieCrew();
+        mc.setDescription("");
+        mc.setMovieCrewType(MovieCrewType.DIRECTOR);
+        mc.setMovie(movie);
+        movieCrewRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewMinRatingValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrew mc = new MovieCrew();
+        mc.setDescription("text");
+        mc.setMovieCrewType(MovieCrewType.DIRECTOR);
+        mc.setMovie(movie);
+        mc.setAverageRating(-0.01);
+        movieCrewRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCrewMaxRatingValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCrew mc = new MovieCrew();
+        mc.setDescription("text");
+        mc.setMovieCrewType(MovieCrewType.DIRECTOR);
+        mc.setMovie(movie);
+        mc.setAverageRating(10.01);
+        movieCrewRepository.save(mc);
     }
 }

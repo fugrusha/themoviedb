@@ -1,6 +1,7 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.exception.EntityNotFoundException;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.EntityManager;
@@ -37,6 +38,13 @@ public class RepositoryHelper {
         boolean exists = ((Number) query.getSingleResult()).intValue() > 0;
         if (!exists) {
             throw new EntityNotFoundException(entityClass, id);
+        }
+    }
+
+    public void applyPaging(Query query, Pageable pageable) {
+        if (pageable.isPaged()) {
+            query.setMaxResults(pageable.getPageSize());
+            query.setFirstResult((int) pageable.getOffset());
         }
     }
 }

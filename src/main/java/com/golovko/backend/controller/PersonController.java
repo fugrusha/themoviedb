@@ -8,6 +8,7 @@ import com.golovko.backend.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,23 +24,24 @@ public class PersonController {
         return personService.getPerson(id);
     }
 
+    // TODO pagination
     @GetMapping
     public List<PersonReadDTO> getAllPersons() {
         return personService.getAllPersons();
     }
 
     @PostMapping
-    public PersonReadDTO createPerson(@RequestBody PersonCreateDTO createDTO) {
+    public PersonReadDTO createPerson(@RequestBody @Valid PersonCreateDTO createDTO) {
         return personService.createPerson(createDTO);
     }
 
     @PatchMapping("/{id}")
-    public PersonReadDTO patchPerson(@RequestBody PersonPatchDTO patchDTO, @PathVariable UUID id) {
+    public PersonReadDTO patchPerson(@RequestBody @Valid PersonPatchDTO patchDTO, @PathVariable UUID id) {
         return personService.patchPerson(id, patchDTO);
     }
 
     @PutMapping("/{id}")
-    public PersonReadDTO updatePerson(@RequestBody PersonPutDTO updateDTO, @PathVariable UUID id) {
+    public PersonReadDTO updatePerson(@RequestBody @Valid PersonPutDTO updateDTO, @PathVariable UUID id) {
         return personService.updatePerson(id, updateDTO);
     }
 

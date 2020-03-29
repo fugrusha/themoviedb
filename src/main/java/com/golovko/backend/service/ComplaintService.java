@@ -3,15 +3,19 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintStatus;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -27,12 +31,10 @@ public class ComplaintService {
     @Autowired
     private RepositoryHelper repoHelper;
 
-    public List<ComplaintReadDTO> getAllComplaints(ComplaintFilter filter) {
-        List<Complaint> complaints = complaintRepository.findByFilter(filter);
+    public PageResult<ComplaintReadDTO> getAllComplaints(ComplaintFilter filter, Pageable pageable) {
+        Page<Complaint> complaints = complaintRepository.findByFilter(filter, pageable);
 
-        return complaints.stream()
-                .map(c -> translationService.translate(c, ComplaintReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(complaints, ComplaintReadDTO.class);
     }
 
     public ComplaintReadDTO getComplaint(UUID userId, UUID id) {
@@ -40,6 +42,7 @@ public class ComplaintService {
         return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
+    // TODO pagination
     public List<ComplaintReadDTO> getUserComplaints(UUID userId) {
         List<Complaint> complaints = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
 
@@ -92,13 +95,7 @@ public class ComplaintService {
     }
 
     private Complaint getComplaintByUserId(UUID id, UUID userId) {
-        Complaint complaint = complaintRepository.findByIdAndAuthorId(id, userId);
-
-        if (complaint != null) {
-            return complaint;
-        } else {
-            throw new EntityNotFoundException(Complaint.class, id, userId);
-        }
+        return Optional.ofNullable(complaintRepository.findByIdAndAuthorId(id, userId))
+                .orElseThrow(() -> new EntityNotFoundException(Complaint.class, id, userId));
     }
-
 }

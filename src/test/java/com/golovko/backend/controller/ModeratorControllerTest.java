@@ -1,11 +1,11 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.CommentFilter;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.dto.comment.CommentStatusDTO;
@@ -14,40 +14,34 @@ import com.golovko.backend.dto.complaint.ComplaintModerateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.dto.user.UserTrustLevelDTO;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ApplicationUserService;
 import com.golovko.backend.service.CommentService;
 import com.golovko.backend.service.ComplaintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ModeratorController.class)
-public class ModeratorControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class ModeratorControllerTest extends BaseControllerTest {
 
     @MockBean
     private ComplaintService complaintService;
@@ -78,9 +72,11 @@ public class ModeratorControllerTest {
         readDTO.setComplaintTitle("title");
         readDTO.setComplaintText("description");
 
-        List<ComplaintReadDTO> expectedResult = List.of(readDTO);
+        PageResult<ComplaintReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
 
-        Mockito.when(complaintService.getAllComplaints(filter)).thenReturn(expectedResult);
+        Mockito.when(complaintService.getAllComplaints(filter, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/complaints")
@@ -93,10 +89,10 @@ public class ModeratorControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<ComplaintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assert.assertEquals(expectedResult, actualResult);
+        PageResult<ComplaintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
 
-        Mockito.verify(complaintService).getAllComplaints(filter);
+        Mockito.verify(complaintService).getAllComplaints(filter, PageRequest.of(0, defaultPageSize));
     }
 
     @Test
@@ -125,6 +121,23 @@ public class ModeratorControllerTest {
     }
 
     @Test
+    public void testModerateComplaintNotNUllValidationException() throws Exception {
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/complaints/{id}/moderate", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(moderDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(complaintService, Mockito.never()).moderateComplaint(any(), any());
+    }
+
+    @Test
     public void testSetUserTrustLevel() throws Exception {
         UserTrustLevelDTO dto = new UserTrustLevelDTO();
         dto.setTrustLevel(6.5);
@@ -147,6 +160,59 @@ public class ModeratorControllerTest {
     }
 
     @Test
+    public void testSetUserTrustLevelNotNullValidationException() throws Exception {
+        UserTrustLevelDTO dto = new UserTrustLevelDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/set-trust-level", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
+    }
+
+    @Test
+    public void testSetUserTrustLevelMaxValueValidationException() throws Exception {
+        UserTrustLevelDTO dto = new UserTrustLevelDTO();
+        dto.setTrustLevel(10.1);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/set-trust-level", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
+    }
+
+    @Test
+    public void testSetUserTrustLevelMinValueValidationException() throws Exception {
+        UserTrustLevelDTO dto = new UserTrustLevelDTO();
+        dto.setTrustLevel(0.9);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/set-trust-level", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(dto)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
+    }
+
+    @Test
     public void testGetCommentsByFilter() throws Exception {
         CommentReadDTO readDTO = createCommentReadDTO(UUID.randomUUID());
 
@@ -155,9 +221,11 @@ public class ModeratorControllerTest {
         filter.setStatuses(Set.of(CommentStatus.PENDING, CommentStatus.NEED_MODERATION));
         filter.setTypes(Set.of(TargetObjectType.MOVIE));
 
-        List<CommentReadDTO> expectedResult = List.of(readDTO);
+        PageResult<CommentReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
 
-        Mockito.when(commentService.getCommentsByFilter(filter)).thenReturn(expectedResult);
+        Mockito.when(commentService.getCommentsByFilter(filter, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/comments")
@@ -167,10 +235,10 @@ public class ModeratorControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<CommentReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assert.assertEquals(actualResult, expectedResult);
+        PageResult<CommentReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(actualResult, pageResult);
 
-        Mockito.verify(commentService).getCommentsByFilter(filter);
+        Mockito.verify(commentService).getCommentsByFilter(filter, PageRequest.of(0, defaultPageSize));
     }
 
     @Test
@@ -193,6 +261,85 @@ public class ModeratorControllerTest {
         Assert.assertEquals(actualResult, readDTO);
 
         Mockito.verify(commentService).changeStatus(readDTO.getId(), statusDTO);
+    }
+
+    @Test
+    public void testChangeCommentStatusValidationException() throws Exception {
+        CommentStatusDTO statusDTO = new CommentStatusDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/comments/{id}/change-status", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(statusDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).changeStatus(any(), any());
+    }
+
+    @Test
+    public void testGetCommentsWithPagingAndSorting() throws Exception {
+        CommentReadDTO readDTO = createCommentReadDTO(UUID.randomUUID());
+        CommentFilter filter = new CommentFilter();
+
+        int page = 1;
+        int size = 25;
+
+        PageResult<CommentReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(100);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "status"));
+
+        Mockito.when(commentService.getCommentsByFilter(filter, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/comments")
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "status,desc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<CommentReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
+    }
+
+    @Test
+    public void testGetComplaintsWithPagingAndSorting() throws Exception {
+        ComplaintReadDTO readDTO = createComplaintReadDTO(UUID.randomUUID(), UUID.randomUUID());
+        ComplaintFilter filter = new ComplaintFilter();
+
+        int page = 1;
+        int size = 25;
+
+        PageResult<ComplaintReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(100);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "complaintType"));
+
+        Mockito.when(complaintService.getAllComplaints(filter, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/complaints")
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "complaintType,desc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<ComplaintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID moderatorId) {

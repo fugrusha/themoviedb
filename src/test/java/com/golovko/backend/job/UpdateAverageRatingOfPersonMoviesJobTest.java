@@ -1,32 +1,19 @@
 package com.golovko.backend.job;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.repository.PersonRepository;
 import com.golovko.backend.service.PersonService;
-import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from movie_cast",
-        "delete from person",
-        "delete from movie"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class UpdateAverageRatingOfPersonMoviesJobTest {
+public class UpdateAverageRatingOfPersonMoviesJobTest extends BaseTest {
 
     @Autowired
     private UpdateAverageRatingOfPersonMoviesJob updateAverageRatingOfPersonMoviesJob;
@@ -36,9 +23,6 @@ public class UpdateAverageRatingOfPersonMoviesJobTest {
 
     @SpyBean
     private PersonService personService;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @Test
     public void testUpdateAverageRatingOfPersonMoviesJob() {

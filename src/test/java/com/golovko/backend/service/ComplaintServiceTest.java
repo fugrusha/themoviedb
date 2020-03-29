@@ -1,49 +1,31 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ComplaintRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.TransactionSystemException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.golovko.backend.domain.ComplaintType.*;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from complaint",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class ComplaintServiceTest {
+public class ComplaintServiceTest extends BaseTest {
 
     @Autowired
     private ComplaintService complaintService;
 
     @Autowired
     private ComplaintRepository complaintRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
-
-    @Autowired
-    private TransactionTemplate transactionTemplate;
 
     @Test
     public void testGetComplaint() {
@@ -202,9 +184,9 @@ public class ComplaintServiceTest {
 
         ComplaintFilter filter = new ComplaintFilter();
 
-        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+        PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
     }
 
@@ -220,9 +202,9 @@ public class ComplaintServiceTest {
         filter.setStatuses(new HashSet<ComplaintStatus>());
         filter.setTargetObjectTypes(new HashSet<TargetObjectType>());
 
-        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+        PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
     }
 
@@ -241,9 +223,9 @@ public class ComplaintServiceTest {
         ComplaintFilter filter = new ComplaintFilter();
         filter.setStatuses(Set.of(ComplaintStatus.DUPLICATE));
 
-        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+        PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c3.getId());
     }
 
@@ -261,9 +243,9 @@ public class ComplaintServiceTest {
         ComplaintFilter filter = new ComplaintFilter();
         filter.setAuthorId(user1.getId());
 
-        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+        PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
@@ -285,9 +267,9 @@ public class ComplaintServiceTest {
         ComplaintFilter filter = new ComplaintFilter();
         filter.setModeratorId(moderator1.getId());
 
-        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+        PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
@@ -304,9 +286,9 @@ public class ComplaintServiceTest {
         ComplaintFilter filter = new ComplaintFilter();
         filter.setComplaintTypes(Set.of(SPAM, VIOLENCE));
 
-        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+        PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
@@ -323,9 +305,9 @@ public class ComplaintServiceTest {
         ComplaintFilter filter = new ComplaintFilter();
         filter.setTargetObjectTypes(Set.of(TargetObjectType.COMMENT, TargetObjectType.MOVIE));
 
-        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+        PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
@@ -360,9 +342,9 @@ public class ComplaintServiceTest {
         filter.setComplaintTypes(Set.of(SPAM));
         filter.setTargetObjectTypes(Set.of(TargetObjectType.MOVIE));
 
-        List<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter);
+        PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId());
     }
 
@@ -388,9 +370,50 @@ public class ComplaintServiceTest {
         Assert.assertEquals(c1.getComplaintStatus(), ComplaintStatus.UNDER_INVESTIGATION);
     }
 
-    private void inTransaction (Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveComplaintNotNullValidation() {
+        Complaint complaint = new Complaint();
+        complaintRepository.save(complaint);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveComplaintMaxSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Complaint complaint = testObjectFactory.createComplaint(movie.getId(), TargetObjectType.MOVIE, user);
+        complaint.setComplaintTitle("very long title".repeat(100));
+        complaint.setComplaintText("long description of issue".repeat(1000));
+        complaintRepository.save(complaint);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveComplaintMinSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Complaint complaint = testObjectFactory.createComplaint(movie.getId(), TargetObjectType.MOVIE, user);
+        complaint.setComplaintTitle("");
+        complaint.setComplaintText("");
+        complaintRepository.save(complaint);
+    }
+
+    @Test
+    public void testGetComplaintsWithFilterWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+
+        Complaint c1 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.COMMENT);
+        Complaint c2 = testObjectFactory.createComplaint(user1, MISPRINT, TargetObjectType.COMMENT);
+        testObjectFactory.createComplaint(user2, MISPRINT, TargetObjectType.PERSON);
+        testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.MOVIE_CAST);
+
+        ComplaintFilter filter = new ComplaintFilter();
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "targetObjectType, complaintType"));
+
+        Assertions.assertThat(complaintService.getAllComplaints(filter, pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(c2.getId(), c1.getId()));
     }
 }

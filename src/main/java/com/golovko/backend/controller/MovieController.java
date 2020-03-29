@@ -1,11 +1,13 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
@@ -16,8 +18,8 @@ public class MovieController {
     private MovieService movieService;
 
     @GetMapping
-    public List<MovieReadDTO> getMovies(MovieFilter filter) {
-        return movieService.getMovies(filter);
+    public PageResult<MovieReadDTO> getMovies(MovieFilter filter, Pageable pageable) {
+        return movieService.getMovies(filter, pageable);
     }
 
     @GetMapping("/{id}")
@@ -31,17 +33,17 @@ public class MovieController {
     }
 
     @PostMapping
-    public MovieReadDTO createMovie(@RequestBody MovieCreateDTO createDTO) {
+    public MovieReadDTO createMovie(@RequestBody @Valid MovieCreateDTO createDTO) {
         return movieService.createMovie(createDTO);
     }
 
     @PatchMapping("/{id}")
-    public MovieReadDTO patchMovie(@PathVariable UUID id, @RequestBody MoviePatchDTO patchDTO) {
+    public MovieReadDTO patchMovie(@PathVariable UUID id, @RequestBody @Valid MoviePatchDTO patchDTO) {
         return movieService.patchMovie(id, patchDTO);
     }
 
     @PutMapping("/{id}")
-    public MovieReadDTO updateMovie(@PathVariable UUID id, @RequestBody MoviePutDTO updateDTO) {
+    public MovieReadDTO updateMovie(@PathVariable UUID id, @RequestBody @Valid MoviePutDTO updateDTO) {
         return movieService.updateMovie(id, updateDTO);
     }
 

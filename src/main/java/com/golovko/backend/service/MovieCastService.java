@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -38,6 +39,7 @@ public class MovieCastService {
     @Autowired
     private RepositoryHelper repoHelper;
 
+    // TODO pagination
     public List<MovieCastReadDTO> getAllMovieCasts(UUID movieId) {
         List<MovieCast> movieCasts = movieCastRepository.findByMovieId(movieId);
 
@@ -106,12 +108,7 @@ public class MovieCastService {
     }
 
     private MovieCast getMovieCastByMovieIdRequired(UUID id, UUID movieId) {
-        MovieCast movieCast = movieCastRepository.findByIdAndMovieId(id, movieId);
-
-        if (movieCast != null) {
-            return movieCast;
-        } else {
-            throw new EntityNotFoundException(MovieCast.class, id, movieId);
-        }
+        return Optional.ofNullable(movieCastRepository.findByIdAndMovieId(id, movieId))
+                .orElseThrow(() -> new EntityNotFoundException(MovieCast.class, id, movieId));
     }
 }

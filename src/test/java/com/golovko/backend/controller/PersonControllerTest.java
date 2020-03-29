@@ -1,41 +1,32 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.PersonService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(PersonController.class)
-public class PersonControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class PersonControllerTest extends BaseControllerTest {
 
     @MockBean
     private PersonService personService;
@@ -104,6 +95,65 @@ public class PersonControllerTest {
     }
 
     @Test
+    public void testCreatePersonNotNullValidationException() throws Exception {
+        PersonCreateDTO createDTO = new PersonCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/persons")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(personService, Mockito.never()).createPerson(any());
+    }
+
+    @Test
+    public void testCreatePersonMinSizeValidationException() throws Exception {
+        PersonCreateDTO createDTO = new PersonCreateDTO();
+        createDTO.setFirstName("");
+        createDTO.setLastName("");
+        createDTO.setBio("");
+        createDTO.setGender(Gender.MALE);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/persons")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(personService, Mockito.never()).createPerson(any());
+    }
+
+    @Test
+    public void testCreatePersonMaxSizeValidationException() throws Exception {
+        PersonCreateDTO createDTO = new PersonCreateDTO();
+        createDTO.setFirstName("first name".repeat(100));
+        createDTO.setLastName("last name".repeat(100));
+        createDTO.setBio("long text about life".repeat(100));
+        createDTO.setGender(Gender.MALE);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/persons")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(personService, Mockito.never()).createPerson(any());
+    }
+
+    @Test
     public void testPatchPerson() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
 
@@ -128,6 +178,48 @@ public class PersonControllerTest {
     }
 
     @Test
+    public void testPatchPersonMinSizeValidationException() throws Exception {
+        PersonPatchDTO patchDTO = new PersonPatchDTO();
+        patchDTO.setFirstName("");
+        patchDTO.setLastName("");
+        patchDTO.setBio("");
+        patchDTO.setGender(Gender.MALE);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/persons/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(personService, Mockito.never()).patchPerson(any(), any());
+    }
+
+    @Test
+    public void testPatchPersonMaxSizeValidationException() throws Exception {
+        PersonPatchDTO patchDTO = new PersonPatchDTO();
+        patchDTO.setFirstName("first name".repeat(100));
+        patchDTO.setLastName("last name".repeat(100));
+        patchDTO.setBio("long text about life".repeat(100));
+        patchDTO.setGender(Gender.MALE);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/persons/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(personService, Mockito.never()).patchPerson(any(), any());
+    }
+
+    @Test
     public void testUpdatePerson() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
 
@@ -149,6 +241,48 @@ public class PersonControllerTest {
         PersonReadDTO actualPerson = objectMapper.readValue(resultJson, PersonReadDTO.class);
 
         Assert.assertEquals(readDTO, actualPerson);
+    }
+
+    @Test
+    public void testUpdatePersonMinSizeValidationException() throws Exception {
+        PersonPutDTO updateDTO = new PersonPutDTO();
+        updateDTO.setFirstName("");
+        updateDTO.setLastName("");
+        updateDTO.setBio("");
+        updateDTO.setGender(Gender.MALE);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/persons/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(personService, Mockito.never()).patchPerson(any(), any());
+    }
+
+    @Test
+    public void testUpdatePersonMaxSizeValidationException() throws Exception {
+        PersonPutDTO updateDTO = new PersonPutDTO();
+        updateDTO.setFirstName("first name".repeat(100));
+        updateDTO.setLastName("last name".repeat(100));
+        updateDTO.setBio("long text about life".repeat(100));
+        updateDTO.setGender(Gender.MALE);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/persons/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(personService, Mockito.never()).patchPerson(any(), any());
     }
 
     @Test

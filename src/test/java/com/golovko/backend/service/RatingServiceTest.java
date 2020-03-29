@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Rating;
@@ -10,35 +11,18 @@ import com.golovko.backend.dto.rating.RatingPutDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.RatingRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from rating",
-        "delete from movie",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class RatingServiceTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class RatingServiceTest extends BaseTest {
 
     @Autowired
     private RatingService ratingService;
@@ -179,5 +163,37 @@ public class RatingServiceTest {
     @Test(expected = EntityNotFoundException.class)
     public void testDeleteRatingNotFound() {
         ratingService.deleteRating(UUID.randomUUID(), UUID.randomUUID());
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveRatingNotNullValidation() {
+        Rating rating = new Rating();
+        ratingRepository.save(rating);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveRatingMinRatingValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Rating rating = new Rating();
+        rating.setRating(0);
+        rating.setRatedObjectId(movie.getId());
+        rating.setRatedObjectType(MOVIE);
+        rating.setAuthor(user);
+        ratingRepository.save(rating);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveRatingMaxRatingValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Rating rating = new Rating();
+        rating.setRating(11);
+        rating.setRatedObjectId(movie.getId());
+        rating.setRatedObjectType(MOVIE);
+        rating.setAuthor(user);
+        ratingRepository.save(rating);
     }
 }

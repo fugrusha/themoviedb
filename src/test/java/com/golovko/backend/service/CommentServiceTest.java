@@ -1,44 +1,28 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
+import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.TransactionSystemException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from like",
-        "delete from comment",
-        "delete from movie",
-        "delete from article",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class CommentServiceTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class CommentServiceTest extends BaseTest {
 
     @Autowired
     private CommentService commentService;
@@ -115,6 +99,55 @@ public class CommentServiceTest {
         createDTO.setTargetObjectType(ARTICLE);
 
         commentService.createComment(article.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateCommentWithUserTrustLevelLessThanFive() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser(4.9, false);
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        CommentReadDTO readDTO = commentService.createComment(movie.getId(), createDTO);
+
+        Assert.assertEquals(readDTO.getStatus(), PENDING);
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assert.assertEquals(comment.getStatus(), PENDING);
+    }
+
+    @Test
+    public void testCreateCommentWithUserTrustLevelGraterThanFiveAndMore() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser(5.0, false);
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        CommentReadDTO readDTO = commentService.createComment(movie.getId(), createDTO);
+
+        Assert.assertEquals(readDTO.getStatus(), APPROVED);
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assert.assertEquals(comment.getStatus(), APPROVED);
+    }
+
+    @Test(expected = BlockedUserException.class)
+    public void testCreateCommentWithBlockedUser() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser(5.0, true);
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        commentService.createComment(movie.getId(), createDTO);
     }
 
     @Test
@@ -218,9 +251,9 @@ public class CommentServiceTest {
 
         CommentFilter filter = new CommentFilter();
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
     }
 
@@ -238,9 +271,9 @@ public class CommentServiceTest {
         filter.setStatuses(new HashSet<CommentStatus>());
         filter.setTypes(new HashSet<TargetObjectType>());
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId(), c3.getId());
     }
 
@@ -258,9 +291,9 @@ public class CommentServiceTest {
         CommentFilter filter = new CommentFilter();
         filter.setAuthorId(user2.getId());
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
@@ -278,9 +311,9 @@ public class CommentServiceTest {
         CommentFilter filter = new CommentFilter();
         filter.setStatuses(Set.of(APPROVED));
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 
@@ -298,9 +331,9 @@ public class CommentServiceTest {
         CommentFilter filter = new CommentFilter();
         filter.setTypes(Set.of(MOVIE));
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId());
     }
 
@@ -321,9 +354,9 @@ public class CommentServiceTest {
         filter.setTypes(Set.of(MOVIE));
         filter.setAuthorId(user1.getId());
 
-        List<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter);
+        PageResult<CommentReadDTO> actualResult = commentService.getCommentsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId());
     }
 
@@ -346,5 +379,51 @@ public class CommentServiceTest {
         Assert.assertEquals(actualResult.getAuthorId(), updatedComment.getAuthor().getId());
 
         Assert.assertEquals(updatedComment.getStatus(), statusDTO.getStatus());
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveCommentNotNullValidation() {
+        Comment comment = new Comment();
+        commentRepository.save(comment);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveCommentMaxSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment comment = testObjectFactory.createComment(user, movie.getId(), PENDING, MOVIE);
+        comment.setMessage("long message".repeat(100));
+        commentRepository.save(comment);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveCommentMinSizeValidation() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment comment = testObjectFactory.createComment(user, movie.getId(), PENDING, MOVIE);
+        comment.setMessage("");
+        commentRepository.save(comment);
+    }
+
+    @Test
+    public void testGetCommentsWithFilterWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+
+        testObjectFactory.createComment(user1, article.getId(), BLOCKED, ARTICLE);
+        Comment c1 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, movie.getId(), APPROVED, MOVIE);
+
+        CommentFilter filter = new CommentFilter();
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "status, targetObjectType"));
+
+        Assertions.assertThat(commentService.getCommentsByFilter(filter, pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
     }
 }

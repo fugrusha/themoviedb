@@ -1,6 +1,6 @@
 package com.golovko.backend.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.golovko.backend.domain.ActionType;
 import com.golovko.backend.domain.Like;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.like.LikeCreateDTO;
@@ -8,34 +8,27 @@ import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.WrongTypeOfTargetObjectException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.LikeService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(LikeController.class)
-public class LikeControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class LikeControllerTest extends BaseControllerTest {
 
     @MockBean
     private LikeService likeService;
@@ -95,6 +88,47 @@ public class LikeControllerTest {
 
         LikeReadDTO actualResult = objectMapper.readValue(resultJSON, LikeReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testCreateLikeWrongTypeOfTargetObjectException() throws Exception {
+        UUID userId = UUID.randomUUID();
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setLikedObjectId(UUID.randomUUID());
+        createDTO.setLikedObjectType(TargetObjectType.MOVIE_CAST);
+        createDTO.setMeLiked(true);
+
+        WrongTypeOfTargetObjectException exception =
+                new WrongTypeOfTargetObjectException(ActionType.ADD_LIKE, createDTO.getLikedObjectType());
+
+        Mockito.when(likeService.createLike(userId, createDTO)).thenThrow(exception);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/likes/", userId)
+                .content(objectMapper.writeValueAsString(createDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn().getResponse().getContentAsString();
+
+        Assert.assertTrue(resultJson.contains(exception.getMessage()));
+    }
+
+    @Test
+    public void testCreateLikeValidationException() throws Exception {
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/likes/", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(likeService, Mockito.never()).createLike(any(), any());
     }
 
     @Test

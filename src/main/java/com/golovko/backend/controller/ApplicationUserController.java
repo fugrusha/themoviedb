@@ -1,10 +1,12 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.controller.validation.ControllerValidationUtil;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.service.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
@@ -14,23 +16,31 @@ public class ApplicationUserController {
     @Autowired
     private ApplicationUserService applicationUserService;
 
+    // TODO list of users for admin
+
     @GetMapping("/{id}")
     public UserReadDTO getUser(@PathVariable UUID id) {
         return applicationUserService.getUser(id);
     }
 
     @PostMapping
-    public UserReadDTO createUser(@RequestBody UserCreateDTO createDTO) {
+    public UserReadDTO createUser(@RequestBody @Valid UserCreateDTO createDTO) {
+        ControllerValidationUtil.validateEquals(createDTO.getPassword(), createDTO.getPasswordConfirmation(),
+                "password", "passwordConfirmation");
         return applicationUserService.createUser(createDTO);
     }
 
     @PatchMapping("/{id}")
-    public UserReadDTO patchUser(@PathVariable UUID id, @RequestBody UserPatchDTO patch) {
+    public UserReadDTO patchUser(@PathVariable UUID id, @RequestBody @Valid UserPatchDTO patch) {
+        ControllerValidationUtil.validateEquals(patch.getPassword(), patch.getPasswordConfirmation(),
+                "password", "passwordConfirmation");
         return applicationUserService.patchUser(id, patch);
     }
 
     @PutMapping("/{id}")
-    public UserReadDTO updateUser(@PathVariable UUID id, @RequestBody UserPutDTO update) {
+    public UserReadDTO updateUser(@PathVariable UUID id, @RequestBody @Valid UserPutDTO update) {
+        ControllerValidationUtil.validateEquals(update.getPassword(), update.getPasswordConfirmation(),
+                "password", "passwordConfirmation");
         return applicationUserService.updateUser(id, update);
     }
 
@@ -52,7 +62,7 @@ public class ApplicationUserController {
     @PostMapping("/{id}/add-user-role")
     public UserReadDTO addUserRole(
             @PathVariable UUID id,
-            @RequestBody UserRoleDTO dto
+            @RequestBody @Valid UserRoleDTO dto
     ) {
         return applicationUserService.addUserRole(id, dto);
     }
@@ -60,7 +70,7 @@ public class ApplicationUserController {
     @PostMapping("/{id}/remove-user-role")
     public UserReadDTO removeUserRole(
             @PathVariable UUID id,
-            @RequestBody UserRoleDTO dto
+            @RequestBody @Valid UserRoleDTO dto
     ) {
         return applicationUserService.removeUserRole(id, dto);
     }

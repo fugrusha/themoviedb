@@ -8,6 +8,7 @@ import com.golovko.backend.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -25,6 +26,7 @@ public class MovieCastCommentController {
         return commentService.getComment(movieCastId, id);
     }
 
+    // TODO pagination
     @GetMapping
     public List<CommentReadDTO> getAllPublishedMovieCastComments(@PathVariable UUID movieCastId) {
         return commentService.getAllPublishedComments(movieCastId);
@@ -33,7 +35,7 @@ public class MovieCastCommentController {
     @PostMapping
     public CommentReadDTO createMovieCastComment(
             @PathVariable UUID movieCastId,
-            @RequestBody CommentCreateDTO createDTO
+            @RequestBody @Valid CommentCreateDTO createDTO
     ) {
         return commentService.createComment(movieCastId, createDTO);
     }
@@ -42,7 +44,7 @@ public class MovieCastCommentController {
     public CommentReadDTO updateMovieCastComment(
             @PathVariable UUID movieCastId,
             @PathVariable UUID id,
-            @RequestBody CommentPutDTO putDTO
+            @RequestBody @Valid CommentPutDTO putDTO
     ) {
         return commentService.updateComment(movieCastId, id, putDTO);
     }
@@ -51,7 +53,7 @@ public class MovieCastCommentController {
     public CommentReadDTO patchMovieCastComment(
             @PathVariable UUID movieCastId,
             @PathVariable UUID id,
-            @RequestBody CommentPatchDTO patchDTO
+            @RequestBody @Valid CommentPatchDTO patchDTO
     ) {
         return commentService.patchComment(movieCastId, id, patchDTO);
     }

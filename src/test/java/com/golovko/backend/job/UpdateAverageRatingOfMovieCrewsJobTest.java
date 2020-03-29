@@ -1,39 +1,23 @@
 package com.golovko.backend.job;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCrew;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.repository.MovieCrewRepository;
 import com.golovko.backend.service.MovieCrewService;
-import com.golovko.backend.util.TestObjectFactory;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE_CREW;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from rating",
-        "delete from user_role",
-        "delete from application_user",
-        "delete from person",
-        "delete from movie",
-        "delete from movie_crew"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class UpdateAverageRatingOfMovieCrewsJobTest {
+public class UpdateAverageRatingOfMovieCrewsJobTest extends BaseTest {
 
     @Autowired
     private UpdateAverageRatingOfMovieCrewsJob updateAverageRatingOfMovieCrewsJob;
@@ -43,9 +27,6 @@ public class UpdateAverageRatingOfMovieCrewsJobTest {
 
     @SpyBean
     private MovieCrewService movieCrewService;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @Test
     public void testUpdateAverageRatingOfMovieCrews() {

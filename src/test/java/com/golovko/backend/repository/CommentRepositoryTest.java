@@ -1,17 +1,11 @@
 package com.golovko.backend.repository;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.time.Instant;
 import java.util.List;
@@ -20,26 +14,10 @@ import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from movie",
-        "delete from comment",
-        "delete from article",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class CommentRepositoryTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class CommentRepositoryTest extends BaseTest {
 
     @Autowired
     private CommentRepository commentRepository;
-
-    @Autowired
-    TransactionTemplate transactionTemplate;
 
     @Test
     public void testCreatedAtIsSet() {
@@ -120,18 +98,80 @@ public class CommentRepositoryTest {
         Comment c2 = testObjectFactory.createComment(user2, article2.getId(), APPROVED, ARTICLE); // another id
         Comment c3 = testObjectFactory.createComment(user2, movie.getId(), NEED_MODERATION, MOVIE); // another type
 
-        inTransaction(() -> {
+        transactionTemplate.executeWithoutResult(status -> {
             commentRepository.deleteCommentsByTargetObjectId(article1.getId(), ARTICLE);
-
-            Assert.assertTrue(commentRepository.existsById(c2.getId()));
-            Assert.assertTrue(commentRepository.existsById(c3.getId()));
-            Assert.assertFalse(commentRepository.existsById(c1.getId()));
         });
+
+        Assert.assertTrue(commentRepository.existsById(c2.getId()));
+        Assert.assertTrue(commentRepository.existsById(c3.getId()));
+        Assert.assertFalse(commentRepository.existsById(c1.getId()));
     }
 
-    private void inTransaction(Runnable runnable) {
+    @Test
+    public void testIncrementLikesCountField() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+        c1.setLikesCount(5);
+        commentRepository.save(c1);
+
         transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
+            commentRepository.incrementLikesCountField(c1.getId());
         });
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assert.assertEquals((Integer) 6, updatedComment.getLikesCount());
+    }
+
+    @Test
+    public void testDecrementLikesCountField() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+        c1.setLikesCount(5);
+        commentRepository.save(c1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            commentRepository.decrementLikesCountField(c1.getId());
+        });
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assert.assertEquals((Integer) 4, updatedComment.getLikesCount());
+    }
+
+    @Test
+    public void testIncrementDislikesCountField() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+        c1.setDislikesCount(5);
+        commentRepository.save(c1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            commentRepository.incrementDislikesCountField(c1.getId());
+        });
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assert.assertEquals((Integer) 6, updatedComment.getDislikesCount());
+    }
+
+    @Test
+    public void testDecrementDislikesCountField() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
+        c1.setDislikesCount(5);
+        commentRepository.save(c1);
+
+        transactionTemplate.executeWithoutResult(status -> {
+            commentRepository.decrementDislikesCountField(c1.getId());
+        });
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assert.assertEquals((Integer) 4, updatedComment.getDislikesCount());
     }
 }

@@ -1,7 +1,6 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.domain.TargetObjectType;
@@ -9,75 +8,64 @@ import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
+import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.CommentService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(MovieCrewCommentController.class)
-public class MovieCrewCommentControllerTest {
+public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
     @MockBean
     private CommentService commentService;
 
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MockMvc mockMvc;
-
     @Test
     public void testGetMovieCrewCommentById() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        UUID movieCrewId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, movieCrewId);
+        CommentReadDTO readDTO = createCommentReadDTO();
 
-        Mockito.when(commentService.getComment(movieCrewId, readDTO.getId())).thenReturn(readDTO);
+        Mockito.when(commentService.getComment(readDTO.getTargetObjectId(), readDTO.getId()))
+                .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
-                        movieId, movieCrewId, readDTO.getId()))
+                        UUID.randomUUID(), readDTO.getTargetObjectId(), readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         CommentReadDTO actualResult = objectMapper.readValue(resultJson, CommentReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(commentService).getComment(movieCrewId, readDTO.getId());
+        Mockito.verify(commentService).getComment(readDTO.getTargetObjectId(), readDTO.getId());
     }
 
     @Test
     public void testGetAllPublishedMovieCrewComments() throws Exception {
-        UUID userId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        UUID movieCrewId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, movieCrewId);
+        CommentReadDTO readDTO = createCommentReadDTO();
 
         List<CommentReadDTO> expectedResult = List.of(readDTO);
 
-        Mockito.when(commentService.getAllPublishedComments(movieCrewId)).thenReturn(expectedResult);
+        Mockito.when(commentService.getAllPublishedComments(readDTO.getTargetObjectId()))
+                .thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
-                        movieId, movieCrewId))
+                        UUID.randomUUID(), readDTO.getTargetObjectId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -85,7 +73,7 @@ public class MovieCrewCommentControllerTest {
         Assertions.assertThat(actualResult).extracting(CommentReadDTO::getId)
                 .containsExactlyInAnyOrder(readDTO.getId());
 
-        Mockito.verify(commentService).getAllPublishedComments(movieCrewId);
+        Mockito.verify(commentService).getAllPublishedComments(readDTO.getTargetObjectId());
     }
 
     @Test
@@ -98,59 +86,138 @@ public class MovieCrewCommentControllerTest {
 
         Mockito.when(commentService.getComment(movieCrewId, wrongId)).thenThrow(exception);
 
-        String result = mockMvc
+        String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
                         movieId, movieCrewId, wrongId))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
 
-        Assert.assertTrue(result.contains(exception.getMessage()));
+        Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
     @Test
     public void testCreateMovieCrewComment() throws Exception {
-        UUID movieCrewId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        UUID authorId = UUID.randomUUID();
-
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("message text");
-        createDTO.setAuthorId(authorId);
-        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CAST);
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
 
-        CommentReadDTO readDTO = createCommentReadDTO(authorId, movieCrewId);
+        CommentReadDTO readDTO = createCommentReadDTO();
 
-        Mockito.when(commentService.createComment(movieCrewId, createDTO)).thenReturn(readDTO);
+        Mockito.when(commentService.createComment(readDTO.getTargetObjectId(), createDTO))
+                .thenReturn(readDTO);
 
-        String resultString = mockMvc
+        String resultJson = mockMvc
                 .perform(post("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
-                        movieId, movieCrewId)
+                        UUID.randomUUID(), readDTO.getTargetObjectId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        CommentReadDTO actualResult = objectMapper.readValue(resultString, CommentReadDTO.class);
+        CommentReadDTO actualResult = objectMapper.readValue(resultJson, CommentReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
 
-        Mockito.verify(commentService).createComment(movieCrewId, createDTO);
+        Mockito.verify(commentService).createComment(readDTO.getTargetObjectId(), createDTO);
+    }
+
+    @Test
+    public void testCreateMovieCrewCommentBlockedUserException() throws Exception {
+        UUID movieCrewId = UUID.randomUUID();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
+
+        BlockedUserException exception = new BlockedUserException(createDTO.getAuthorId());
+
+        Mockito.when(commentService.createComment(movieCrewId, createDTO)).thenThrow(exception);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
+                        UUID.randomUUID(), movieCrewId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isForbidden())
+                .andReturn().getResponse().getContentAsString();
+
+        Assert.assertTrue(resultJson.contains(exception.getMessage()));
+    }
+
+    @Test
+    public void testCreateMovieCrewCommentNotNullValidationFailed() throws Exception {
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
+    }
+
+    @Test
+    public void testCreateMovieCrewCommentMinSizeValidationFailed() throws Exception {
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("");
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
+    }
+
+    @Test
+    public void testCreateMovieCrewCommentMaxSizeValidationFailed() throws Exception {
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("comment message".repeat(100));
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
     @Test
     public void testUpdateMovieCrewComment() throws Exception {
-        UUID movieCrewId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, movieCrewId);
+        CommentReadDTO readDTO = createCommentReadDTO();
 
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("message text");
 
-        Mockito.when(commentService.updateComment(movieCrewId, readDTO.getId(), putDTO)).thenReturn(readDTO);
+        Mockito.when(commentService.updateComment(readDTO.getTargetObjectId(), readDTO.getId(), putDTO))
+                .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(put("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
-                        movieId, movieCrewId, readDTO.getId())
+                        UUID.randomUUID(), readDTO.getTargetObjectId(), readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(putDTO)))
                 .andExpect(status().isOk())
@@ -161,20 +228,56 @@ public class MovieCrewCommentControllerTest {
     }
 
     @Test
+    public void testUpdateMovieCrewCommentMinSizeValidationFailed() throws Exception {
+        CommentPutDTO putDTO = new CommentPutDTO();
+        putDTO.setMessage("");
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateMovieCrewCommentMaxSizeValidationFailed() throws Exception {
+        CommentPutDTO putDTO = new CommentPutDTO();;
+        putDTO.setMessage("comment message".repeat(100));
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(putDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
+    }
+
+    @Test
     public void testPatchMovieCrewComment() throws Exception {
-        UUID movieCrewId = UUID.randomUUID();
-        UUID movieId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, movieCrewId);
+        CommentReadDTO readDTO = createCommentReadDTO();
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("New message");
 
-        Mockito.when(commentService.patchComment(movieCrewId, readDTO.getId(), patchDTO)).thenReturn(readDTO);
+        Mockito.when(commentService.patchComment(readDTO.getTargetObjectId(), readDTO.getId(), patchDTO))
+                .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
-                        movieId, movieCrewId, readDTO.getId())
+                        UUID.randomUUID(), readDTO.getTargetObjectId(), readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isOk())
@@ -182,6 +285,44 @@ public class MovieCrewCommentControllerTest {
 
         CommentReadDTO actualResult = objectMapper.readValue(resultJson, CommentReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testPatchMovieCrewCommentMinSizeValidationFailed() throws Exception {
+        CommentPatchDTO patchDTO = new CommentPatchDTO();
+        patchDTO.setMessage("");
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
+    }
+
+    @Test
+    public void testPatchMovieCrewCommentMaxSizeValidationFailed() throws Exception {
+        CommentPatchDTO patchDTO = new CommentPatchDTO();
+        patchDTO.setMessage("comment message".repeat(100));
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
     @Test
@@ -197,13 +338,13 @@ public class MovieCrewCommentControllerTest {
         Mockito.verify(commentService).deleteComment(movieCrewId, commentId);
     }
 
-    private CommentReadDTO createCommentReadDTO(UUID authorId, UUID targetObjectId) {
+    private CommentReadDTO createCommentReadDTO() {
         CommentReadDTO dto = new CommentReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setMessage("some text");
-        dto.setAuthorId(authorId);
-        dto.setTargetObjectType(TargetObjectType.MOVIE_CAST);
-        dto.setTargetObjectId(targetObjectId);
+        dto.setAuthorId(UUID.randomUUID());
+        dto.setTargetObjectType(TargetObjectType.MOVIE_CREW);
+        dto.setTargetObjectId(UUID.randomUUID());
         dto.setDislikesCount(46);
         dto.setLikesCount(120);
         dto.setStatus(CommentStatus.PENDING);

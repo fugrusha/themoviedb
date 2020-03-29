@@ -1,7 +1,6 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.Rating;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
@@ -9,35 +8,27 @@ import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.RatingService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(MovieCastRatingController.class)
-public class MovieCastRatingControllerTest {
-
-    @Autowired
-    private MockMvc mockMvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class MovieCastRatingControllerTest extends BaseControllerTest {
 
     @MockBean
     private RatingService ratingService;
@@ -46,8 +37,7 @@ public class MovieCastRatingControllerTest {
     public void testGetMovieCrewRatingById() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
-        UUID authorId = UUID.randomUUID();
-        RatingReadDTO readDTO = createRatingReadDTO(5, authorId, movieCastId);
+        RatingReadDTO readDTO = createRatingReadDTO(5, movieCastId);
 
         Mockito.when(ratingService.getRating(movieCastId, readDTO.getId())).thenReturn(readDTO);
 
@@ -67,10 +57,8 @@ public class MovieCastRatingControllerTest {
     public void testGetAllMovieCrewRatings() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
-        UUID authorId1 = UUID.randomUUID();
-        UUID authorId2 = UUID.randomUUID();
-        RatingReadDTO r1 = createRatingReadDTO(7, authorId1, movieCastId);
-        RatingReadDTO r2 = createRatingReadDTO(5, authorId2, movieCastId);
+        RatingReadDTO r1 = createRatingReadDTO(7, movieCastId);
+        RatingReadDTO r2 = createRatingReadDTO(5, movieCastId);
 
         List<RatingReadDTO> expectedResult = List.of(r1, r2);
 
@@ -112,14 +100,13 @@ public class MovieCastRatingControllerTest {
     public void testCreateMovieCrewRating() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
-        UUID authorId = UUID.randomUUID();
 
         RatingCreateDTO createDTO = new RatingCreateDTO();
         createDTO.setRating(6);
-        createDTO.setAuthorId(authorId);
+        createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setRatedObjectType(TargetObjectType.MOVIE_CAST);
 
-        RatingReadDTO readDTO = createRatingReadDTO(7, authorId, movieCastId);
+        RatingReadDTO readDTO = createRatingReadDTO(7, movieCastId);
 
         Mockito.when(ratingService.createRating(movieCastId, createDTO)).thenReturn(readDTO);
 
@@ -138,11 +125,28 @@ public class MovieCastRatingControllerTest {
     }
 
     @Test
+    public void testCreateMovieCastRatingValidationException() throws Exception {
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(ratingService, Mockito.never()).createRating(any(), any());
+    }
+
+    @Test
     public void testUpdateMovieCrewRating() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        RatingReadDTO readDTO = createRatingReadDTO(4, userId, movieCastId);
+        RatingReadDTO readDTO = createRatingReadDTO(4, movieCastId);
 
         RatingPutDTO putDTO = new RatingPutDTO();
         putDTO.setRating(6);
@@ -166,8 +170,7 @@ public class MovieCastRatingControllerTest {
     public void testPatchMovieCrewRating() throws Exception {
         UUID movieId = UUID.randomUUID();
         UUID movieCastId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        RatingReadDTO readDTO = createRatingReadDTO(4, userId, movieCastId);
+        RatingReadDTO readDTO = createRatingReadDTO(4, movieCastId);
 
         RatingPatchDTO patchDTO = new RatingPatchDTO();
         patchDTO.setRating(9);
@@ -200,11 +203,129 @@ public class MovieCastRatingControllerTest {
         Mockito.verify(ratingService).deleteRating(movieCastId, ratingId);
     }
 
-    private RatingReadDTO createRatingReadDTO(int rating, UUID authorId, UUID targetObjectId) {
+    @Test
+    public void testCreateMovieCastRatingMinValueValidationException() throws Exception {
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(0);
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CAST);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(ratingService, Mockito.never()).createRating(any(), any());
+    }
+
+    @Test
+    public void testCreateMovieCastRatingMaxValueValidationException() throws Exception {
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(11);
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CAST);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/",
+                        UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(ratingService, Mockito.never()).createRating(any(), any());
+    }
+
+    @Test
+    public void testPatchMovieCastRatingMaxValueValidationException() throws Exception {
+        RatingPatchDTO patchDTO = new RatingPatchDTO();
+        patchDTO.setRating(11);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/{ratingId}",
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(ratingService, Mockito.never()).patchRating(any(), any(), any());
+    }
+
+    @Test
+    public void testPatchMovieCastRatingMinValueValidationException() throws Exception {
+        RatingPatchDTO patchDTO = new RatingPatchDTO();
+        patchDTO.setRating(0);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/{ratingId}",
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(ratingService, Mockito.never()).patchRating(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateMovieCastRatingMaxValueValidationException() throws Exception {
+        RatingPatchDTO patchDTO = new RatingPatchDTO();
+        patchDTO.setRating(11);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/{ratingId}",
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(ratingService, Mockito.never()).updateRating(any(), any(), any());
+    }
+
+    @Test
+    public void testUpdateMovieCastRatingMinValueValidationException() throws Exception {
+        RatingPatchDTO patchDTO = new RatingPatchDTO();
+        patchDTO.setRating(0);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/{ratingId}",
+                        UUID.randomUUID(), UUID.randomUUID(), UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(ratingService, Mockito.never()).updateRating(any(), any(), any());
+    }
+
+    private RatingReadDTO createRatingReadDTO(int rating, UUID targetObjectId) {
         RatingReadDTO dto = new RatingReadDTO();
         dto.setId(UUID.randomUUID());
         dto.setRating(rating);
-        dto.setAuthorId(authorId);
+        dto.setAuthorId(UUID.randomUUID());
         dto.setRatedObjectType(TargetObjectType.MOVIE_CAST);
         dto.setRatedObjectId(targetObjectId);
         dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));

@@ -8,6 +8,7 @@ import com.golovko.backend.service.RatingService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,7 @@ public class MovieCastRatingController {
     @Autowired
     private RatingService ratingService;
 
+    // TODO pagination
     @GetMapping
     public List<RatingReadDTO> getAllRatingsByMovieCastId(@PathVariable UUID movieCastId) {
         return ratingService.getAllRatingsByTargetObjectId(movieCastId);
@@ -31,7 +33,7 @@ public class MovieCastRatingController {
     @PostMapping
     public RatingReadDTO createMovieCastRating(
             @PathVariable UUID movieCastId,
-            @RequestBody RatingCreateDTO createDTO
+            @RequestBody @Valid RatingCreateDTO createDTO
     ) {
         return ratingService.createRating(movieCastId, createDTO);
     }
@@ -40,7 +42,7 @@ public class MovieCastRatingController {
     public RatingReadDTO patchMovieCastRating(
             @PathVariable UUID movieCastId,
             @PathVariable UUID id,
-            @RequestBody RatingPatchDTO patchDTO
+            @RequestBody @Valid RatingPatchDTO patchDTO
     ) {
         return ratingService.patchRating(movieCastId, id, patchDTO);
     }
@@ -49,7 +51,7 @@ public class MovieCastRatingController {
     public RatingReadDTO updateMovieCastRating(
             @PathVariable UUID movieCastId,
             @PathVariable UUID id,
-            @RequestBody RatingPutDTO putDTO
+            @RequestBody @Valid RatingPutDTO putDTO
     ) {
         return ratingService.updateRating(movieCastId, id, putDTO);
     }

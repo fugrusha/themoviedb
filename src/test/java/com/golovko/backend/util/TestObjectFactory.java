@@ -90,6 +90,16 @@ public class TestObjectFactory {
         return applicationUserRepository.save(user);
     }
 
+    public ApplicationUser createUser(Double trustLevel, Boolean isBlocked) {
+        ApplicationUser user = new ApplicationUser();
+        user.setUsername("Vitalka");
+        user.setPassword("123456");
+        user.setEmail("vetal@gmail.com");
+        user.setIsBlocked(isBlocked);
+        user.setTrustLevel(trustLevel);
+        user.setUserRole(Set.of(UserRole.USER));
+        return applicationUserRepository.save(user);
+    }
 
     public ApplicationUser createUser(Set<UserRole> userRoles) {
         ApplicationUser user = new ApplicationUser();

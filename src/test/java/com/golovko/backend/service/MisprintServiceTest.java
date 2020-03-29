@@ -1,46 +1,27 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.repository.*;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.TransactionSystemException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.golovko.backend.domain.TargetObjectType.*;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from movie_cast",
-        "delete from movie_crew",
-        "delete from person",
-        "delete from movie",
-        "delete from article",
-        "delete from misprint",
-        "delete from user_role",
-        "delete from application_user"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MisprintServiceTest {
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
+public class MisprintServiceTest extends BaseTest {
 
     @Autowired
     private MisprintService misprintService;
@@ -132,68 +113,6 @@ public class MisprintServiceTest {
         createDTO.setTargetObjectId(movie.getId());
 
         misprintService.createMisprintComplaint(UUID.randomUUID(), createDTO);
-    }
-
-    @Test
-    public void testPatchMisprintComplaint() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
-
-        Misprint m1 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user, "misprint");
-
-        MisprintPatchDTO patchDTO = new MisprintPatchDTO();
-        patchDTO.setReplaceTo("another text");
-        patchDTO.setMisprintText("misprint");
-
-        MisprintReadDTO readDTO = misprintService.patchMisprintComplaint(user.getId(), m1.getId(), patchDTO);
-
-        Assertions.assertThat(patchDTO).isEqualToIgnoringGivenFields(readDTO,
-                "moderatorId", "authorId");
-
-        m1 = misprintRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(m1).isEqualToIgnoringGivenFields(readDTO, "moderator", "author");
-        Assert.assertEquals(readDTO.getAuthorId(), m1.getAuthor().getId());
-    }
-
-    @Test
-    public void testPatchMisprintComplaintEmptyPatch() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
-        Misprint m1 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user, "misprint");
-
-        MisprintPatchDTO patchDTO = new MisprintPatchDTO();
-
-        MisprintReadDTO readDTO = misprintService.patchMisprintComplaint(user.getId(), m1.getId(), patchDTO);
-
-        Assertions.assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("moderatorId", "fixedAt",
-                "replacedWith", "reason");
-
-        Misprint misprintAfterUpdate = misprintRepository.findById(readDTO.getId()).get();
-
-        Assertions.assertThat(misprintAfterUpdate).hasNoNullFieldsOrPropertiesExcept("moderator", "fixedAt",
-                "replacedWith", "reason");
-        Assertions.assertThat(misprintAfterUpdate).isEqualToIgnoringGivenFields(m1,"author", "moderator");
-        Assert.assertEquals(readDTO.getAuthorId(), misprintAfterUpdate.getAuthor().getId());
-    }
-
-    @Test
-    public void testUpdateMisprintComplaint() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
-        Misprint m1 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user, "misprint");
-
-        MisprintPutDTO updateDTO = new MisprintPutDTO();
-        updateDTO.setMisprintText("misprint");
-        updateDTO.setReplaceTo("new title");
-
-        MisprintReadDTO readDTO = misprintService.updateMisprintComplaint(user.getId(), m1.getId(), updateDTO);
-
-        Assertions.assertThat(updateDTO).isEqualToIgnoringGivenFields(readDTO,
-                "moderatorId", "authorId");
-
-        m1 = misprintRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(m1).isEqualToIgnoringGivenFields(readDTO, "moderator", "author");
-        Assert.assertEquals(readDTO.getAuthorId(), m1.getAuthor().getId());
     }
 
     @Test
@@ -592,9 +511,9 @@ public class MisprintServiceTest {
 
         MisprintFilter filter = new MisprintFilter();
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
     }
 
@@ -611,9 +530,9 @@ public class MisprintServiceTest {
         filter.setStatuses(new HashSet<ComplaintStatus>());
         filter.setTargetObjectTypes(new HashSet<TargetObjectType>());
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
     }
 
@@ -634,9 +553,9 @@ public class MisprintServiceTest {
         MisprintFilter filter = new MisprintFilter();
         filter.setStatuses(Set.of(ComplaintStatus.DUPLICATE));
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m3.getId());
     }
 
@@ -655,9 +574,9 @@ public class MisprintServiceTest {
         MisprintFilter filter = new MisprintFilter();
         filter.setAuthorId(user2.getId());
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -681,9 +600,9 @@ public class MisprintServiceTest {
         MisprintFilter filter = new MisprintFilter();
         filter.setModeratorId(moderator1.getId());
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -702,9 +621,9 @@ public class MisprintServiceTest {
         MisprintFilter filter = new MisprintFilter();
         filter.setTargetObjectTypes(Set.of(PERSON, ARTICLE));
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -738,9 +657,71 @@ public class MisprintServiceTest {
         filter.setStatuses(Set.of(ComplaintStatus.INITIATED));
         filter.setTargetObjectTypes(Set.of(ARTICLE));
 
-        List<MisprintReadDTO> actualResult = misprintService.getAllMisprints(filter);
+        PageResult<MisprintReadDTO> actualResult = misprintService.getMisprintsByFilter(filter, Pageable.unpaged());
 
-        Assertions.assertThat(actualResult).extracting("id")
+        Assertions.assertThat(actualResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId());
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMisprintNotNullValidation() {
+        Misprint misprint = new Misprint();
+        misprintRepository.save(misprint);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMisprintMinSizeValidation() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Misprint misprint = new Misprint();
+        misprint.setMisprintText("");
+        misprint.setReplaceTo("");
+        misprint.setReplacedWith("");
+        misprint.setReason("");
+        misprint.setAuthor(user1);
+        misprint.setStatus(ComplaintStatus.CLOSED);
+        misprint.setTargetObjectId(movie.getId());
+        misprint.setTargetObjectType(MOVIE);
+
+        misprintRepository.save(misprint);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMisprintMaxSizeValidation() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Misprint misprint = new Misprint();
+        misprint.setMisprintText("long text".repeat(100));
+        misprint.setReplaceTo("long text".repeat(100));
+        misprint.setReplacedWith("long text".repeat(100));
+        misprint.setReason("long text".repeat(100));
+        misprint.setAuthor(user1);
+        misprint.setStatus(ComplaintStatus.CLOSED);
+        misprint.setTargetObjectId(movie.getId());
+        misprint.setTargetObjectType(MOVIE);
+
+        misprintRepository.save(misprint);
+    }
+
+    @Test
+    public void testGetMisprintsWithFilterWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        Misprint m1 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+        testObjectFactory.createMisprint(article.getId(), ARTICLE, user1, "misprint");
+
+        MisprintFilter filter = new MisprintFilter();
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Assertions.assertThat(misprintService.getMisprintsByFilter(filter, pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
+
     }
 }

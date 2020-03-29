@@ -1,41 +1,32 @@
 package com.golovko.backend.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.dto.user.*;
+import com.golovko.backend.exception.ControllerValidationException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ApplicationUserService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
 import java.time.Instant;
 import java.util.UUID;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@RunWith(SpringRunner.class)
 @WebMvcTest(ApplicationUserController.class)
-public class ApplicationUserControllerTest {
-
-    @Autowired
-    private MockMvc mvc;
-
-    @Autowired
-    private ObjectMapper objectMapper;
+public class ApplicationUserControllerTest extends BaseControllerTest {
 
     @MockBean
     private ApplicationUserService applicationUserService;
@@ -46,12 +37,10 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.getUser(user.getId())).thenReturn(user);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(get("/api/v1/users/{id}", user.getId()))
                 .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
+                .andReturn().getResponse().getContentAsString();
 
         UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
         Assertions.assertThat(actualUser).isEqualToComparingFieldByField(user);
@@ -66,7 +55,7 @@ public class ApplicationUserControllerTest {
         EntityNotFoundException exception = new EntityNotFoundException(ApplicationUser.class, wrongId);
         Mockito.when(applicationUserService.getUser(wrongId)).thenThrow(exception);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(get("/api/v1/users/{id}", wrongId))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse().getContentAsString();
@@ -85,7 +74,7 @@ public class ApplicationUserControllerTest {
                 MethodArgumentTypeMismatchException.class,
                 errorMsg);
 
-        String result = mvc
+        String result = mockMvc
                 .perform(get("/api/v1/users/{id}", invalidId))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
@@ -98,14 +87,15 @@ public class ApplicationUserControllerTest {
     public void testCreateUser() throws Exception {
         UserCreateDTO createDTO = new UserCreateDTO();
         createDTO.setUsername("david");
-        createDTO.setPassword("12345");
+        createDTO.setPassword("1234567890");
+        createDTO.setPasswordConfirmation("1234567890");
         createDTO.setEmail("david101@email.com");
 
         UserReadDTO readDTO = createUserReadDTO();
 
         Mockito.when(applicationUserService.createUser(createDTO)).thenReturn(readDTO);
 
-        String result = mvc
+        String result = mockMvc
                 .perform(post("/api/v1/users")
                 .content(objectMapper.writeValueAsString(createDTO))
                 .contentType(MediaType.APPLICATION_JSON))
@@ -117,18 +107,124 @@ public class ApplicationUserControllerTest {
     }
 
     @Test
+    public void testCreateUserNotNullValidationException() throws Exception {
+        UserCreateDTO createDTO = new UserCreateDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).createUser(any());
+    }
+
+    @Test
+    public void testCreateUserEmailValidationException() throws Exception {
+        UserCreateDTO createDTO = new UserCreateDTO();
+        createDTO.setUsername("david");
+        createDTO.setPassword("1234567890");
+        createDTO.setPasswordConfirmation("1234567890");
+        createDTO.setEmail("david101email.com"); // wrong email
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).createUser(any());
+    }
+
+    @Test
+    public void testCreateUserShortPassword() throws Exception {
+        UserCreateDTO createDTO = new UserCreateDTO();
+        createDTO.setUsername("david");
+        createDTO.setPassword("1234567");
+        createDTO.setPasswordConfirmation("1234567");
+        createDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).createUser(any());
+    }
+
+    @Test
+    public void testCreateUserPasswordWithSpaces() throws Exception {
+        UserCreateDTO createDTO = new UserCreateDTO();
+        createDTO.setUsername("david");
+        createDTO.setPassword("12 34 567");
+        createDTO.setPasswordConfirmation("12 34 567");
+        createDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).createUser(any());
+    }
+
+    @Test
+    public void testCreateUserDifferentPasswords() throws Exception {
+        UserCreateDTO createDTO = new UserCreateDTO();
+        createDTO.setUsername("david");
+        createDTO.setPassword("12345789");
+        createDTO.setPasswordConfirmation("xyxyxyxyxyxyxy");
+        createDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo errorInfo = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(errorInfo.getMessage().contains("password"));
+        Assert.assertTrue(errorInfo.getMessage().contains("passwordConfirmation"));
+        Assert.assertEquals(ControllerValidationException.class, errorInfo.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).createUser(any());
+    }
+
+    @Test
     public void testPatchUser() throws Exception {
         UserPatchDTO patchDTO = new UserPatchDTO();
         patchDTO.setUsername("david");
+        patchDTO.setPassword("securedPassword");
+        patchDTO.setPasswordConfirmation("securedPassword");
         patchDTO.setEmail("david101@email.com");
-        patchDTO.setPassword("12345");
 
         UserReadDTO readDTO = createUserReadDTO();
 
         Mockito.when(applicationUserService.patchUser(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc
-                .perform(patch("/api/v1/users/{id}", readDTO.getId().toString())
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/users/{id}", readDTO.getId())
                 .content(objectMapper.writeValueAsString(patchDTO))
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
@@ -139,17 +235,85 @@ public class ApplicationUserControllerTest {
     }
 
     @Test
+    public void testPatchUserShortPassword() throws Exception {
+        UserPatchDTO patchDTO = new UserPatchDTO();
+        patchDTO.setUsername("david");
+        patchDTO.setPassword("1234567");
+        patchDTO.setPasswordConfirmation("1234567");
+        patchDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/users/{id}", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(patchDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
+    }
+
+    @Test
+    public void testPatchUserPasswordWithSpaces() throws Exception {
+        UserPatchDTO patchDTO = new UserPatchDTO();
+        patchDTO.setUsername("david");
+        patchDTO.setPassword("1234 56789");
+        patchDTO.setPasswordConfirmation("1234 56789");
+        patchDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/users/{id}", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(patchDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
+    }
+
+    @Test
+    public void testPatchUserDifferentPasswords() throws Exception {
+        UserPatchDTO patchDTO = new UserPatchDTO();
+        patchDTO.setUsername("david");
+        patchDTO.setPassword("123456789");
+        patchDTO.setPasswordConfirmation("xyxyxyxyxyxyxy");
+        patchDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/users/{id}", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(patchDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo errorInfo = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(errorInfo.getMessage().contains("password"));
+        Assert.assertTrue(errorInfo.getMessage().contains("passwordConfirmation"));
+        Assert.assertEquals(ControllerValidationException.class, errorInfo.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
+    }
+
+    @Test
     public void testUpdateUser() throws Exception {
         UserPutDTO updateDTO = new UserPutDTO();
         updateDTO.setUsername("new username");
-        updateDTO.setPassword("new password");
+        updateDTO.setPasswordConfirmation("securedPassword");
+        updateDTO.setPassword("securedPassword");
         updateDTO.setEmail("new_user_email@gmail.com");
 
         UserReadDTO readDTO = createUserReadDTO();
 
         Mockito.when(applicationUserService.updateUser(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(put("/api/v1/users/{id}", readDTO.getId().toString())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
@@ -160,11 +324,79 @@ public class ApplicationUserControllerTest {
         Assert.assertEquals(readDTO, actualUser);
     }
 
+
+    @Test
+    public void testUpdateUserShortPassword() throws Exception {
+        UserPutDTO updateDTO = new UserPutDTO();
+        updateDTO.setUsername("david");
+        updateDTO.setPassword("1234567");
+        updateDTO.setPasswordConfirmation("1234567");
+        updateDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/users/{id}", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(updateDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
+    }
+
+    @Test
+    public void testUpdateUserPasswordWithSpaces() throws Exception {
+        UserPutDTO updateDTO = new UserPutDTO();
+        updateDTO.setUsername("david");
+        updateDTO.setPassword("1234 56789");
+        updateDTO.setPasswordConfirmation("1234 56789");
+        updateDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/users/{id}", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(updateDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
+    }
+
+    @Test
+    public void testUpdateUserDifferentPasswords() throws Exception {
+        UserPutDTO updateDTO = new UserPutDTO();
+        updateDTO.setUsername("david");
+        updateDTO.setPassword("123456789");
+        updateDTO.setPasswordConfirmation("xyxyxyxyxyxyxy");
+        updateDTO.setEmail("david101@email.com");
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/users/{id}", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(updateDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo errorInfo = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(errorInfo.getMessage().contains("password"));
+        Assert.assertTrue(errorInfo.getMessage().contains("passwordConfirmation"));
+        Assert.assertEquals(ControllerValidationException.class, errorInfo.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
+    }
+
     @Test
     public void testDeleteUser() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mvc.perform(delete("/api/v1/users/{id}", id))
+        mockMvc.perform(delete("/api/v1/users/{id}", id))
                 .andExpect(status().isOk());
 
         Mockito.verify(applicationUserService).deleteUser(id);
@@ -176,7 +408,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.ban(readDTO.getId())).thenReturn(readDTO);
 
-        String resultJson = mvc.perform(post("/api/v1/users/{id}/ban", readDTO.getId()))
+        String resultJson = mockMvc.perform(post("/api/v1/users/{id}/ban", readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -192,7 +424,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.pardon(readDTO.getId())).thenReturn(readDTO);
 
-        String resultJson = mvc.perform(post("/api/v1/users/{id}/pardon", readDTO.getId()))
+        String resultJson = mockMvc.perform(post("/api/v1/users/{id}/pardon", readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -211,7 +443,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.addUserRole(readDTO.getId(), userRoleDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(post("/api/v1/users/{id}/add-user-role", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRoleDTO)))
@@ -233,7 +465,7 @@ public class ApplicationUserControllerTest {
 
         Mockito.when(applicationUserService.removeUserRole(readDTO.getId(), userRoleDTO)).thenReturn(readDTO);
 
-        String resultJson = mvc
+        String resultJson = mockMvc
                 .perform(post("/api/v1/users/{id}/remove-user-role", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(userRoleDTO)))
@@ -244,6 +476,23 @@ public class ApplicationUserControllerTest {
         Assert.assertEquals(readDTO, actualUser);
 
         Mockito.verify(applicationUserService).removeUserRole(readDTO.getId(), userRoleDTO);
+    }
+
+    @Test
+    public void testAddUserRoleValidationException() throws Exception {
+        UserRoleDTO userRoleDTO = new UserRoleDTO();
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/remove-user-role", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(userRoleDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).addUserRole(any(), any());
     }
 
     private UserReadDTO createUserReadDTO() {

@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -7,36 +8,18 @@ import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.MovieCastRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RatingRepository;
-import com.golovko.backend.util.TestObjectFactory;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.transaction.support.TransactionTemplate;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.util.List;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE_CAST;
 
-@SpringBootTest
-@RunWith(SpringRunner.class)
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from comment",
-        "delete from rating",
-        "delete from user_role",
-        "delete from application_user",
-        "delete from person",
-        "delete from movie",
-        "delete from movie_cast"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MovieCastServiceTest {
+public class MovieCastServiceTest extends BaseTest {
 
     @Autowired
     private MovieCastRepository movieCastRepository;
@@ -51,13 +34,7 @@ public class MovieCastServiceTest {
     private MovieRepository movieRepository;
 
     @Autowired
-    private TestObjectFactory testObjectFactory;
-
-    @Autowired
     private MovieCastService movieCastService;
-
-    @Autowired
-    TransactionTemplate transactionTemplate;
 
     @Test
     public void testGetMovieCast() {
@@ -203,7 +180,8 @@ public class MovieCastServiceTest {
         MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
         patchDTO.setCharacter("New Character");
         patchDTO.setDescription("New text");
-        patchDTO.setPersonId(person.getId());;
+        patchDTO.setPersonId(person.getId());
+        ;
 
         MovieCastReadDTO readDTO = movieCastService.patchMovieCast(patchDTO, movieCast.getId(), movie.getId());
 
@@ -283,9 +261,55 @@ public class MovieCastServiceTest {
         Assert.assertEquals(4.5, movieCast.getAverageRating(), Double.MIN_NORMAL);
     }
 
-    private void inTransaction (Runnable runnable) {
-        transactionTemplate.executeWithoutResult(status -> {
-            runnable.run();
-        });
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastNotNullException() {
+        MovieCast mc = new MovieCast();
+        movieCastRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastMaxSizeValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCast mc = new MovieCast();
+        mc.setDescription("Long long text".repeat(1000));
+        mc.setCharacter("Long long text".repeat(1000));
+        mc.setMovie(movie);
+        movieCastRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastMinSizeValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCast mc = new MovieCast();
+        mc.setDescription("");
+        mc.setCharacter("");
+        mc.setMovie(movie);
+        movieCastRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastMinRatingValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCast mc = new MovieCast();
+        mc.setDescription("text");
+        mc.setCharacter("text");
+        mc.setMovie(movie);
+        mc.setAverageRating(-0.01);
+        movieCastRepository.save(mc);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieCastMaxRatingValidation() {
+        Movie movie = testObjectFactory.createMovie();
+
+        MovieCast mc = new MovieCast();
+        mc.setDescription("text");
+        mc.setCharacter("text");
+        mc.setMovie(movie);
+        mc.setAverageRating(10.01);
+        movieCastRepository.save(mc);
     }
 }

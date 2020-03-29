@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -8,44 +9,22 @@ import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RatingRepository;
-import com.golovko.backend.util.TestObjectFactory;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.jdbc.Sql;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.transaction.TransactionSystemException;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
-@ActiveProfiles("test")
-@Sql(statements = {
-        "delete from like",
-        "delete from comment",
-        "delete from genre_movie",
-        "delete from genre",
-        "delete from rating",
-        "delete from user_role",
-        "delete from application_user",
-        "delete from genre_movie",
-        "delete from genre",
-        "delete from movie_cast",
-        "delete from movie_crew",
-        "delete from person",
-        "delete from movie"},
-        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
-public class MovieServiceTest {
+public class MovieServiceTest extends BaseTest {
 
     @Autowired
     private MovieService movieService;
@@ -61,9 +40,6 @@ public class MovieServiceTest {
 
     @Autowired
     private RatingRepository ratingRepository;
-
-    @Autowired
-    private TestObjectFactory testObjectFactory;
 
     @Autowired
     private UpdateAverageRatingOfMoviesJob updateAverageRatingOfMoviesJob;
@@ -147,12 +123,13 @@ public class MovieServiceTest {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         MovieReadDTO readDTO = movieService.patchMovie(movie.getId(), patchDTO);
 
-        assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRating");
+        assertThat(readDTO).hasNoNullFieldsOrPropertiesExcept("averageRating", "likesCount", "dislikesCount");
 
-        Movie movieAfterUpdate = movieRepository.findById(readDTO.getId()).get();
+        Movie afterUpdate = movieRepository.findById(readDTO.getId()).get();
 
-        assertThat(movieAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRating");
-        assertThat(movie).isEqualToIgnoringGivenFields(movieAfterUpdate,
+        assertThat(afterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRating", "likesCount", "dislikesCount");
+
+        assertThat(movie).isEqualToIgnoringGivenFields(afterUpdate,
                 "movieCrews", "movieCasts", "genres");
     }
 
@@ -165,7 +142,6 @@ public class MovieServiceTest {
         updateDTO.setDescription("some NEW description");
         updateDTO.setIsReleased(false);
         updateDTO.setReleaseDate(LocalDate.parse("1900-07-10"));
-        updateDTO.setAverageRating(5.5);
 
         MovieReadDTO readDTO = movieService.updateMovie(movie.getId(), updateDTO);
 
@@ -225,7 +201,7 @@ public class MovieServiceTest {
         Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
 
         MovieFilter filter = new MovieFilter();
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
     }
 
@@ -238,7 +214,7 @@ public class MovieServiceTest {
         MovieFilter filter = new MovieFilter();
         filter.setGenreNames(new HashSet<String>());
         filter.setMovieCrewTypes(new HashSet<MovieCrewType>());
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId(), m3.getId());
     }
 
@@ -257,7 +233,7 @@ public class MovieServiceTest {
 
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(person2.getId());
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -277,7 +253,7 @@ public class MovieServiceTest {
 
         MovieFilter filter = new MovieFilter();
         filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
-        List<MovieReadDTO> filteredMovies = movieService.getMovies(filter);
+        List<MovieReadDTO> filteredMovies = movieService.getMovies(filter, Pageable.unpaged()).getData();
         assertThat(filteredMovies).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
@@ -296,7 +272,7 @@ public class MovieServiceTest {
         MovieFilter filter = new MovieFilter();
         filter.setGenreNames(Set.of(genre1.getGenreName()));
 
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId());
     }
 
@@ -316,7 +292,7 @@ public class MovieServiceTest {
         MovieFilter filter = new MovieFilter();
         filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
         filter.setReleasedTo(LocalDate.of(1992, 5, 4));
-        assertThat(movieService.getMovies(filter)).extracting("id")
+        assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
                 .containsExactlyInAnyOrder(m2.getId(), m3.getId());
     }
 
@@ -346,7 +322,7 @@ public class MovieServiceTest {
         filter.setReleasedTo(LocalDate.of(1992, 5, 4));
         filter.setGenreNames(Set.of(genre.getGenreName()));
 
-        List<MovieReadDTO> filteredMovies = movieService.getMovies(filter);
+        List<MovieReadDTO> filteredMovies = movieService.getMovies(filter, Pageable.unpaged()).getData();
         assertThat(filteredMovies).extracting("id")
                 .containsExactlyInAnyOrder(m2.getId());
     }
@@ -364,6 +340,69 @@ public class MovieServiceTest {
 
         movie = movieRepository.findById(movie.getId()).get();
         Assert.assertEquals(4.5, movie.getAverageRating(), Double.MIN_NORMAL);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieNotNullValidation() {
+        Movie movie = new Movie();
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieMaxSizeValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("movie title".repeat(100));
+        movie.setDescription("movie title".repeat(1000));
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieMinSizeValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("");
+        movie.setDescription("");
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieMinRatingValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("text");
+        movie.setDescription("text");
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movie.setAverageRating(-0.01);
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMovieMaxRatingValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("text");
+        movie.setDescription("text");
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movie.setAverageRating(10.01);
+        movieRepository.save(movie);
+    }
+
+    @Test
+    public void testGetMoviesWithFilterWithPagingAndSorting() {
+        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = createMovie(LocalDate.of(1990, 5, 4));
+        createMovie(LocalDate.of(1980, 5, 4));
+
+        MovieFilter filter = new MovieFilter();
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.DESC, "releaseDate"));
+
+        Assertions.assertThat(movieService.getMovies(filter, pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
     }
 
     private Movie createMovie(LocalDate releasedDate) {

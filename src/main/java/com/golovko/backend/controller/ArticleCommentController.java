@@ -8,6 +8,7 @@ import com.golovko.backend.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,7 +24,7 @@ public class ArticleCommentController {
         return commentService.getComment(articleId, id);
     }
 
-    @GetMapping
+    @GetMapping // TODO pagination
     public List<CommentReadDTO> getAllPublishedArticleComments(@PathVariable UUID articleId) {
         return commentService.getAllPublishedComments(articleId);
     }
@@ -31,7 +32,7 @@ public class ArticleCommentController {
     @PostMapping
     public CommentReadDTO createArticleComment(
             @PathVariable UUID articleId,
-            @RequestBody CommentCreateDTO createDTO
+            @RequestBody @Valid CommentCreateDTO createDTO
     ) {
         return commentService.createComment(articleId, createDTO);
     }
@@ -40,7 +41,7 @@ public class ArticleCommentController {
     public CommentReadDTO updateArticleComment(
             @PathVariable UUID articleId,
             @PathVariable UUID id,
-            @RequestBody CommentPutDTO putDTO
+            @RequestBody @Valid CommentPutDTO putDTO
     ) {
         return commentService.updateComment(articleId, id, putDTO);
     }
@@ -49,7 +50,7 @@ public class ArticleCommentController {
     public CommentReadDTO patchArticleComment(
             @PathVariable UUID articleId,
             @PathVariable UUID id,
-            @RequestBody CommentPatchDTO patchDTO
+            @RequestBody @Valid CommentPatchDTO patchDTO
     ) {
         return commentService.patchComment(articleId, id, patchDTO);
     }

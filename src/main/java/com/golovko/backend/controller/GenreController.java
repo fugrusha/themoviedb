@@ -5,6 +5,7 @@ import com.golovko.backend.service.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.util.List;
 import java.util.UUID;
 
@@ -15,6 +16,7 @@ public class GenreController {
     @Autowired
     private GenreService genreService;
 
+    // TODO pagination
     @GetMapping
     public List<GenreReadDTO> getAllGenres() {
         return genreService.getAllGenres();
@@ -31,17 +33,17 @@ public class GenreController {
     }
 
     @PostMapping
-    public GenreReadDTO createGenre(@RequestBody GenreCreateDTO createDTO) {
+    public GenreReadDTO createGenre(@RequestBody @Valid GenreCreateDTO createDTO) {
         return genreService.createGenre(createDTO);
     }
 
     @PatchMapping("/{id}")
-    public GenreReadDTO patchGenre(@PathVariable UUID id, @RequestBody GenrePatchDTO patchDTO) {
+    public GenreReadDTO patchGenre(@PathVariable UUID id, @RequestBody @Valid GenrePatchDTO patchDTO) {
         return genreService.patchGenre(id, patchDTO);
     }
 
     @PutMapping("/{id}")
-    public GenreReadDTO updateGenre(@PathVariable UUID id, @RequestBody GenrePutDTO putDTO) {
+    public GenreReadDTO updateGenre(@PathVariable UUID id, @RequestBody @Valid GenrePutDTO putDTO) {
         return genreService.updateGenre(id, putDTO);
     }
 

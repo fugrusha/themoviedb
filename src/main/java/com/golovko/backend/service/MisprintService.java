@@ -1,12 +1,15 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -45,12 +49,10 @@ public class MisprintService {
     @Autowired
     private MovieCrewRepository movieCrewRepository;
 
-    public List<MisprintReadDTO> getAllMisprints(MisprintFilter filter) {
-        List<Misprint> misprints = misprintRepository.findByFilter(filter);
+    public PageResult<MisprintReadDTO> getMisprintsByFilter(MisprintFilter filter, Pageable pageable) {
+        Page<Misprint> misprints = misprintRepository.findByFilter(filter, pageable);
 
-        return misprints.stream()
-                .map(m -> translationService.translate(m, MisprintReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(misprints, MisprintReadDTO.class);
     }
 
     public MisprintReadDTO getMisprintComplaint(UUID userId, UUID id) {
@@ -59,6 +61,7 @@ public class MisprintService {
         return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
+    // TODO pagination
     public List<MisprintReadDTO> getAllUserMisprintComplaints(UUID userId) {
         List<Misprint> misprints = misprintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
 
@@ -77,36 +80,11 @@ public class MisprintService {
         return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
-    public MisprintReadDTO patchMisprintComplaint(
-            UUID userId,
-            UUID id,
-            MisprintPatchDTO patchDTO
-    ) {
-        Misprint misprint = getMisprintByUserId(id, userId);
-
-        translationService.map(patchDTO, misprint);
-        misprint = misprintRepository.save(misprint);
-
-        return translationService.translate(misprint, MisprintReadDTO.class);
-    }
-
-    public MisprintReadDTO updateMisprintComplaint(
-            UUID userId,
-            UUID id,
-            MisprintPutDTO updateDTO
-    ) {
-        Misprint misprint = getMisprintByUserId(id, userId);
-
-        translationService.map(updateDTO, misprint);
-        misprint = misprintRepository.save(misprint);
-
-        return translationService.translate(misprint, MisprintReadDTO.class);
-    }
-
     public void deleteMisprintComplaint(UUID userId, UUID id) {
         misprintRepository.delete(getMisprintByUserId(id, userId));
     }
 
+    // TODO pagination
     public List<MisprintReadDTO> getAllMisprintsByTargetId(UUID targetObjectId) {
         List<Misprint> misprints = misprintRepository.findAllByTargetObjectId(targetObjectId);
 
@@ -247,22 +225,12 @@ public class MisprintService {
     }
 
     private Misprint getMisprintByUserId(UUID id, UUID userId) {
-        Misprint misprint = misprintRepository.findByIdAndAuthorId(id, userId);
-
-        if (misprint != null) {
-            return misprint;
-        } else {
-            throw new EntityNotFoundException(Misprint.class, id, userId);
-        }
+        return Optional.ofNullable(misprintRepository.findByIdAndAuthorId(id, userId))
+                .orElseThrow(() -> new EntityNotFoundException(Misprint.class, id, userId));
     }
 
     private Misprint getMisprintByTargetIdRequired(UUID id, UUID targetObjectId) {
-        Misprint misprint = misprintRepository.findByIdAndTargetObjectId(id, targetObjectId);
-
-        if (misprint != null) {
-            return misprint;
-        } else {
-            throw new EntityNotFoundException(Misprint.class, id, targetObjectId);
-        }
+        return Optional.ofNullable(misprintRepository.findByIdAndTargetObjectId(id, targetObjectId))
+                .orElseThrow(() -> new EntityNotFoundException(Misprint.class, id, targetObjectId));
     }
 }
