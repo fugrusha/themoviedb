@@ -68,10 +68,29 @@ public class MisprintServiceTest extends BaseTest {
         testObjectFactory.createMisprint(movie.getId(), MOVIE, user2, "misprint");
         testObjectFactory.createMisprint(movie.getId(), MOVIE, user2, "misprint");
 
-        List<MisprintReadDTO> misprints = misprintService.getAllUserMisprintComplaints(user1.getId());
+        PageResult<MisprintReadDTO> misprints = misprintService
+                .getAllUserMisprintComplaints(user1.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(misprints).extracting("id")
+        Assertions.assertThat(misprints.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
+    }
+
+    @Test
+    public void testGetUserMisprintsWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Misprint m1 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+        testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+        testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Assertions.assertThat(misprintService.getAllUserMisprintComplaints(user1.getId(), pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -142,9 +161,10 @@ public class MisprintServiceTest extends BaseTest {
         testObjectFactory.createMisprint(movie2.getId(), MOVIE, user1, "misprint");
         testObjectFactory.createMisprint(movie2.getId(), MOVIE, user1, "misprint");
 
-        List<MisprintReadDTO> expectedResult = misprintService.getAllMisprintsByTargetId(movie1.getId());
+        PageResult<MisprintReadDTO> expectedResult = misprintService
+                .getMisprintsByTargetId(movie1.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(expectedResult).extracting("id")
+        Assertions.assertThat(expectedResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 

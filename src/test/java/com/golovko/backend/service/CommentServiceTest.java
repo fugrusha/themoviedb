@@ -17,7 +17,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.*;
@@ -61,9 +64,10 @@ public class CommentServiceTest extends BaseTest {
         testObjectFactory.createComment(user1, article1.getId(), PENDING, ARTICLE);
         testObjectFactory.createComment(user1, article1.getId(), BLOCKED, ARTICLE);
 
-        List<CommentReadDTO> comments = commentService.getAllPublishedComments(article1.getId());
+        PageResult<CommentReadDTO> comments = commentService
+                .getPublishedComments(article1.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(comments).extracting("id")
+        Assertions.assertThat(comments.getData()).extracting("id")
                 .containsExactlyInAnyOrder(comment1.getId(), comment2.getId());
     }
 
@@ -423,6 +427,24 @@ public class CommentServiceTest extends BaseTest {
                 Sort.by(Sort.Direction.ASC, "status, targetObjectType"));
 
         Assertions.assertThat(commentService.getCommentsByFilter(filter, pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
+    }
+
+    @Test
+    public void testGetPublishedCommentsWithFilterWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        testObjectFactory.createComment(user1, article.getId(), BLOCKED, ARTICLE);
+        Comment c1 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        Comment c2 = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Assertions.assertThat(commentService.getPublishedComments(article.getId(), pageRequest).getData())
                 .extracting("id")
                 .isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
     }

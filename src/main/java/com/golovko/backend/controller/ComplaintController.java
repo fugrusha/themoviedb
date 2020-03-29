@@ -1,15 +1,16 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.service.ComplaintService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,9 +25,12 @@ public class ComplaintController {
         return complaintService.getComplaint(userId, id);
     }
 
-    @GetMapping // TODO pagination
-    public List<ComplaintReadDTO> getAllUserComplaints(@PathVariable UUID userId) {
-        return complaintService.getUserComplaints(userId);
+    @GetMapping
+    public PageResult<ComplaintReadDTO> getUserComplaints(
+            @PathVariable UUID userId,
+            Pageable pageable
+    ) {
+        return complaintService.getUserComplaints(userId, pageable);
     }
 
     @PostMapping

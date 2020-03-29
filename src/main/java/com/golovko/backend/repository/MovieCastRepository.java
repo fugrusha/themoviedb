@@ -1,18 +1,19 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.MovieCast;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @Repository
 public interface MovieCastRepository extends CrudRepository<MovieCast, UUID> {
 
-    List<MovieCast> findByMovieId(UUID movieId);
+    Page<MovieCast> findByMovieId(UUID movieId, Pageable pageable);
 
     MovieCast findByIdAndMovieId(UUID id, UUID movieId);
 

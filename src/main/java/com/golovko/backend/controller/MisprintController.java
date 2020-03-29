@@ -1,13 +1,14 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.MisprintCreateDTO;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.service.MisprintService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -22,10 +23,12 @@ public class MisprintController {
         return misprintService.getMisprintComplaint(userId, id);
     }
 
-    // TODO pagination
     @GetMapping
-    public List<MisprintReadDTO> getAllReportedMisprintComplaints(@PathVariable UUID userId) {
-        return misprintService.getAllUserMisprintComplaints(userId);
+    public PageResult<MisprintReadDTO> getAllReportedMisprintComplaints(
+            @PathVariable UUID userId,
+            Pageable pageable
+    ) {
+        return misprintService.getAllUserMisprintComplaints(userId, pageable);
     }
 
     @PostMapping

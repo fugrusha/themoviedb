@@ -5,6 +5,7 @@ import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Rating;
 import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
@@ -15,9 +16,11 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
-import java.util.List;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
@@ -55,12 +58,31 @@ public class RatingServiceTest extends BaseTest {
         Movie movie2 = testObjectFactory.createMovie();
         Rating r1 = testObjectFactory.createRating(2, user1, movie1.getId(), MOVIE);
         Rating r2 = testObjectFactory.createRating(3, user2, movie1.getId(), MOVIE);
-        Rating r3 = testObjectFactory.createRating(4, user1, movie2.getId(), MOVIE);
-        Rating r4 = testObjectFactory.createRating(5, user2, movie2.getId(), MOVIE);
+        testObjectFactory.createRating(4, user1, movie2.getId(), MOVIE);
+        testObjectFactory.createRating(5, user2, movie2.getId(), MOVIE);
 
-        List<RatingReadDTO> ratings = ratingService.getAllRatingsByTargetObjectId(movie1.getId());
+        PageResult<RatingReadDTO> ratings = ratingService
+                .getRatingsByTargetObjectId(movie1.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(ratings).extracting("id").containsExactlyInAnyOrder(r1.getId(), r2.getId());
+        Assertions.assertThat(ratings.getData()).extracting("id")
+                .containsExactlyInAnyOrder(r1.getId(), r2.getId());
+    }
+
+    @Test
+    public void testGetRatingsWithPagingAndSorting() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Rating r1 = testObjectFactory.createRating(2, user, movie.getId(), MOVIE);
+        Rating r2 = testObjectFactory.createRating(3, user, movie.getId(), MOVIE);
+        testObjectFactory.createRating(4, user, movie.getId(), MOVIE);
+        testObjectFactory.createRating(5, user, movie.getId(), MOVIE);
+
+        PageRequest pageRequest = PageRequest.of(0, 2, Sort.by(Sort.Direction.ASC, "rating"));
+        PageResult<RatingReadDTO> ratings = ratingService
+                .getRatingsByTargetObjectId(movie.getId(), pageRequest);
+
+        Assertions.assertThat(ratings.getData()).extracting("id")
+                .containsExactlyInAnyOrder(r1.getId(), r2.getId());
     }
 
     @Test

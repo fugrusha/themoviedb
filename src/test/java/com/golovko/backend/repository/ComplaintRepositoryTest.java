@@ -8,9 +8,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.List;
 
 import static com.golovko.backend.domain.ComplaintType.CHILD_ABUSE;
 import static com.golovko.backend.domain.ComplaintType.MISPRINT;
@@ -31,7 +32,8 @@ public class ComplaintRepositoryTest extends BaseTest {
         testObjectFactory.createComplaint(user2, CHILD_ABUSE, PERSON);
         testObjectFactory.createComplaint(user2, MISPRINT, PERSON);
 
-        List<Complaint> result = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(user1.getId());
+        Page<Complaint> result = complaintRepository
+                .findByAuthorId(user1.getId(), Pageable.unpaged());
 
         Assertions.assertThat(result).extracting(Complaint::getId)
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());

@@ -6,10 +6,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
@@ -78,7 +80,7 @@ public class MisprintRepositoryTest extends BaseTest {
         testObjectFactory.createMisprint(movie2.getId(), MOVIE, user2, "misprint");
         testObjectFactory.createMisprint(movie2.getId(), MOVIE, user2, "misprint");
 
-        List<Misprint> result = misprintRepository.findByAuthorIdOrderByCreatedAtAsc(user1.getId());
+        Page<Misprint> result = misprintRepository.findByAuthorId(user1.getId(), Pageable.unpaged());
 
         Assertions.assertThat(result).extracting(Misprint::getId)
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
@@ -95,7 +97,8 @@ public class MisprintRepositoryTest extends BaseTest {
         testObjectFactory.createMisprint(movie2.getId(), MOVIE, user1, "misprint");
         testObjectFactory.createMisprint(movie2.getId(), MOVIE, user1, "misprint");
 
-        List<Misprint> expectedResult = misprintRepository.findAllByTargetObjectId(movie1.getId());
+        Page<Misprint> expectedResult = misprintRepository
+                .findAllByTargetObjectId(movie1.getId(), Pageable.unpaged());
 
         Assertions.assertThat(expectedResult).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
@@ -129,11 +132,13 @@ public class MisprintRepositoryTest extends BaseTest {
         createMisprint(movie1.getId(), MOVIE, user, "misprint", ComplaintStatus.DUPLICATE);
         createMisprint(movie2.getId(), MOVIE, user, "misprint", ComplaintStatus.INITIATED);
 
-        List<Misprint> misprints = misprintRepository
-                .findSimilarMisprints(movie1.getId(), "misprint", ComplaintStatus.INITIATED);
+        transactionTemplate.executeWithoutResult(status -> {
+            Stream<Misprint> misprints = misprintRepository
+                    .findSimilarMisprints(movie1.getId(), "misprint", ComplaintStatus.INITIATED);
 
-        Assertions.assertThat(misprints).extracting("id")
-                .containsExactlyInAnyOrder(m1.getId(), m2.getId());
+            Assertions.assertThat(misprints).extracting("id")
+                    .containsExactlyInAnyOrder(m1.getId(), m2.getId());
+        });
     }
 
     private Misprint createMisprint(

@@ -1,12 +1,13 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -21,10 +22,9 @@ public class ArticleController {
         return articleService.getArticle(id);
     }
 
-    // TODO pagination
     @GetMapping // TODO add filter by Person and by Movie
-    public List<ArticleReadDTO> getAllArticles() {
-        return articleService.getAllPublishedArticles();
+    public PageResult<ArticleReadDTO> getAllArticles(Pageable pageable) {
+        return articleService.getAllPublishedArticles(pageable);
     }
 
     @GetMapping("/{id}/extended")

@@ -5,6 +5,7 @@ import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
 import com.golovko.backend.dto.complaint.ComplaintPatchDTO;
 import com.golovko.backend.dto.complaint.ComplaintPutDTO;
@@ -18,6 +19,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -60,20 +63,53 @@ public class ComplaintControllerTest extends BaseControllerTest {
         ComplaintReadDTO c1 = createComplaintReadDTO(userId);
         ComplaintReadDTO c2 = createComplaintReadDTO(userId);
 
-        List<ComplaintReadDTO> expectedResult = List.of(c1, c2);
+        PageResult<ComplaintReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(c1, c2));
 
-        Mockito.when(complaintService.getUserComplaints(userId)).thenReturn(expectedResult);
+        Mockito.when(complaintService.getUserComplaints(userId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/users/{userId}/complaints/", userId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<ComplaintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting(ComplaintReadDTO::getId)
+        PageResult<ComplaintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult.getData()).extracting(ComplaintReadDTO::getId)
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
 
-        Mockito.verify(complaintService).getUserComplaints(userId);
+        Mockito.verify(complaintService).getUserComplaints(userId, PageRequest.of(0, defaultPageSize));
+    }
+
+    @Test
+    public void testGetUserComplaintsWithPagingAndSorting() throws Exception {
+        UUID userId = UUID.randomUUID();
+        ComplaintReadDTO c1 = createComplaintReadDTO(userId);
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<ComplaintReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(c1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(complaintService.getUserComplaints(userId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/users/{userId}/complaints/", userId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<ComplaintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     @Test

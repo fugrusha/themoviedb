@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieCrew;
 import com.golovko.backend.domain.MovieCrewType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.dto.person.PersonReadDTO;
@@ -16,6 +17,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -78,17 +81,50 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
-        List<MovieCrewReadDTO> expectedResult = List.of(readDTO);
+        PageResult<MovieCrewReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
 
-        Mockito.when(movieCrewService.getAllMovieCrews(movieId)).thenReturn(expectedResult);
+        Mockito.when(movieCrewService.getAllMovieCrews(movieId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews", movieId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MovieCrewReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assert.assertEquals(expectedResult, actualResult);
+        PageResult<MovieCrewReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
+    }
+
+    @Test
+    public void testGetMovieCastsWithPagingAndSorting() throws Exception {
+        MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
+        UUID movieId = readDTO.getMovieId();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<MovieCrewReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(movieCrewService.getAllMovieCrews(movieId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies/{movieId}/movie-crews", movieId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MovieCrewReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     @Test

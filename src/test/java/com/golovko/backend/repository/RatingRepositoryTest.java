@@ -8,9 +8,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.List;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
@@ -93,7 +94,7 @@ public class RatingRepositoryTest extends BaseTest {
         testObjectFactory.createRating(3, u1, m2.getId(), MOVIE);
         testObjectFactory.createRating(3, u2, m2.getId(), MOVIE);
 
-        List<Rating> ratings = ratingRepository.findAllByTargetId(m1.getId());
+        Page<Rating> ratings = ratingRepository.findAllByTargetId(m1.getId(), Pageable.unpaged());
 
         Assertions.assertThat(ratings).extracting("id")
                 .containsExactlyInAnyOrder(r1.getId(), r2.getId(), r3.getId());

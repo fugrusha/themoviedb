@@ -15,9 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
 
@@ -52,13 +50,11 @@ public class ArticleService {
         return translationService.translate(article, ArticleReadExtendedDTO.class);
     }
 
-    // TODO pagination
-    public List<ArticleReadDTO> getAllPublishedArticles() {
-        List<Article> articles = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.PUBLISHED);
+    public PageResult<ArticleReadDTO> getAllPublishedArticles(Pageable pageable) {
+        Page<Article> articles = articleRepository
+                .findByStatus(ArticleStatus.PUBLISHED, pageable);
 
-        return articles.stream()
-                .map(a -> translationService.translate(a, ArticleReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(articles, ArticleReadDTO.class);
     }
 
     public ArticleReadDTO createArticle(ArticleCreateDTO createDTO) {

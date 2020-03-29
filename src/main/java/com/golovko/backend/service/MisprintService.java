@@ -16,10 +16,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -61,13 +59,10 @@ public class MisprintService {
         return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
-    // TODO pagination
-    public List<MisprintReadDTO> getAllUserMisprintComplaints(UUID userId) {
-        List<Misprint> misprints = misprintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
+    public PageResult<MisprintReadDTO> getAllUserMisprintComplaints(UUID userId, Pageable pageable) {
+        Page<Misprint> misprints = misprintRepository.findByAuthorId(userId, pageable);
 
-        return misprints.stream()
-                .map(m -> translationService.translate(m, MisprintReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(misprints, MisprintReadDTO.class);
     }
 
     public MisprintReadDTO createMisprintComplaint(UUID userId, MisprintCreateDTO createDTO) {
@@ -84,13 +79,10 @@ public class MisprintService {
         misprintRepository.delete(getMisprintByUserId(id, userId));
     }
 
-    // TODO pagination
-    public List<MisprintReadDTO> getAllMisprintsByTargetId(UUID targetObjectId) {
-        List<Misprint> misprints = misprintRepository.findAllByTargetObjectId(targetObjectId);
+    public PageResult<MisprintReadDTO> getMisprintsByTargetId(UUID targetObjectId, Pageable pageable) {
+        Page<Misprint> misprints = misprintRepository.findAllByTargetObjectId(targetObjectId, pageable);
 
-        return misprints.stream()
-                .map(m -> translationService.translate(m, MisprintReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(misprints, MisprintReadDTO.class);
     }
 
     public MisprintReadDTO getMisprintByTargetId(UUID targetObjectId, UUID id) {

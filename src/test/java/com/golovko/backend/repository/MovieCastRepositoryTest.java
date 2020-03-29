@@ -8,10 +8,11 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -85,7 +86,7 @@ public class MovieCastRepositoryTest extends BaseTest {
         testObjectFactory.createMovieCast(p2, m2);
         testObjectFactory.createMovieCast(p3, m2);
 
-        List<MovieCast> movieCasts = movieCastRepository.findByMovieId(m1.getId());
+        Page<MovieCast> movieCasts = movieCastRepository.findByMovieId(m1.getId(), Pageable.unpaged());
 
         Assertions.assertThat(movieCasts).extracting("id")
                 .containsExactlyInAnyOrder(mc1.getId(), mc2.getId());

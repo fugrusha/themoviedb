@@ -48,9 +48,28 @@ public class ComplaintServiceTest extends BaseTest {
         testObjectFactory.createComplaint(user2, MISPRINT, TargetObjectType.PERSON);
         testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.PERSON);
 
-        List<ComplaintReadDTO> complaints = complaintService.getUserComplaints(user1.getId());
+        PageResult<ComplaintReadDTO> complaints = complaintService
+                .getUserComplaints(user1.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(complaints).extracting("id")
+        Assertions.assertThat(complaints.getData()).extracting("id")
+                .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+    }
+
+    @Test
+    public void testGetComplaintsWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint c2 = testObjectFactory.createComplaint(user1, MISPRINT, TargetObjectType.PERSON);
+        testObjectFactory.createComplaint(user1, MISPRINT, TargetObjectType.PERSON);
+        testObjectFactory.createComplaint(user1, SPAM, TargetObjectType.PERSON);
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        PageResult<ComplaintReadDTO> complaints = complaintService
+                .getUserComplaints(user1.getId(), pageRequest);
+
+        Assertions.assertThat(complaints.getData()).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
     }
 

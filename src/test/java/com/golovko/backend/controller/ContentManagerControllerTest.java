@@ -318,85 +318,100 @@ public class ContentManagerControllerTest extends BaseControllerTest {
     public void testGetAllMisprintsByArticleId() throws Exception {
         UUID articleId = UUID.randomUUID();
         MisprintReadDTO readDTO = createMisprintReadDTO();
-        List<MisprintReadDTO> expectedResult = List.of(readDTO);
 
-        Mockito.when(misprintService.getAllMisprintsByTargetId(articleId)).thenReturn(expectedResult);
+        PageResult<MisprintReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(articleId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/articles/{articleId}/misprints/", articleId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
     }
 
     @Test
     public void testGetAllMisprintsByMovieId() throws Exception {
         UUID movieId = UUID.randomUUID();
         MisprintReadDTO readDTO = createMisprintReadDTO();
-        List<MisprintReadDTO> expectedResult = List.of(readDTO);
 
-        Mockito.when(misprintService.getAllMisprintsByTargetId(movieId)).thenReturn(expectedResult);
+        PageResult<MisprintReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(movieId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/misprints/", movieId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
     }
 
     @Test
     public void testGetAllMisprintsByPersonId() throws Exception {
         UUID personId = UUID.randomUUID();
         MisprintReadDTO readDTO = createMisprintReadDTO();
-        List<MisprintReadDTO> expectedResult = List.of(readDTO);
 
-        Mockito.when(misprintService.getAllMisprintsByTargetId(personId)).thenReturn(expectedResult);
+        PageResult<MisprintReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(personId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/persons/{personId}/misprints/", personId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
     }
 
     @Test
     public void testGetAllMisprintsByMovieCastId() throws Exception {
         UUID movieCastId = UUID.randomUUID();
         MisprintReadDTO readDTO = createMisprintReadDTO();
-        List<MisprintReadDTO> expectedResult = List.of(readDTO);
 
-        Mockito.when(misprintService.getAllMisprintsByTargetId(movieCastId)).thenReturn(expectedResult);
+        PageResult<MisprintReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(movieCastId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movie-casts/{movieCastId}/misprints/", movieCastId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
     }
 
     @Test
     public void testGetAllMisprintsByMovieCrewId() throws Exception {
         UUID movieCrewId = UUID.randomUUID();
         MisprintReadDTO readDTO = createMisprintReadDTO();
-        List<MisprintReadDTO> expectedResult = List.of(readDTO);
 
-        Mockito.when(misprintService.getAllMisprintsByTargetId(movieCrewId)).thenReturn(expectedResult);
+        PageResult<MisprintReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(movieCrewId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movie-crews/{movieCrew}/misprints/", movieCrewId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting("id").contains(readDTO.getId());
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
     }
 
     @Test
@@ -632,6 +647,161 @@ public class ContentManagerControllerTest extends BaseControllerTest {
                 .andReturn().getResponse().getContentAsString();
 
         PageResult<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
+    }
+
+    @Test
+    public void testGetMisprintsByArticleIdWithPagingAndSorting() throws Exception {
+        UUID articleId = UUID.randomUUID();
+        MisprintReadDTO m1 = createMisprintReadDTO();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<MisprintReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(m1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(articleId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/{articleId}/misprints/", articleId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
+    }
+
+    @Test
+    public void testGetMisprintsByMovieIdWithPagingAndSorting() throws Exception {
+        UUID movieId = UUID.randomUUID();
+        MisprintReadDTO m1 = createMisprintReadDTO();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<MisprintReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(m1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(movieId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies/{movieId}/misprints/", movieId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
+    }
+
+    @Test
+    public void testGetMisprintsByPersonIdWithPagingAndSorting() throws Exception {
+        UUID personId = UUID.randomUUID();
+        MisprintReadDTO m1 = createMisprintReadDTO();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<MisprintReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(m1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(personId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/persons/{personId}/misprints/", personId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
+    }
+
+    @Test
+    public void testGetMisprintsByMovieCastIdWithPagingAndSorting() throws Exception {
+        UUID movieCastId = UUID.randomUUID();
+        MisprintReadDTO m1 = createMisprintReadDTO();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<MisprintReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(m1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(movieCastId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movie-casts/{movieCastId}/misprints/", movieCastId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
+    }
+
+    @Test
+    public void testGetMisprintsByMovieCrewIdWithPagingAndSorting() throws Exception {
+        UUID movieCrewId = UUID.randomUUID();
+        MisprintReadDTO m1 = createMisprintReadDTO();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<MisprintReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(m1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(misprintService.getMisprintsByTargetId(movieCrewId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movie-crews/{movieCrewId}/misprints/", movieCrewId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assert.assertEquals(result, actualResult);
     }
 

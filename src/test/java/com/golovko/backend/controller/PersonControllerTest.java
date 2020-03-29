@@ -2,6 +2,7 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Gender;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
@@ -14,6 +15,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -54,19 +57,51 @@ public class PersonControllerTest extends BaseControllerTest {
         PersonReadDTO p2 = createPersonReadDTO();
         PersonReadDTO p3 = createPersonReadDTO();
 
-        List<PersonReadDTO> expectedResult = List.of(p1, p2, p3);
+        PageResult<PersonReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(p1, p2, p3));
 
-        Mockito.when(personService.getAllPersons()).thenReturn(expectedResult);
+        Mockito.when(personService.getPeople(PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/persons"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<PersonReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assert.assertEquals(expectedResult, actualResult);
+        PageResult<PersonReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
 
-        Mockito.verify(personService).getAllPersons();
+        Mockito.verify(personService).getPeople(PageRequest.of(0, defaultPageSize));
+    }
+
+    @Test
+    public void testGetPeopleWithPagingAndSorting() throws Exception {
+        PersonReadDTO p1 = createPersonReadDTO();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<PersonReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(p1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(personService.getPeople(pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/persons")
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<PersonReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     @Test

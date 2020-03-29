@@ -14,10 +14,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class ComplaintService {
@@ -42,13 +40,10 @@ public class ComplaintService {
         return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
-    // TODO pagination
-    public List<ComplaintReadDTO> getUserComplaints(UUID userId) {
-        List<Complaint> complaints = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
+    public PageResult<ComplaintReadDTO> getUserComplaints(UUID userId, Pageable pageable) {
+        Page<Complaint> complaints = complaintRepository.findByAuthorId(userId, pageable);
 
-        return complaints.stream()
-                .map(c -> translationService.translate(c, ComplaintReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(complaints, ComplaintReadDTO.class);
     }
 
     public ComplaintReadDTO createComplaint(UUID userId, ComplaintCreateDTO createDTO) {

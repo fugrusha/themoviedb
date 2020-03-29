@@ -7,10 +7,11 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -55,12 +56,11 @@ public class PersonRepositoryTest extends BaseTest {
         Person p1 = createPerson("Akulova");
         Person p2 = createPerson("Moldovan");
         Person p3 = createPerson("Hefner");
-        Person p4 = createPerson("Buzova");
 
-        List<Person> result = personRepository.findAllPeople();
+        Page<Person> result = personRepository.findAllPeople(Pageable.unpaged());
 
         Assertions.assertThat(result).extracting("id")
-                .containsExactly(p1.getId(), p4.getId(), p3.getId(), p2.getId());
+                .containsExactlyInAnyOrder(p1.getId(), p2.getId(), p3.getId());
     }
 
     @Test

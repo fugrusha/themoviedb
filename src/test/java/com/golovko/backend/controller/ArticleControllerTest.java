@@ -3,6 +3,7 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.*;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -14,6 +15,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -57,20 +60,22 @@ public class ArticleControllerTest extends BaseControllerTest {
         ArticleReadDTO a3 = createArticleReadDTO();
         ArticleReadDTO a4 = createArticleReadDTO();
 
-        List<ArticleReadDTO> expectedResult = List.of(a1, a2, a3, a4);
+        PageResult<ArticleReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(a1, a2, a3, a4));
 
-        Mockito.when(articleService.getAllPublishedArticles()).thenReturn(expectedResult);
+        Mockito.when(articleService.getAllPublishedArticles(PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/articles/"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting(ArticleReadDTO::getId)
+        PageResult<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult.getData()).extracting(ArticleReadDTO::getId)
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId(), a4.getId());
 
-        Mockito.verify(articleService).getAllPublishedArticles();
+        Mockito.verify(articleService).getAllPublishedArticles(PageRequest.of(0, defaultPageSize));
     }
 
     @Test
@@ -323,6 +328,36 @@ public class ArticleControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk());
 
         Mockito.verify(articleService).deleteArticle(id);
+    }
+
+    @Test
+    public void testGetPublishedArticlesWithPagingAndSorting() throws Exception {
+        ArticleReadDTO readDTO = createArticleReadDTO();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<ArticleReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(articleService.getAllPublishedArticles(pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/")
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     private ArticleReadDTO createArticleReadDTO() {

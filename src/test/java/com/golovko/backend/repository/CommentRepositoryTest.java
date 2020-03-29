@@ -6,9 +6,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.List;
 
 import static com.golovko.backend.domain.CommentStatus.*;
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
@@ -80,7 +81,8 @@ public class CommentRepositoryTest extends BaseTest {
         testObjectFactory.createComment(user2, article.getId(), NEED_MODERATION, ARTICLE);
         testObjectFactory.createComment(user2, article.getId(), BLOCKED, ARTICLE);
 
-        List<Comment> comments = commentRepository.findAllByStatusAndTarget(article.getId(), APPROVED);
+        Page<Comment> comments = commentRepository
+                .findAllByStatusAndTarget(article.getId(), APPROVED, Pageable.unpaged());
 
         Assertions.assertThat(comments).extracting("id")
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());

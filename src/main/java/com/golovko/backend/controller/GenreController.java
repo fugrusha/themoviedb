@@ -1,12 +1,13 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.genre.*;
 import com.golovko.backend.service.GenreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -16,10 +17,9 @@ public class GenreController {
     @Autowired
     private GenreService genreService;
 
-    // TODO pagination
     @GetMapping
-    public List<GenreReadDTO> getAllGenres() {
-        return genreService.getAllGenres();
+    public PageResult<GenreReadDTO> getAllGenres(Pageable pageable) {
+        return genreService.getGenres(pageable);
     }
 
     @GetMapping("/{id}/extended")

@@ -72,10 +72,26 @@ public class ArticleServiceTest extends BaseTest {
         testObjectFactory.createArticle(user2, ArticleStatus.NEED_MODERATION);
         testObjectFactory.createArticle(user2, ArticleStatus.DRAFT);
 
-        List<ArticleReadDTO> articles = articleService.getAllPublishedArticles();
+        PageResult<ArticleReadDTO> articles = articleService.getAllPublishedArticles(Pageable.unpaged());
 
-        Assertions.assertThat(articles).extracting("id")
+        Assertions.assertThat(articles.getData()).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId());
+    }
+
+    @Test
+    public void testGetArticlesWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Article a3 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Article a4 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Assertions.assertThat(articleService.getAllPublishedArticles(pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(a4.getId(), a3.getId()));
     }
 
     @Test

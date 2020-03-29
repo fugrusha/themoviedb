@@ -15,7 +15,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -51,58 +50,83 @@ public class ContentManagerController {
         return misprintService.getMisprintsByFilter(filter, pageable);
     }
 
-    // TODO pagination
     @GetMapping("/articles/{articleId}/misprints/")
-    public List<MisprintReadDTO> getAllMisprintsByArticleId(@PathVariable UUID articleId) {
-        return misprintService.getAllMisprintsByTargetId(articleId);
+    public PageResult<MisprintReadDTO> getAllMisprintsByArticleId(
+            @PathVariable UUID articleId,
+            Pageable pageable
+    ) {
+        return misprintService.getMisprintsByTargetId(articleId, pageable);
     }
 
     @GetMapping("/articles/{articleId}/misprints/{id}")
-    public MisprintReadDTO getMisprintByArticleId(@PathVariable UUID articleId, @PathVariable UUID id) {
+    public MisprintReadDTO getMisprintByArticleId(
+            @PathVariable UUID articleId,
+            @PathVariable UUID id
+    ) {
         return misprintService.getMisprintByTargetId(articleId, id);
     }
 
-    // TODO pagination
     @GetMapping("/movies/{movieId}/misprints/")
-    public List<MisprintReadDTO> getAllMisprintsByMovieId(@PathVariable UUID movieId) {
-        return misprintService.getAllMisprintsByTargetId(movieId);
+    public PageResult<MisprintReadDTO> getAllMisprintsByMovieId(
+            @PathVariable UUID movieId,
+            Pageable pageable
+    ) {
+        return misprintService.getMisprintsByTargetId(movieId, pageable);
     }
 
     @GetMapping("/movies/{movieId}/misprints/{id}")
-    public MisprintReadDTO getMisprintByMovieId(@PathVariable UUID movieId, @PathVariable UUID id) {
+    public MisprintReadDTO getMisprintByMovieId(
+            @PathVariable UUID movieId,
+            @PathVariable UUID id
+    ) {
         return misprintService.getMisprintByTargetId(movieId, id);
     }
 
-    // TODO pagination
     @GetMapping("/persons/{personId}/misprints/")
-    public List<MisprintReadDTO> getAllMisprintsByPersonId(@PathVariable UUID personId) {
-        return misprintService.getAllMisprintsByTargetId(personId);
+    public PageResult<MisprintReadDTO> getAllMisprintsByPersonId(
+            @PathVariable UUID personId,
+            Pageable pageable
+    ) {
+        return misprintService.getMisprintsByTargetId(personId, pageable);
     }
 
     @GetMapping("/persons/{personId}/misprints/{id}")
-    public MisprintReadDTO getMisprintByPersonId(@PathVariable UUID personId, @PathVariable UUID id) {
+    public MisprintReadDTO getMisprintByPersonId(
+            @PathVariable UUID personId,
+            @PathVariable UUID id
+    ) {
         return misprintService.getMisprintByTargetId(personId, id);
     }
 
-    // TODO pagination
     @GetMapping("/movie-casts/{movieCastId}/misprints/")
-    public List<MisprintReadDTO> getAllMisprintsByMovieCastIdId(@PathVariable UUID movieCastId) {
-        return misprintService.getAllMisprintsByTargetId(movieCastId);
+    public PageResult<MisprintReadDTO> getAllMisprintsByMovieCastIdId(
+            @PathVariable UUID movieCastId,
+            Pageable pageable
+    ) {
+        return misprintService.getMisprintsByTargetId(movieCastId, pageable);
     }
 
     @GetMapping("/movie-casts/{movieCastId}/misprints/{id}")
-    public MisprintReadDTO getMisprintByMovieCastId(@PathVariable UUID movieCastId, @PathVariable UUID id) {
+    public MisprintReadDTO getMisprintByMovieCastId(
+            @PathVariable UUID movieCastId,
+            @PathVariable UUID id
+    ) {
         return misprintService.getMisprintByTargetId(movieCastId, id);
     }
 
-    // TODO pagination
     @GetMapping("/movie-crews/{movieCrewId}/misprints/")
-    public List<MisprintReadDTO> getAllMisprintsByMovieCrewId(@PathVariable UUID movieCrewId) {
-        return misprintService.getAllMisprintsByTargetId(movieCrewId);
+    public PageResult<MisprintReadDTO> getAllMisprintsByMovieCrewId(
+            @PathVariable UUID movieCrewId,
+            Pageable pageable
+    ) {
+        return misprintService.getMisprintsByTargetId(movieCrewId, pageable);
     }
 
     @GetMapping("/movie-crews/{movieCrewId}/misprints/{id}")
-    public MisprintReadDTO getMisprintByMovieCrewId(@PathVariable UUID movieCrewId, @PathVariable UUID id) {
+    public MisprintReadDTO getMisprintByMovieCrewId(
+            @PathVariable UUID movieCrewId,
+            @PathVariable UUID id
+    ) {
         return misprintService.getMisprintByTargetId(movieCrewId, id);
     }
 

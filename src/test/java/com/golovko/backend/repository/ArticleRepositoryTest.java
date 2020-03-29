@@ -8,9 +8,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.List;
 
 public class ArticleRepositoryTest extends BaseTest {
 
@@ -62,7 +63,8 @@ public class ArticleRepositoryTest extends BaseTest {
         Article a3 = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
         testObjectFactory.createArticle(author, ArticleStatus.NEED_MODERATION);
 
-        List<Article> articles = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.DRAFT);
+        Page<Article> articles = articleRepository
+                .findByStatus(ArticleStatus.DRAFT, Pageable.unpaged());
 
         Assertions.assertThat(articles).extracting("id")
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId());

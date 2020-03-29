@@ -3,6 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.MovieCrew;
 import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
@@ -11,14 +12,14 @@ import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -39,13 +40,10 @@ public class MovieCrewService {
     @Autowired
     private RepositoryHelper repoHelper;
 
-    // TODO pagination
-    public List<MovieCrewReadDTO> getAllMovieCrews(UUID movieId) {
-        List<MovieCrew> movieCrews = movieCrewRepository.findByMovieId(movieId);
+    public PageResult<MovieCrewReadDTO> getAllMovieCrews(UUID movieId, Pageable pageable) {
+        Page<MovieCrew> movieCrews = movieCrewRepository.findByMovieId(movieId, pageable);
 
-        return movieCrews.stream()
-                .map(m -> translationService.translate(m, MovieCrewReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(movieCrews, MovieCrewReadDTO.class);
     }
 
     public MovieCrewReadDTO getMovieCrew(UUID movieId, UUID id) {

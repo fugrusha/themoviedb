@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
@@ -18,6 +19,8 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -57,11 +60,13 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
     @Test
     public void testGetAllPublishedMovieCrewComments() throws Exception {
         CommentReadDTO readDTO = createCommentReadDTO();
+        UUID movieCrewId = readDTO.getTargetObjectId();
 
-        List<CommentReadDTO> expectedResult = List.of(readDTO);
+        PageResult<CommentReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
 
-        Mockito.when(commentService.getAllPublishedComments(readDTO.getTargetObjectId()))
-                .thenReturn(expectedResult);
+        Mockito.when(commentService.getPublishedComments(movieCrewId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
@@ -69,11 +74,11 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<CommentReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting(CommentReadDTO::getId)
+        PageResult<CommentReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult.getData()).extracting(CommentReadDTO::getId)
                 .containsExactlyInAnyOrder(readDTO.getId());
 
-        Mockito.verify(commentService).getAllPublishedComments(readDTO.getTargetObjectId());
+        Mockito.verify(commentService).getPublishedComments(movieCrewId, PageRequest.of(0, defaultPageSize));
     }
 
     @Test
@@ -336,6 +341,39 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk());
 
         Mockito.verify(commentService).deleteComment(movieCrewId, commentId);
+    }
+
+    @Test
+    public void testGetPublishedMovieCrewCommentsWithPagingAndSorting() throws Exception {
+        CommentReadDTO readDTO = createCommentReadDTO();
+        UUID movieCrewId = readDTO.getTargetObjectId();
+        UUID movieId = UUID.randomUUID();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<CommentReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(commentService.getPublishedComments(movieCrewId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/",
+                        movieId, movieCrewId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<CommentReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     private CommentReadDTO createCommentReadDTO() {
