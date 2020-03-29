@@ -51,6 +51,7 @@ public class ContentManagerController {
         return misprintService.getMisprintsByFilter(filter, pageable);
     }
 
+    // TODO pagination
     @GetMapping("/articles/{articleId}/misprints/")
     public List<MisprintReadDTO> getAllMisprintsByArticleId(@PathVariable UUID articleId) {
         return misprintService.getAllMisprintsByTargetId(articleId);
@@ -61,6 +62,7 @@ public class ContentManagerController {
         return misprintService.getMisprintByTargetId(articleId, id);
     }
 
+    // TODO pagination
     @GetMapping("/movies/{movieId}/misprints/")
     public List<MisprintReadDTO> getAllMisprintsByMovieId(@PathVariable UUID movieId) {
         return misprintService.getAllMisprintsByTargetId(movieId);
@@ -71,6 +73,7 @@ public class ContentManagerController {
         return misprintService.getMisprintByTargetId(movieId, id);
     }
 
+    // TODO pagination
     @GetMapping("/persons/{personId}/misprints/")
     public List<MisprintReadDTO> getAllMisprintsByPersonId(@PathVariable UUID personId) {
         return misprintService.getAllMisprintsByTargetId(personId);
@@ -81,6 +84,7 @@ public class ContentManagerController {
         return misprintService.getMisprintByTargetId(personId, id);
     }
 
+    // TODO pagination
     @GetMapping("/movie-casts/{movieCastId}/misprints/")
     public List<MisprintReadDTO> getAllMisprintsByMovieCastIdId(@PathVariable UUID movieCastId) {
         return misprintService.getAllMisprintsByTargetId(movieCastId);
@@ -91,6 +95,7 @@ public class ContentManagerController {
         return misprintService.getMisprintByTargetId(movieCastId, id);
     }
 
+    // TODO pagination
     @GetMapping("/movie-crews/{movieCrewId}/misprints/")
     public List<MisprintReadDTO> getAllMisprintsByMovieCrewId(@PathVariable UUID movieCrewId) {
         return misprintService.getAllMisprintsByTargetId(movieCrewId);

@@ -24,7 +24,7 @@ public class ComplaintController {
         return complaintService.getComplaint(userId, id);
     }
 
-    @GetMapping
+    @GetMapping // TODO pagination
     public List<ComplaintReadDTO> getAllUserComplaints(@PathVariable UUID userId) {
         return complaintService.getUserComplaints(userId);
     }

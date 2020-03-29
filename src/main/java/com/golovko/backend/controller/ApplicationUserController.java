@@ -16,6 +16,8 @@ public class ApplicationUserController {
     @Autowired
     private ApplicationUserService applicationUserService;
 
+    // TODO list of users for admin
+
     @GetMapping("/{id}")
     public UserReadDTO getUser(@PathVariable UUID id) {
         return applicationUserService.getUser(id);

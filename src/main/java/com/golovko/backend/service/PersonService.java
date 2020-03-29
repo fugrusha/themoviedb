@@ -38,6 +38,7 @@ public class PersonService {
     @Autowired
     private RepositoryHelper repoHelper;
 
+    // TODO pagination
     public List<PersonReadDTO> getAllPersons() {
         List<Person> people = personRepository.findAllPeople();
 

@@ -39,6 +39,7 @@ public class MovieCastService {
     @Autowired
     private RepositoryHelper repoHelper;
 
+    // TODO pagination
     public List<MovieCastReadDTO> getAllMovieCasts(UUID movieId) {
         List<MovieCast> movieCasts = movieCastRepository.findByMovieId(movieId);
 
@@ -108,6 +109,6 @@ public class MovieCastService {
 
     private MovieCast getMovieCastByMovieIdRequired(UUID id, UUID movieId) {
         return Optional.ofNullable(movieCastRepository.findByIdAndMovieId(id, movieId))
-                .orElseThrow(() -> new EntityNotFoundException(MovieCast.class, id ,movieId));
+                .orElseThrow(() -> new EntityNotFoundException(MovieCast.class, id, movieId));
     }
 }

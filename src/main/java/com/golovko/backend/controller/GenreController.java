@@ -16,6 +16,7 @@ public class GenreController {
     @Autowired
     private GenreService genreService;
 
+    // TODO pagination
     @GetMapping
     public List<GenreReadDTO> getAllGenres() {
         return genreService.getAllGenres();

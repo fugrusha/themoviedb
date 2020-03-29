@@ -51,6 +51,7 @@ public class CommentService {
         return translationService.toPageResult(comments, CommentReadDTO.class);
     }
 
+    // TODO pagination
     public List<CommentReadDTO> getAllPublishedComments(UUID targetObjectId) {
         List<Comment> comments = commentRepository.findAllByStatusAndTarget(targetObjectId, CommentStatus.APPROVED);
 

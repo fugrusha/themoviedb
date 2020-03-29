@@ -16,6 +16,7 @@ public class MovieCrewController {
     @Autowired
     private MovieCrewService movieCrewService;
 
+    // TODO pagination
     @GetMapping
     public List<MovieCrewReadDTO> getAllMovieCrews(@PathVariable UUID movieId) {
         return movieCrewService.getAllMovieCrews(movieId);

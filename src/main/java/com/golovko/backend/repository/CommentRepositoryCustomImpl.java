@@ -2,6 +2,7 @@ package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Comment;
 import com.golovko.backend.dto.comment.CommentFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,13 +18,16 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     @Override
     public Page<Comment> findByFilter(CommentFilter filter, Pageable pageable) {
         StringBuilder sb = new StringBuilder();
         sb.append("select c from Comment c where 1=1");
 
         Query query = createQueryApplyingFilter(filter, pageable.getSort(), sb);
-        applyPaging(query, pageable);
+        repoHelper.applyPaging(query, pageable);
 
         List<Comment> data = query.getResultList();
 
@@ -62,13 +66,6 @@ public class CommentRepositoryCustomImpl implements CommentRepositoryCustom {
         }
 
         return query;
-    }
-
-    private void applyPaging(Query query, Pageable pageable) {
-        if (pageable.isPaged()) {
-            query.setMaxResults(pageable.getPageSize());
-            query.setFirstResult((int) pageable.getOffset());
-        }
     }
 
     private long getCountOfComments(CommentFilter filter) {

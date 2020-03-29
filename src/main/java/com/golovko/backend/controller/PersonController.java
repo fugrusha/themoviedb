@@ -24,6 +24,7 @@ public class PersonController {
         return personService.getPerson(id);
     }
 
+    // TODO pagination
     @GetMapping
     public List<PersonReadDTO> getAllPersons() {
         return personService.getAllPersons();

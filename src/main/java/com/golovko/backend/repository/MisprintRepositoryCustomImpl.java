@@ -2,6 +2,7 @@ package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Misprint;
 import com.golovko.backend.dto.misprint.MisprintFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,13 +18,16 @@ public class MisprintRepositoryCustomImpl implements MisprintRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     @Override
     public Page<Misprint> findByFilter(MisprintFilter filter, Pageable pageable) {
         StringBuilder sb = new StringBuilder();
         sb.append("select m from Misprint m where 1=1");
 
         Query query = createQueryApplyingFilter(filter, pageable.getSort(), sb);
-        applyPaging(query, pageable);
+        repoHelper.applyPaging(query, pageable);
 
         List<Misprint> data = query.getResultList();
 
@@ -69,13 +73,6 @@ public class MisprintRepositoryCustomImpl implements MisprintRepositoryCustom {
         }
 
         return query;
-    }
-
-    private void applyPaging(Query query, Pageable pageable) {
-        if (pageable.isPaged()) {
-            query.setMaxResults(pageable.getPageSize());
-            query.setFirstResult((int) pageable.getOffset());
-        }
     }
 
     private long getCountOfMovies(MisprintFilter filter) {

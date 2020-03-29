@@ -21,6 +21,7 @@ public class ArticleController {
         return articleService.getArticle(id);
     }
 
+    // TODO pagination
     @GetMapping // TODO add filter by Person and by Movie
     public List<ArticleReadDTO> getAllArticles() {
         return articleService.getAllPublishedArticles();

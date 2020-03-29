@@ -24,6 +24,7 @@ public class RatingService {
     @Autowired
     private TranslationService translationService;
 
+    // TODO pagination
     public List<RatingReadDTO> getAllRatingsByTargetObjectId(UUID targetId) {
         List<Rating> ratings = ratingRepository.findAllByTargetId(targetId);
 

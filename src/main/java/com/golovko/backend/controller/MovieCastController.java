@@ -16,6 +16,7 @@ public class MovieCastController {
     @Autowired
     private MovieCastService movieCastService;
 
+    // TODO pagination
     @GetMapping
     public List<MovieCastReadDTO> getListOfMovieCast(@PathVariable UUID movieId) {
         return movieCastService.getAllMovieCasts(movieId);

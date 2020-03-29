@@ -24,7 +24,7 @@ public class ArticleCommentController {
         return commentService.getComment(articleId, id);
     }
 
-    @GetMapping
+    @GetMapping // TODO pagination
     public List<CommentReadDTO> getAllPublishedArticleComments(@PathVariable UUID articleId) {
         return commentService.getAllPublishedComments(articleId);
     }

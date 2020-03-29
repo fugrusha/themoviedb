@@ -39,6 +39,7 @@ public class MovieCrewService {
     @Autowired
     private RepositoryHelper repoHelper;
 
+    // TODO pagination
     public List<MovieCrewReadDTO> getAllMovieCrews(UUID movieId) {
         List<MovieCrew> movieCrews = movieCrewRepository.findByMovieId(movieId);
 

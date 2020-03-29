@@ -42,6 +42,7 @@ public class ComplaintService {
         return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
+    // TODO pagination
     public List<ComplaintReadDTO> getUserComplaints(UUID userId) {
         List<Complaint> complaints = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
 

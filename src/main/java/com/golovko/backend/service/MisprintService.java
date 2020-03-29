@@ -61,6 +61,7 @@ public class MisprintService {
         return translationService.translate(misprint, MisprintReadDTO.class);
     }
 
+    // TODO pagination
     public List<MisprintReadDTO> getAllUserMisprintComplaints(UUID userId) {
         List<Misprint> misprints = misprintRepository.findByAuthorIdOrderByCreatedAtAsc(userId);
 
@@ -83,6 +84,7 @@ public class MisprintService {
         misprintRepository.delete(getMisprintByUserId(id, userId));
     }
 
+    // TODO pagination
     public List<MisprintReadDTO> getAllMisprintsByTargetId(UUID targetObjectId) {
         List<Misprint> misprints = misprintRepository.findAllByTargetObjectId(targetObjectId);
 
@@ -223,8 +225,8 @@ public class MisprintService {
     }
 
     private Misprint getMisprintByUserId(UUID id, UUID userId) {
-            return Optional.ofNullable(misprintRepository.findByIdAndAuthorId(id, userId))
-                    .orElseThrow(() -> new EntityNotFoundException(Misprint.class, id, userId));
+        return Optional.ofNullable(misprintRepository.findByIdAndAuthorId(id, userId))
+                .orElseThrow(() -> new EntityNotFoundException(Misprint.class, id, userId));
     }
 
     private Misprint getMisprintByTargetIdRequired(UUID id, UUID targetObjectId) {

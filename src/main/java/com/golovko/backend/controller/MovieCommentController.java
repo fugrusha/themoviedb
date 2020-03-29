@@ -24,6 +24,7 @@ public class MovieCommentController {
         return commentService.getComment(movieId, id);
     }
 
+    // TODO pagination
     @GetMapping
     public List<CommentReadDTO> getAllPublishedMovieComments(@PathVariable UUID movieId) {
         return commentService.getAllPublishedComments(movieId);

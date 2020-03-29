@@ -19,6 +19,7 @@ public class MovieRatingController {
     @Autowired
     private RatingService ratingService;
 
+    // TODO pagination
     @GetMapping
     public List<RatingReadDTO> getAllRatingsByMovieId(@PathVariable UUID movieId) {
         return ratingService.getAllRatingsByTargetObjectId(movieId);

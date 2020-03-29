@@ -2,6 +2,7 @@ package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Complaint;
 import com.golovko.backend.dto.complaint.ComplaintFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,13 +18,16 @@ public class ComplaintRepositoryCustomImpl implements ComplaintRepositoryCustom 
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     @Override
     public Page<Complaint> findByFilter(ComplaintFilter filter, Pageable pageable) {
         StringBuilder sb = new StringBuilder();
         sb.append("select c from Complaint c where 1=1");
 
         Query query = createQueryApplyingFilter(filter, pageable.getSort(), sb);
-        applyPaging(query, pageable);
+        repoHelper.applyPaging(query, pageable);
 
         List<Complaint> data = query.getResultList();
 
@@ -75,13 +79,6 @@ public class ComplaintRepositoryCustomImpl implements ComplaintRepositoryCustom 
         }
 
         return query;
-    }
-
-    private void applyPaging(Query query, Pageable pageable) {
-        if (pageable.isPaged()) {
-            query.setMaxResults(pageable.getPageSize());
-            query.setFirstResult((int) pageable.getOffset());
-        }
     }
 
     private long getCountOfComplaints(ComplaintFilter filter) {

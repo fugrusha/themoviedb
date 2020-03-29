@@ -52,6 +52,7 @@ public class ArticleService {
         return translationService.translate(article, ArticleReadExtendedDTO.class);
     }
 
+    // TODO pagination
     public List<ArticleReadDTO> getAllPublishedArticles() {
         List<Article> articles = articleRepository.findByStatusOrderByCreatedAtDesc(ArticleStatus.PUBLISHED);
 

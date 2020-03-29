@@ -2,6 +2,7 @@ package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Article;
 import com.golovko.backend.dto.article.ArticleManagerFilter;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -17,13 +18,16 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Autowired
+    private RepositoryHelper repoHelper;
+
     @Override
     public Page<Article> findByManagerFilter(ArticleManagerFilter filter, Pageable pageable) {
         StringBuilder sb = new StringBuilder();
         sb.append("select a from Article a where 1=1");
 
         Query query = createQueryApplyingFilter(filter, pageable.getSort(), sb);
-        applyPaging(query, pageable);
+        repoHelper.applyPaging(query, pageable);
 
         List<Article> data = query.getResultList();
 
@@ -56,13 +60,6 @@ public class ArticleRepositoryCustomImpl implements ArticleRepositoryCustom {
         }
 
         return query;
-    }
-
-    private void applyPaging(Query query, Pageable pageable) {
-        if (pageable.isPaged()) {
-            query.setMaxResults(pageable.getPageSize());
-            query.setFirstResult((int) pageable.getOffset());
-        }
     }
 
     private long getCountOfArticles(ArticleManagerFilter filter) {

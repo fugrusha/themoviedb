@@ -22,6 +22,7 @@ public class MisprintController {
         return misprintService.getMisprintComplaint(userId, id);
     }
 
+    // TODO pagination
     @GetMapping
     public List<MisprintReadDTO> getAllReportedMisprintComplaints(@PathVariable UUID userId) {
         return misprintService.getAllUserMisprintComplaints(userId);
