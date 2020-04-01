@@ -1,7 +1,6 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieCrew;
 import com.golovko.backend.domain.MovieCrewType;
 import com.golovko.backend.dto.PageResult;
@@ -22,8 +21,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -360,51 +357,24 @@ public class MovieCrewControllerTest extends BaseControllerTest {
     }
 
     private PersonReadDTO createPersonReadDTO() {
-        PersonReadDTO dto = new PersonReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setFirstName("Max");
-        dto.setLastName("Popov");
-        dto.setGender(Gender.MALE);
-        return dto;
+        return generateObject(PersonReadDTO.class);
     }
 
     private MovieReadDTO createMovieReadDTO() {
-        MovieReadDTO readDTO = new MovieReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setMovieTitle("Guess Who");
-        readDTO.setDescription("12345");
-        readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        readDTO.setIsReleased(false);
-        readDTO.setAverageRating(8.3);
-        return readDTO;
+        return generateObject(MovieReadDTO.class);
     }
 
     private MovieCrewReadDTO createMovieCrewReadDTO() {
-        MovieCrewReadDTO dto = new MovieCrewReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setDescription("Some text");
-        dto.setAverageRating(9.2);
-        dto.setPersonId(UUID.randomUUID());
-        dto.setMovieId(UUID.randomUUID());
-        dto.setMovieCrewType(MovieCrewType.COSTUME_DESIGNER);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return dto;
+        return generateObject(MovieCrewReadDTO.class);
     }
 
     private MovieCrewReadExtendedDTO createMovieCrewReadExtendedDTO(
             PersonReadDTO personDTO,
             MovieReadDTO movieDTO
     ) {
-        MovieCrewReadExtendedDTO dto = new MovieCrewReadExtendedDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setDescription("Some text");
-        dto.setAverageRating(9.2);
+        MovieCrewReadExtendedDTO dto = generateObject(MovieCrewReadExtendedDTO.class);
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
-        dto.setMovieCrewType(MovieCrewType.COSTUME_DESIGNER);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

@@ -2,7 +2,6 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Comment;
-import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,14 +38,15 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetMovieCrewCommentById() throws Exception {
-        CommentReadDTO readDTO = createCommentReadDTO();
+        UUID movieCrewId = UUID.randomUUID();
+        CommentReadDTO readDTO = createCommentReadDTO(movieCrewId);
 
-        Mockito.when(commentService.getComment(readDTO.getTargetObjectId(), readDTO.getId()))
+        Mockito.when(commentService.getComment(movieCrewId, readDTO.getId()))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
-                        UUID.randomUUID(), readDTO.getTargetObjectId(), readDTO.getId()))
+                        UUID.randomUUID(), movieCrewId, readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -59,8 +58,8 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetAllPublishedMovieCrewComments() throws Exception {
-        CommentReadDTO readDTO = createCommentReadDTO();
-        UUID movieCrewId = readDTO.getTargetObjectId();
+        UUID movieCrewId = UUID.randomUUID();
+        CommentReadDTO readDTO = createCommentReadDTO(movieCrewId);
 
         PageResult<CommentReadDTO> pageResult = new PageResult<>();
         pageResult.setData(List.of(readDTO));
@@ -70,7 +69,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
-                        UUID.randomUUID(), readDTO.getTargetObjectId()))
+                        UUID.randomUUID(), movieCrewId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -107,14 +106,15 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
 
-        CommentReadDTO readDTO = createCommentReadDTO();
+        UUID movieCrewId = UUID.randomUUID();
+        CommentReadDTO readDTO = createCommentReadDTO(movieCrewId);
 
-        Mockito.when(commentService.createComment(readDTO.getTargetObjectId(), createDTO))
+        Mockito.when(commentService.createComment(movieCrewId, createDTO))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
-                        UUID.randomUUID(), readDTO.getTargetObjectId())
+                        UUID.randomUUID(), movieCrewId)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
@@ -212,17 +212,18 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
     @Test
     public void testUpdateMovieCrewComment() throws Exception {
-        CommentReadDTO readDTO = createCommentReadDTO();
+        UUID movieCrewId = UUID.randomUUID();
+        CommentReadDTO readDTO = createCommentReadDTO(movieCrewId);
 
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("message text");
 
-        Mockito.when(commentService.updateComment(readDTO.getTargetObjectId(), readDTO.getId(), putDTO))
+        Mockito.when(commentService.updateComment(movieCrewId, readDTO.getId(), putDTO))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(put("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
-                        UUID.randomUUID(), readDTO.getTargetObjectId(), readDTO.getId())
+                        UUID.randomUUID(), movieCrewId, readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(putDTO)))
                 .andExpect(status().isOk())
@@ -272,17 +273,18 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
     @Test
     public void testPatchMovieCrewComment() throws Exception {
-        CommentReadDTO readDTO = createCommentReadDTO();
+        UUID movieCrewId = UUID.randomUUID();
+        CommentReadDTO readDTO = createCommentReadDTO(movieCrewId);
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("New message");
 
-        Mockito.when(commentService.patchComment(readDTO.getTargetObjectId(), readDTO.getId(), patchDTO))
+        Mockito.when(commentService.patchComment(movieCrewId, readDTO.getId(), patchDTO))
                 .thenReturn(readDTO);
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
-                        UUID.randomUUID(), readDTO.getTargetObjectId(), readDTO.getId())
+                        UUID.randomUUID(), movieCrewId, readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isOk())
@@ -345,9 +347,9 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetPublishedMovieCrewCommentsWithPagingAndSorting() throws Exception {
-        CommentReadDTO readDTO = createCommentReadDTO();
-        UUID movieCrewId = readDTO.getTargetObjectId();
+        UUID movieCrewId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
+        CommentReadDTO readDTO = createCommentReadDTO(movieCrewId);
 
         int page = 1;
         int size = 30;
@@ -376,18 +378,11 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
-    private CommentReadDTO createCommentReadDTO() {
-        CommentReadDTO dto = new CommentReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setMessage("some text");
-        dto.setAuthorId(UUID.randomUUID());
+
+    private CommentReadDTO createCommentReadDTO(UUID targetObjectId) {
+        CommentReadDTO dto = generateObject(CommentReadDTO.class);
         dto.setTargetObjectType(TargetObjectType.MOVIE_CREW);
-        dto.setTargetObjectId(UUID.randomUUID());
-        dto.setDislikesCount(46);
-        dto.setLikesCount(120);
-        dto.setStatus(CommentStatus.PENDING);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        dto.setTargetObjectId(targetObjectId);
         return dto;
     }
 }

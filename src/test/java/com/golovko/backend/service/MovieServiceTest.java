@@ -196,9 +196,9 @@ public class MovieServiceTest extends BaseTest {
 
     @Test
     public void testGetMoviesWithEmptyFilter() {
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
+        Movie m1 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4));
 
         MovieFilter filter = new MovieFilter();
         assertThat(movieService.getMovies(filter, Pageable.unpaged()).getData()).extracting("id")
@@ -207,9 +207,9 @@ public class MovieServiceTest extends BaseTest {
 
     @Test
     public void testGetMoviesWithEmptySetsOfFilter() {
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
+        Movie m1 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4));
 
         MovieFilter filter = new MovieFilter();
         filter.setGenreNames(new HashSet<String>());
@@ -222,10 +222,10 @@ public class MovieServiceTest extends BaseTest {
     public void testGetMoviesByPerson() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
-        createMovie(LocalDate.of(1944, 5, 4));
+        Movie m1 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4));
+        testObjectFactory.createMovie(LocalDate.of(1944, 5, 4));
 
         testObjectFactory.createMovieCrew(person2, m1);
         testObjectFactory.createMovieCrew(person2, m2);
@@ -241,15 +241,15 @@ public class MovieServiceTest extends BaseTest {
     public void testGetMoviesByPartTypes() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1990, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
-        Movie m4 = createMovie(LocalDate.of(1944, 5, 4));
+        Movie m1 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = testObjectFactory.createMovie(LocalDate.of(1990, 5, 4));
+        Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4));
+        Movie m4 = testObjectFactory.createMovie(LocalDate.of(1944, 5, 4));
 
-        testObjectFactory.createMovieCrewForFilter(person2, m1, MovieCrewType.COMPOSER);
-        testObjectFactory.createMovieCrewForFilter(person2, m2, MovieCrewType.WRITER);
-        testObjectFactory.createMovieCrewForFilter(person1, m3, MovieCrewType.PRODUCER);
-        testObjectFactory.createMovieCrewForFilter(person2, m4, MovieCrewType.COSTUME_DESIGNER);
+        testObjectFactory.createMovieCrew(person2, m1, MovieCrewType.COMPOSER);
+        testObjectFactory.createMovieCrew(person2, m2, MovieCrewType.WRITER);
+        testObjectFactory.createMovieCrew(person1, m3, MovieCrewType.PRODUCER);
+        testObjectFactory.createMovieCrew(person2, m4, MovieCrewType.COSTUME_DESIGNER);
 
         MovieFilter filter = new MovieFilter();
         filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
@@ -280,10 +280,10 @@ public class MovieServiceTest extends BaseTest {
     public void testGetMoviesByReleasedInterval() {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1990, 5, 4));
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4));
-        createMovie(LocalDate.of(1944, 5, 4));
+        Movie m1 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = testObjectFactory.createMovie(LocalDate.of(1990, 5, 4));
+        Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4));
+        testObjectFactory.createMovie(LocalDate.of(1944, 5, 4));
 
         testObjectFactory.createMovieCrew(person2, m1);
         testObjectFactory.createMovieCrew(person2, m2);
@@ -303,17 +303,17 @@ public class MovieServiceTest extends BaseTest {
         Person person1 = testObjectFactory.createPerson();
         Person person2 = testObjectFactory.createPerson();
 
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4)); // no
-        Movie m2 = createMovie(LocalDate.of(1990, 5, 4)); // yes
+        Movie m1 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4)); // no
+        Movie m2 = testObjectFactory.createMovie(LocalDate.of(1990, 5, 4)); // yes
         m2.setGenres(Set.of(genre));
         movieRepository.save(m2);
-        Movie m3 = createMovie(LocalDate.of(1980, 5, 4)); // no
-        Movie m4 = createMovie(LocalDate.of(1987, 5, 4));
+        Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4)); // no
+        Movie m4 = testObjectFactory.createMovie(LocalDate.of(1987, 5, 4));
 
-        testObjectFactory.createMovieCrewForFilter(person2, m1, MovieCrewType.COMPOSER);
-        testObjectFactory.createMovieCrewForFilter(person2, m2, MovieCrewType.WRITER);
-        testObjectFactory.createMovieCrewForFilter(person1, m3, MovieCrewType.PRODUCER);
-        testObjectFactory.createMovieCrewForFilter(person2, m4, MovieCrewType.COSTUME_DESIGNER);
+        testObjectFactory.createMovieCrew(person2, m1, MovieCrewType.COMPOSER);
+        testObjectFactory.createMovieCrew(person2, m2, MovieCrewType.WRITER);
+        testObjectFactory.createMovieCrew(person1, m3, MovieCrewType.PRODUCER);
+        testObjectFactory.createMovieCrew(person2, m4, MovieCrewType.COSTUME_DESIGNER);
 
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(person2.getId());
@@ -392,9 +392,9 @@ public class MovieServiceTest extends BaseTest {
 
     @Test
     public void testGetMoviesWithFilterWithPagingAndSorting() {
-        Movie m1 = createMovie(LocalDate.of(1992, 5, 4));
-        Movie m2 = createMovie(LocalDate.of(1990, 5, 4));
-        createMovie(LocalDate.of(1980, 5, 4));
+        Movie m1 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4));
+        Movie m2 = testObjectFactory.createMovie(LocalDate.of(1990, 5, 4));
+        testObjectFactory.createMovie(LocalDate.of(1980, 5, 4));
 
         MovieFilter filter = new MovieFilter();
         PageRequest pageRequest = PageRequest.of(0, 2,
@@ -403,16 +403,5 @@ public class MovieServiceTest extends BaseTest {
         Assertions.assertThat(movieService.getMovies(filter, pageRequest).getData())
                 .extracting("id")
                 .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
-    }
-
-    private Movie createMovie(LocalDate releasedDate) {
-        Movie movie = new Movie();
-        movie.setMovieTitle("Title of the Movie");
-        movie.setDescription("movie description");
-        movie.setIsReleased(true);
-        movie.setReleaseDate(releasedDate);
-        movie.setAverageRating(5.0);
-        movie = movieRepository.save(movie);
-        return movie;
     }
 }

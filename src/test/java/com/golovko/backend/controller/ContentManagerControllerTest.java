@@ -28,7 +28,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -806,30 +805,12 @@ public class ContentManagerControllerTest extends BaseControllerTest {
     }
 
     private MisprintReadDTO createMisprintReadDTO() {
-        MisprintReadDTO dto = new MisprintReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setReplaceTo("replace to this");
-        dto.setStatus(ComplaintStatus.INITIATED);
-        dto.setAuthorId(UUID.randomUUID());
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        dto.setTargetObjectType(TargetObjectType.ARTICLE);
-        dto.setTargetObjectId(UUID.randomUUID());
-        dto.setModeratorId(UUID.randomUUID());
-        return dto;
+        return generateObject(MisprintReadDTO.class);
     }
 
     private ArticleReadDTO createArticleReadDTO(UUID authorId) {
-        ArticleReadDTO dto = new ArticleReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setTitle("Title");
-        dto.setText("Some Text");
-        dto.setStatus(ArticleStatus.PUBLISHED);
+        ArticleReadDTO dto = generateObject(ArticleReadDTO.class);
         dto.setAuthorId(authorId);
-        dto.setDislikesCount(555);
-        dto.setLikesCount(333);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

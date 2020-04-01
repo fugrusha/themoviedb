@@ -20,7 +20,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -187,16 +186,9 @@ public class LikeControllerTest extends BaseControllerTest {
     }
 
     private LikeReadDTO createLikeReadDTO(UUID authorId, Boolean meLiked) {
-        LikeReadDTO dto = new LikeReadDTO();
-        dto.setId(UUID.randomUUID());
+        LikeReadDTO dto = generateObject(LikeReadDTO.class);
         dto.setMeLiked(meLiked);
         dto.setAuthorId(authorId);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        dto.setLikedObjectType(TargetObjectType.MOVIE);
-        dto.setLikedObjectId(UUID.randomUUID());
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

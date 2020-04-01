@@ -42,9 +42,9 @@ public class PersonServiceTest extends BaseTest {
 
     @Test
     public void testGetAllPeople() {
-        Person p1 = createPerson("Akulova");
-        Person p2 = createPerson("Moldovan");
-        Person p3 = createPerson("Hefner");
+        Person p1 = testObjectFactory.createPerson();
+        Person p2 = testObjectFactory.createPerson();
+        Person p3 = testObjectFactory.createPerson();
 
         PageResult<PersonReadDTO> result = personService.getPeople(Pageable.unpaged());
 
@@ -54,9 +54,9 @@ public class PersonServiceTest extends BaseTest {
 
     @Test
     public void testGetAllPeopleWithPagingAndSorting() {
-        Person p1 = createPerson("Akulova");
-        Person p2 = createPerson("Hefner");
-        createPerson("Moldovan");
+        Person p1 = testObjectFactory.createPerson("Akulova");
+        Person p2 = testObjectFactory.createPerson("Hefner");
+        testObjectFactory.createPerson("Moldovan");
 
         PageRequest pageRequest = PageRequest.of(0, 2,
                 Sort.by(Sort.Direction.ASC, "lastName"));
@@ -237,15 +237,5 @@ public class PersonServiceTest extends BaseTest {
         person.setAverageRatingByMovies(10.01);
         person.setAverageRatingByRoles(10.01);
         personRepository.save(person);;
-    }
-
-    private Person createPerson(String lastName) {
-        Person person = new Person();
-        person.setFirstName("Anna");
-        person.setLastName(lastName);
-        person.setBio("some text");
-        person.setAverageRatingByRoles(5.0);
-        person.setGender(Gender.FEMALE);
-        return personRepository.save(person);
     }
 }

@@ -18,6 +18,8 @@ import org.springframework.transaction.TransactionSystemException;
 import java.util.*;
 
 import static com.golovko.backend.domain.ComplaintType.*;
+import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
+import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
 public class ComplaintServiceTest extends BaseTest {
 
@@ -30,7 +32,7 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testGetComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint complaint = testObjectFactory.createComplaint(user);
 
         ComplaintReadDTO readDTO = complaintService.getComplaint(user.getId(), complaint.getId());
 
@@ -43,10 +45,10 @@ public class ComplaintServiceTest extends BaseTest {
     public void testGetAllUserComplaints() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
-        Complaint c2 = testObjectFactory.createComplaint(user1, MISPRINT, TargetObjectType.PERSON);
-        testObjectFactory.createComplaint(user2, MISPRINT, TargetObjectType.PERSON);
-        testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.PERSON);
+        Complaint c1 = testObjectFactory.createComplaint(user1);
+        Complaint c2 = testObjectFactory.createComplaint(user1);
+        testObjectFactory.createComplaint(user2);
+        testObjectFactory.createComplaint(user2);
 
         PageResult<ComplaintReadDTO> complaints = complaintService
                 .getUserComplaints(user1.getId(), Pageable.unpaged());
@@ -58,10 +60,10 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testGetComplaintsWithPagingAndSorting() {
         ApplicationUser user1 = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
-        Complaint c2 = testObjectFactory.createComplaint(user1, MISPRINT, TargetObjectType.PERSON);
-        testObjectFactory.createComplaint(user1, MISPRINT, TargetObjectType.PERSON);
-        testObjectFactory.createComplaint(user1, SPAM, TargetObjectType.PERSON);
+        Complaint c1 = testObjectFactory.createComplaint(user1);
+        Complaint c2 = testObjectFactory.createComplaint(user1);
+        testObjectFactory.createComplaint(user1);
+        testObjectFactory.createComplaint(user1);
 
         PageRequest pageRequest = PageRequest.of(0, 2,
                 Sort.by(Sort.Direction.ASC, "createdAt"));
@@ -87,7 +89,7 @@ public class ComplaintServiceTest extends BaseTest {
         createDTO.setComplaintTitle("Complaint Title");
         createDTO.setComplaintText("Text text text");
         createDTO.setComplaintType(ComplaintType.SPAM);
-        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setTargetObjectType(MOVIE);
         createDTO.setTargetObjectId(targetObject.getId());
 
         ComplaintReadDTO readDTO = complaintService.createComplaint(author.getId(), createDTO);
@@ -96,7 +98,7 @@ public class ComplaintServiceTest extends BaseTest {
         Assert.assertNotNull(readDTO.getId());
 
         Complaint complaint = complaintRepository
-                .findByIdAndTargetId(readDTO.getId(), readDTO.getTargetObjectId(), TargetObjectType.MOVIE);
+                .findByIdAndTargetId(readDTO.getId(), readDTO.getTargetObjectId(), MOVIE);
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
                 "moderatorId", "authorId");
@@ -111,7 +113,7 @@ public class ComplaintServiceTest extends BaseTest {
         createDTO.setComplaintTitle("Complaint Title");
         createDTO.setComplaintText("Text text text");
         createDTO.setComplaintType(ComplaintType.SPAM);
-        createDTO.setTargetObjectType(TargetObjectType.MOVIE);
+        createDTO.setTargetObjectType(MOVIE);
         createDTO.setTargetObjectId(movie.getId());
 
         complaintService.createComplaint(UUID.randomUUID(), createDTO);
@@ -120,7 +122,7 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testPatchComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint complaint = testObjectFactory.createComplaint(user);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
         patchDTO.setComplaintTitle("another title");
@@ -141,7 +143,7 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testPatchComplaintEmptyPatch() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint complaint = testObjectFactory.createComplaint(user);
 
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
 
@@ -162,7 +164,7 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testUpdateComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint complaint = testObjectFactory.createComplaint(user);
 
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
         updateDTO.setComplaintText("new text");
@@ -183,7 +185,7 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testDeleteComplaint() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint complaint = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint complaint = testObjectFactory.createComplaint(user);
         complaintService.deleteComplaint(user.getId(), complaint.getId());
 
         Assert.assertFalse(complaintRepository.existsById(complaint.getId()));
@@ -197,9 +199,9 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testGetComplaintsWithEmptyFilter() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
-        Complaint c2 = testObjectFactory.createComplaint(user, SPAM, TargetObjectType.COMMENT);
-        Complaint c3 = testObjectFactory.createComplaint(user, VIOLENCE, TargetObjectType.MOVIE);
+        Complaint c1 = testObjectFactory.createComplaint(user);
+        Complaint c2 = testObjectFactory.createComplaint(user);
+        Complaint c3 = testObjectFactory.createComplaint(user);
 
         ComplaintFilter filter = new ComplaintFilter();
 
@@ -212,9 +214,9 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testGetComplaintsWithEmptySetsOfFilter() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
-        Complaint c2 = testObjectFactory.createComplaint(user, SPAM, TargetObjectType.COMMENT);
-        Complaint c3 = testObjectFactory.createComplaint(user, VIOLENCE, TargetObjectType.MOVIE);
+        Complaint c1 = testObjectFactory.createComplaint(user);
+        Complaint c2 = testObjectFactory.createComplaint(user);
+        Complaint c3 = testObjectFactory.createComplaint(user);
 
         ComplaintFilter filter = new ComplaintFilter();
         filter.setComplaintTypes(new HashSet<ComplaintType>());
@@ -230,9 +232,9 @@ public class ComplaintServiceTest extends BaseTest {
     @Test
     public void testGetComplaintsByStatus() {
         ApplicationUser user = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user, CHILD_ABUSE, TargetObjectType.PERSON);
-        Complaint c2 = testObjectFactory.createComplaint(user, SPAM, TargetObjectType.COMMENT);
-        Complaint c3 = testObjectFactory.createComplaint(user, VIOLENCE, TargetObjectType.MOVIE);
+        Complaint c1 = testObjectFactory.createComplaint(user);
+        Complaint c2 = testObjectFactory.createComplaint(user);
+        Complaint c3 = testObjectFactory.createComplaint(user);
 
         c1.setComplaintStatus(ComplaintStatus.DUPLICATE);
         c2.setComplaintStatus(ComplaintStatus.CLOSED);
@@ -253,11 +255,11 @@ public class ComplaintServiceTest extends BaseTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         ApplicationUser user3 = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
-        Complaint c2 = testObjectFactory.createComplaint(user1, SPAM, TargetObjectType.COMMENT);
-        testObjectFactory.createComplaint(user2, VIOLENCE, TargetObjectType.MOVIE);
-        testObjectFactory.createComplaint(user3, VIOLENCE, TargetObjectType.MOVIE);
-        testObjectFactory.createComplaint(user3, VIOLENCE, TargetObjectType.MOVIE);
+        Complaint c1 = testObjectFactory.createComplaint(user1);
+        Complaint c2 = testObjectFactory.createComplaint(user1);
+        testObjectFactory.createComplaint(user2);
+        testObjectFactory.createComplaint(user3);
+        testObjectFactory.createComplaint(user3);
 
         ComplaintFilter filter = new ComplaintFilter();
         filter.setAuthorId(user1.getId());
@@ -273,10 +275,10 @@ public class ComplaintServiceTest extends BaseTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser moderator1 = testObjectFactory.createUser();
         ApplicationUser moderator2 = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
-        Complaint c2 = testObjectFactory.createComplaint(user1, SPAM, TargetObjectType.COMMENT);
-        Complaint c3 = testObjectFactory.createComplaint(user1, VIOLENCE, TargetObjectType.MOVIE);
-        testObjectFactory.createComplaint(user1, VIOLENCE, TargetObjectType.MOVIE); // without moderator
+        Complaint c1 = testObjectFactory.createComplaint(user1);
+        Complaint c2 = testObjectFactory.createComplaint(user1);
+        Complaint c3 = testObjectFactory.createComplaint(user1);
+        testObjectFactory.createComplaint(user1); // without moderator
 
         c1.setModerator(moderator1);
         c2.setModerator(moderator1);
@@ -296,11 +298,12 @@ public class ComplaintServiceTest extends BaseTest {
     public void testGetComplaintsByComplaintType() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
 
-        Complaint c1 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.COMMENT);
-        Complaint c2 = testObjectFactory.createComplaint(user1, VIOLENCE, TargetObjectType.MOVIE);
-        testObjectFactory.createComplaint(user2, MISPRINT, TargetObjectType.MOVIE);
-        testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.PERSON);
+        Complaint c1 = testObjectFactory.createComplaint(m1.getId(), MOVIE, SPAM, user2);
+        Complaint c2 = testObjectFactory.createComplaint(m1.getId(), MOVIE, VIOLENCE, user1);
+        testObjectFactory.createComplaint(m1.getId(), MOVIE, SPOILER, user2);
+        testObjectFactory.createComplaint(m1.getId(), MOVIE, CHILD_ABUSE, user1);
 
         ComplaintFilter filter = new ComplaintFilter();
         filter.setComplaintTypes(Set.of(SPAM, VIOLENCE));
@@ -315,14 +318,16 @@ public class ComplaintServiceTest extends BaseTest {
     public void testGetComplaintsByTargetObjectType() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Article a1 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
 
-        Complaint c1 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.COMMENT);
-        Complaint c2 = testObjectFactory.createComplaint(user1, VIOLENCE, TargetObjectType.MOVIE);
-        testObjectFactory.createComplaint(user2, MISPRINT, TargetObjectType.PERSON);
-        testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.MOVIE_CAST);
+        Complaint c1 = testObjectFactory.createComplaint(m1.getId(), MOVIE, SPOILER, user2);
+        Complaint c2 = testObjectFactory.createComplaint(m1.getId(), MOVIE, SPOILER, user1);
+        testObjectFactory.createComplaint(a1.getId(), ARTICLE, SPOILER, user2);
+        testObjectFactory.createComplaint(a1.getId(), ARTICLE, CHILD_ABUSE, user1);
 
         ComplaintFilter filter = new ComplaintFilter();
-        filter.setTargetObjectTypes(Set.of(TargetObjectType.COMMENT, TargetObjectType.MOVIE));
+        filter.setTargetObjectTypes(Set.of(MOVIE));
 
         PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
@@ -335,22 +340,23 @@ public class ComplaintServiceTest extends BaseTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         ApplicationUser moder1 = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
 
-        Complaint c1 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.MOVIE);
+        Complaint c1 = testObjectFactory.createComplaint(m1.getId(), MOVIE, SPAM, user2);
         c1.setModerator(moder1);
         c1.setComplaintStatus(ComplaintStatus.CLOSED);
 
-        Complaint c2 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.MOVIE);
+        Complaint c2 = testObjectFactory.createComplaint(m1.getId(), MOVIE, SPAM, user2);
         c2.setModerator(moder1);
         c2.setComplaintStatus(ComplaintStatus.DUPLICATE); // wrong status
 
 
-        Complaint c3 = testObjectFactory.createComplaint(user1, SPAM, TargetObjectType.MOVIE);  // wrong author
+        Complaint c3 = testObjectFactory.createComplaint(m1.getId(), MOVIE, SPAM, user1);  // wrong author
         c3.setModerator(moder1);
         c3.setComplaintStatus(ComplaintStatus.CLOSED);
 
-        testObjectFactory.createComplaint(user2, VIOLENCE, TargetObjectType.COMMENT); // wrong complaintType
-        testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.MOVIE); // without moderator
+        testObjectFactory.createComplaint(m1.getId(), ARTICLE, SPAM, user2); // wrong complaintType
+        testObjectFactory.createComplaint(m1.getId(), MOVIE, SPAM, user2); // without moderator
 
         complaintRepository.saveAll(List.of(c1, c2, c3));
 
@@ -359,7 +365,7 @@ public class ComplaintServiceTest extends BaseTest {
         filter.setModeratorId(moder1.getId());
         filter.setStatuses(Set.of(ComplaintStatus.CLOSED));
         filter.setComplaintTypes(Set.of(SPAM));
-        filter.setTargetObjectTypes(Set.of(TargetObjectType.MOVIE));
+        filter.setTargetObjectTypes(Set.of(MOVIE));
 
         PageResult<ComplaintReadDTO> actualResult = complaintService.getAllComplaints(filter, Pageable.unpaged());
 
@@ -376,7 +382,7 @@ public class ComplaintServiceTest extends BaseTest {
         moderDTO.setModeratorId(moderator.getId());
         moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
 
-        Complaint c1 = testObjectFactory.createComplaint(author, SPAM, TargetObjectType.MOVIE);
+        Complaint c1 = testObjectFactory.createComplaint(author);
 
         ComplaintReadDTO actualResult = complaintService.moderateComplaint(c1.getId(), moderDTO);
 
@@ -398,9 +404,8 @@ public class ComplaintServiceTest extends BaseTest {
     @Test(expected = TransactionSystemException.class)
     public void testSaveComplaintMaxSizeValidation() {
         ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
 
-        Complaint complaint = testObjectFactory.createComplaint(movie.getId(), TargetObjectType.MOVIE, user);
+        Complaint complaint = testObjectFactory.createComplaint(user);
         complaint.setComplaintTitle("very long title".repeat(100));
         complaint.setComplaintText("long description of issue".repeat(1000));
         complaintRepository.save(complaint);
@@ -409,9 +414,8 @@ public class ComplaintServiceTest extends BaseTest {
     @Test(expected = TransactionSystemException.class)
     public void testSaveComplaintMinSizeValidation() {
         ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
 
-        Complaint complaint = testObjectFactory.createComplaint(movie.getId(), TargetObjectType.MOVIE, user);
+        Complaint complaint = testObjectFactory.createComplaint(user);
         complaint.setComplaintTitle("");
         complaint.setComplaintText("");
         complaintRepository.save(complaint);
@@ -422,17 +426,17 @@ public class ComplaintServiceTest extends BaseTest {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
 
-        Complaint c1 = testObjectFactory.createComplaint(user2, SPAM, TargetObjectType.COMMENT);
-        Complaint c2 = testObjectFactory.createComplaint(user1, MISPRINT, TargetObjectType.COMMENT);
-        testObjectFactory.createComplaint(user2, MISPRINT, TargetObjectType.PERSON);
-        testObjectFactory.createComplaint(user1, CHILD_ABUSE, TargetObjectType.MOVIE_CAST);
+        Complaint c1 = testObjectFactory.createComplaint(user2);
+        Complaint c2 = testObjectFactory.createComplaint(user1);
+        testObjectFactory.createComplaint(user2);
+        testObjectFactory.createComplaint(user1);
 
         ComplaintFilter filter = new ComplaintFilter();
         PageRequest pageRequest = PageRequest.of(0, 2,
-                Sort.by(Sort.Direction.ASC, "targetObjectType, complaintType"));
+                Sort.by(Sort.Direction.ASC, "createdAt"));
 
         Assertions.assertThat(complaintService.getAllComplaints(filter, pageRequest).getData())
                 .extracting("id")
-                .isEqualTo(Arrays.asList(c2.getId(), c1.getId()));
+                .isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
     }
 }

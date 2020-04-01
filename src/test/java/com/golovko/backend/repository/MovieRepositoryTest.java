@@ -42,6 +42,7 @@ public class MovieRepositoryTest extends BaseTest {
         movie = movieRepository.findById(movie.getId()).get();
         movie.setMovieTitle("Another Movie Title");
         movie = movieRepository.save(movie);
+
         Instant modifiedAtAfterReload = movie.getUpdatedAt();
 
         Assert.assertNotNull(modifiedAtAfterReload);
@@ -65,7 +66,7 @@ public class MovieRepositoryTest extends BaseTest {
     public void testCalcAverageRatingOfPersonMovies() {
         Movie m1 = testObjectFactory.createMovie(5.0);
         Movie m2 = testObjectFactory.createMovie(4.0);
-        Movie m3 = testObjectFactory.createMovie(null);
+        Movie m3 = testObjectFactory.createMovie((Double) null);
         Movie m4 = testObjectFactory.createMovie(9.0);
 
         Person p1 = testObjectFactory.createPerson();

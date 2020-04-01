@@ -20,7 +20,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -361,41 +360,16 @@ public class ArticleControllerTest extends BaseControllerTest {
     }
 
     private ArticleReadDTO createArticleReadDTO() {
-        ArticleReadDTO dto = new ArticleReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setTitle("Title");
-        dto.setText("Some Text");
-        dto.setStatus(ArticleStatus.PUBLISHED);
-        dto.setAuthorId(UUID.randomUUID());
-        dto.setDislikesCount(555);
-        dto.setLikesCount(333);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return dto;
+        return generateObject(ArticleReadDTO.class);
     }
 
-    private ArticleReadExtendedDTO createArticleReadExtendedDTO(UserReadDTO author) {
-        ArticleReadExtendedDTO dto = new ArticleReadExtendedDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setTitle("Title");
-        dto.setText("Some Text");
-        dto.setStatus(ArticleStatus.PUBLISHED);
-        dto.setAuthor(author);
-        dto.setDislikesCount(555);
-        dto.setLikesCount(333);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+    private ArticleReadExtendedDTO createArticleReadExtendedDTO(UserReadDTO userReadDTO) {
+        ArticleReadExtendedDTO dto = generateObject(ArticleReadExtendedDTO.class);
+        dto.setAuthor(userReadDTO);
         return dto;
     }
 
     private UserReadDTO createUserReadDTO() {
-        UserReadDTO readDTO = new UserReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setUsername("david");
-        readDTO.setEmail("david101@email.com");
-        readDTO.setIsBlocked(false);
-        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return readDTO;
+        return generateObject(UserReadDTO.class);
     }
 }

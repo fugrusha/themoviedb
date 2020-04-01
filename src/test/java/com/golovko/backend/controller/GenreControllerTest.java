@@ -19,8 +19,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -345,36 +343,16 @@ public class GenreControllerTest extends BaseControllerTest {
     }
 
     private GenreReadDTO createGenreReadDTO() {
-        GenreReadDTO dto = new GenreReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setGenreName("genre name");
-        dto.setDescription("some description");
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return dto;
+        return generateObject(GenreReadDTO.class);
     }
 
     private GenreReadExtendedDTO createGenreReadExtendedDTO(List<MovieReadDTO> movies) {
-        GenreReadExtendedDTO dto = new GenreReadExtendedDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setGenreName("genre name");
-        dto.setDescription("some description");
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+        GenreReadExtendedDTO dto = generateObject(GenreReadExtendedDTO.class);
         dto.setMovies(movies);
         return dto;
     }
 
     private MovieReadDTO createMovieReadDTO() {
-        MovieReadDTO readDTO = new MovieReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setMovieTitle("Guess Who");
-        readDTO.setDescription("12345");
-        readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        readDTO.setIsReleased(false);
-        readDTO.setAverageRating(8.3);
-        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return readDTO;
+        return generateObject(MovieReadDTO.class);
     }
 }

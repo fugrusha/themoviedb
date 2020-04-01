@@ -1,7 +1,6 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.golovko.backend.domain.UserRoleType;
 import com.golovko.backend.dto.userrole.UserRoleReadDTO;
 import com.golovko.backend.service.UserRoleService;
 import org.junit.Assert;
@@ -83,9 +82,6 @@ public class UserRoleControllerTest extends BaseControllerTest {
     }
 
     private UserRoleReadDTO createUserRoleReadDTO() {
-        UserRoleReadDTO dto = new UserRoleReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setType(UserRoleType.ADMIN);
-        return dto;
+        return generateObject(UserRoleReadDTO.class);
     }
 }

@@ -2,7 +2,6 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Complaint;
-import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.PageResult;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -360,18 +358,8 @@ public class ComplaintControllerTest extends BaseControllerTest {
     }
 
     private ComplaintReadDTO createComplaintReadDTO(UUID authorId) {
-        ComplaintReadDTO readDTO = new ComplaintReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setComplaintTitle("Report 1");
-        readDTO.setComplaintText("I have noticed a spoiler");
-        readDTO.setComplaintType(ComplaintType.SPOILER);
-        readDTO.setComplaintStatus(ComplaintStatus.DUPLICATE);
+        ComplaintReadDTO readDTO = generateObject(ComplaintReadDTO.class);
         readDTO.setAuthorId(authorId);
-        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        readDTO.setTargetObjectType(TargetObjectType.PERSON);
-        readDTO.setTargetObjectId(UUID.randomUUID());
-        readDTO.setModeratorId(UUID.randomUUID());
         return readDTO;
     }
 }

@@ -1,7 +1,6 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.PageResult;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -366,17 +364,9 @@ public class MovieCommentControllerTest extends BaseControllerTest {
     }
 
     private CommentReadDTO createCommentReadDTO(UUID targetObjectId) {
-        CommentReadDTO dto = new CommentReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setMessage("some text");
-        dto.setAuthorId(UUID.randomUUID());
+        CommentReadDTO dto = generateObject(CommentReadDTO.class);
         dto.setTargetObjectType(TargetObjectType.MOVIE);
         dto.setTargetObjectId(targetObjectId);
-        dto.setDislikesCount(46);
-        dto.setLikesCount(120);
-        dto.setStatus(CommentStatus.PENDING);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

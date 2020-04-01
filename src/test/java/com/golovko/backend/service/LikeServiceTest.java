@@ -45,7 +45,7 @@ public class LikeServiceTest extends BaseTest {
     public void testGetRatingById() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
-        Like like = testObjectFactory.createLike(true, user, article.getId());
+        Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
 
         LikeReadDTO readDTO = likeService.getLike(user.getId(), like.getId());
 
@@ -95,7 +95,7 @@ public class LikeServiceTest extends BaseTest {
     public void testPatchLike() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
-        Like like = testObjectFactory.createLike(true, user, article.getId());
+        Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
 
         LikePatchDTO patchDTO = new LikePatchDTO();
         patchDTO.setMeLiked(false);
@@ -113,7 +113,7 @@ public class LikeServiceTest extends BaseTest {
     public void testPatchLikeEmptyPatch() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
-        Like like = testObjectFactory.createLike(true, user, article.getId());
+        Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
 
         LikePatchDTO patchDTO = new LikePatchDTO();
 
@@ -131,7 +131,7 @@ public class LikeServiceTest extends BaseTest {
     public void testUpdateLike() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
-        Like like = testObjectFactory.createLike(true, user, article.getId());
+        Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
 
         LikePutDTO putDTO = new LikePutDTO();
         putDTO.setMeLiked(false);
@@ -147,7 +147,7 @@ public class LikeServiceTest extends BaseTest {
     public void testDeleteLike() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
-        Like like = testObjectFactory.createLike(true, user, article.getId());
+        Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
 
         likeService.deleteLike(user.getId(), like.getId());
 

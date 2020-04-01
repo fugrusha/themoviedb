@@ -2,7 +2,6 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Comment;
-import com.golovko.backend.domain.CommentStatus;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -40,9 +38,8 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetArticleCommentById() throws Exception {
-        UUID userId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
+        CommentReadDTO readDTO = createCommentReadDTO(articleId);
 
         Mockito.when(commentService.getComment(articleId, readDTO.getId())).thenReturn(readDTO);
 
@@ -59,9 +56,8 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetAllPublishedArticleComments() throws Exception {
-        UUID userId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
+        CommentReadDTO readDTO = createCommentReadDTO(articleId);
 
         PageResult<CommentReadDTO> pageResult = new PageResult<>();
         pageResult.setData(List.of(readDTO));
@@ -101,14 +97,13 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
     @Test
     public void testCreateArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
-        UUID authorId = UUID.randomUUID();
 
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("message text");
-        createDTO.setAuthorId(authorId);
+        createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.ARTICLE);
 
-        CommentReadDTO readDTO = createCommentReadDTO(authorId, articleId);
+        CommentReadDTO readDTO = createCommentReadDTO(articleId);
 
         Mockito.when(commentService.createComment(articleId, createDTO)).thenReturn(readDTO);
 
@@ -212,8 +207,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
     @Test
     public void testUpdateArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
+        CommentReadDTO readDTO = createCommentReadDTO(articleId);
 
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("message text");
@@ -273,8 +267,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
     @Test
     public void testPatchArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
-        UUID userId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
+        CommentReadDTO readDTO = createCommentReadDTO(articleId);
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("New message");
@@ -342,9 +335,8 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetPublishedArticleCommentsWithPagingAndSorting() throws Exception {
-        UUID userId = UUID.randomUUID();
         UUID articleId = UUID.randomUUID();
-        CommentReadDTO readDTO = createCommentReadDTO(userId, articleId);
+        CommentReadDTO readDTO = createCommentReadDTO(articleId);
 
         int page = 1;
         int size = 30;
@@ -372,18 +364,10 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
-    private CommentReadDTO createCommentReadDTO(UUID authorId, UUID targetObjectId) {
-        CommentReadDTO dto = new CommentReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setMessage("some text");
-        dto.setAuthorId(authorId);
+    private CommentReadDTO createCommentReadDTO(UUID targetObjectId) {
+        CommentReadDTO dto = generateObject(CommentReadDTO.class);
         dto.setTargetObjectType(TargetObjectType.ARTICLE);
         dto.setTargetObjectId(targetObjectId);
-        dto.setDislikesCount(46);
-        dto.setLikesCount(120);
-        dto.setStatus(CommentStatus.PENDING);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

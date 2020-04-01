@@ -1,7 +1,6 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.Misprint;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.PageResult;
@@ -21,7 +20,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -39,8 +37,7 @@ public class MisprintControllerTest extends BaseControllerTest {
     public void testGetMisprintComplaintById() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        MisprintReadDTO readDTO = createMisprintReadDTO(userId, parentId, moderatorId);
+        MisprintReadDTO readDTO = createMisprintReadDTO(userId, moderatorId);
 
         Mockito.when(misprintService.getMisprintComplaint(userId, readDTO.getId())).thenReturn(readDTO);
 
@@ -59,9 +56,8 @@ public class MisprintControllerTest extends BaseControllerTest {
     public void testGetAllMisprintsReportedByUser() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        MisprintReadDTO m1 = createMisprintReadDTO(userId, parentId, moderatorId);
-        MisprintReadDTO m2 = createMisprintReadDTO(userId, parentId, moderatorId);
+        MisprintReadDTO m1 = createMisprintReadDTO(userId, moderatorId);
+        MisprintReadDTO m2 = createMisprintReadDTO(userId, moderatorId);
 
         PageResult<MisprintReadDTO> pageResult = new PageResult<>();
         pageResult.setData(List.of(m1, m2));
@@ -85,8 +81,7 @@ public class MisprintControllerTest extends BaseControllerTest {
     public void testGetMisprintsWithPagingAndSorting() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        MisprintReadDTO m1 = createMisprintReadDTO(userId, parentId, moderatorId);
+        MisprintReadDTO m1 = createMisprintReadDTO(userId, moderatorId);
 
         int page = 1;
         int size = 30;
@@ -140,10 +135,9 @@ public class MisprintControllerTest extends BaseControllerTest {
         createDTO.setTargetObjectId(UUID.randomUUID());
 
         UUID userId = UUID.randomUUID();
-        UUID targetObjectId = createDTO.getTargetObjectId();
         UUID moderatorId = UUID.randomUUID();
 
-        MisprintReadDTO readDTO = createMisprintReadDTO(userId, targetObjectId, moderatorId);
+        MisprintReadDTO readDTO = createMisprintReadDTO(userId, moderatorId);
 
         Mockito.when(misprintService.createMisprintComplaint(userId, createDTO)).thenReturn(readDTO);
 
@@ -228,17 +222,9 @@ public class MisprintControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService).deleteMisprintComplaint(userId, id);
     }
 
-    private MisprintReadDTO createMisprintReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {
-        MisprintReadDTO dto = new MisprintReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setMisprintText("misprint");
-        dto.setReplaceTo("replace to this");
-        dto.setStatus(ComplaintStatus.INITIATED);
+    private MisprintReadDTO createMisprintReadDTO(UUID authorId, UUID moderatorId) {
+        MisprintReadDTO dto = generateObject(MisprintReadDTO.class);
         dto.setAuthorId(authorId);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        dto.setTargetObjectType(TargetObjectType.MOVIE);
-        dto.setTargetObjectId(parentId);
         dto.setModeratorId(moderatorId);
         return dto;
     }

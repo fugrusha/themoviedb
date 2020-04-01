@@ -2,6 +2,8 @@ package com.golovko.backend.util;
 
 import com.golovko.backend.domain.*;
 import com.golovko.backend.repository.*;
+import org.bitbucket.brunneng.br.Configuration;
+import org.bitbucket.brunneng.br.RandomObjectGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -47,85 +49,94 @@ public class TestObjectFactory {
     @Autowired
     private MisprintRepository misprintRepository;
 
+    protected RandomObjectGenerator flatGenerator;
+    {
+        Configuration c = new Configuration();
+        c.setFlatMode(true);
+        flatGenerator = new RandomObjectGenerator(c);
+    }
+
+    protected <T extends AbstractEntity> T generateFlatEntityWithoutId(Class<T> entityClass) {
+        T entity = flatGenerator.generateRandomObject(entityClass);
+        entity.setId(null);
+        return entity;
+    }
+
     public Movie createMovie() {
-        Movie movie = new Movie();
-        movie.setMovieTitle("Title of the Movie");
-        movie.setDescription("movie description");
-        movie.setIsReleased(false);
-        movie.setReleaseDate(LocalDate.parse("1990-05-14"));
+        Movie movie = generateFlatEntityWithoutId(Movie.class);
         movie.setAverageRating(null);
         return movieRepository.save(movie);
     }
 
+    public Movie createMovie(LocalDate releasedDate) {
+        Movie movie = generateFlatEntityWithoutId(Movie.class);
+        movie.setReleaseDate(releasedDate);
+        movie.setAverageRating(5.0);
+        return movieRepository.save(movie);
+    }
+
     public Movie createMovie(Double averageRating) {
-        Movie movie = new Movie();
-        movie.setMovieTitle("Title of the Movie");
-        movie.setDescription("movie description");
-        movie.setIsReleased(false);
-        movie.setReleaseDate(LocalDate.parse("1990-05-14"));
+        Movie movie = generateFlatEntityWithoutId(Movie.class);
         movie.setAverageRating(averageRating);
         return movieRepository.save(movie);
     }
 
     public Person createPerson() {
-        Person person = new Person();
-        person.setFirstName("Anna");
-        person.setLastName("Popova");
-        person.setBio("some text");
+        Person person = generateFlatEntityWithoutId(Person.class);
         person.setAverageRatingByRoles(null);
         person.setAverageRatingByMovies(null);
-        person.setGender(Gender.FEMALE);
+        return personRepository.save(person);
+    }
+
+    public Person createPerson(String lastName) {
+        Person person = generateFlatEntityWithoutId(Person.class);
+        person.setLastName(lastName);
+        person.setAverageRatingByRoles(null);
+        person.setAverageRatingByMovies(null);
         return personRepository.save(person);
     }
 
     public ApplicationUser createUser() {
-        ApplicationUser user = new ApplicationUser();
-        user.setUsername("Vitalka");
-        user.setPassword("123456");
+        ApplicationUser user = generateFlatEntityWithoutId(ApplicationUser.class);
+        user.setTrustLevel(5.0);
+        user.setPassword("123456789");
         user.setEmail("vetal@gmail.com");
         user.setIsBlocked(false);
-        user.setTrustLevel(7.0);
         return applicationUserRepository.save(user);
     }
 
     public ApplicationUser createUser(Double trustLevel, Boolean isBlocked) {
         ApplicationUser user = new ApplicationUser();
         user.setUsername("Vitalka");
-        user.setPassword("123456");
+        user.setPassword("123456789");
         user.setEmail("vetal@gmail.com");
+        user.setTrustLevel(5.0);
         user.setIsBlocked(isBlocked);
         user.setTrustLevel(trustLevel);
         return applicationUserRepository.save(user);
     }
 
     public Complaint createComplaint(
-            ApplicationUser user,
-            ComplaintType complaintType,
-            TargetObjectType targetObjectType
+            ApplicationUser author
     ) {
-        Complaint complaint = new Complaint();
-        complaint.setComplaintTitle("Some title");
-        complaint.setComplaintText("Some report text");
-        complaint.setComplaintType(complaintType);
+        Complaint complaint = generateFlatEntityWithoutId(Complaint.class);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
-        complaint.setAuthor(user);
-        complaint.setTargetObjectType(targetObjectType);
-        complaint.setTargetObjectId(UUID.randomUUID());
+        complaint.setAuthor(author);
+        complaint.setModerator(null);
         return complaintRepository.save(complaint);
     }
 
     public Complaint createComplaint(
             UUID targetObjectId,
             TargetObjectType targetObjectType,
+            ComplaintType complaintType,
             ApplicationUser author
     ) {
-        Complaint complaint = new Complaint();
-        complaint.setComplaintTitle("Some title");
-        complaint.setComplaintText("Some report text");
-        complaint.setComplaintType(ComplaintType.MISPRINT);
+        Complaint complaint = generateFlatEntityWithoutId(Complaint.class);
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(author);
         complaint.setModerator(null);
+        complaint.setComplaintType(complaintType);
         complaint.setTargetObjectId(targetObjectId);
         complaint.setTargetObjectType(targetObjectType);
         return complaintRepository.save(complaint);
@@ -149,42 +160,32 @@ public class TestObjectFactory {
     }
 
     public MovieCast createMovieCast(Person person, Movie movie) {
-        MovieCast movieCast = new MovieCast();
-        movieCast.setDescription("Some text");
+        MovieCast movieCast = generateFlatEntityWithoutId(MovieCast.class);
+        movieCast.setMovieCrewType(MovieCrewType.CAST);
         movieCast.setAverageRating(null);
         movieCast.setPerson(person);
         movieCast.setMovie(movie);
-        movieCast.setMovieCrewType(MovieCrewType.CAST);
-        movieCast.setCharacter("Leon");
         return movieCastRepository.save(movieCast);
     }
 
     public MovieCast createMovieCast(Person person, Movie movie, Double rating) {
-        MovieCast movieCast = new MovieCast();
-        movieCast.setDescription("Some text");
+        MovieCast movieCast = generateFlatEntityWithoutId(MovieCast.class);
+        movieCast.setMovieCrewType(MovieCrewType.CAST);
         movieCast.setAverageRating(rating);
         movieCast.setPerson(person);
         movieCast.setMovie(movie);
-        movieCast.setMovieCrewType(MovieCrewType.CAST);
-        movieCast.setCharacter("Leon");
         return movieCastRepository.save(movieCast);
     }
 
     public MovieCrew createMovieCrew(Person person, Movie movie) {
-        MovieCrew movieCrew = new MovieCrew();
-        movieCrew.setDescription("Some text");
+        MovieCrew movieCrew = generateFlatEntityWithoutId(MovieCrew.class);
         movieCrew.setAverageRating(null);
         movieCrew.setPerson(person);
         movieCrew.setMovie(movie);
-        movieCrew.setMovieCrewType(MovieCrewType.WRITER);
         return movieCrewRepository.save(movieCrew);
     }
 
-    public MovieCrew createMovieCrewForFilter(
-            Person person,
-            Movie movie,
-            MovieCrewType movieCrewType
-    ) {
+    public MovieCrew createMovieCrew(Person person, Movie movie, MovieCrewType movieCrewType) {
         MovieCrew movieCrew = new MovieCrew();
         movieCrew.setDescription("Some text");
         movieCrew.setAverageRating(5.0);
@@ -195,12 +196,8 @@ public class TestObjectFactory {
     }
 
     public Article createArticle(ApplicationUser author, ArticleStatus status) {
-        Article article = new Article();
-        article.setTitle("Some title");
-        article.setText("Some long long long text");
+        Article article = generateFlatEntityWithoutId(Article.class);
         article.setStatus(status);
-        article.setDislikesCount(444);
-        article.setLikesCount(111);
         article.setAuthor(author);
         return articleRepository.save(article);
     }
@@ -210,11 +207,8 @@ public class TestObjectFactory {
             UUID targetObjectId,
             CommentStatus status,
             TargetObjectType targetObjectType) {
-        Comment comment = new Comment();
-        comment.setMessage("text");
+        Comment comment = generateFlatEntityWithoutId(Comment.class);
         comment.setStatus(status);
-        comment.setLikesCount(45);
-        comment.setDislikesCount(78);
         comment.setAuthor(author);
         comment.setTargetObjectType(targetObjectType);
         comment.setTargetObjectId(targetObjectId);
@@ -222,9 +216,8 @@ public class TestObjectFactory {
     }
 
     public Genre createGenre(String genreName) {
-        Genre genre = new Genre();
+        Genre genre = generateFlatEntityWithoutId(Genre.class);
         genre.setGenreName(genreName);
-        genre.setDescription("Scary movies");
         return genreRepository.save(genre);
     }
 
@@ -240,19 +233,6 @@ public class TestObjectFactory {
         rating.setRatedObjectType(targetObjectType);
         rating.setAuthor(author);
         return ratingRepository.save(rating);
-    }
-
-    public Like createLike(
-            Boolean meLiked,
-            ApplicationUser author,
-            UUID likedObjectId
-    ) {
-        Like like = new Like();
-        like.setMeLiked(meLiked);
-        like.setAuthor(author);
-        like.setLikedObjectType(TargetObjectType.ARTICLE);
-        like.setLikedObjectId(likedObjectId);
-        return likeRepository.save(like);
     }
 
     public Like createLike(

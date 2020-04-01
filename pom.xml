@@ -63,6 +63,12 @@
 			<artifactId>object-translator</artifactId>
 			<version>1.0.8</version>
 		</dependency>
+
+		<dependency>
+			<groupId>org.bitbucket.brunneng.br</groupId>
+			<artifactId>bean-randomizer</artifactId>
+			<version>1.0.6</version>
+		</dependency>
 	</dependencies>
 
 	<build>
