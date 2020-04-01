@@ -2,7 +2,6 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
@@ -12,7 +11,6 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionSystemException;
 
-import java.util.Set;
 import java.util.UUID;
 
 public class ApplicationUserServiceTest extends BaseTest {
@@ -70,7 +68,7 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO,
-                "password", "passwordConfirmation", "articles", "likes");
+                "password", "passwordConfirmation", "articles", "likes", "userRoles");
     }
 
     @Test
@@ -86,7 +84,7 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
-                "password", "passwordConfirmation", "articles", "likes");
+                "password", "passwordConfirmation", "articles", "likes", "userRoles");
     }
 
     @Test
@@ -105,7 +103,7 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
-                "password", "passwordConfirmation", "articles", "likes");
+                "password", "passwordConfirmation", "articles", "likes", "userRoles");
     }
 
     @Test
@@ -162,38 +160,6 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
         Assert.assertEquals(updatedUser.getTrustLevel(), trustLevelDTO.getTrustLevel());
-    }
-
-    @Test
-    public void testAddUserRole() {
-        ApplicationUser user = testObjectFactory.createUser(Set.of(UserRole.USER));
-
-        UserRoleDTO userRoleDTO = new UserRoleDTO();
-        userRoleDTO.setUserRole(UserRole.MODERATOR);
-
-        UserReadDTO actualResult = applicationUserService.addUserRole(user.getId(), userRoleDTO);
-
-        Assertions.assertThat(actualResult).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(actualResult.getUserRole()).contains(UserRole.MODERATOR);
-
-        ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
-        Assertions.assertThat(updatedUser.getUserRole()).contains(UserRole.MODERATOR, UserRole.USER);
-    }
-
-    @Test
-    public void testRemoveUserRole() {
-        ApplicationUser user = testObjectFactory.createUser(Set.of(UserRole.USER, UserRole.CONTENT_MANAGER));
-
-        UserRoleDTO userRoleDTO = new UserRoleDTO();
-        userRoleDTO.setUserRole(UserRole.CONTENT_MANAGER);
-
-        UserReadDTO actualResult = applicationUserService.removeUserRole(user.getId(), userRoleDTO);
-
-        Assertions.assertThat(actualResult).hasNoNullFieldsOrProperties();
-        Assert.assertFalse(actualResult.getUserRole().contains(UserRole.CONTENT_MANAGER));
-
-        ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
-        Assert.assertFalse(updatedUser.getUserRole().contains(UserRole.CONTENT_MANAGER));
     }
 
     @Test(expected = TransactionSystemException.class)

@@ -6,5 +6,6 @@
 
         <include file="db/changelog/init.xml" />
         <include file="db/changelog/update.xml" />
+        <include file="db/changelog/load-static-data.xml" />
 
 </databaseChangeLog>

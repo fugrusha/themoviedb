@@ -10,7 +10,7 @@
     </changeSet>
 
     <changeSet id="add constraints to article" author="andrew">
-        <addNotNullConstraint tableName="article" columnName="article_status"/>
+        <addNotNullConstraint tableName="article" columnName="status"/>
         <addNotNullConstraint tableName="article" columnName="text"/>
     </changeSet>
 

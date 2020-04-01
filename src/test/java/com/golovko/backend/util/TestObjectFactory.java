@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
-import java.util.Set;
 import java.util.UUID;
 
 @Component
@@ -86,7 +85,6 @@ public class TestObjectFactory {
         user.setEmail("vetal@gmail.com");
         user.setIsBlocked(false);
         user.setTrustLevel(7.0);
-        user.setUserRole(Set.of(UserRole.USER));
         return applicationUserRepository.save(user);
     }
 
@@ -97,18 +95,6 @@ public class TestObjectFactory {
         user.setEmail("vetal@gmail.com");
         user.setIsBlocked(isBlocked);
         user.setTrustLevel(trustLevel);
-        user.setUserRole(Set.of(UserRole.USER));
-        return applicationUserRepository.save(user);
-    }
-
-    public ApplicationUser createUser(Set<UserRole> userRoles) {
-        ApplicationUser user = new ApplicationUser();
-        user.setUsername("Vitalka");
-        user.setPassword("123456");
-        user.setEmail("vetal@gmail.com");
-        user.setIsBlocked(false);
-        user.setTrustLevel(7.0);
-        user.setUserRole(userRoles);
         return applicationUserRepository.save(user);
     }
 

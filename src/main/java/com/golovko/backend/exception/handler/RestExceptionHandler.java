@@ -2,6 +2,7 @@ package com.golovko.backend.exception.handler;
 
 import com.golovko.backend.exception.ControllerValidationException;
 import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.exception.LinkDuplicatedException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
@@ -18,7 +19,11 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 @ControllerAdvice
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
-    @ExceptionHandler({ControllerValidationException.class, EntityWrongStatusException.class, Exception.class})
+    @ExceptionHandler({
+            LinkDuplicatedException.class,
+            ControllerValidationException.class,
+            EntityWrongStatusException.class,
+            Exception.class})
     public ResponseEntity<Object> handleException(Exception e) {
         ResponseStatus status = AnnotatedElementUtils.findMergedAnnotation(e.getClass(), ResponseStatus.class);
         HttpStatus httpStatus = status != null ? status.code() : HttpStatus.INTERNAL_SERVER_ERROR;
@@ -38,8 +43,9 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @NotNull
     @Override
-    public ResponseEntity<Object> handleMethodArgumentNotValid(MethodArgumentNotValidException ex,
-                               HttpHeaders headers, HttpStatus httpStatus, WebRequest request
+    public ResponseEntity<Object> handleMethodArgumentNotValid(
+            MethodArgumentNotValidException ex,
+            HttpHeaders headers, HttpStatus httpStatus, WebRequest request
     ) {
         String errorMessage = ex.getBindingResult().getFieldErrors().toString();
 

@@ -1,8 +1,10 @@
 package com.golovko.backend.dto.user;
 
+import com.golovko.backend.domain.UserRoleType;
 import lombok.Data;
 
 import java.time.Instant;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -17,6 +19,8 @@ public class UserReadExtendedDTO {
     private Boolean isBlocked;
 
     private Double trustLevel;
+
+    private List<UserRoleType> userRoles;
 
     private Instant createdAt;
 

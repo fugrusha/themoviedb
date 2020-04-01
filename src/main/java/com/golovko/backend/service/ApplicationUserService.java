@@ -1,7 +1,6 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
@@ -31,7 +30,8 @@ public class ApplicationUserService {
     public UserReadDTO createUser(UserCreateDTO createDTO) {
         ApplicationUser user = translationService.translate(createDTO, ApplicationUser.class);
 
-        user.getUserRole().add(UserRole.USER);
+        // FIXME
+        // user.getUserRoleType().add(UserRoleType.USER);
         user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);
@@ -79,24 +79,6 @@ public class ApplicationUserService {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
         user.setTrustLevel(dto.getTrustLevel());
         applicationUserRepository.save(user);
-
-        return translationService.translate(user, UserReadDTO.class);
-    }
-
-    public UserReadDTO addUserRole(UUID id, UserRoleDTO dto) {
-        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
-
-        user.getUserRole().add(dto.getUserRole());
-        user = applicationUserRepository.save(user);
-
-        return translationService.translate(user, UserReadDTO.class);
-    }
-
-    public UserReadDTO removeUserRole(UUID id, UserRoleDTO dto) {
-        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
-
-        user.getUserRole().remove(dto.getUserRole());
-        user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);
     }

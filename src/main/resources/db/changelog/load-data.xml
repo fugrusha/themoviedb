@@ -141,14 +141,6 @@
         </loadUpdateData>
     </changeSet>
 
-    <changeSet id="load user roles" author="andrew" runOnChange="true">
-        <loadUpdateData tableName="user_role" file="db/data/user-role.csv"
-                        separator=";" primaryKey="user_id, user_role">
-            <column name="user_id" type="uuid"/>
-            <column name="user_role" type="string"/>
-        </loadUpdateData>
-    </changeSet>
-
     <changeSet id="load misprints" author="andrew" runOnChange="true">
         <loadUpdateData tableName="misprint" file="db/data/misprints.csv" separator=";" primaryKey="id">
             <column name="id" type="uuid"/>
