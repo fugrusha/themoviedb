@@ -18,6 +18,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 @Slf4j
 @Service
@@ -114,16 +116,11 @@ public class MisprintService {
         if (!misprint.getStatus().equals(ComplaintStatus.INITIATED)) {
             throw new EntityWrongStatusException(Misprint.class, id);
         } else {
-            String text = getTextWithMisprintFromEntity(misprint);
-            String misprintText = misprint.getMisprintText();
-
-            String newText = replaceMisprint(text, misprintText, dto);
-
-            saveNewTextToEntity(misprint, newText);
+            fixIssue(misprint, dto);
 
             setStatusClosedAndSave(dto, misprint);
 
-            closeSimilarMisprints(dto, misprintText);
+            closeSimilarMisprints(dto, misprint.getMisprintText());
 
             return translationService.translate(misprint, MisprintReadDTO.class);
         }
@@ -148,23 +145,33 @@ public class MisprintService {
         log.info("Misprint with id={} saved successfully", misprint.getId());
     }
 
-    public String getTextWithMisprintFromEntity(Misprint misprint) {
+    public void fixIssue(Misprint misprint, MisprintConfirmDTO dto) {
         switch (misprint.getTargetObjectType()) {
           case MOVIE:
               Movie movie = repoHelper.getEntityById(Movie.class, misprint.getTargetObjectId());
-              return movie.getDescription();
+              replaceMisprint(movie::getDescription, movie::setDescription, misprint.getMisprintText(), dto);
+              movieRepository.save(movie);
+              break;
           case ARTICLE:
               Article article = repoHelper.getEntityById(Article.class, misprint.getTargetObjectId());
-              return article.getText();
+              replaceMisprint(article::getText, article::setText, misprint.getMisprintText(), dto);
+              articleRepository.save(article);
+              break;
           case PERSON:
               Person person = repoHelper.getEntityById(Person.class, misprint.getTargetObjectId());
-              return person.getBio();
+              replaceMisprint(person::getBio, person::setBio, misprint.getMisprintText(), dto);
+              personRepository.save(person);
+              break;
           case MOVIE_CAST:
               MovieCast movieCast = repoHelper.getEntityById(MovieCast.class, misprint.getTargetObjectId());
-              return movieCast.getDescription();
+              replaceMisprint(movieCast::getDescription, movieCast::setDescription, misprint.getMisprintText(), dto);
+              movieCastRepository.save(movieCast);
+              break;
           case MOVIE_CREW:
               MovieCrew movieCrew = repoHelper.getEntityById(MovieCrew.class, misprint.getTargetObjectId());
-              return movieCrew.getDescription();
+              replaceMisprint(movieCrew::getDescription, movieCrew::setDescription, misprint.getMisprintText(), dto);
+              movieCrewRepository.save(movieCrew);
+              break;
           default:
               throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                       String.format("It is not allowed to fix misprint in %s entity",
@@ -172,43 +179,16 @@ public class MisprintService {
         }
     }
 
-    public void saveNewTextToEntity(Misprint misprint, String newText) {
-        switch (misprint.getTargetObjectType()) {
-          case MOVIE:
-              Movie movie = repoHelper.getEntityById(Movie.class, misprint.getTargetObjectId());
-              movie.setDescription(newText);
-              movieRepository.save(movie);
-              break;
-          case ARTICLE:
-              Article article = repoHelper.getEntityById(Article.class, misprint.getTargetObjectId());
-              article.setText(newText);
-              articleRepository.save(article);
-              break;
-          case PERSON:
-              Person person = repoHelper.getEntityById(Person.class, misprint.getTargetObjectId());
-              person.setBio(newText);
-              personRepository.save(person);
-              break;
-          case MOVIE_CAST:
-              MovieCast movieCast = repoHelper.getEntityById(MovieCast.class, misprint.getTargetObjectId());
-              movieCast.setDescription(newText);
-              movieCastRepository.save(movieCast);
-              break;
-          case MOVIE_CREW:
-              MovieCrew movieCrew = repoHelper.getEntityById(MovieCrew.class, misprint.getTargetObjectId());
-              movieCrew.setDescription(newText);
-              movieCrewRepository.save(movieCrew);
-              break;
-          default:
-        }
-    }
-
-    public String replaceMisprint(String text, String misprintText, MisprintConfirmDTO dto) {
+    public void replaceMisprint(Supplier<String> getterText, Consumer<String> setter,
+                                String misprintText, MisprintConfirmDTO dto) {
+        String text = getterText.get();
 
         if (misprintText.equals(text.substring(dto.getStartIndex(), dto.getEndIndex()))) {
-            return text.substring(0, dto.getStartIndex())
+            String newText = text.substring(0, dto.getStartIndex())
                     + dto.getReplaceTo()
                     + text.substring(dto.getEndIndex());
+
+            setter.accept(newText);
         } else {
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                     "Text could not be replaced."
