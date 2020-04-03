@@ -2,8 +2,14 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Article;
 import com.golovko.backend.domain.ArticleStatus;
+import com.golovko.backend.domain.Movie;
+import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.*;
+import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.LinkDuplicatedException;
 import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
@@ -15,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
@@ -94,5 +101,87 @@ public class ArticleService {
         Page<Article> articles = articleRepository.findByManagerFilter(filter, pageable);
 
         return translationService.toPageResult(articles, ArticleReadDTO.class);
+    }
+
+    @Transactional
+    public List<PersonReadDTO> getArticlePeople(UUID articleId) {
+        Article article = repoHelper.getEntityById(Article.class, articleId);
+
+        if (article.getPeople().isEmpty() || article.getPeople() == null) {
+            throw new EntityNotFoundException("Article " + articleId + " has not any mentioned person.");
+        }
+
+        return translationService.translateList(article.getPeople(), PersonReadDTO.class);
+    }
+
+    @Transactional
+    public List<PersonReadDTO> addPersonToArticle(UUID articleId, UUID personId) {
+        Article article = repoHelper.getEntityById(Article.class, articleId);
+        Person person = repoHelper.getEntityById(Person.class, personId);
+
+        if (article.getPeople().stream().anyMatch(p -> p.getId().equals(personId))) {
+            throw new LinkDuplicatedException(String.format("Article %s already has person %s", articleId, personId));
+        }
+
+        article.getPeople().add(person);
+        article = articleRepository.save(article);
+
+        return translationService.translateList(article.getPeople(), PersonReadDTO.class);
+    }
+
+    @Transactional
+    public List<PersonReadDTO> removePersonFromArticle(UUID articleId, UUID personId) {
+        Article article = repoHelper.getEntityById(Article.class, articleId);
+
+        boolean removed = article.getPeople().removeIf(p -> p.getId().equals(personId));
+
+        if (!removed) {
+            throw new EntityNotFoundException("Article " + articleId + " has no person " + personId);
+        }
+
+        article = articleRepository.save(article);
+
+        return translationService.translateList(article.getPeople(), PersonReadDTO.class);
+    }
+
+    @Transactional
+    public List<MovieReadDTO> getArticleMovies(UUID articleId) {
+        Article article = repoHelper.getEntityById(Article.class, articleId);
+
+        if (article.getMovies().isEmpty() || article.getMovies() == null) {
+            throw new EntityNotFoundException("Article " + articleId + " has not any mentioned movie.");
+        }
+
+        return translationService.translateList(article.getMovies(), MovieReadDTO.class);
+    }
+
+    @Transactional
+    public List<MovieReadDTO> addMovieToArticle(UUID articleId, UUID movieId) {
+        Article article = repoHelper.getEntityById(Article.class, articleId);
+        Movie movie = repoHelper.getEntityById(Movie.class, movieId);
+
+        if (article.getMovies().stream().anyMatch(m -> m.getId().equals(movieId))) {
+            throw new LinkDuplicatedException(String.format("Article %s already has movie %s", articleId, movieId));
+        }
+
+        article.getMovies().add(movie);
+        article = articleRepository.save(article);
+
+        return translationService.translateList(article.getMovies(), MovieReadDTO.class);
+    }
+
+    @Transactional
+    public List<MovieReadDTO> removeMovieFromArticle(UUID articleId, UUID movieId) {
+        Article article = repoHelper.getEntityById(Article.class, articleId);
+
+        boolean removed = article.getMovies().removeIf(m -> m.getId().equals(movieId));
+
+        if (!removed) {
+            throw new EntityNotFoundException("Article " + articleId + " has no movie " + movieId);
+        }
+
+        article = articleRepository.save(article);
+
+        return translationService.translateList(article.getMovies(), MovieReadDTO.class);
     }
 }

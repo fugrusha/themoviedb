@@ -123,7 +123,8 @@
     </changeSet>
 
     <changeSet id="load genre_movie table" author="andrew">
-        <loadUpdateData tableName="genre_movie" file="db/data/genre_movie.csv" separator=";" primaryKey="movie_id, genre_id">
+        <loadUpdateData tableName="genre_movie" file="db/data/genre_movie.csv"
+                        separator=";" primaryKey="movie_id, genre_id">
             <column name="movie_id" type="uuid"/>
             <column name="genre_id" type="uuid"/>
         </loadUpdateData>
@@ -168,6 +169,30 @@
             <column name="liked_object_id" type="uuid"/>
             <column name="created_at" type="timestamp"/>
             <column name="updated_at" type="timestamp"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load user_user_role" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="user_user_role" file="db/data/user-user-role.csv"
+                        separator=";" primaryKey="user_id, user_role_id">
+            <column name="user_id" type="uuid"/>
+            <column name="user_role_id" type="uuid"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load article_movie" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="article_movie" file="db/data/article-movie.csv"
+                        separator=";" primaryKey="article_id, movie_id">
+            <column name="article_id" type="uuid"/>
+            <column name="movie_id" type="uuid"/>
+        </loadUpdateData>
+    </changeSet>
+
+    <changeSet id="load article_person" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="article_person" file="db/data/article-person.csv"
+                        separator=";" primaryKey="article_id, person_id">
+            <column name="article_id" type="uuid"/>
+            <column name="person_id" type="uuid"/>
         </loadUpdateData>
     </changeSet>
 

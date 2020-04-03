@@ -1,0 +1,60 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create table article_person" author="andrew">
+        <createTable tableName="article_person">
+            <column name="article_id" type="uuid">
+                <constraints foreignKeyName="article_person_article_fk"
+                             referencedTableName="article"
+                             referencedColumnNames="id"
+                             nullable="false" deleteCascade="true"/>
+            </column>
+            <column name="person_id" type="uuid">
+                <constraints foreignKeyName="article_person_person_fk"
+                             referencedTableName="person"
+                             referencedColumnNames="id"
+                             nullable="false" deleteCascade="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="drop all constraints user_user_role" author="andrew">
+        <dropAllForeignKeyConstraints baseTableName="user_user_role"/>
+    </changeSet>
+
+    <changeSet id="add foreign keys to user_user_role" author="andrew">
+        <addForeignKeyConstraint baseTableName="user_user_role" baseColumnNames="user_id"
+                                 constraintName="user_constraint"
+                                 referencedTableName="application_user"
+                                 referencedColumnNames="id"
+                                 nullable="false"
+                                 deleteCascade="true"/>
+        <addForeignKeyConstraint baseTableName="user_user_role" baseColumnNames="user_role_id"
+                                 constraintName="user_role_constraint"
+                                 referencedTableName="user_role"
+                                 referencedColumnNames="id"
+                                 nullable="false"
+                                 deleteCascade="true"/>
+    </changeSet>
+
+    <changeSet id="create table article_movie" author="andrew">
+        <createTable tableName="article_movie">
+            <column name="article_id" type="uuid">
+                <constraints foreignKeyName="article_movie_article_fk"
+                             referencedTableName="article"
+                             referencedColumnNames="id"
+                             nullable="false" deleteCascade="true"/>
+            </column>
+            <column name="movie_id" type="uuid">
+                <constraints foreignKeyName="article_movie_movie_fk"
+                             referencedTableName="movie"
+                             referencedColumnNames="id"
+                             nullable="false" deleteCascade="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

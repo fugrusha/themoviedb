@@ -78,7 +78,7 @@ public class MovieGenreServiceTest extends BaseTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void testWrongMovieId() {
+    public void testAddGenreToMovieWrongMovieId() {
         UUID wrongMovieId = UUID.randomUUID();
         Genre genre = testObjectFactory.createGenre("Comedy");
 
@@ -86,7 +86,7 @@ public class MovieGenreServiceTest extends BaseTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void testWrongGenreId() {
+    public void testAddGenreToMovieWrongGenreId() {
         Movie movie = testObjectFactory.createMovie();
         UUID wrongGenreId = UUID.randomUUID();
 

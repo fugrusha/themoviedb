@@ -2,12 +2,15 @@ package com.golovko.backend.controller;
 
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.*;
+import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.service.ArticleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -56,5 +59,47 @@ public class ArticleController {
     @DeleteMapping("/{id}")
     public void deleteArticle(@PathVariable UUID id) {
         articleService.deleteArticle(id);
+    }
+
+    @GetMapping("/{articleId}/people")
+    public List<PersonReadDTO> getArticlePeople(@PathVariable UUID articleId) {
+        return articleService.getArticlePeople(articleId);
+    }
+
+    @PostMapping("/{articleId}/people/{personId}")
+    public List<PersonReadDTO> addPersonToArticle(
+            @PathVariable UUID articleId,
+            @PathVariable UUID personId
+    ) {
+        return articleService.addPersonToArticle(articleId, personId);
+    }
+
+    @DeleteMapping("/{articleId}/people/{personId}")
+    public List<PersonReadDTO> removePersonFromArticle(
+            @PathVariable UUID articleId,
+            @PathVariable UUID personId
+    ) {
+        return articleService.removePersonFromArticle(articleId, personId);
+    }
+
+    @GetMapping("/{articleId}/movies")
+    public List<MovieReadDTO> getArticleMovies(@PathVariable UUID articleId) {
+        return articleService.getArticleMovies(articleId);
+    }
+
+    @PostMapping("/{articleId}/movies/{movieId}")
+    public List<MovieReadDTO> addMovieToArticle(
+            @PathVariable UUID articleId,
+            @PathVariable UUID movieId
+    ) {
+        return articleService.addMovieToArticle(articleId, movieId);
+    }
+
+    @DeleteMapping("/{articleId}/movies/{movieId}")
+    public List<MovieReadDTO> removeMovieFromArticle(
+            @PathVariable UUID articleId,
+            @PathVariable UUID movieId
+    ) {
+        return articleService.removeMovieFromArticle(articleId, movieId);
     }
 }

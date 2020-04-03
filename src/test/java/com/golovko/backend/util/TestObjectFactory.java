@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Component
@@ -199,6 +200,17 @@ public class TestObjectFactory {
         Article article = generateFlatEntityWithoutId(Article.class);
         article.setStatus(status);
         article.setAuthor(author);
+        return articleRepository.save(article);
+    }
+
+    public Article createExtendedArticle(
+            ApplicationUser author, ArticleStatus status,
+            List<Person> people, List<Movie> movies) {
+        Article article = generateFlatEntityWithoutId(Article.class);
+        article.setPeople(people);
+        article.setStatus(status);
+        article.setAuthor(author);
+        article.setMovies(movies);
         return articleRepository.save(article);
     }
 

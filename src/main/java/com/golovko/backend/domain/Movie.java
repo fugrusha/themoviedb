@@ -54,4 +54,7 @@ public class Movie extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
     private List<Genre> genres = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "movies")
+    private List<Article> articles = new ArrayList<>();
 }

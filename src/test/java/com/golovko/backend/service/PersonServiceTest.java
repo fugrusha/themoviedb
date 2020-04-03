@@ -104,7 +104,7 @@ public class PersonServiceTest extends BaseTest {
 
         person = personRepository.findById(person.getId()).get();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO,
-                        "movieCrews", "movieCast");
+                        "movieCrews", "movieCast", "articles");
     }
 
     @Test
@@ -122,7 +122,7 @@ public class PersonServiceTest extends BaseTest {
         Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles",
                 "averageRatingByMovies");
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate,
-                        "movieCrews", "movieCast");
+                        "movieCrews", "movieCast", "articles");
     }
 
     @Test
@@ -141,7 +141,7 @@ public class PersonServiceTest extends BaseTest {
 
         person = personRepository.findById(person.getId()).get();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO,
-                "movieCrews", "movieCast");
+                "movieCrews", "movieCast", "articles");
     }
 
     @Test
