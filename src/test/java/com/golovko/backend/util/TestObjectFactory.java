@@ -72,6 +72,7 @@ public class TestObjectFactory {
     public Movie createMovie(LocalDate releasedDate) {
         Movie movie = generateFlatEntityWithoutId(Movie.class);
         movie.setReleaseDate(releasedDate);
+        movie.setIsReleased(false);
         movie.setAverageRating(5.0);
         return movieRepository.save(movie);
     }

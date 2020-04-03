@@ -404,4 +404,34 @@ public class MovieServiceTest extends BaseTest {
                 .extracting("id")
                 .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
     }
+
+    @Test
+    public void testUpdateReleasedStatusOfMovieFutureDate() {
+        Movie movie = testObjectFactory.createMovie(LocalDate.of(2022, 5, 4));
+
+        movieService.updateReleasedStatusOfMovie(movie.getId());
+
+        Movie updatedMovie = movieRepository.findById(movie.getId()).get();
+        Assert.assertEquals(false, updatedMovie.getIsReleased());
+    }
+
+    @Test
+    public void testUpdateReleasedStatusOfMoviePastDate() {
+        Movie movie = testObjectFactory.createMovie(LocalDate.of(2006, 5, 4));
+
+        movieService.updateReleasedStatusOfMovie(movie.getId());
+
+        Movie updatedMovie = movieRepository.findById(movie.getId()).get();
+        Assert.assertEquals(true, updatedMovie.getIsReleased());
+    }
+
+    @Test
+    public void testUpdateReleasedStatusOfMovieTodayDate() {
+        Movie movie = testObjectFactory.createMovie(LocalDate.now());
+
+        movieService.updateReleasedStatusOfMovie(movie.getId());
+
+        Movie updatedMovie = movieRepository.findById(movie.getId()).get();
+        Assert.assertEquals(true, updatedMovie.getIsReleased());
+    }
 }

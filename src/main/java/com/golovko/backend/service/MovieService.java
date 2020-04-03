@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
@@ -101,5 +102,18 @@ public class MovieService {
 
         movie.setAverageRating(averageRating);
         movieRepository.save(movie);
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updateReleasedStatusOfMovie(UUID movieId) {
+        Movie movie = repoHelper.getEntityById(Movie.class, movieId);
+        LocalDate today = LocalDate.now();
+
+        if (movie.getReleaseDate().isBefore(today) || movie.getReleaseDate().equals(today)) {
+            movie.setIsReleased(true);
+            movieRepository.save(movie);
+
+            log.info("Release status of movie: {} is set to true", movieId);
+        }
     }
 }
