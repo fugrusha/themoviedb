@@ -365,7 +365,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
                 .thenReturn(pageResult);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/persons/{personId}/misprints/", personId))
+                .perform(get("/api/v1/people/{personId}/misprints/", personId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -455,7 +455,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.when(misprintService.getMisprintByTargetId(personId, readDTO.getId())).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/persons/{personId}/misprints/{id}",
+                .perform(get("/api/v1/people/{personId}/misprints/{id}",
                         personId, readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
@@ -731,7 +731,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.when(misprintService.getMisprintsByTargetId(personId, pageRequest)).thenReturn(result);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/persons/{personId}/misprints/", personId)
+                .perform(get("/api/v1/people/{personId}/misprints/", personId)
                 .param("page", Integer.toString(page))
                 .param("size", Integer.toString(size))
                 .param("sort", "createdAt,asc"))

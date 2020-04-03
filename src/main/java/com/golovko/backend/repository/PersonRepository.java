@@ -17,5 +17,5 @@ public interface PersonRepository extends CrudRepository<Person, UUID> {
     Page<Person> findAllPeople(Pageable pageable);
 
     @Query("select p.id from Person p")
-    Stream<UUID> getIdsOfPersons();
+    Stream<UUID> getIdsOfPeople();
 }

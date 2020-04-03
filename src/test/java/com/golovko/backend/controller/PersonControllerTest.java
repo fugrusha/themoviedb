@@ -40,7 +40,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.when(personService.getPerson(readDTO.getId())).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/persons/{id}", readDTO.getId()))
+                .perform(get("/api/v1/people/{id}", readDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -51,7 +51,7 @@ public class PersonControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testGetAllPersons() throws Exception {
+    public void testGetAllPeople() throws Exception {
         PersonReadDTO p1 = createPersonReadDTO();
         PersonReadDTO p2 = createPersonReadDTO();
         PersonReadDTO p3 = createPersonReadDTO();
@@ -63,7 +63,7 @@ public class PersonControllerTest extends BaseControllerTest {
                 .thenReturn(pageResult);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/persons"))
+                .perform(get("/api/v1/people"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
@@ -92,7 +92,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.when(personService.getPeople(pageRequest)).thenReturn(result);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/persons")
+                .perform(get("/api/v1/people")
                 .param("page", Integer.toString(page))
                 .param("size", Integer.toString(size))
                 .param("sort", "createdAt,asc"))
@@ -116,7 +116,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.when(personService.createPerson(createDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/persons")
+                .perform(post("/api/v1/people")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isOk())
@@ -133,7 +133,7 @@ public class PersonControllerTest extends BaseControllerTest {
         PersonCreateDTO createDTO = new PersonCreateDTO();
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/persons")
+                .perform(post("/api/v1/people")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isBadRequest())
@@ -154,7 +154,7 @@ public class PersonControllerTest extends BaseControllerTest {
         createDTO.setGender(Gender.MALE);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/persons")
+                .perform(post("/api/v1/people")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isBadRequest())
@@ -175,7 +175,7 @@ public class PersonControllerTest extends BaseControllerTest {
         createDTO.setGender(Gender.MALE);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/persons")
+                .perform(post("/api/v1/people")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(createDTO)))
                 .andExpect(status().isBadRequest())
@@ -200,7 +200,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.when(personService.patchPerson(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/persons/{id}", readDTO.getId())
+                .perform(patch("/api/v1/people/{id}", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isOk())
@@ -220,7 +220,7 @@ public class PersonControllerTest extends BaseControllerTest {
         patchDTO.setGender(Gender.MALE);
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/persons/{id}", UUID.randomUUID())
+                .perform(patch("/api/v1/people/{id}", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isBadRequest())
@@ -241,7 +241,7 @@ public class PersonControllerTest extends BaseControllerTest {
         patchDTO.setGender(Gender.MALE);
 
         String resultJson = mockMvc
-                .perform(patch("/api/v1/persons/{id}", UUID.randomUUID())
+                .perform(patch("/api/v1/people/{id}", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(patchDTO)))
                 .andExpect(status().isBadRequest())
@@ -266,7 +266,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.when(personService.updatePerson(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/persons/{id}", readDTO.getId())
+                .perform(put("/api/v1/people/{id}", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isOk())
@@ -286,7 +286,7 @@ public class PersonControllerTest extends BaseControllerTest {
         updateDTO.setGender(Gender.MALE);
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/persons/{id}", UUID.randomUUID())
+                .perform(put("/api/v1/people/{id}", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isBadRequest())
@@ -307,7 +307,7 @@ public class PersonControllerTest extends BaseControllerTest {
         updateDTO.setGender(Gender.MALE);
 
         String resultJson = mockMvc
-                .perform(put("/api/v1/persons/{id}", UUID.randomUUID())
+                .perform(put("/api/v1/people/{id}", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(updateDTO)))
                 .andExpect(status().isBadRequest())
@@ -323,7 +323,7 @@ public class PersonControllerTest extends BaseControllerTest {
     public void testDeletePerson() throws Exception {
         UUID id = UUID.randomUUID();
 
-        mockMvc.perform(delete("/api/v1/persons/{id}", id))
+        mockMvc.perform(delete("/api/v1/people/{id}", id))
                 .andExpect(status().is2xxSuccessful());
 
         Mockito.verify(personService).deletePerson(id);

@@ -14,7 +14,7 @@ import javax.validation.Valid;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/api/v1/persons")
+@RequestMapping("/api/v1/people")
 public class PersonController {
 
     @Autowired

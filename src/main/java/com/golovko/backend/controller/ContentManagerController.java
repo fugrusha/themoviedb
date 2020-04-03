@@ -82,7 +82,7 @@ public class ContentManagerController {
         return misprintService.getMisprintByTargetId(movieId, id);
     }
 
-    @GetMapping("/persons/{personId}/misprints/")
+    @GetMapping("/people/{personId}/misprints/")
     public PageResult<MisprintReadDTO> getAllMisprintsByPersonId(
             @PathVariable UUID personId,
             Pageable pageable
@@ -90,7 +90,7 @@ public class ContentManagerController {
         return misprintService.getMisprintsByTargetId(personId, pageable);
     }
 
-    @GetMapping("/persons/{personId}/misprints/{id}")
+    @GetMapping("/people/{personId}/misprints/{id}")
     public MisprintReadDTO getMisprintByPersonId(
             @PathVariable UUID personId,
             @PathVariable UUID id

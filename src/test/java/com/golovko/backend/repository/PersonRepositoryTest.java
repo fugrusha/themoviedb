@@ -1,7 +1,6 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.BaseTest;
-import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Person;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -52,10 +51,10 @@ public class PersonRepositoryTest extends BaseTest {
     }
 
     @Test
-    public void testGetPersonOrderByLastNameAsc() {
-        Person p1 = createPerson("Akulova");
-        Person p2 = createPerson("Moldovan");
-        Person p3 = createPerson("Hefner");
+    public void testGetPeople() {
+        Person p1 = testObjectFactory.createPerson("Akulova");
+        Person p2 = testObjectFactory.createPerson("Moldovan");
+        Person p3 = testObjectFactory.createPerson("Hefner");
 
         Page<Person> result = personRepository.findAllPeople(Pageable.unpaged());
 
@@ -64,24 +63,15 @@ public class PersonRepositoryTest extends BaseTest {
     }
 
     @Test
-    public void testGetIdsOfPersons() {
+    public void testGetIdsOfPeople() {
         Set<UUID> expectedResult = new HashSet<>();
         expectedResult.add(testObjectFactory.createPerson().getId());
         expectedResult.add(testObjectFactory.createPerson().getId());
         expectedResult.add(testObjectFactory.createPerson().getId());
 
         transactionTemplate.executeWithoutResult(status -> {
-            Set<UUID> actualResult = personRepository.getIdsOfPersons().collect(Collectors.toSet());
+            Set<UUID> actualResult = personRepository.getIdsOfPeople().collect(Collectors.toSet());
             Assert.assertEquals(expectedResult, actualResult);
         });
-    }
-
-    private Person createPerson(String lastName) {
-        Person person = new Person();
-        person.setFirstName("Anna");
-        person.setLastName(lastName);
-        person.setBio("some text");
-        person.setGender(Gender.FEMALE);
-        return personRepository.save(person);
     }
 }
