@@ -7,8 +7,8 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToMany;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Setter
@@ -24,5 +24,5 @@ public class Genre extends AbstractEntity {
     private String description;
 
     @ManyToMany(mappedBy = "genres")
-    private Set<Movie> movies = new HashSet<Movie>();
+    private List<Movie> movies = new ArrayList<>();
 }

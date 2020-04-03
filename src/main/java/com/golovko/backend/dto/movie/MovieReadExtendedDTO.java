@@ -7,6 +7,7 @@ import lombok.Data;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -33,7 +34,7 @@ public class MovieReadExtendedDTO {
 
     private Instant updatedAt;
 
-    private Set<GenreReadDTO> genres;
+    private List<GenreReadDTO> genres;
 
     private Set<MovieCrewReadDTO> movieCrews;
 

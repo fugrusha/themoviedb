@@ -50,6 +50,7 @@ public class GenreService {
         return translationService.translate(genre, GenreReadDTO.class);
     }
 
+    @Transactional
     public GenreReadDTO patchGenre(UUID id, GenrePatchDTO patchDTO) {
         Genre genre = repoHelper.getEntityById(Genre.class, id);
 

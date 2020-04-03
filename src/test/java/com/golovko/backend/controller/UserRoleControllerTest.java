@@ -59,6 +59,8 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
         List<UserRoleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(userRoleService).addUserRole(userId, userRoleId);
     }
 
     @Test
@@ -66,7 +68,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
         UUID userId = UUID.randomUUID();
         UUID userRoleId = UUID.randomUUID();
 
-        List<UserRoleReadDTO> emptyList= new ArrayList<>();
+        List<UserRoleReadDTO> emptyList = new ArrayList<>();
 
         Mockito.when(userRoleService.removeRoleFromUser(userId, userRoleId)).thenReturn(emptyList);
 

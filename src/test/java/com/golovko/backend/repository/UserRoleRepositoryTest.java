@@ -1,6 +1,7 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.BaseTest;
+import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.domain.UserRoleType;
 import org.junit.Assert;
 import org.junit.Test;
@@ -20,5 +21,15 @@ public class UserRoleRepositoryTest extends BaseTest {
         UUID actualId = userRoleRepository.findUserRoleIdByType(UserRoleType.USER);
 
         Assert.assertEquals(userRoleId, actualId);
+    }
+
+    @Test
+    public void testFindByType() {
+        UserRoleType expectedType = UserRoleType.USER;
+
+        UserRole userRole = userRoleRepository.findByType(expectedType);
+
+        Assert.assertNotNull(userRole);
+        Assert.assertEquals(expectedType, userRole.getType());
     }
 }

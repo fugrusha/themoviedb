@@ -7,7 +7,6 @@ import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.LinkDuplicatedException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
-import com.golovko.backend.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,9 +16,6 @@ import java.util.UUID;
 
 @Service
 public class UserRoleService {
-
-    @Autowired
-    private UserRoleRepository userRoleRepository;
 
     @Autowired
     private ApplicationUserRepository applicationUserRepository;

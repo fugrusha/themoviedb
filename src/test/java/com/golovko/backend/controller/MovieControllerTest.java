@@ -60,7 +60,7 @@ public class MovieControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetMovieExtended() throws Exception {
-        Set<GenreReadDTO> genres = Set.of(createGenreReadDTO());
+        List<GenreReadDTO> genres = List.of(createGenreReadDTO());
         Set<MovieCastReadDTO> movieCasts = Set.of(createMovieCastReadDTO());
         Set<MovieCrewReadDTO> movieCrews = Set.of(createMovieCrewReadDTO());
 
@@ -400,7 +400,7 @@ public class MovieControllerTest extends BaseControllerTest {
     }
 
     private MovieReadExtendedDTO createMovieReadExtendedDTO(
-            Set<GenreReadDTO> genres,
+            List<GenreReadDTO> genres,
             Set<MovieCastReadDTO> movieCasts,
             Set<MovieCrewReadDTO> movieCrews
     ) {

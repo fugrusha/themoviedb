@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.UserRoleType;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
@@ -48,8 +49,12 @@ public class ApplicationUserServiceTest extends BaseTest {
                 "password", "passwordConfirmation");
         Assert.assertNotNull(readDTO.getId());
 
-        ApplicationUser applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(applicationUser);
+        ApplicationUser createdUser = applicationUserRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(createdUser,
+                "userRoles");
+
+        Assertions.assertThat(createdUser.getUserRoles()).extracting("type")
+                .containsExactlyInAnyOrder(UserRoleType.USER);
     }
 
     @Test

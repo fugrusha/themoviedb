@@ -66,7 +66,7 @@ public class MovieServiceTest extends BaseTest {
         MovieCast movieCast = testObjectFactory.createMovieCast(person1, movie);
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person2, movie);
 
-        movie.setGenres(Set.of(genre));
+        movie.setGenres(List.of(genre));
         movie.setMovieCasts(Set.of(movieCast));
         movie.setMovieCrews(Set.of(movieCrew));
         Movie extendedMovie = movieRepository.save(movie);
@@ -264,9 +264,9 @@ public class MovieServiceTest extends BaseTest {
         Genre genre2 = testObjectFactory.createGenre("Horror");
 
         Movie m1 = testObjectFactory.createMovie();
-        m1.setGenres(Set.of(genre1));
+        m1.setGenres(List.of(genre1));
         Movie m2 = testObjectFactory.createMovie();
-        m2.setGenres(Set.of(genre2));
+        m2.setGenres(List.of(genre2));
         movieRepository.saveAll(List.of(m1, m2));
 
         MovieFilter filter = new MovieFilter();
@@ -305,7 +305,7 @@ public class MovieServiceTest extends BaseTest {
 
         Movie m1 = testObjectFactory.createMovie(LocalDate.of(1992, 5, 4)); // no
         Movie m2 = testObjectFactory.createMovie(LocalDate.of(1990, 5, 4)); // yes
-        m2.setGenres(Set.of(genre));
+        m2.setGenres(List.of(genre));
         movieRepository.save(m2);
         Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4)); // no
         Movie m4 = testObjectFactory.createMovie(LocalDate.of(1987, 5, 4));

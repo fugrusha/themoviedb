@@ -13,4 +13,6 @@ public interface UserRoleRepository extends CrudRepository<UserRole, UUID> {
 
     @Query("select role.id from UserRole role where role.type = :userRoleType")
     UUID findUserRoleIdByType(UserRoleType userRoleType);
+
+    UserRole findByType(UserRoleType userRoleType);
 }

@@ -20,7 +20,6 @@ import org.springframework.transaction.TransactionSystemException;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 public class GenreServiceTest extends BaseTest {
@@ -50,9 +49,9 @@ public class GenreServiceTest extends BaseTest {
         UUID genreId = genre.getId();
 
         Movie m1 = testObjectFactory.createMovie();
-        m1.setGenres(Set.of(genre));
+        m1.setGenres(List.of(genre));
         Movie m2 = testObjectFactory.createMovie();
-        m2.setGenres(Set.of(genre));
+        m2.setGenres(List.of(genre));
         movieRepository.saveAll(List.of(m1, m2));
 
         testObjectFactory.createMovie();
@@ -141,7 +140,7 @@ public class GenreServiceTest extends BaseTest {
         inTransaction(() -> {
             Genre genreAfterUpdate = genreRepository.findById(readDTO.getId()).get();
             Assertions.assertThat(genreAfterUpdate).hasNoNullFieldsOrPropertiesExcept("movies");
-            Assertions.assertThat(genreAfterUpdate).isEqualToComparingFieldByField(genre);
+            Assertions.assertThat(genreAfterUpdate).isEqualToIgnoringGivenFields(genre, "movies");
         });
     }
 

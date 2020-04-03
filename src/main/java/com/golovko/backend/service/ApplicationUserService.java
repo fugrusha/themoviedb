@@ -1,9 +1,12 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.UserRole;
+import com.golovko.backend.domain.UserRoleType;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import com.golovko.backend.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +17,9 @@ public class ApplicationUserService {
 
     @Autowired
     private ApplicationUserRepository applicationUserRepository;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
     @Autowired
     private TranslationService translationService;
@@ -30,8 +36,8 @@ public class ApplicationUserService {
     public UserReadDTO createUser(UserCreateDTO createDTO) {
         ApplicationUser user = translationService.translate(createDTO, ApplicationUser.class);
 
-        // FIXME
-        // user.getUserRoleType().add(UserRoleType.USER);
+        UserRole userRole = userRoleRepository.findByType(UserRoleType.USER);
+        user.getUserRoles().add(userRole);
         user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);
