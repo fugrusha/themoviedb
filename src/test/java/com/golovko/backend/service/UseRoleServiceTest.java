@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.domain.UserRoleType;
 import com.golovko.backend.dto.userrole.UserRoleReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -13,6 +14,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,17 +32,28 @@ public class UseRoleServiceTest extends BaseTest {
     @Test
     public void testGetUserRolesByUserId() {
         ApplicationUser user = testObjectFactory.createUser();
-        UUID userRoleId = userRoleRepository.findUserRoleIdByType(UserRoleType.CONTENT_MANAGER);
-        List<UserRoleReadDTO> expectedResult = userRoleService.addUserRole(user.getId(), userRoleId);
+        UserRole userRole = userRoleRepository.findByType(UserRoleType.CONTENT_MANAGER);
+        user.setUserRoles(List.of(userRole));
+        applicationUserRepository.save(user);
 
         List<UserRoleReadDTO> actualResult = userRoleService.getUserRoles(user.getId());
 
-        Assert.assertEquals(expectedResult, actualResult);
+        Assertions.assertThat(actualResult).extracting("id")
+                .contains(userRole.getId());
     }
 
     @Test(expected = EntityNotFoundException.class)
     public void testGetNotFoundUserRolesByUserId() {
         ApplicationUser user = testObjectFactory.createUser();
+        userRoleService.getUserRoles(user.getId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testGetUserRolesByUserIdEmptyList() {
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setUserRoles(new ArrayList<UserRole>());
+        applicationUserRepository.save(user);
+
         userRoleService.getUserRoles(user.getId());
     }
 

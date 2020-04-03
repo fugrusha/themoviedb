@@ -31,11 +31,13 @@ public class MovieGenreServiceTest extends BaseTest {
     public void testGetGenresByMovieId() {
         Genre genre = testObjectFactory.createGenre("Comedy");
         Movie movie = testObjectFactory.createMovie();
-        List<GenreReadDTO> expectedResult = movieGenreService.addGenreToMovie(movie.getId(), genre.getId());
+        movie.setGenres(List.of(genre));
+        movieRepository.save(movie);
 
         List<GenreReadDTO> actualResult = movieGenreService.getMovieGenres(movie.getId());
 
-        Assert.assertEquals(expectedResult, actualResult);
+        Assertions.assertThat(actualResult).extracting("id")
+                .contains(genre.getId());
     }
 
     @Test(expected = EntityNotFoundException.class)
