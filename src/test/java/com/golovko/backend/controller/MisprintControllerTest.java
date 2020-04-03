@@ -1,9 +1,9 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.Misprint;
 import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.MisprintCreateDTO;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -15,10 +15,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -36,8 +37,7 @@ public class MisprintControllerTest extends BaseControllerTest {
     public void testGetMisprintComplaintById() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        MisprintReadDTO readDTO = createMistakeReadDTO(userId, parentId, moderatorId);
+        MisprintReadDTO readDTO = createMisprintReadDTO(userId, moderatorId);
 
         Mockito.when(misprintService.getMisprintComplaint(userId, readDTO.getId())).thenReturn(readDTO);
 
@@ -56,24 +56,57 @@ public class MisprintControllerTest extends BaseControllerTest {
     public void testGetAllMisprintsReportedByUser() throws Exception {
         UUID userId = UUID.randomUUID();
         UUID moderatorId = UUID.randomUUID();
-        UUID parentId = UUID.randomUUID();
-        MisprintReadDTO m1 = createMistakeReadDTO(userId, parentId, moderatorId);
-        MisprintReadDTO m2 = createMistakeReadDTO(userId, parentId, moderatorId);
+        MisprintReadDTO m1 = createMisprintReadDTO(userId, moderatorId);
+        MisprintReadDTO m2 = createMisprintReadDTO(userId, moderatorId);
 
-        List<MisprintReadDTO> expectedResult = List.of(m1, m2);
+        PageResult<MisprintReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(m1, m2));
 
-        Mockito.when(misprintService.getAllUserMisprintComplaints(userId)).thenReturn(expectedResult);
+        Mockito.when(misprintService.getAllUserMisprintComplaints(userId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/users/{userId}/misprints/", userId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting(MisprintReadDTO::getId)
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult.getData()).extracting(MisprintReadDTO::getId)
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
 
-        Mockito.verify(misprintService).getAllUserMisprintComplaints(userId);
+        Mockito.verify(misprintService).getAllUserMisprintComplaints(userId, PageRequest.of(0, defaultPageSize));
+    }
+
+    @Test
+    public void testGetMisprintsWithPagingAndSorting() throws Exception {
+        UUID userId = UUID.randomUUID();
+        UUID moderatorId = UUID.randomUUID();
+        MisprintReadDTO m1 = createMisprintReadDTO(userId, moderatorId);
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<MisprintReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(m1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(misprintService.getAllUserMisprintComplaints(userId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/users/{userId}/misprints/", userId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     @Test
@@ -102,10 +135,9 @@ public class MisprintControllerTest extends BaseControllerTest {
         createDTO.setTargetObjectId(UUID.randomUUID());
 
         UUID userId = UUID.randomUUID();
-        UUID targetObjectId = createDTO.getTargetObjectId();
         UUID moderatorId = UUID.randomUUID();
 
-        MisprintReadDTO readDTO = createMistakeReadDTO(userId, targetObjectId, moderatorId);
+        MisprintReadDTO readDTO = createMisprintReadDTO(userId, moderatorId);
 
         Mockito.when(misprintService.createMisprintComplaint(userId, createDTO)).thenReturn(readDTO);
 
@@ -190,17 +222,9 @@ public class MisprintControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService).deleteMisprintComplaint(userId, id);
     }
 
-    private MisprintReadDTO createMistakeReadDTO(UUID authorId, UUID parentId, UUID moderatorId) {
-        MisprintReadDTO dto = new MisprintReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setMisprintText("misprint");
-        dto.setReplaceTo("replace to this");
-        dto.setStatus(ComplaintStatus.INITIATED);
+    private MisprintReadDTO createMisprintReadDTO(UUID authorId, UUID moderatorId) {
+        MisprintReadDTO dto = generateObject(MisprintReadDTO.class);
         dto.setAuthorId(authorId);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        dto.setTargetObjectType(TargetObjectType.MOVIE);
-        dto.setTargetObjectId(parentId);
         dto.setModeratorId(moderatorId);
         return dto;
     }

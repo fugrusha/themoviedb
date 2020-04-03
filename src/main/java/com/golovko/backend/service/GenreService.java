@@ -1,16 +1,17 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Genre;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.genre.*;
 import com.golovko.backend.repository.GenreRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class GenreService {
@@ -24,13 +25,10 @@ public class GenreService {
     @Autowired
     private RepositoryHelper repoHelper;
 
-    // TODO pagination
-    public List<GenreReadDTO> getAllGenres() {
-        List<Genre> genres = genreRepository.findAllByOrderByGenreNameAsc();
+    public PageResult<GenreReadDTO> getGenres(Pageable pageable) {
+        Page<Genre> genres = genreRepository.findAll(pageable);
 
-        return genres.stream()
-                .map(g -> translationService.translate(g, GenreReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(genres, GenreReadDTO.class);
     }
 
     @Transactional(readOnly = true)

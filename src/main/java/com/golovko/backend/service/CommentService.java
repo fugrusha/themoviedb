@@ -17,10 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 import static com.golovko.backend.domain.TargetObjectType.COMMENT;
 
@@ -51,13 +49,11 @@ public class CommentService {
         return translationService.toPageResult(comments, CommentReadDTO.class);
     }
 
-    // TODO pagination
-    public List<CommentReadDTO> getAllPublishedComments(UUID targetObjectId) {
-        List<Comment> comments = commentRepository.findAllByStatusAndTarget(targetObjectId, CommentStatus.APPROVED);
+    public PageResult<CommentReadDTO> getPublishedComments(UUID targetObjectId, Pageable pageable) {
+        Page<Comment> comments = commentRepository
+                .findAllByStatusAndTarget(targetObjectId, CommentStatus.APPROVED, pageable);
 
-        return comments.stream()
-                .map(c -> translationService.translate(c, CommentReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(comments, CommentReadDTO.class);
     }
 
     @Transactional

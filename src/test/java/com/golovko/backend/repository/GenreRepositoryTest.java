@@ -6,9 +6,10 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.List;
 
 public class GenreRepositoryTest extends BaseTest {
 
@@ -50,12 +51,12 @@ public class GenreRepositoryTest extends BaseTest {
         Genre g1 = testObjectFactory.createGenre("Thriller");
         Genre g2 = testObjectFactory.createGenre("Horror");
         Genre g3 = testObjectFactory.createGenre("Comedy");
-        Genre g4 = testObjectFactory.createGenre("Fantasy");
 
-        List<Genre> genres = genreRepository.findAllByOrderByGenreNameAsc();
+
+        Page<Genre> genres = genreRepository.findAll(Pageable.unpaged());
 
         Assertions.assertThat(genres).extracting(Genre::getId)
-                .containsSequence(g3.getId(), g4.getId(), g2.getId(), g1.getId());
+                .containsExactlyInAnyOrder(g3.getId(), g2.getId(), g1.getId());
 
     }
 }

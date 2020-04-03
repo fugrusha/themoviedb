@@ -1,6 +1,7 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.bitbucket.brunneng.br.RandomObjectGenerator;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -9,6 +10,12 @@ import org.springframework.test.web.servlet.MockMvc;
 
 @RunWith(SpringRunner.class)
 public abstract class BaseControllerTest {
+
+    protected RandomObjectGenerator generator = new RandomObjectGenerator();
+
+    protected <T> T generateObject(Class<T> objectClass) {
+        return generator.generateRandomObject(objectClass);
+    }
 
     @Autowired
     protected ObjectMapper objectMapper;

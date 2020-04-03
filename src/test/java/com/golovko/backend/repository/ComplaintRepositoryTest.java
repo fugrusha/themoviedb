@@ -8,14 +8,13 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
-import java.util.List;
 
-import static com.golovko.backend.domain.ComplaintType.CHILD_ABUSE;
-import static com.golovko.backend.domain.ComplaintType.MISPRINT;
+import static com.golovko.backend.domain.ComplaintType.VIOLENCE;
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
-import static com.golovko.backend.domain.TargetObjectType.PERSON;
 
 public class ComplaintRepositoryTest extends BaseTest {
 
@@ -26,12 +25,13 @@ public class ComplaintRepositoryTest extends BaseTest {
     public void testGetComplaintsByAuthorId() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, PERSON);
-        Complaint c2 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, PERSON);
-        testObjectFactory.createComplaint(user2, CHILD_ABUSE, PERSON);
-        testObjectFactory.createComplaint(user2, MISPRINT, PERSON);
+        Complaint c1 = testObjectFactory.createComplaint(user1);
+        Complaint c2 = testObjectFactory.createComplaint(user1);
+        testObjectFactory.createComplaint(user2);
+        testObjectFactory.createComplaint(user2);
 
-        List<Complaint> result = complaintRepository.findByAuthorIdOrderByCreatedAtAsc(user1.getId());
+        Page<Complaint> result = complaintRepository
+                .findByAuthorId(user1.getId(), Pageable.unpaged());
 
         Assertions.assertThat(result).extracting(Complaint::getId)
                 .containsExactlyInAnyOrder(c1.getId(), c2.getId());
@@ -41,8 +41,8 @@ public class ComplaintRepositoryTest extends BaseTest {
     public void testGetComplaintByIdAndAuthorId() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
-        Complaint c1 = testObjectFactory.createComplaint(user1, CHILD_ABUSE, PERSON);
-        testObjectFactory.createComplaint(user2, CHILD_ABUSE, PERSON);
+        Complaint c1 = testObjectFactory.createComplaint(user1);
+        testObjectFactory.createComplaint(user2);
 
         Complaint complaint = complaintRepository.findByIdAndAuthorId(c1.getId(), user1.getId());
 
@@ -55,8 +55,8 @@ public class ComplaintRepositoryTest extends BaseTest {
         Movie m1 = testObjectFactory.createMovie();
         Movie m2 = testObjectFactory.createMovie();
 
-        Complaint expectedComplaint = testObjectFactory.createComplaint(m1.getId(), MOVIE, author);
-        testObjectFactory.createComplaint(m2.getId(), MOVIE, author);
+        Complaint expectedComplaint = testObjectFactory.createComplaint(m1.getId(), MOVIE, VIOLENCE, author);
+        testObjectFactory.createComplaint(m2.getId(), MOVIE, VIOLENCE, author);
 
         Complaint complaint = complaintRepository.findByIdAndTargetId(expectedComplaint.getId(), m1.getId(), MOVIE);
 
@@ -67,7 +67,7 @@ public class ComplaintRepositoryTest extends BaseTest {
     public void testCreatedAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
 
-        Complaint complaint = testObjectFactory.createComplaint(author, MISPRINT, PERSON);
+        Complaint complaint = testObjectFactory.createComplaint(author);
 
         Instant createdAtBeforeReload = complaint.getCreatedAt();
         Assert.assertNotNull(createdAtBeforeReload);
@@ -82,16 +82,16 @@ public class ComplaintRepositoryTest extends BaseTest {
     @Test
     public void testUpdatedAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
-
-        Complaint complaint = testObjectFactory.createComplaint(author, MISPRINT, PERSON);
+        Complaint complaint = testObjectFactory.createComplaint(author);
 
         Instant modifiedAtBeforeReload = complaint.getUpdatedAt();
         Assert.assertNotNull(modifiedAtBeforeReload);
 
         complaint = complaintRepository.findById(complaint.getId()).get();
-        complaint.setComplaintType(CHILD_ABUSE);
-        complaint = complaintRepository.save(complaint);
-        Instant modifiedAtAfterReload = complaint.getUpdatedAt();
+        complaint.setComplaintText("new text");
+        Complaint updatedComplaint = complaintRepository.save(complaint);
+
+        Instant modifiedAtAfterReload = updatedComplaint.getUpdatedAt();
 
         Assert.assertNotNull(modifiedAtAfterReload);
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));

@@ -49,7 +49,7 @@ public class RepositoryHelperTest extends BaseTest {
         Assertions.assertThat(userEntity).isInstanceOf(ApplicationUser.class);
         Assert.assertEquals(userFromDB.getId(), userEntity.getId());
         Assertions.assertThat(userEntity).isEqualToIgnoringGivenFields(userFromDB,
-                "articles", "likes");
+                "articles", "likes", "userRoles");
     }
 
     @Test(expected = EntityNotFoundException.class)

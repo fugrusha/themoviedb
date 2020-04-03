@@ -21,7 +21,7 @@ import org.springframework.transaction.support.TransactionTemplate;
         "delete from comment",
         "delete from complaint",
         "delete from article",
-        "delete from user_role",
+        "delete from user_user_role",
         "delete from application_user",
         "delete from movie_cast",
         "delete from movie_crew",

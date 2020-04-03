@@ -1,10 +1,10 @@
 package com.golovko.backend.dto.user;
 
-import com.golovko.backend.domain.UserRole;
+import com.golovko.backend.dto.userrole.UserRoleReadDTO;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.Set;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -20,7 +20,7 @@ public class UserReadDTO {
 
     private Double trustLevel;
 
-    private Set<UserRole> userRole;
+    private List<UserRoleReadDTO> userRoles;
 
     private Instant createdAt;
 

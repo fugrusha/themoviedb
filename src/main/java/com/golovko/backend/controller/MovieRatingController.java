@@ -1,15 +1,16 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.service.RatingService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,10 +20,12 @@ public class MovieRatingController {
     @Autowired
     private RatingService ratingService;
 
-    // TODO pagination
     @GetMapping
-    public List<RatingReadDTO> getAllRatingsByMovieId(@PathVariable UUID movieId) {
-        return ratingService.getAllRatingsByTargetObjectId(movieId);
+    public PageResult<RatingReadDTO> getAllRatingsByMovieId(
+            @PathVariable UUID movieId,
+            Pageable pageable
+    ) {
+        return ratingService.getRatingsByTargetObjectId(movieId, pageable);
     }
 
     @GetMapping("/{id}")

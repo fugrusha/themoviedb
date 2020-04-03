@@ -24,7 +24,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
@@ -61,25 +60,24 @@ public class MovieControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetMovieExtended() throws Exception {
-        UUID movieId = UUID.randomUUID();
-        Set<GenreReadDTO> genres = Set.of(createGenreReadDTO());
-        Set<MovieCastReadDTO> movieCasts = Set.of(createMovieCastReadDTO(movieId));
-        Set<MovieCrewReadDTO> movieCrews = Set.of(createMovieCrewReadDTO(movieId));
+        List<GenreReadDTO> genres = List.of(createGenreReadDTO());
+        Set<MovieCastReadDTO> movieCasts = Set.of(createMovieCastReadDTO());
+        Set<MovieCrewReadDTO> movieCrews = Set.of(createMovieCrewReadDTO());
 
-        MovieReadExtendedDTO extendedDTO = createMovieReadExtendedDTO(movieId, genres, movieCasts, movieCrews);
+        MovieReadExtendedDTO movieExtendedDTO = createMovieReadExtendedDTO(genres, movieCasts, movieCrews);
 
-        Mockito.when(movieService.getMovieExtended(movieId)).thenReturn(extendedDTO);
+        Mockito.when(movieService.getMovieExtended(movieExtendedDTO.getId())).thenReturn(movieExtendedDTO);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/{id}/extended", movieId))
+                .perform(get("/api/v1/movies/{id}/extended", movieExtendedDTO.getId()))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
 
         MovieReadExtendedDTO actualResult = objectMapper.readValue(resultJson, MovieReadExtendedDTO.class);
-        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(extendedDTO);
+        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(movieExtendedDTO);
 
-        Mockito.verify(movieService).getMovieExtended(movieId);
+        Mockito.verify(movieService).getMovieExtended(movieExtendedDTO.getId());
     }
 
     @Test
@@ -398,71 +396,30 @@ public class MovieControllerTest extends BaseControllerTest {
     }
 
     private MovieReadDTO createMovieReadDTO() {
-        MovieReadDTO readDTO = new MovieReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setMovieTitle("Guess Who");
-        readDTO.setDescription("12345");
-        readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        readDTO.setIsReleased(false);
-        readDTO.setAverageRating(8.3);
-        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return readDTO;
+        return generateObject(MovieReadDTO.class);
     }
 
     private MovieReadExtendedDTO createMovieReadExtendedDTO(
-            UUID movieId,
-            Set<GenreReadDTO> genres,
+            List<GenreReadDTO> genres,
             Set<MovieCastReadDTO> movieCasts,
             Set<MovieCrewReadDTO> movieCrews
     ) {
-       MovieReadExtendedDTO dto = new MovieReadExtendedDTO();
-        dto.setId(movieId);
-        dto.setMovieTitle("Guess Who");
-        dto.setDescription("12345");
-        dto.setReleaseDate(LocalDate.parse("1990-12-05"));
-        dto.setIsReleased(false);
-        dto.setAverageRating(8.3);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+       MovieReadExtendedDTO dto = generateObject(MovieReadExtendedDTO.class);
         dto.setGenres(genres);
         dto.setMovieCrews(movieCrews);
         dto.setMovieCasts(movieCasts);
         return dto;
     }
 
-    private MovieCastReadDTO createMovieCastReadDTO(UUID movieId) {
-        MovieCastReadDTO dto = new MovieCastReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setDescription("Some Text");
-        dto.setAverageRating(5.3);
-        dto.setMovieCrewType(MovieCrewType.CAST);
-        dto.setMovieId(movieId);
-        dto.setPersonId(UUID.randomUUID());
-        dto.setCharacter("Leon Killer");
-        return dto;
+    private MovieCastReadDTO createMovieCastReadDTO() {
+        return generateObject(MovieCastReadDTO.class);
     }
 
-    private MovieCrewReadDTO createMovieCrewReadDTO(UUID movieId) {
-        MovieCrewReadDTO dto = new MovieCrewReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setDescription("Some text");
-        dto.setAverageRating(9.2);
-        dto.setPersonId(UUID.randomUUID());
-        dto.setMovieId(movieId);
-        dto.setMovieCrewType(MovieCrewType.COSTUME_DESIGNER);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return dto;
+    private MovieCrewReadDTO createMovieCrewReadDTO() {
+        return generateObject(MovieCrewReadDTO.class);
     }
 
     private GenreReadDTO createGenreReadDTO() {
-        GenreReadDTO dto = new GenreReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setGenreName("genre name");
-        dto.setDescription("some description");
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return dto;
+        return generateObject(GenreReadDTO.class);
     }
 }

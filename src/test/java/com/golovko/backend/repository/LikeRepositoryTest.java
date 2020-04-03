@@ -9,6 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 
+import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
+import static com.golovko.backend.domain.TargetObjectType.MOVIE;
+
 public class LikeRepositoryTest extends BaseTest {
 
     @Autowired
@@ -19,7 +22,7 @@ public class LikeRepositoryTest extends BaseTest {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
 
-        Like like = testObjectFactory.createLike(true, user, article.getId());
+        Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
 
         Instant createdAtBeforeReload = like.getCreatedAt();
         Assert.assertNotNull(createdAtBeforeReload);
@@ -36,7 +39,7 @@ public class LikeRepositoryTest extends BaseTest {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
 
-        Like like = testObjectFactory.createLike(true, user, article.getId());
+        Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
 
         Instant updatedAtBeforeReload = like.getUpdatedAt();
         Assert.assertNotNull(updatedAtBeforeReload);
@@ -56,10 +59,10 @@ public class LikeRepositoryTest extends BaseTest {
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
 
-        Like like = testObjectFactory.createLike(true, user1, article.getId());
-        testObjectFactory.createLike(true, user1, article.getId());
-        testObjectFactory.createLike(true, user2, article.getId()); // wrong user
-        testObjectFactory.createLike(true, user2, article.getId());
+        Like like = testObjectFactory.createLike(true, user1, article.getId(), ARTICLE);
+        testObjectFactory.createLike(true, user1, article.getId(), ARTICLE);
+        testObjectFactory.createLike(true, user2, article.getId(), ARTICLE); // wrong user
+        testObjectFactory.createLike(true, user2, article.getId(), ARTICLE);
 
         Like savedLike = likeRepository.findByIdAndUserId(like.getId(), user1.getId());
 
@@ -73,10 +76,10 @@ public class LikeRepositoryTest extends BaseTest {
         Movie movie1 = testObjectFactory.createMovie();
         Movie movie2 = testObjectFactory.createMovie();
 
-        Like like = testObjectFactory.createLike(true, user1, movie1.getId());
-        testObjectFactory.createLike(true, user1, movie2.getId());
-        testObjectFactory.createLike(true, user2, movie1.getId()); // wrong user
-        testObjectFactory.createLike(true, user2, movie2.getId()); // wrong user
+        Like like = testObjectFactory.createLike(true, user1, movie1.getId(), MOVIE);
+        testObjectFactory.createLike(true, user1, movie2.getId(), MOVIE);
+        testObjectFactory.createLike(true, user2, movie1.getId(), MOVIE); // wrong user
+        testObjectFactory.createLike(true, user2, movie2.getId(), MOVIE); // wrong user
 
         Like likeFromDb = likeRepository.findByUserIdAndLikedObjectId(user1.getId(), movie1.getId());
         Assert.assertEquals(like.getId(), likeFromDb.getId());
@@ -90,12 +93,12 @@ public class LikeRepositoryTest extends BaseTest {
         Article a2 = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
         Movie movie = testObjectFactory.createMovie();
 
-        Like like1 = testObjectFactory.createLike(true, user1, a1.getId(), TargetObjectType.ARTICLE);
-        Like like2 = testObjectFactory.createLike(true, user1, a2.getId(), TargetObjectType.ARTICLE);
-        Like like3 = testObjectFactory.createLike(true, user2, movie.getId(), TargetObjectType.MOVIE);
+        Like like1 = testObjectFactory.createLike(true, user1, a1.getId(), ARTICLE);
+        Like like2 = testObjectFactory.createLike(true, user1, a2.getId(), ARTICLE);
+        Like like3 = testObjectFactory.createLike(true, user2, movie.getId(), MOVIE);
 
         transactionTemplate.executeWithoutResult(status -> {
-            likeRepository.deleteLikesByTargetObjectId(a1.getId(), TargetObjectType.ARTICLE);
+            likeRepository.deleteLikesByTargetObjectId(a1.getId(), ARTICLE);
         });
 
         Assert.assertFalse(likeRepository.existsById(like1.getId()));

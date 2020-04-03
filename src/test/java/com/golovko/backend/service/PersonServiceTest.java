@@ -4,6 +4,7 @@ import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonPatchDTO;
 import com.golovko.backend.dto.person.PersonPutDTO;
@@ -14,9 +15,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.UUID;
 
 public class PersonServiceTest extends BaseTest {
@@ -37,16 +41,29 @@ public class PersonServiceTest extends BaseTest {
     }
 
     @Test
-    public void testGetAllPersons() {
-        Person p1 = createPerson("Akulova");
-        Person p2 = createPerson("Moldovan");
-        Person p3 = createPerson("Hefner");
-        Person p4 = createPerson("Buzova");
+    public void testGetAllPeople() {
+        Person p1 = testObjectFactory.createPerson();
+        Person p2 = testObjectFactory.createPerson();
+        Person p3 = testObjectFactory.createPerson();
 
-        List<PersonReadDTO> result = personService.getAllPersons();
+        PageResult<PersonReadDTO> result = personService.getPeople(Pageable.unpaged());
 
-        Assertions.assertThat(result).extracting("id")
-                .containsExactly(p1.getId(), p4.getId(), p3.getId(), p2.getId());
+        Assertions.assertThat(result.getData()).extracting("id")
+                .containsExactlyInAnyOrder(p1.getId(), p3.getId(), p2.getId());
+    }
+
+    @Test
+    public void testGetAllPeopleWithPagingAndSorting() {
+        Person p1 = testObjectFactory.createPerson("Akulova");
+        Person p2 = testObjectFactory.createPerson("Hefner");
+        testObjectFactory.createPerson("Moldovan");
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "lastName"));
+
+        Assertions.assertThat(personService.getPeople(pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(p1.getId(), p2.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -87,7 +104,7 @@ public class PersonServiceTest extends BaseTest {
 
         person = personRepository.findById(person.getId()).get();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO,
-                        "movieCrews", "movieCast");
+                        "movieCrews", "movieCast", "articles");
     }
 
     @Test
@@ -105,7 +122,7 @@ public class PersonServiceTest extends BaseTest {
         Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles",
                 "averageRatingByMovies");
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate,
-                        "movieCrews", "movieCast");
+                        "movieCrews", "movieCast", "articles");
     }
 
     @Test
@@ -124,7 +141,7 @@ public class PersonServiceTest extends BaseTest {
 
         person = personRepository.findById(person.getId()).get();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO,
-                "movieCrews", "movieCast");
+                "movieCrews", "movieCast", "articles");
     }
 
     @Test
@@ -220,15 +237,5 @@ public class PersonServiceTest extends BaseTest {
         person.setAverageRatingByMovies(10.01);
         person.setAverageRatingByRoles(10.01);
         personRepository.save(person);;
-    }
-
-    private Person createPerson(String lastName) {
-        Person person = new Person();
-        person.setFirstName("Anna");
-        person.setLastName(lastName);
-        person.setBio("some text");
-        person.setAverageRatingByRoles(5.0);
-        person.setGender(Gender.FEMALE);
-        return personRepository.save(person);
     }
 }

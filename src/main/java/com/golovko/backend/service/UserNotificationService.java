@@ -10,4 +10,16 @@ public class UserNotificationService {
     public void notifyOnMisprintStatusChangedToClosed(UUID misprintId) {
 
     }
+
+    public void notifyOnComplaintStatusChangedToClosed(UUID complaintId) {
+
+    }
+
+    public void notifyOnCommentStatusChangedToApproved(UUID commentId) {
+
+    }
+
+    public void notifyOnCommentStatusChangedToBlocked(UUID commentId) {
+
+    }
 }

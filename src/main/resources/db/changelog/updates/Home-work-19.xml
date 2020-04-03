@@ -1,0 +1,37 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="drop user roles" author="andrew">
+        <dropTable tableName="user_role"/>
+    </changeSet>
+    
+    <changeSet id="create table user_role" author="andrew">
+        <createTable tableName="user_role">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="type" type="varchar(30)"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+        
+        <createTable tableName="user_user_role">
+            <column name="user_id" type="uuid">
+                <constraints foreignKeyName="uur_user_fk"
+                             referencedTableName="application_user"
+                             referencedColumnNames="id"
+                             nullable="false" deleteCascade="true"/>
+            </column>
+            <column name="user_role_id" type="uuid">
+                <constraints foreignKeyName="uur_user_role_fk"
+                             referencedTableName="user_role"
+                             referencedColumnNames="id"
+                             nullable="false" deleteCascade="true"/>
+            </column>
+        </createTable>
+    </changeSet>
+
+</databaseChangeLog>

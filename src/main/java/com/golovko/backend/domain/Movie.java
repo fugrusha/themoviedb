@@ -9,7 +9,9 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -45,11 +47,14 @@ public class Movie extends AbstractEntity {
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<MovieCast> movieCasts = new HashSet<MovieCast>();
 
-    @ManyToMany(cascade = {CascadeType.PERSIST})
+    @ManyToMany
     @JoinTable(
             name = "genre_movie",
             joinColumns = @JoinColumn(name = "movie_id"),
             inverseJoinColumns = @JoinColumn(name = "genre_id")
     )
-    private Set<Genre> genres = new HashSet<Genre>();
+    private List<Genre> genres = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "movies")
+    private List<Article> articles = new ArrayList<>();
 }

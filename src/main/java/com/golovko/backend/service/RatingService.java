@@ -1,6 +1,7 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Rating;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
@@ -8,12 +9,12 @@ import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.RatingRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @Service
 public class RatingService {
@@ -24,13 +25,10 @@ public class RatingService {
     @Autowired
     private TranslationService translationService;
 
-    // TODO pagination
-    public List<RatingReadDTO> getAllRatingsByTargetObjectId(UUID targetId) {
-        List<Rating> ratings = ratingRepository.findAllByTargetId(targetId);
+    public PageResult<RatingReadDTO> getRatingsByTargetObjectId(UUID targetId, Pageable pageable) {
+        Page<Rating> ratings = ratingRepository.findAllByTargetId(targetId, pageable);
 
-        return ratings.stream()
-                .map(r -> translationService.translate(r, RatingReadDTO.class))
-                .collect(Collectors.toList());
+        return translationService.toPageResult(ratings, RatingReadDTO.class);
     }
 
     public RatingReadDTO getRating(UUID movieId, UUID id) {

@@ -3,6 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Genre;
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.genre.*;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
@@ -12,10 +13,13 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 public class GenreServiceTest extends BaseTest {
@@ -45,9 +49,9 @@ public class GenreServiceTest extends BaseTest {
         UUID genreId = genre.getId();
 
         Movie m1 = testObjectFactory.createMovie();
-        m1.setGenres(Set.of(genre));
+        m1.setGenres(List.of(genre));
         Movie m2 = testObjectFactory.createMovie();
-        m2.setGenres(Set.of(genre));
+        m2.setGenres(List.of(genre));
         movieRepository.saveAll(List.of(m1, m2));
 
         testObjectFactory.createMovie();
@@ -66,12 +70,25 @@ public class GenreServiceTest extends BaseTest {
         Genre g1 = testObjectFactory.createGenre("Thriller");
         Genre g2 = testObjectFactory.createGenre("Horror");
         Genre g3 = testObjectFactory.createGenre("Comedy");
-        Genre g4 = testObjectFactory.createGenre("Fantasy");
 
-        List<GenreReadDTO> genres = genreService.getAllGenres();
+        PageResult<GenreReadDTO> genres = genreService.getGenres(Pageable.unpaged());
 
-        Assertions.assertThat(genres).extracting(GenreReadDTO::getId)
-                .containsSequence(g3.getId(), g4.getId(), g2.getId(), g1.getId());
+        Assertions.assertThat(genres.getData()).extracting(GenreReadDTO::getId)
+                .containsExactlyInAnyOrder(g3.getId(), g2.getId(), g1.getId());
+    }
+
+    @Test
+    public void testGetGenresWithPagingAndSorting() {
+        testObjectFactory.createGenre("Thriller");
+        Genre g2 = testObjectFactory.createGenre("Horror");
+        Genre g3 = testObjectFactory.createGenre("Comedy");
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "genreName"));
+
+        Assertions.assertThat(genreService.getGenres(pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(g3.getId(), g2.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -123,7 +140,7 @@ public class GenreServiceTest extends BaseTest {
         inTransaction(() -> {
             Genre genreAfterUpdate = genreRepository.findById(readDTO.getId()).get();
             Assertions.assertThat(genreAfterUpdate).hasNoNullFieldsOrPropertiesExcept("movies");
-            Assertions.assertThat(genreAfterUpdate).isEqualToComparingFieldByField(genre);
+            Assertions.assertThat(genreAfterUpdate).isEqualToIgnoringGivenFields(genre, "movies");
         });
     }
 

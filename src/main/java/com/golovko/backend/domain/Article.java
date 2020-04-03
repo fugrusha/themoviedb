@@ -3,12 +3,11 @@ package com.golovko.backend.domain;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.EnumType;
-import javax.persistence.Enumerated;
-import javax.persistence.ManyToOne;
+import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter
@@ -35,6 +34,17 @@ public class Article extends AbstractEntity {
 
     private Integer dislikesCount;
 
-    // TODO relatedPersons for articles
-    // TODO relatedMovies for articles
+    @ManyToMany
+    @JoinTable(
+            name = "article_person",
+            joinColumns = @JoinColumn(name = "article_id"),
+            inverseJoinColumns = @JoinColumn(name = "person_id"))
+    private List<Person> people = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(
+            name = "article_movie",
+            joinColumns = @JoinColumn(name = "article_id"),
+            inverseJoinColumns = @JoinColumn(name = "movie_id"))
+    private List<Movie> movies = new ArrayList<>();
 }

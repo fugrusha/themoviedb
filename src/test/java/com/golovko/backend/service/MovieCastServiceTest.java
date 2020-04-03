@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.moviecast.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
@@ -12,9 +13,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE_CAST;
@@ -71,10 +75,27 @@ public class MovieCastServiceTest extends BaseTest {
         Movie movie = testObjectFactory.createMovie();
         MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
 
-        List<MovieCastReadDTO> result = movieCastService.getAllMovieCasts(movie.getId());
+        PageResult<MovieCastReadDTO> result = movieCastService.getAllMovieCasts(movie.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(result).extracting(MovieCastReadDTO::getId)
+        Assertions.assertThat(result.getData()).extracting(MovieCastReadDTO::getId)
                 .containsExactlyInAnyOrder(movieCast.getId());
+    }
+
+    @Test
+    public void testGetMovieCastsWithPagingAndSorting() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieCast mc1 = testObjectFactory.createMovieCast(person, movie);
+        MovieCast mc2 = testObjectFactory.createMovieCast(person, movie);
+        testObjectFactory.createMovieCast(person, movie);
+        testObjectFactory.createMovieCast(person, movie);
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Assertions.assertThat(movieCastService.getAllMovieCasts(movie.getId(), pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(mc1.getId(), mc2.getId()));
     }
 
     @Test

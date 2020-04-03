@@ -1,8 +1,10 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.UserRole;
-import com.golovko.backend.dto.user.*;
+import com.golovko.backend.dto.user.UserCreateDTO;
+import com.golovko.backend.dto.user.UserPatchDTO;
+import com.golovko.backend.dto.user.UserPutDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.exception.ControllerValidationException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
@@ -18,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.time.Instant;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -33,7 +34,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetUser() throws Exception {
-        UserReadDTO user = createUserReadDTO();
+        UserReadDTO user = generateObject(UserReadDTO.class);
 
         Mockito.when(applicationUserService.getUser(user.getId())).thenReturn(user);
 
@@ -91,7 +92,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         createDTO.setPasswordConfirmation("1234567890");
         createDTO.setEmail("david101@email.com");
 
-        UserReadDTO readDTO = createUserReadDTO();
+        UserReadDTO readDTO = generateObject(UserReadDTO.class);
 
         Mockito.when(applicationUserService.createUser(createDTO)).thenReturn(readDTO);
 
@@ -150,7 +151,6 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         createDTO.setUsername("david");
         createDTO.setPassword("1234567");
         createDTO.setPasswordConfirmation("1234567");
-        createDTO.setEmail("david101@email.com");
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/users")
@@ -219,7 +219,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         patchDTO.setPasswordConfirmation("securedPassword");
         patchDTO.setEmail("david101@email.com");
 
-        UserReadDTO readDTO = createUserReadDTO();
+        UserReadDTO readDTO = generateObject(UserReadDTO.class);
 
         Mockito.when(applicationUserService.patchUser(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
@@ -309,7 +309,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         updateDTO.setPassword("securedPassword");
         updateDTO.setEmail("new_user_email@gmail.com");
 
-        UserReadDTO readDTO = createUserReadDTO();
+        UserReadDTO readDTO = generateObject(UserReadDTO.class);
 
         Mockito.when(applicationUserService.updateUser(readDTO.getId(), updateDTO)).thenReturn(readDTO);
 
@@ -404,7 +404,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
 
     @Test
     public void testBanUser() throws Exception {
-        UserReadDTO readDTO = createUserReadDTO();
+        UserReadDTO readDTO = generateObject(UserReadDTO.class);
 
         Mockito.when(applicationUserService.ban(readDTO.getId())).thenReturn(readDTO);
 
@@ -420,7 +420,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
 
     @Test
     public void testPardonUser() throws Exception {
-        UserReadDTO readDTO = createUserReadDTO();
+        UserReadDTO readDTO = generateObject(UserReadDTO.class);
 
         Mockito.when(applicationUserService.pardon(readDTO.getId())).thenReturn(readDTO);
 
@@ -432,78 +432,5 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Assert.assertEquals(actualResult, readDTO);
 
         Mockito.verify(applicationUserService).pardon(readDTO.getId());
-    }
-
-    @Test
-    public void testAddUserRole() throws Exception {
-        UserReadDTO readDTO = createUserReadDTO();
-
-        UserRoleDTO userRoleDTO = new UserRoleDTO();
-        userRoleDTO.setUserRole(UserRole.MODERATOR);
-
-        Mockito.when(applicationUserService.addUserRole(readDTO.getId(), userRoleDTO)).thenReturn(readDTO);
-
-        String resultJson = mockMvc
-                .perform(post("/api/v1/users/{id}/add-user-role", readDTO.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRoleDTO)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
-        Assert.assertEquals(readDTO, actualUser);
-
-        Mockito.verify(applicationUserService).addUserRole(readDTO.getId(), userRoleDTO);
-    }
-
-    @Test
-    public void testRemoveUserRole() throws Exception {
-        UserReadDTO readDTO = createUserReadDTO();
-
-        UserRoleDTO userRoleDTO = new UserRoleDTO();
-        userRoleDTO.setUserRole(UserRole.MODERATOR);
-
-        Mockito.when(applicationUserService.removeUserRole(readDTO.getId(), userRoleDTO)).thenReturn(readDTO);
-
-        String resultJson = mockMvc
-                .perform(post("/api/v1/users/{id}/remove-user-role", readDTO.getId())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRoleDTO)))
-                .andExpect(status().isOk())
-                .andReturn().getResponse().getContentAsString();
-
-        UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
-        Assert.assertEquals(readDTO, actualUser);
-
-        Mockito.verify(applicationUserService).removeUserRole(readDTO.getId(), userRoleDTO);
-    }
-
-    @Test
-    public void testAddUserRoleValidationException() throws Exception {
-        UserRoleDTO userRoleDTO = new UserRoleDTO();
-
-        String resultJson = mockMvc
-                .perform(post("/api/v1/users/{id}/remove-user-role", UUID.randomUUID())
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(userRoleDTO)))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
-        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
-
-        Mockito.verify(applicationUserService, Mockito.never()).addUserRole(any(), any());
-    }
-
-    private UserReadDTO createUserReadDTO() {
-        UserReadDTO readDTO = new UserReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setUsername("david");
-        readDTO.setEmail("david101@email.com");
-        readDTO.setIsBlocked(false);
-        readDTO.setTrustLevel(6.5);
-        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return readDTO;
     }
 }

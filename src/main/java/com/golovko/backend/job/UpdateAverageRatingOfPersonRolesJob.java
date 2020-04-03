@@ -23,7 +23,7 @@ public class UpdateAverageRatingOfPersonRolesJob {
     public void updateAverageRating() {
         log.info("Job started...");
 
-        personRepository.getIdsOfPersons().forEach(personId -> {
+        personRepository.getIdsOfPeople().forEach(personId -> {
             try {
                 personService.updateAverageRatingOfPersonRoles(personId);
             } catch (Exception e) {

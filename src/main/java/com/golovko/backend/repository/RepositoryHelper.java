@@ -23,11 +23,10 @@ public class RepositoryHelper {
     public <E> E getEntityById(Class<E> entityClass, UUID id) {
         E obj = entityManager.find(entityClass, id);
 
-        if (obj != null) {
-            return obj;
-        } else {
+        if (obj == null) {
             throw new EntityNotFoundException(entityClass, id);
         }
+        return obj;
     }
 
     public <E> void validateExists(Class<E> entityClass, UUID id) {

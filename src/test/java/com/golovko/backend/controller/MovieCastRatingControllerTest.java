@@ -3,6 +3,7 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Rating;
 import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
@@ -16,10 +17,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.UUID;
 
@@ -60,9 +62,11 @@ public class MovieCastRatingControllerTest extends BaseControllerTest {
         RatingReadDTO r1 = createRatingReadDTO(7, movieCastId);
         RatingReadDTO r2 = createRatingReadDTO(5, movieCastId);
 
-        List<RatingReadDTO> expectedResult = List.of(r1, r2);
+        PageResult<RatingReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(r1, r2));
 
-        Mockito.when(ratingService.getAllRatingsByTargetObjectId(movieCastId)).thenReturn(expectedResult);
+        Mockito.when(ratingService.getRatingsByTargetObjectId(movieCastId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/",
@@ -70,11 +74,45 @@ public class MovieCastRatingControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<RatingReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting(RatingReadDTO::getId)
+        PageResult<RatingReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult.getData()).extracting(RatingReadDTO::getId)
                 .containsExactlyInAnyOrder(r1.getId(), r2.getId());
 
-        Mockito.verify(ratingService).getAllRatingsByTargetObjectId(movieCastId);
+        Mockito.verify(ratingService).getRatingsByTargetObjectId(movieCastId, PageRequest.of(0, defaultPageSize));
+    }
+
+    @Test
+    public void testGetMovieCastRatingsWithPagingAndSorting() throws Exception {
+        UUID movieId = UUID.randomUUID();
+        UUID movieCastId = UUID.randomUUID();
+        RatingReadDTO r1 = createRatingReadDTO(7, movieCastId);
+        RatingReadDTO r2 = createRatingReadDTO(5, movieCastId);
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<RatingReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(r1, r2));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "rating"));
+
+        Mockito.when(ratingService.getRatingsByTargetObjectId(movieCastId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/",
+                        movieId, movieCastId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "rating,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<RatingReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     @Test
@@ -322,14 +360,10 @@ public class MovieCastRatingControllerTest extends BaseControllerTest {
     }
 
     private RatingReadDTO createRatingReadDTO(int rating, UUID targetObjectId) {
-        RatingReadDTO dto = new RatingReadDTO();
-        dto.setId(UUID.randomUUID());
+        RatingReadDTO dto = generateObject(RatingReadDTO.class);
         dto.setRating(rating);
-        dto.setAuthorId(UUID.randomUUID());
         dto.setRatedObjectType(TargetObjectType.MOVIE_CAST);
         dto.setRatedObjectId(targetObjectId);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

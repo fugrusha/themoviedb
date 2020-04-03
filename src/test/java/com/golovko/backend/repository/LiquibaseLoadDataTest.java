@@ -45,6 +45,9 @@ public class LiquibaseLoadDataTest extends BaseTest {
     @Autowired
     private LikeRepository likeRepository;
 
+    @Autowired
+    private UserRoleRepository userRoleRepository;
+
     @Test
     public void testLoadData() {
         Assert.assertTrue(applicationUserRepository.count() > 0);
@@ -59,5 +62,6 @@ public class LiquibaseLoadDataTest extends BaseTest {
         Assert.assertTrue(ratingRepository.count() > 0);
         Assert.assertTrue(misprintRepository.count() > 0);
         Assert.assertTrue(likeRepository.count() > 0);
+        Assert.assertTrue(userRoleRepository.count() > 0);
     }
 }

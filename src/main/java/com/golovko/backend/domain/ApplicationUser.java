@@ -37,10 +37,11 @@ public class ApplicationUser extends AbstractEntity {
     @Max(value = 10)
     private Double trustLevel = 1.0;
 
-    @ElementCollection(targetClass = UserRole.class, fetch = FetchType.EAGER)
-    @CollectionTable(name = "user_role", joinColumns = @JoinColumn(name = "user_id"))
-    @Enumerated(EnumType.STRING)
-    private Set<UserRole> userRole = new HashSet<UserRole>();
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(name = "user_user_role",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_role_id"))
+    private List<UserRole> userRoles = new ArrayList<>();
 
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Article> articles = new ArrayList<>();

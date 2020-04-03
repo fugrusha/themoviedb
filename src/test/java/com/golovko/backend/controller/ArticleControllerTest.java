@@ -3,7 +3,10 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.ArticleStatus;
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.*;
+import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.person.PersonReadDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
@@ -14,10 +17,12 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -57,20 +62,22 @@ public class ArticleControllerTest extends BaseControllerTest {
         ArticleReadDTO a3 = createArticleReadDTO();
         ArticleReadDTO a4 = createArticleReadDTO();
 
-        List<ArticleReadDTO> expectedResult = List.of(a1, a2, a3, a4);
+        PageResult<ArticleReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(a1, a2, a3, a4));
 
-        Mockito.when(articleService.getAllPublishedArticles()).thenReturn(expectedResult);
+        Mockito.when(articleService.getAllPublishedArticles(PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/articles/"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assertions.assertThat(actualResult).extracting(ArticleReadDTO::getId)
+        PageResult<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult.getData()).extracting(ArticleReadDTO::getId)
                 .containsExactlyInAnyOrder(a1.getId(), a2.getId(), a3.getId(), a4.getId());
 
-        Mockito.verify(articleService).getAllPublishedArticles();
+        Mockito.verify(articleService).getAllPublishedArticles(PageRequest.of(0, defaultPageSize));
     }
 
     @Test
@@ -92,7 +99,10 @@ public class ArticleControllerTest extends BaseControllerTest {
     @Test
     public void testGetArticleExtended() throws Exception {
         UserReadDTO userReadDTO = createUserReadDTO();
-        ArticleReadExtendedDTO extendedDTO = createArticleReadExtendedDTO(userReadDTO);
+        PersonReadDTO personDTO = createPersonReadDTO();
+        MovieReadDTO movieDTO = createMovieReadDTO();
+        ArticleReadExtendedDTO extendedDTO = createArticleReadExtendedDTO(userReadDTO,
+                List.of(personDTO), List.of(movieDTO));
 
         Mockito.when(articleService.getArticleExtended(extendedDTO.getId())).thenReturn(extendedDTO);
 
@@ -325,42 +335,183 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).deleteArticle(id);
     }
 
-    private ArticleReadDTO createArticleReadDTO() {
-        ArticleReadDTO dto = new ArticleReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setTitle("Title");
-        dto.setText("Some Text");
-        dto.setStatus(ArticleStatus.PUBLISHED);
-        dto.setAuthorId(UUID.randomUUID());
-        dto.setDislikesCount(555);
-        dto.setLikesCount(333);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return dto;
+    @Test
+    public void testGetPublishedArticlesWithPagingAndSorting() throws Exception {
+        ArticleReadDTO readDTO = createArticleReadDTO();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<ArticleReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(articleService.getAllPublishedArticles(pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/")
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<ArticleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
-    private ArticleReadExtendedDTO createArticleReadExtendedDTO(UserReadDTO author) {
-        ArticleReadExtendedDTO dto = new ArticleReadExtendedDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setTitle("Title");
-        dto.setText("Some Text");
-        dto.setStatus(ArticleStatus.PUBLISHED);
-        dto.setAuthor(author);
-        dto.setDislikesCount(555);
-        dto.setLikesCount(333);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
+    @Test
+    public void testGetPeopleByArticleId() throws Exception {
+        PersonReadDTO readDTO = createPersonReadDTO();
+        List<PersonReadDTO> expectedResult = List.of(readDTO);
+
+        UUID articleId = UUID.randomUUID();
+
+        Mockito.when(articleService.getArticlePeople(articleId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/{articleId}/people", articleId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<PersonReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(articleService).getArticlePeople(articleId);
+    }
+
+    @Test
+    public void testAddPersonToArticle() throws Exception {
+        PersonReadDTO readDTO = createPersonReadDTO();
+        UUID articleId = UUID.randomUUID();
+        UUID personId = readDTO.getId();
+
+        List<PersonReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(articleService.addPersonToArticle(articleId, personId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/{articleId}/people/{id}", articleId, personId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<PersonReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(articleService).addPersonToArticle(articleId, personId);
+    }
+
+    @Test
+    public void testRemovePersonFromArticle() throws Exception {
+        UUID articleId = UUID.randomUUID();
+        UUID personId = UUID.randomUUID();
+
+        List<PersonReadDTO> emptyList = new ArrayList<>();
+
+        Mockito.when(articleService.removePersonFromArticle(articleId, personId)).thenReturn(emptyList);
+
+        String resultJson = mockMvc
+                .perform(delete("/api/v1/articles/{articleId}/people/{id}", articleId, personId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<PersonReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertTrue(actualResult.isEmpty());
+
+        Mockito.verify(articleService).removePersonFromArticle(articleId, personId);
+    }
+
+    @Test
+    public void testGetMoviesByArticleId() throws Exception {
+        MovieReadDTO readDTO = createMovieReadDTO();
+        List<MovieReadDTO> expectedResult = List.of(readDTO);
+
+        UUID articleId = UUID.randomUUID();
+
+        Mockito.when(articleService.getArticleMovies(articleId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/articles/{articleId}/movies", articleId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MovieReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(articleService).getArticleMovies(articleId);
+    }
+
+    @Test
+    public void testAddMovieToArticle() throws Exception {
+        MovieReadDTO readDTO = createMovieReadDTO();
+        UUID articleId = UUID.randomUUID();
+        UUID movieId = readDTO.getId();
+
+        List<MovieReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(articleService.addMovieToArticle(articleId, movieId)).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/articles/{articleId}/movies/{id}", articleId, movieId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MovieReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(articleService).addMovieToArticle(articleId, movieId);
+    }
+
+    @Test
+    public void testRemoveMovieFromArticle() throws Exception {
+        UUID articleId = UUID.randomUUID();
+        UUID movieId = UUID.randomUUID();
+
+        List<MovieReadDTO> emptyList = new ArrayList<>();
+
+        Mockito.when(articleService.removeMovieFromArticle(articleId, movieId)).thenReturn(emptyList);
+
+        String resultJson = mockMvc
+                .perform(delete("/api/v1/articles/{articleId}/movies/{id}", articleId, movieId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<MovieReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertTrue(actualResult.isEmpty());
+
+        Mockito.verify(articleService).removeMovieFromArticle(articleId, movieId);
+    }
+
+    private ArticleReadDTO createArticleReadDTO() {
+        return generateObject(ArticleReadDTO.class);
+    }
+
+    private ArticleReadExtendedDTO createArticleReadExtendedDTO(
+            UserReadDTO userReadDTO,
+            List<PersonReadDTO> people,
+            List<MovieReadDTO> movies
+    ) {
+        ArticleReadExtendedDTO dto = generateObject(ArticleReadExtendedDTO.class);
+        dto.setAuthor(userReadDTO);
+        dto.setPeople(people);
+        dto.setMovies(movies);
         return dto;
     }
 
     private UserReadDTO createUserReadDTO() {
-        UserReadDTO readDTO = new UserReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setUsername("david");
-        readDTO.setEmail("david101@email.com");
-        readDTO.setIsBlocked(false);
-        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return readDTO;
+        return generateObject(UserReadDTO.class);
+    }
+
+    private PersonReadDTO createPersonReadDTO() {
+        return generateObject(PersonReadDTO.class);
+    }
+
+    private MovieReadDTO createMovieReadDTO() {
+        return generateObject(MovieReadDTO.class);
     }
 }

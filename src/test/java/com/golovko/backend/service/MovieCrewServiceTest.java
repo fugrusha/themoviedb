@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.CommentRepository;
@@ -12,9 +13,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE_CREW;
@@ -68,12 +72,29 @@ public class MovieCrewServiceTest extends BaseTest {
     public void testGetAllMovieCrewsByMovieId() {
         Person person = testObjectFactory.createPerson();
         Movie movie = testObjectFactory.createMovie();
-        MovieCrew moviePart = testObjectFactory.createMovieCrew(person, movie);
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
 
-        List<MovieCrewReadDTO> result = movieCrewService.getAllMovieCrews(movie.getId());
+        PageResult<MovieCrewReadDTO> result = movieCrewService.getAllMovieCrews(movie.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(result).extracting(MovieCrewReadDTO::getId)
-                .containsExactlyInAnyOrder(moviePart.getId());
+        Assertions.assertThat(result.getData()).extracting(MovieCrewReadDTO::getId)
+                .containsExactlyInAnyOrder(movieCrew.getId());
+    }
+
+    @Test
+    public void testGetMovieCrewsWithPagingAndSorting() {
+        Person person = testObjectFactory.createPerson();
+        Movie movie = testObjectFactory.createMovie();
+        MovieCrew mc1 = testObjectFactory.createMovieCrew(person, movie);
+        MovieCrew mc2 = testObjectFactory.createMovieCrew(person, movie);
+        testObjectFactory.createMovieCrew(person, movie);
+        testObjectFactory.createMovieCrew(person, movie);
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Assertions.assertThat(movieCrewService.getAllMovieCrews(movie.getId(), pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(mc1.getId(), mc2.getId()));
     }
 
     @Test

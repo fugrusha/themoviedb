@@ -29,7 +29,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -214,7 +213,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetCommentsByFilter() throws Exception {
-        CommentReadDTO readDTO = createCommentReadDTO(UUID.randomUUID());
+        CommentReadDTO readDTO = createCommentReadDTO();
 
         CommentFilter filter = new CommentFilter();
         filter.setAuthorId(readDTO.getAuthorId());
@@ -246,7 +245,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         CommentStatusDTO statusDTO = new CommentStatusDTO();
         statusDTO.setStatus(CommentStatus.APPROVED);
 
-        CommentReadDTO readDTO = createCommentReadDTO(UUID.randomUUID());
+        CommentReadDTO readDTO = createCommentReadDTO();
 
         Mockito.when(commentService.changeStatus(readDTO.getId(), statusDTO)).thenReturn(readDTO);
 
@@ -282,7 +281,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetCommentsWithPagingAndSorting() throws Exception {
-        CommentReadDTO readDTO = createCommentReadDTO(UUID.randomUUID());
+        CommentReadDTO readDTO = createCommentReadDTO();
         CommentFilter filter = new CommentFilter();
 
         int page = 1;
@@ -343,45 +342,17 @@ public class ModeratorControllerTest extends BaseControllerTest {
     }
 
     private ComplaintReadDTO createComplaintReadDTO(UUID authorId, UUID moderatorId) {
-        ComplaintReadDTO readDTO = new ComplaintReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setComplaintTitle("Report 1");
-        readDTO.setComplaintText("I have noticed a spoiler");
-        readDTO.setComplaintType(ComplaintType.SPOILER);
-        readDTO.setComplaintStatus(ComplaintStatus.INITIATED);
+        ComplaintReadDTO readDTO = generateObject(ComplaintReadDTO.class);
         readDTO.setAuthorId(authorId);
-        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        readDTO.setTargetObjectType(TargetObjectType.PERSON);
-        readDTO.setTargetObjectId(UUID.randomUUID());
         readDTO.setModeratorId(moderatorId);
         return readDTO;
     }
 
     private UserReadDTO createUserReadDTO() {
-        UserReadDTO readDTO = new UserReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setUsername("david");
-        readDTO.setEmail("david101@email.com");
-        readDTO.setIsBlocked(false);
-        readDTO.setTrustLevel(6.5);
-        readDTO.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        readDTO.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return readDTO;
+        return generateObject(UserReadDTO.class);
     }
 
-    private CommentReadDTO createCommentReadDTO(UUID authorId) {
-        CommentReadDTO dto = new CommentReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setMessage("some text");
-        dto.setAuthorId(authorId);
-        dto.setTargetObjectType(TargetObjectType.MOVIE);
-        dto.setTargetObjectId(UUID.randomUUID());
-        dto.setDislikesCount(46);
-        dto.setLikesCount(120);
-        dto.setStatus(CommentStatus.PENDING);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return dto;
+    private CommentReadDTO createCommentReadDTO() {
+        return generateObject(CommentReadDTO.class);
     }
 }

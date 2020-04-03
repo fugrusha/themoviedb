@@ -7,6 +7,8 @@ import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.repository.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -68,10 +70,29 @@ public class MisprintServiceTest extends BaseTest {
         testObjectFactory.createMisprint(movie.getId(), MOVIE, user2, "misprint");
         testObjectFactory.createMisprint(movie.getId(), MOVIE, user2, "misprint");
 
-        List<MisprintReadDTO> misprints = misprintService.getAllUserMisprintComplaints(user1.getId());
+        PageResult<MisprintReadDTO> misprints = misprintService
+                .getAllUserMisprintComplaints(user1.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(misprints).extracting("id")
+        Assertions.assertThat(misprints.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
+    }
+
+    @Test
+    public void testGetUserMisprintsWithPagingAndSorting() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Misprint m1 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+        Misprint m2 = testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+        testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+        testObjectFactory.createMisprint(movie.getId(), MOVIE, user1, "misprint");
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Assertions.assertThat(misprintService.getAllUserMisprintComplaints(user1.getId(), pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -142,9 +163,10 @@ public class MisprintServiceTest extends BaseTest {
         testObjectFactory.createMisprint(movie2.getId(), MOVIE, user1, "misprint");
         testObjectFactory.createMisprint(movie2.getId(), MOVIE, user1, "misprint");
 
-        List<MisprintReadDTO> expectedResult = misprintService.getAllMisprintsByTargetId(movie1.getId());
+        PageResult<MisprintReadDTO> expectedResult = misprintService
+                .getMisprintsByTargetId(movie1.getId(), Pageable.unpaged());
 
-        Assertions.assertThat(expectedResult).extracting("id")
+        Assertions.assertThat(expectedResult.getData()).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
     }
 
@@ -175,6 +197,8 @@ public class MisprintServiceTest extends BaseTest {
         String textBeforeUpdate = "simply dummy text of the printing and typesetting industry.";
         String misprintText = "dummy";
 
+        TestObject object = new TestObject(textBeforeUpdate);
+
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
         confirmDTO.setStartIndex(7);
         confirmDTO.setEndIndex(12);
@@ -182,7 +206,9 @@ public class MisprintServiceTest extends BaseTest {
 
         String expectedResult = "simply DUMMY text of the printing and typesetting industry.";
 
-        String actualResult = misprintService.replaceMisprint(textBeforeUpdate, misprintText, confirmDTO);
+        misprintService.replaceMisprint(object::getText, object::setText, misprintText, confirmDTO);
+
+        String actualResult = object.getText();
 
         Assert.assertEquals(expectedResult, actualResult);
     }
@@ -192,12 +218,14 @@ public class MisprintServiceTest extends BaseTest {
         String textBeforeUpdate = "simply dummy text of the printing and typesetting industry.";
         String misprintText = "dummy";
 
+        TestObject object = new TestObject(textBeforeUpdate);
+
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
         confirmDTO.setStartIndex(5); // wrong index
         confirmDTO.setEndIndex(12);
         confirmDTO.setReplaceTo("DUMMY");
 
-        misprintService.replaceMisprint(textBeforeUpdate, misprintText, confirmDTO);
+        misprintService.replaceMisprint(object::getText, object::setText, misprintText, confirmDTO);
     }
 
     @Test(expected = ResponseStatusException.class)
@@ -205,12 +233,14 @@ public class MisprintServiceTest extends BaseTest {
         String alreadyUpdatedText = "simply DUMMY text of the printing and typesetting industry.";
         String misprintText = "dummy";
 
+        TestObject object = new TestObject(alreadyUpdatedText);
+
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
         confirmDTO.setStartIndex(7);
         confirmDTO.setEndIndex(12);
         confirmDTO.setReplaceTo("DUMMY");
 
-        misprintService.replaceMisprint(alreadyUpdatedText, misprintText, confirmDTO);
+        misprintService.replaceMisprint(object::getText, object::setText, misprintText, confirmDTO);
     }
 
     @Test(expected = EntityWrongStatusException.class)
@@ -723,5 +753,11 @@ public class MisprintServiceTest extends BaseTest {
                 .extracting("id")
                 .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
 
+    }
+
+    @Data
+    @AllArgsConstructor
+    static class TestObject {
+        String text;
     }
 }

@@ -1,15 +1,16 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -24,9 +25,12 @@ public class ArticleCommentController {
         return commentService.getComment(articleId, id);
     }
 
-    @GetMapping // TODO pagination
-    public List<CommentReadDTO> getAllPublishedArticleComments(@PathVariable UUID articleId) {
-        return commentService.getAllPublishedComments(articleId);
+    @GetMapping
+    public PageResult<CommentReadDTO> getPublishedArticleComments(
+            @PathVariable UUID articleId,
+            Pageable pageable
+    ) {
+        return commentService.getPublishedComments(articleId, pageable);
     }
 
     @PostMapping

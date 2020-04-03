@@ -1,12 +1,13 @@
 package com.golovko.backend.controller;
 
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.service.MovieCrewService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -16,10 +17,9 @@ public class MovieCrewController {
     @Autowired
     private MovieCrewService movieCrewService;
 
-    // TODO pagination
     @GetMapping
-    public List<MovieCrewReadDTO> getAllMovieCrews(@PathVariable UUID movieId) {
-        return movieCrewService.getAllMovieCrews(movieId);
+    public PageResult<MovieCrewReadDTO> getAllMovieCrews(@PathVariable UUID movieId, Pageable pageable) {
+        return movieCrewService.getAllMovieCrews(movieId, pageable);
     }
 
     @GetMapping("/{id}")

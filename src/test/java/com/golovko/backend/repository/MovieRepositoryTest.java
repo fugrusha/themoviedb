@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Instant;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -42,6 +43,7 @@ public class MovieRepositoryTest extends BaseTest {
         movie = movieRepository.findById(movie.getId()).get();
         movie.setMovieTitle("Another Movie Title");
         movie = movieRepository.save(movie);
+
         Instant modifiedAtAfterReload = movie.getUpdatedAt();
 
         Assert.assertNotNull(modifiedAtAfterReload);
@@ -65,7 +67,7 @@ public class MovieRepositoryTest extends BaseTest {
     public void testCalcAverageRatingOfPersonMovies() {
         Movie m1 = testObjectFactory.createMovie(5.0);
         Movie m2 = testObjectFactory.createMovie(4.0);
-        Movie m3 = testObjectFactory.createMovie(null);
+        Movie m3 = testObjectFactory.createMovie((Double) null);
         Movie m4 = testObjectFactory.createMovie(9.0);
 
         Person p1 = testObjectFactory.createPerson();
@@ -135,5 +137,24 @@ public class MovieRepositoryTest extends BaseTest {
 
         Movie updatedMovie = movieRepository.findById(m1.getId()).get();
         Assert.assertEquals((Integer) 4, updatedMovie.getDislikesCount());
+    }
+
+    @Test
+    public void testGetIdsOfUnreleasedMovies() {
+        Movie m1 = testObjectFactory.createMovie();
+        Movie m2 = testObjectFactory.createMovie();
+        Movie m3 = testObjectFactory.createMovie();
+
+        m1.setIsReleased(false);
+        m2.setIsReleased(true);
+        m3.setIsReleased(false);
+        movieRepository.saveAll(List.of(m1, m2, m3));
+
+        Set<UUID> expectedResult = Set.of(m1.getId(), m3.getId());
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Set<UUID> actualResult = movieRepository.getIdsOfUnreleasedMovies().collect(Collectors.toSet());
+            Assert.assertEquals(expectedResult, actualResult);
+        });
     }
 }

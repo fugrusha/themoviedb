@@ -1,9 +1,9 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieCrew;
 import com.golovko.backend.domain.MovieCrewType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.moviecrew.*;
 import com.golovko.backend.dto.person.PersonReadDTO;
@@ -16,11 +16,11 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
-import java.time.Instant;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -78,17 +78,50 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
         UUID movieId = readDTO.getMovieId();
 
-        List<MovieCrewReadDTO> expectedResult = List.of(readDTO);
+        PageResult<MovieCrewReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(readDTO));
 
-        Mockito.when(movieCrewService.getAllMovieCrews(movieId)).thenReturn(expectedResult);
+        Mockito.when(movieCrewService.getAllMovieCrews(movieId, PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
 
         String resultJson = mockMvc
                 .perform(get("/api/v1/movies/{movieId}/movie-crews", movieId))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<MovieCrewReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
-        Assert.assertEquals(expectedResult, actualResult);
+        PageResult<MovieCrewReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(pageResult, actualResult);
+    }
+
+    @Test
+    public void testGetMovieCastsWithPagingAndSorting() throws Exception {
+        MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
+        UUID movieId = readDTO.getMovieId();
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<MovieCrewReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(movieCrewService.getAllMovieCrews(movieId, pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies/{movieId}/movie-crews", movieId)
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MovieCrewReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
     }
 
     @Test
@@ -324,51 +357,24 @@ public class MovieCrewControllerTest extends BaseControllerTest {
     }
 
     private PersonReadDTO createPersonReadDTO() {
-        PersonReadDTO dto = new PersonReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setFirstName("Max");
-        dto.setLastName("Popov");
-        dto.setGender(Gender.MALE);
-        return dto;
+        return generateObject(PersonReadDTO.class);
     }
 
     private MovieReadDTO createMovieReadDTO() {
-        MovieReadDTO readDTO = new MovieReadDTO();
-        readDTO.setId(UUID.randomUUID());
-        readDTO.setMovieTitle("Guess Who");
-        readDTO.setDescription("12345");
-        readDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        readDTO.setIsReleased(false);
-        readDTO.setAverageRating(8.3);
-        return readDTO;
+        return generateObject(MovieReadDTO.class);
     }
 
     private MovieCrewReadDTO createMovieCrewReadDTO() {
-        MovieCrewReadDTO dto = new MovieCrewReadDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setDescription("Some text");
-        dto.setAverageRating(9.2);
-        dto.setPersonId(UUID.randomUUID());
-        dto.setMovieId(UUID.randomUUID());
-        dto.setMovieCrewType(MovieCrewType.COSTUME_DESIGNER);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
-        return dto;
+        return generateObject(MovieCrewReadDTO.class);
     }
 
     private MovieCrewReadExtendedDTO createMovieCrewReadExtendedDTO(
             PersonReadDTO personDTO,
             MovieReadDTO movieDTO
     ) {
-        MovieCrewReadExtendedDTO dto = new MovieCrewReadExtendedDTO();
-        dto.setId(UUID.randomUUID());
-        dto.setDescription("Some text");
-        dto.setAverageRating(9.2);
+        MovieCrewReadExtendedDTO dto = generateObject(MovieCrewReadExtendedDTO.class);
         dto.setPerson(personDTO);
         dto.setMovie(movieDTO);
-        dto.setMovieCrewType(MovieCrewType.COSTUME_DESIGNER);
-        dto.setCreatedAt(Instant.parse("2019-05-12T12:45:22.00Z"));
-        dto.setUpdatedAt(Instant.parse("2019-12-01T05:45:12.00Z"));
         return dto;
     }
 }

@@ -1,7 +1,10 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.controller.validation.ControllerValidationUtil;
-import com.golovko.backend.dto.user.*;
+import com.golovko.backend.dto.user.UserCreateDTO;
+import com.golovko.backend.dto.user.UserPatchDTO;
+import com.golovko.backend.dto.user.UserPutDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.service.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -57,21 +60,5 @@ public class ApplicationUserController {
     @PostMapping("/{id}/pardon")
     public UserReadDTO pardonUser(@PathVariable UUID id) {
         return applicationUserService.pardon(id);
-    }
-
-    @PostMapping("/{id}/add-user-role")
-    public UserReadDTO addUserRole(
-            @PathVariable UUID id,
-            @RequestBody @Valid UserRoleDTO dto
-    ) {
-        return applicationUserService.addUserRole(id, dto);
-    }
-
-    @PostMapping("/{id}/remove-user-role")
-    public UserReadDTO removeUserRole(
-            @PathVariable UUID id,
-            @RequestBody @Valid UserRoleDTO dto
-    ) {
-        return applicationUserService.removeUserRole(id, dto);
     }
 }

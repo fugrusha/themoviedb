@@ -39,4 +39,7 @@ public interface MovieRepository extends CrudRepository<Movie, UUID>, MovieRepos
     @Query("update Movie m set m.dislikesCount=(m.dislikesCount - 1)"
             + " where m.id = :movieId")
     void decrementDislikesCountField(UUID movieId);
+
+    @Query("select m.id from Movie m where m.isReleased = false")
+    Stream<UUID> getIdsOfUnreleasedMovies();
 }
