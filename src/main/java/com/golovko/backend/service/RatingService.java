@@ -59,15 +59,15 @@ public class RatingService {
     private void validateTargetObject(UUID targetId, RatingCreateDTO createDTO) {
         switch (createDTO.getRatedObjectType()) {
           case MOVIE_CAST:
-              MovieCast movieCast = repoHelper.getReferenceIfExist(MovieCast.class, targetId);
+              MovieCast movieCast = repoHelper.getEntityById(MovieCast.class, targetId);
               checkIfMovieIsReleased(movieCast.getMovie());
               break;
           case MOVIE_CREW:
-              MovieCrew movieCrew = repoHelper.getReferenceIfExist(MovieCrew.class, targetId);
+              MovieCrew movieCrew = repoHelper.getEntityById(MovieCrew.class, targetId);
               checkIfMovieIsReleased(movieCrew.getMovie());
               break;
           case MOVIE:
-              Movie movie = repoHelper.getReferenceIfExist(Movie.class, targetId);
+              Movie movie = repoHelper.getEntityById(Movie.class, targetId);
               checkIfMovieIsReleased(movie);
               break;
           default:

@@ -6,6 +6,7 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
 import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import org.assertj.core.api.Assertions;
@@ -72,7 +73,7 @@ public class CommentServiceTest extends BaseTest {
     }
 
     @Test
-    public void testCreateComment() {
+    public void testCreateCommentForArticle() {
         ApplicationUser articleAuthor = testObjectFactory.createUser();
         ApplicationUser commentAuthor = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(articleAuthor, ArticleStatus.PUBLISHED);
@@ -90,6 +91,143 @@ public class CommentServiceTest extends BaseTest {
         Comment comment = commentRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(comment, "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), comment.getAuthor().getId());
+        Assert.assertEquals(article.getId(), comment.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateCommentForArticleWrongArticleId() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(ARTICLE);
+
+        UUID wrongArticleId = UUID.randomUUID();
+
+        commentService.createComment(wrongArticleId, createDTO);
+    }
+
+    @Test
+    public void testCreateCommentForMovie() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        CommentReadDTO readDTO = commentService.createComment(movie.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assert.assertNotNull(readDTO.getId());
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(comment, "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), comment.getAuthor().getId());
+        Assert.assertEquals(movie.getId(), comment.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateCommentForMovieWrongMovieId() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        UUID wrongMovieId = UUID.randomUUID();
+
+        commentService.createComment(wrongMovieId, createDTO);
+    }
+
+    @Test
+    public void testCreateCommentForMovieCast() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE_CAST);
+
+        CommentReadDTO readDTO = commentService.createComment(movieCast.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assert.assertNotNull(readDTO.getId());
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(comment, "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), comment.getAuthor().getId());
+        Assert.assertEquals(movieCast.getId(), comment.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateCommentForMovieCastWrongMovieCastId() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE_CAST);
+
+        UUID wrongMovieCastId = UUID.randomUUID();
+
+        commentService.createComment(wrongMovieCastId, createDTO);
+    }
+
+    @Test
+    public void testCreateCommentForMovieCrew() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE_CREW);
+
+        CommentReadDTO readDTO = commentService.createComment(movieCrew.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assert.assertNotNull(readDTO.getId());
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(comment, "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), comment.getAuthor().getId());
+        Assert.assertEquals(movieCrew.getId(), comment.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateCommentForMovieCrewWrongMovieCrewId() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE_CREW);
+
+        UUID wrongMovieCrewId = UUID.randomUUID();
+
+        commentService.createComment(wrongMovieCrewId, createDTO);
+    }
+
+    @Test(expected = WrongTargetObjectTypeException.class)
+    public void testCreateCommentForPerson() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Person person = testObjectFactory.createPerson();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(PERSON);
+
+        commentService.createComment(person.getId(), createDTO);
     }
 
     @Test(expected = EntityNotFoundException.class)
