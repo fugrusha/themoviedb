@@ -4,5 +4,6 @@ public enum ActionType {
     ADD_LIKE,
     ADD_DISLIKE,
     REMOVE_LIKE,
-    REMOVE_DISLIKE
+    REMOVE_DISLIKE,
+    ADD_RATING
 }

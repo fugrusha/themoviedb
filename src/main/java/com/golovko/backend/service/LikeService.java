@@ -9,7 +9,7 @@ import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.exception.WrongTypeOfTargetObjectException;
+import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -81,7 +81,7 @@ public class LikeService {
               articleRepository.incrementLikesCountField(likedObjectId);
               break;
           default:
-              throw new WrongTypeOfTargetObjectException(ActionType.ADD_LIKE, objectType);
+              throw new WrongTargetObjectTypeException(ActionType.ADD_LIKE, objectType);
         }
     }
 
@@ -97,7 +97,7 @@ public class LikeService {
               articleRepository.incrementDislikesCountField(likedObjectId);
               break;
           default:
-              throw new WrongTypeOfTargetObjectException(ActionType.ADD_DISLIKE, objectType);
+              throw new WrongTargetObjectTypeException(ActionType.ADD_DISLIKE, objectType);
         }
     }
 
@@ -144,7 +144,7 @@ public class LikeService {
               articleRepository.decrementLikesCountField(likedObjectId);
               break;
           default:
-              throw new WrongTypeOfTargetObjectException(ActionType.REMOVE_LIKE, objectType);
+              throw new WrongTargetObjectTypeException(ActionType.REMOVE_LIKE, objectType);
         }
     }
 
@@ -160,7 +160,7 @@ public class LikeService {
               articleRepository.decrementDislikesCountField(likedObjectId);
               break;
           default:
-              throw new WrongTypeOfTargetObjectException(ActionType.REMOVE_DISLIKE, objectType);
+              throw new WrongTargetObjectTypeException(ActionType.REMOVE_DISLIKE, objectType);
         }
     }
 

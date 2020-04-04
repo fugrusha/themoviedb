@@ -7,7 +7,7 @@ import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.exception.WrongTypeOfTargetObjectException;
+import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
@@ -179,7 +179,7 @@ public class LikeServiceTest extends BaseTest {
         }).isInstanceOf(ResponseStatusException.class);
     }
 
-    @Test(expected = WrongTypeOfTargetObjectException.class)
+    @Test(expected = WrongTargetObjectTypeException.class)
     public void testCreateLikeForWrongObjectType() {
         ApplicationUser user = testObjectFactory.createUser();
 
@@ -193,7 +193,7 @@ public class LikeServiceTest extends BaseTest {
         likeService.createLike(user.getId(), createDTO);
     }
 
-    @Test(expected = WrongTypeOfTargetObjectException.class)
+    @Test(expected = WrongTargetObjectTypeException.class)
     public void testCreateDislikeForWrongObjectType() {
         ApplicationUser user = testObjectFactory.createUser();
 
