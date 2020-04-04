@@ -365,24 +365,48 @@ public class CommentServiceTest extends BaseTest {
     }
 
     @Test
-    public void testChangeCommentStatus() {
+    public void testModerateCommentWithoutNewMessage() {
         ApplicationUser user = testObjectFactory.createUser();
         Movie movie = testObjectFactory.createMovie();
 
         Comment c1 = testObjectFactory.createComment(user, movie.getId(), PENDING, MOVIE);
 
-        CommentStatusDTO statusDTO = new CommentStatusDTO();
-        statusDTO.setStatus(APPROVED);
+        CommentModerateDTO dto = new CommentModerateDTO();
+        dto.setNewStatus(APPROVED);
 
-        CommentReadDTO actualResult = commentService.changeStatus(c1.getId(), statusDTO);
+        CommentReadDTO actualResult = commentService.moderateComment(c1.getId(), dto);
 
-        Assert.assertEquals(actualResult.getStatus(), statusDTO.getStatus());
+        Assert.assertEquals(actualResult.getStatus(), dto.getNewStatus());
 
         Comment updatedComment = commentRepository.findById(c1.getId()).get();
         Assertions.assertThat(actualResult).isEqualToIgnoringGivenFields(updatedComment, "authorId");
         Assert.assertEquals(actualResult.getAuthorId(), updatedComment.getAuthor().getId());
 
-        Assert.assertEquals(updatedComment.getStatus(), statusDTO.getStatus());
+        Assert.assertEquals(updatedComment.getStatus(), dto.getNewStatus());
+    }
+
+    @Test
+    public void testModerateCommentWithNewMessage() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        Comment c1 = testObjectFactory.createComment(user, movie.getId(), PENDING, MOVIE);
+
+        CommentModerateDTO dto = new CommentModerateDTO();
+        dto.setNewStatus(APPROVED);
+        dto.setNewMessage("new text");
+
+        CommentReadDTO actualResult = commentService.moderateComment(c1.getId(), dto);
+
+        Assert.assertEquals(actualResult.getStatus(), dto.getNewStatus());
+
+        Comment updatedComment = commentRepository.findById(c1.getId()).get();
+        Assertions.assertThat(actualResult).isEqualToIgnoringGivenFields(updatedComment, "authorId");
+        Assert.assertEquals(actualResult.getAuthorId(), updatedComment.getAuthor().getId());
+
+        Assert.assertEquals(updatedComment.getStatus(), dto.getNewStatus());
+        Assert.assertEquals(updatedComment.getMessage(), dto.getNewMessage());
+
     }
 
     @Test(expected = TransactionSystemException.class)

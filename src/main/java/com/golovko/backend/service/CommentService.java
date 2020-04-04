@@ -103,10 +103,14 @@ public class CommentService {
         likeRepository.deleteLikesByTargetObjectId(id, COMMENT);
     }
 
-    public CommentReadDTO changeStatus(UUID id, CommentStatusDTO dto) {
+    public CommentReadDTO moderateComment(UUID id, CommentModerateDTO dto) {
         Comment comment = repoHelper.getEntityById(Comment.class, id);
 
-        comment.setStatus(dto.getStatus());
+        if (dto.getNewMessage() != null) {
+            comment.setMessage(dto.getNewMessage());
+        }
+
+        comment.setStatus(dto.getNewStatus());
         comment = commentRepository.save(comment);
 
         return translationService.translate(comment, CommentReadDTO.class);

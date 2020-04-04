@@ -7,8 +7,8 @@ import com.golovko.backend.domain.ComplaintType;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.CommentFilter;
+import com.golovko.backend.dto.comment.CommentModerateDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
-import com.golovko.backend.dto.comment.CommentStatusDTO;
 import com.golovko.backend.dto.complaint.ComplaintFilter;
 import com.golovko.backend.dto.complaint.ComplaintModerateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
@@ -241,42 +241,43 @@ public class ModeratorControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testChangeCommentStatus() throws Exception {
-        CommentStatusDTO statusDTO = new CommentStatusDTO();
-        statusDTO.setStatus(CommentStatus.APPROVED);
+    public void testModerateComment() throws Exception {
+        CommentModerateDTO dto = new CommentModerateDTO();
+        dto.setNewStatus(CommentStatus.APPROVED);
+        dto.setNewMessage("new text");
 
         CommentReadDTO readDTO = createCommentReadDTO();
 
-        Mockito.when(commentService.changeStatus(readDTO.getId(), statusDTO)).thenReturn(readDTO);
+        Mockito.when(commentService.moderateComment(readDTO.getId(), dto)).thenReturn(readDTO);
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/comments/{id}/change-status", readDTO.getId())
+                .perform(post("/api/v1/comments/{id}/moderate", readDTO.getId())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(statusDTO)))
+                .content(objectMapper.writeValueAsString(dto)))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
         CommentReadDTO actualResult = objectMapper.readValue(resultJson, CommentReadDTO.class);
         Assert.assertEquals(actualResult, readDTO);
 
-        Mockito.verify(commentService).changeStatus(readDTO.getId(), statusDTO);
+        Mockito.verify(commentService).moderateComment(readDTO.getId(), dto);
     }
 
     @Test
     public void testChangeCommentStatusValidationException() throws Exception {
-        CommentStatusDTO statusDTO = new CommentStatusDTO();
+        CommentModerateDTO moderateDTO = new CommentModerateDTO();
 
         String resultJson = mockMvc
-                .perform(post("/api/v1/comments/{id}/change-status", UUID.randomUUID())
+                .perform(post("/api/v1/comments/{id}/moderate", UUID.randomUUID())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(statusDTO)))
+                .content(objectMapper.writeValueAsString(moderateDTO)))
                 .andExpect(status().isBadRequest())
                 .andReturn().getResponse().getContentAsString();
 
         ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
         Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
 
-        Mockito.verify(commentService, Mockito.never()).changeStatus(any(), any());
+        Mockito.verify(commentService, Mockito.never()).moderateComment(any(), any());
     }
 
     @Test
