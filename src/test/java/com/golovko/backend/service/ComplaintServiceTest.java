@@ -5,6 +5,7 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.ComplaintRepository;
@@ -647,6 +648,22 @@ public class ComplaintServiceTest extends BaseTest {
 
         ApplicationUser author = testObjectFactory.createUser();
         Complaint c1 = testObjectFactory.createComplaint(author);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+    }
+
+    @Test(expected = EntityWrongStatusException.class)
+    public void testModerateComplaintWrongComplaintStatus() {
+        ApplicationUser moderator = testObjectFactory.createUser();
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(author);
+        c1.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        complaintRepository.save(c1);
 
         complaintService.moderateComplaint(c1.getId(), moderDTO);
     }

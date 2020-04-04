@@ -4,6 +4,7 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.CommentRepository;
@@ -115,6 +116,10 @@ public class ComplaintService {
     @Transactional
     public ComplaintReadDTO moderateComplaint(UUID complaintId, ComplaintModerateDTO dto) {
         Complaint complaint = repoHelper.getReferenceIfExist(Complaint.class, complaintId);
+
+        if (!complaint.getComplaintStatus().equals(ComplaintStatus.INITIATED)) {
+            throw new EntityWrongStatusException(Complaint.class, complaintId);
+        }
 
         if (complaint.getTargetObjectType().equals(TargetObjectType.COMMENT)) {
             moderateCommentComplaint(complaint.getTargetObjectId(), dto);
