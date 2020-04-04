@@ -1,11 +1,11 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Complaint;
-import com.golovko.backend.domain.ComplaintStatus;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.repository.ApplicationUserRepository;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +25,12 @@ public class ComplaintService {
 
     @Autowired
     private TranslationService translationService;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private ApplicationUserRepository applicationUserRepository;
 
     @Autowired
     private RepositoryHelper repoHelper;
@@ -82,11 +88,41 @@ public class ComplaintService {
     public ComplaintReadDTO moderateComplaint(UUID complaintId, ComplaintModerateDTO dto) {
         Complaint complaint = repoHelper.getReferenceIfExist(Complaint.class, complaintId);
 
+        if (complaint.getTargetObjectType().equals(TargetObjectType.COMMENT)) {
+            moderateCommentComplaint(complaint.getTargetObjectId(), dto);
+        }
+        if (dto.getDecreaseComplaintAuthorTrustLevelByOne() != null &&
+                dto.getDecreaseComplaintAuthorTrustLevelByOne()) {
+            decreaseComplaintAuthorTrustLevelByOne(complaint.getAuthor());
+        }
+
         complaint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
         complaint.setComplaintStatus(dto.getComplaintStatus());
         complaint = complaintRepository.save(complaint);
 
         return translationService.translate(complaint, ComplaintReadDTO.class);
+    }
+
+    private void decreaseComplaintAuthorTrustLevelByOne(ApplicationUser complaintAuthor) {
+        Double trustLevel = complaintAuthor.getTrustLevel();
+        complaintAuthor.setTrustLevel(trustLevel - 1);
+        applicationUserRepository.save(complaintAuthor);
+    }
+
+    private void moderateCommentComplaint(UUID commentId, ComplaintModerateDTO dto) {
+        Comment comment = repoHelper.getEntityById(Comment.class, commentId);
+
+        if (dto.getNewCommentMessage() != null && !dto.getNewCommentMessage().trim().isEmpty()) {
+            comment.setMessage(dto.getNewCommentMessage());
+        }
+        if (dto.getDeleteComment() != null && dto.getDeleteComment()) {
+            commentRepository.delete(comment);
+        }
+        if (dto.getBlockCommentAuthor() != null && dto.getBlockCommentAuthor()) {
+            ApplicationUser commentAuthor = comment.getAuthor();
+            commentAuthor.setIsBlocked(true);
+            applicationUserRepository.save(commentAuthor);
+        }
     }
 
     private Complaint getComplaintByUserId(UUID id, UUID userId) {
