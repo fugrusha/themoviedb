@@ -450,6 +450,26 @@ public class ComplaintServiceTest extends BaseTest {
     }
 
     @Test
+    public void testDecreaseComplaintAuthorTrustLevelByOneFalseValue() {
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        author.setTrustLevel(9.0);
+        applicationUserRepository.save(author);
+
+        Complaint c1 = testObjectFactory.createComplaint(author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setDecreaseComplaintAuthorTrustLevelByOne(false);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        ApplicationUser updatedAuthor = applicationUserRepository.findById(author.getId()).get();
+        Assert.assertEquals(9.0, updatedAuthor.getTrustLevel(), Double.MIN_NORMAL);
+    }
+
+    @Test
     public void testModerateCommentComplaintWithNewMessage() {
         ApplicationUser commentAuthor = testObjectFactory.createUser();
         Movie m1 = testObjectFactory.createMovie();
@@ -512,6 +532,26 @@ public class ComplaintServiceTest extends BaseTest {
     }
 
     @Test
+    public void testModerateCommentComplaintDeleteCommentFalseValue() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Comment comment = testObjectFactory.createComment(commentAuthor, m1.getId(), CommentStatus.APPROVED, MOVIE);
+
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(comment.getId(), COMMENT, SPAM, author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setDeleteComment(false);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        Assert.assertTrue(commentRepository.existsById(comment.getId()));
+    }
+
+    @Test
     public void testModerateCommentComplaintBlockCommentAuthor() {
         ApplicationUser commentAuthor = testObjectFactory.createUser();
         Movie m1 = testObjectFactory.createMovie();
@@ -530,6 +570,27 @@ public class ComplaintServiceTest extends BaseTest {
 
         ApplicationUser updatedCommentAuthor = applicationUserRepository.findById(commentAuthor.getId()).get();
         Assert.assertTrue(updatedCommentAuthor.getIsBlocked());
+    }
+
+    @Test
+    public void testModerateCommentComplaintBlockCommentAuthorFalseValue() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Comment comment = testObjectFactory.createComment(commentAuthor, m1.getId(), CommentStatus.APPROVED, MOVIE);
+
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(comment.getId(), COMMENT, SPAM, author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setBlockCommentAuthor(false);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        ApplicationUser updatedCommentAuthor = applicationUserRepository.findById(commentAuthor.getId()).get();
+        Assert.assertFalse(updatedCommentAuthor.getIsBlocked());
     }
 
     @Test(expected = TransactionSystemException.class)
