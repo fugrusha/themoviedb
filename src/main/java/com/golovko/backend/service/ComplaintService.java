@@ -119,8 +119,8 @@ public class ComplaintService {
         if (complaint.getTargetObjectType().equals(TargetObjectType.COMMENT)) {
             moderateCommentComplaint(complaint.getTargetObjectId(), dto);
         }
-        if (dto.getDecreaseComplaintAuthorTrustLevelByOne() != null &&
-                dto.getDecreaseComplaintAuthorTrustLevelByOne()) {
+        if (dto.getDecreaseComplaintAuthorTrustLevelByOne() != null
+                && dto.getDecreaseComplaintAuthorTrustLevelByOne()) {
             decreaseComplaintAuthorTrustLevelByOne(complaint.getAuthor());
         }
 
