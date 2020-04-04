@@ -6,5 +6,6 @@ public enum ActionType {
     REMOVE_LIKE,
     REMOVE_DISLIKE,
     ADD_RATING,
-    ADD_COMMENT
+    CREATE_COMMENT,
+    CREATE_COMPLAINT;
 }

@@ -4,6 +4,7 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.ComplaintRepository;
@@ -55,11 +56,38 @@ public class ComplaintService {
     public ComplaintReadDTO createComplaint(UUID userId, ComplaintCreateDTO createDTO) {
         Complaint complaint = translationService.translate(createDTO, Complaint.class);
 
+        validateTargetObject(createDTO);
+
         complaint.setComplaintStatus(ComplaintStatus.INITIATED);
         complaint.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, userId));
         complaint = complaintRepository.save(complaint);
 
         return translationService.translate(complaint, ComplaintReadDTO.class);
+    }
+
+    private void validateTargetObject(ComplaintCreateDTO createDTO) {
+        switch (createDTO.getTargetObjectType()) {
+          case MOVIE_CAST:
+              repoHelper.getReferenceIfExist(MovieCast.class, createDTO.getTargetObjectId());
+              break;
+          case MOVIE_CREW:
+              repoHelper.getReferenceIfExist(MovieCrew.class, createDTO.getTargetObjectId());
+              break;
+          case MOVIE:
+              repoHelper.getReferenceIfExist(Movie.class, createDTO.getTargetObjectId());
+              break;
+          case ARTICLE:
+              repoHelper.getReferenceIfExist(Article.class, createDTO.getTargetObjectId());
+              break;
+          case COMMENT:
+              repoHelper.getReferenceIfExist(Comment.class, createDTO.getTargetObjectId());
+              break;
+          case PERSON:
+              repoHelper.getReferenceIfExist(Person.class, createDTO.getTargetObjectId());
+              break;
+          default:
+              throw new WrongTargetObjectTypeException(ActionType.CREATE_COMPLAINT, createDTO.getTargetObjectType());
+        }
     }
 
     public ComplaintReadDTO patchComplaint(UUID userId, UUID id, ComplaintPatchDTO patchDTO) {

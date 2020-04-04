@@ -95,7 +95,7 @@ public class CommentService {
               repoHelper.getReferenceIfExist(Article.class, targetObjectId);
               break;
           default:
-              throw new WrongTargetObjectTypeException(ActionType.ADD_COMMENT, createDTO.getTargetObjectType());
+              throw new WrongTargetObjectTypeException(ActionType.CREATE_COMMENT, createDTO.getTargetObjectType());
         }
     }
 
