@@ -228,6 +228,32 @@ public class LikeServiceTest extends BaseTest {
         Assert.assertEquals(updatedMovie.getLikesCount(), (Integer) 6);
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateLikeForMovieWrongMovieId() {
+        ApplicationUser user = testObjectFactory.createUser();
+        UUID wrongMovieId = UUID.randomUUID();
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setMeLiked(true);
+        createDTO.setLikedObjectType(MOVIE);
+        createDTO.setLikedObjectId(wrongMovieId);
+
+        likeService.createLike(user.getId(), createDTO);
+    }
+
+    @Test(expected = WrongTargetObjectTypeException.class)
+    public void testCreateLikeForWrongTargetObjectType() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setMeLiked(true);
+        createDTO.setLikedObjectType(PERSON);
+        createDTO.setLikedObjectId(movie.getId());
+
+        likeService.createLike(user.getId(), createDTO);
+    }
+
     @Test
     public void testCreateLikeForComment() {
         ApplicationUser user = testObjectFactory.createUser();
@@ -250,6 +276,19 @@ public class LikeServiceTest extends BaseTest {
         Assert.assertEquals(updatedComment.getLikesCount(), (Integer) 6);
     }
 
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateLikeForCommentWrongCommentId() {
+        ApplicationUser user = testObjectFactory.createUser();
+        UUID wrongCommentId = UUID.randomUUID();
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setMeLiked(true);
+        createDTO.setLikedObjectType(COMMENT);
+        createDTO.setLikedObjectId(wrongCommentId);
+
+        likeService.createLike(user.getId(), createDTO);
+    }
+
     @Test
     public void testCreateLikeForArticle() {
         ApplicationUser author = testObjectFactory.createUser();
@@ -269,6 +308,19 @@ public class LikeServiceTest extends BaseTest {
 
         Article updatedArticle = articleRepository.findById(readDTO.getLikedObjectId()).get();
         Assert.assertEquals(updatedArticle.getLikesCount(), (Integer) 6);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateLikeForArticleWrongArticleId() {
+        ApplicationUser user = testObjectFactory.createUser();
+        UUID wrongArticleId = UUID.randomUUID();
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setMeLiked(true);
+        createDTO.setLikedObjectType(ARTICLE);
+        createDTO.setLikedObjectId(wrongArticleId);
+
+        likeService.createLike(user.getId(), createDTO);
     }
 
     @Test

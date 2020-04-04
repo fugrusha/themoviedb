@@ -1,9 +1,6 @@
 package com.golovko.backend.service;
 
-import com.golovko.backend.domain.ActionType;
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Like;
-import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.like.LikeCreateDTO;
 import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
@@ -55,6 +52,8 @@ public class LikeService {
                     "User's like or dislike for this entity already exists");
         }
 
+        validateTargetObject(createDTO);
+
         Like like = translationService.translate(createDTO, Like.class);
 
         like.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, userId));
@@ -67,6 +66,22 @@ public class LikeService {
         }
 
         return translationService.translate(like, LikeReadDTO.class);
+    }
+
+    private void validateTargetObject(LikeCreateDTO createDTO) {
+        switch (createDTO.getLikedObjectType()) {
+          case MOVIE:
+              repoHelper.getReferenceIfExist(Movie.class, createDTO.getLikedObjectId());
+              break;
+          case ARTICLE:
+              repoHelper.getReferenceIfExist(Article.class, createDTO.getLikedObjectId());
+              break;
+          case COMMENT:
+              repoHelper.getReferenceIfExist(Comment.class, createDTO.getLikedObjectId());
+              break;
+          default:
+              throw new WrongTargetObjectTypeException(ActionType.ADD_LIKE, createDTO.getLikedObjectType());
+        }
     }
 
     private void incrementLikeField(TargetObjectType objectType, UUID likedObjectId) {
