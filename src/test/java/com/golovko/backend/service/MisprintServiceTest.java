@@ -6,6 +6,7 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -101,7 +102,7 @@ public class MisprintServiceTest extends BaseTest {
     }
 
     @Test
-    public void testCreateMisprintComplaint() {
+    public void testCreateMisprintComplaintForMovie() {
         ApplicationUser user = testObjectFactory.createUser();
         Movie movie = testObjectFactory.createMovie();
 
@@ -121,6 +122,192 @@ public class MisprintServiceTest extends BaseTest {
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(misprint,
                 "moderatorId", "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), misprint.getAuthor().getId());
+        Assert.assertEquals(movie.getId(), misprint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateMisprintComplaintForMovieWrongMovieId() {
+        ApplicationUser user = testObjectFactory.createUser();
+        UUID movieId = UUID.randomUUID();
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(MOVIE);
+        createDTO.setTargetObjectId(movieId);
+
+        misprintService.createMisprintComplaint(user.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateMisprintComplaintForArticle() {
+        ApplicationUser user = testObjectFactory.createUser();
+        ApplicationUser articleAuthor = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(articleAuthor, ArticleStatus.PUBLISHED);
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(ARTICLE);
+        createDTO.setTargetObjectId(article.getId());
+
+        MisprintReadDTO readDTO = misprintService.createMisprintComplaint(user.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Misprint misprint = misprintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(misprint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), misprint.getAuthor().getId());
+        Assert.assertEquals(article.getId(), misprint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateMisprintComplaintForArticleWrongArticleId() {
+        ApplicationUser user = testObjectFactory.createUser();
+        UUID articleId = UUID.randomUUID();
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(ARTICLE);
+        createDTO.setTargetObjectId(articleId);
+
+        misprintService.createMisprintComplaint(user.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateMisprintComplaintForMovieCast() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(MOVIE_CAST);
+        createDTO.setTargetObjectId(movieCast.getId());
+
+        MisprintReadDTO readDTO = misprintService.createMisprintComplaint(user.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Misprint misprint = misprintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(misprint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), misprint.getAuthor().getId());
+        Assert.assertEquals(movieCast.getId(), misprint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateMisprintComplaintForMovieCastWrongMovieCastId() {
+        ApplicationUser user = testObjectFactory.createUser();
+        UUID movieCastId = UUID.randomUUID();
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(MOVIE_CAST);
+        createDTO.setTargetObjectId(movieCastId);
+
+        misprintService.createMisprintComplaint(user.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateMisprintComplaintForMovieCrew() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(MOVIE_CREW);
+        createDTO.setTargetObjectId(movieCrew.getId());
+
+        MisprintReadDTO readDTO = misprintService.createMisprintComplaint(user.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Misprint misprint = misprintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(misprint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), misprint.getAuthor().getId());
+        Assert.assertEquals(movieCrew.getId(), misprint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateMisprintComplaintForMovieCrewWrongMovieCrewId() {
+        ApplicationUser user = testObjectFactory.createUser();
+        UUID movieCrewId = UUID.randomUUID();
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(MOVIE_CREW);
+        createDTO.setTargetObjectId(movieCrewId);
+
+        misprintService.createMisprintComplaint(user.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateMisprintComplaintForPerson() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Person person = testObjectFactory.createPerson();
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(PERSON);
+        createDTO.setTargetObjectId(person.getId());
+
+        MisprintReadDTO readDTO = misprintService.createMisprintComplaint(user.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Misprint misprint = misprintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(misprint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), misprint.getAuthor().getId());
+        Assert.assertEquals(person.getId(), misprint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateMisprintComplaintForPersonWrongPersonId() {
+        ApplicationUser user = testObjectFactory.createUser();
+        UUID personId = UUID.randomUUID();
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(PERSON);
+        createDTO.setTargetObjectId(personId);
+
+        misprintService.createMisprintComplaint(user.getId(), createDTO);
+    }
+
+    @Test(expected = WrongTargetObjectTypeException.class)
+    public void testCreateMisprintComplaintForWrongTypeObjectType() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Person person = testObjectFactory.createPerson();
+
+        MisprintCreateDTO createDTO = new MisprintCreateDTO();
+        createDTO.setMisprintText("misprint");
+        createDTO.setReplaceTo("Text text text");
+        createDTO.setTargetObjectType(COMMENT);
+        createDTO.setTargetObjectId(person.getId());
+
+        misprintService.createMisprintComplaint(user.getId(), createDTO);
     }
 
     @Test(expected = EntityNotFoundException.class)

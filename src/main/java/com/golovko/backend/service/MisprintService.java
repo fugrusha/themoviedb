@@ -5,6 +5,7 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,11 +71,35 @@ public class MisprintService {
     public MisprintReadDTO createMisprintComplaint(UUID userId, MisprintCreateDTO createDTO) {
         Misprint misprint = translationService.translate(createDTO, Misprint.class);
 
+        validateTargetObject(createDTO);
+
         misprint.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, userId));
         misprint.setStatus(ComplaintStatus.INITIATED);
         misprint = misprintRepository.save(misprint);
 
         return translationService.translate(misprint, MisprintReadDTO.class);
+    }
+
+    private void validateTargetObject(MisprintCreateDTO createDTO) {
+        switch (createDTO.getTargetObjectType()) {
+          case MOVIE:
+              repoHelper.getReferenceIfExist(Movie.class, createDTO.getTargetObjectId());
+              break;
+          case ARTICLE:
+              repoHelper.getReferenceIfExist(Article.class, createDTO.getTargetObjectId());
+              break;
+          case MOVIE_CAST:
+              repoHelper.getReferenceIfExist(MovieCast.class, createDTO.getTargetObjectId());
+              break;
+          case MOVIE_CREW:
+              repoHelper.getReferenceIfExist(MovieCrew.class, createDTO.getTargetObjectId());
+              break;
+          case PERSON:
+              repoHelper.getReferenceIfExist(Person.class, createDTO.getTargetObjectId());
+              break;
+          default:
+              throw new WrongTargetObjectTypeException(ActionType.CREATE_MISPRINT, createDTO.getTargetObjectType());
+        }
     }
 
     public void deleteMisprintComplaint(UUID userId, UUID id) {
