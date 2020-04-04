@@ -174,18 +174,6 @@ public class ApplicationUserServiceTest extends BaseTest {
     }
 
     @Test(expected = TransactionSystemException.class)
-    public void testSaveUserTrustLevelMinSizeValidation() {
-        ApplicationUser user = testObjectFactory.createUser(0.9, false);
-        applicationUserRepository.save(user);
-    }
-
-    @Test(expected = TransactionSystemException.class)
-    public void testSaveUserTrustLevelMaxSizeValidation() {
-        ApplicationUser user = testObjectFactory.createUser(11.0, false);
-        applicationUserRepository.save(user);
-    }
-
-    @Test(expected = TransactionSystemException.class)
     public void testSaveUserWrongEmailValidation() {
         ApplicationUser user = testObjectFactory.createUser();
         user.setEmail("wrongemail");

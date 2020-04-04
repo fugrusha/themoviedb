@@ -66,6 +66,7 @@ public class TestObjectFactory {
     public Movie createMovie() {
         Movie movie = generateFlatEntityWithoutId(Movie.class);
         movie.setAverageRating(null);
+        movie.setIsReleased(true);
         return movieRepository.save(movie);
     }
 

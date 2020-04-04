@@ -12,4 +12,8 @@ public class EntityWrongStatusException extends RuntimeException {
         super(String.format("Entity %s with id=%s has not allowed status to update it!",
                 entityClass.getSimpleName(), id));
     }
+
+    public EntityWrongStatusException(String message) {
+        super(message);
+    }
 }

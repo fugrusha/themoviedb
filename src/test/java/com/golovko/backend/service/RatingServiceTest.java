@@ -1,16 +1,18 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.Rating;
-import com.golovko.backend.domain.TargetObjectType;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.exception.WrongTargetObjectTypeException;
+import com.golovko.backend.repository.MovieCastRepository;
+import com.golovko.backend.repository.MovieCrewRepository;
+import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RatingRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -32,6 +34,15 @@ public class RatingServiceTest extends BaseTest {
 
     @Autowired
     private RatingRepository ratingRepository;
+
+    @Autowired
+    private MovieRepository movieRepository;
+
+    @Autowired
+    private MovieCrewRepository movieCrewRepository;
+
+    @Autowired
+    private MovieCastRepository movieCastRepository;
 
     @Test
     public void testGetRatingById() {
@@ -86,7 +97,7 @@ public class RatingServiceTest extends BaseTest {
     }
 
     @Test
-    public void testCreateRating() {
+    public void testCreateRatingForMovie() {
         ApplicationUser author = testObjectFactory.createUser();
         Movie movie = testObjectFactory.createMovie();
 
@@ -106,7 +117,7 @@ public class RatingServiceTest extends BaseTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void testCreateRatingWrongAuthor() {
+    public void testCreateRatingWrongAuthorId() {
         Movie movie = testObjectFactory.createMovie();
 
         RatingCreateDTO createDTO = new RatingCreateDTO();
@@ -115,6 +126,157 @@ public class RatingServiceTest extends BaseTest {
         createDTO.setRatedObjectType(TargetObjectType.MOVIE);
 
         ratingService.createRating(movie.getId(), createDTO);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateRatingWrongMovieId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongMovieId = UUID.randomUUID();
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE);
+
+        ratingService.createRating(wrongMovieId, createDTO);
+    }
+
+    @Test
+    public void testCreateRatingForMovieCast() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CAST);
+
+        RatingReadDTO readDTO = ratingService.createRating(movieCast.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assert.assertEquals(readDTO.getRatedObjectId(), movieCast.getId());
+        Assert.assertNotNull(readDTO.getId());
+
+        Rating rating = ratingRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(rating, "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), rating.getAuthor().getId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateRatingWrongMovieCastId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongMovieCastId = UUID.randomUUID();
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CAST);
+
+        ratingService.createRating(wrongMovieCastId, createDTO);
+    }
+
+    @Test
+    public void testCreateRatingForMovieCrew() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CREW);
+
+        RatingReadDTO readDTO = ratingService.createRating(movieCrew.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assert.assertEquals(readDTO.getRatedObjectId(), movieCrew.getId());
+        Assert.assertNotNull(readDTO.getId());
+
+        Rating rating = ratingRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(rating, "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), rating.getAuthor().getId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateRatingWrongMovieCrewId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongMovieCrewId = UUID.randomUUID();
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CREW);
+
+        ratingService.createRating(wrongMovieCrewId, createDTO);
+    }
+
+    @Test(expected = EntityWrongStatusException.class)
+    public void testCreateRatingForMovieUnreleasedMovie() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        movie.setIsReleased(false);
+        movieRepository.save(movie);
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE);
+
+        ratingService.createRating(movie.getId(), createDTO);
+    }
+
+    @Test(expected = EntityWrongStatusException.class)
+    public void testCreateRatingForMovieCastUnreleasedMovie() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Person person = testObjectFactory.createPerson();
+
+        Movie movie = testObjectFactory.createMovie();
+        movie.setIsReleased(false);
+        movieRepository.save(movie);
+
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CAST);
+
+        ratingService.createRating(movieCast.getId(), createDTO);
+    }
+
+    @Test(expected = EntityWrongStatusException.class)
+    public void testCreateRatingForMovieCrewUnreleasedMovie() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Person person = testObjectFactory.createPerson();
+
+        Movie movie = testObjectFactory.createMovie();
+        movie.setIsReleased(false);
+        movieRepository.save(movie);
+
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CREW);
+
+        ratingService.createRating(movieCrew.getId(), createDTO);
+    }
+
+    @Test(expected = WrongTargetObjectTypeException.class)
+    public void testCreateRatingForPerson() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Person person = testObjectFactory.createPerson();
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.PERSON);
+
+        ratingService.createRating(person.getId(), createDTO);
     }
 
     @Test
@@ -218,4 +380,6 @@ public class RatingServiceTest extends BaseTest {
         rating.setAuthor(user);
         ratingRepository.save(rating);
     }
+
+
 }

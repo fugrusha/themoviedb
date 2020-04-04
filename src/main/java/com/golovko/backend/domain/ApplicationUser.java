@@ -5,8 +5,6 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -33,8 +31,6 @@ public class ApplicationUser extends AbstractEntity {
     private Boolean isBlocked = false;
 
     @NotNull
-    @Min(value = 1)
-    @Max(value = 10)
     private Double trustLevel = 1.0;
 
     @ManyToMany(fetch = FetchType.EAGER)

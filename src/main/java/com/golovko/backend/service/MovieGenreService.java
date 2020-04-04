@@ -30,7 +30,7 @@ public class MovieGenreService {
     public List<GenreReadDTO> getMovieGenres(UUID movieId) {
         Movie movie = repoHelper.getEntityById(Movie.class, movieId);
 
-        if (movie.getGenres().isEmpty() || movie.getGenres() == null) {
+        if (movie.getGenres() == null || movie.getGenres().isEmpty()) {
             throw new EntityNotFoundException("Movie " + movieId + " has not any genre.");
         }
 

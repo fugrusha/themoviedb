@@ -2,8 +2,8 @@ package com.golovko.backend.controller;
 
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.CommentFilter;
+import com.golovko.backend.dto.comment.CommentModerateDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
-import com.golovko.backend.dto.comment.CommentStatusDTO;
 import com.golovko.backend.dto.complaint.ComplaintFilter;
 import com.golovko.backend.dto.complaint.ComplaintModerateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
@@ -44,12 +44,12 @@ public class ModeratorController {
         return commentService.getCommentsByFilter(filter, pageable);
     }
 
-    @PostMapping("/comments/{id}/change-status")
+    @PostMapping("/comments/{id}/moderate")
     public CommentReadDTO changeCommentStatus(
             @PathVariable UUID id,
-            @RequestBody @Valid CommentStatusDTO dto
+            @RequestBody @Valid CommentModerateDTO dto
     ) {
-        return commentService.changeStatus(id, dto);
+        return commentService.moderateComment(id, dto);
     }
 
     @GetMapping("/complaints")

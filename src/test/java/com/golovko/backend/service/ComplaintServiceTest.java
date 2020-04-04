@@ -5,6 +5,8 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.complaint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.repository.ApplicationUserRepository;
+import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.ComplaintRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -18,8 +20,7 @@ import org.springframework.transaction.TransactionSystemException;
 import java.util.*;
 
 import static com.golovko.backend.domain.ComplaintType.*;
-import static com.golovko.backend.domain.TargetObjectType.ARTICLE;
-import static com.golovko.backend.domain.TargetObjectType.MOVIE;
+import static com.golovko.backend.domain.TargetObjectType.*;
 
 public class ComplaintServiceTest extends BaseTest {
 
@@ -28,6 +29,12 @@ public class ComplaintServiceTest extends BaseTest {
 
     @Autowired
     private ComplaintRepository complaintRepository;
+
+    @Autowired
+    private ApplicationUserRepository applicationUserRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Test
     public void testGetComplaint() {
@@ -81,28 +88,250 @@ public class ComplaintServiceTest extends BaseTest {
     }
 
     @Test
-    public void testCreateComplaint() {
+    public void testCreateComplaintForMovie() {
         ApplicationUser author = testObjectFactory.createUser();
-        Movie targetObject = testObjectFactory.createMovie();
+        Movie movie = testObjectFactory.createMovie();
 
         ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
         createDTO.setComplaintTitle("Complaint Title");
         createDTO.setComplaintText("Text text text");
         createDTO.setComplaintType(ComplaintType.SPAM);
         createDTO.setTargetObjectType(MOVIE);
-        createDTO.setTargetObjectId(targetObject.getId());
+        createDTO.setTargetObjectId(movie.getId());
 
         ComplaintReadDTO readDTO = complaintService.createComplaint(author.getId(), createDTO);
 
         Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
         Assert.assertNotNull(readDTO.getId());
 
-        Complaint complaint = complaintRepository
-                .findByIdAndTargetId(readDTO.getId(), readDTO.getTargetObjectId(), MOVIE);
+        Complaint complaint = complaintRepository.findById(readDTO.getId()).get();
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
                 "moderatorId", "authorId");
         Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+        Assert.assertEquals(movie.getId(), complaint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateComplaintForMovieWrongMovieId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongMovieId = UUID.randomUUID();
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(MOVIE);
+        createDTO.setTargetObjectId(wrongMovieId);
+
+        complaintService.createComplaint(author.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateComplaintForMovieCast() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(MOVIE_CAST);
+        createDTO.setTargetObjectId(movieCast.getId());
+
+        ComplaintReadDTO readDTO = complaintService.createComplaint(author.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Complaint complaint = complaintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+        Assert.assertEquals(movieCast.getId(), complaint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateComplaintForMovieCastWrongMovieCastId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongMovieCastId = UUID.randomUUID();
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(MOVIE_CAST);
+        createDTO.setTargetObjectId(wrongMovieCastId);
+
+        complaintService.createComplaint(author.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateComplaintForMovieCrew() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(MOVIE_CREW);
+        createDTO.setTargetObjectId(movieCrew.getId());
+
+        ComplaintReadDTO readDTO = complaintService.createComplaint(author.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Complaint complaint = complaintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+        Assert.assertEquals(movieCrew.getId(), complaint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateComplaintForMovieCrewWrongMovieCrewId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongMovieCrewId = UUID.randomUUID();
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(MOVIE_CREW);
+        createDTO.setTargetObjectId(wrongMovieCrewId);
+
+        complaintService.createComplaint(author.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateComplaintForArticle() {
+        ApplicationUser author = testObjectFactory.createUser();
+        ApplicationUser articleAuthor = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(articleAuthor, ArticleStatus.PUBLISHED);
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(ARTICLE);
+        createDTO.setTargetObjectId(article.getId());
+
+        ComplaintReadDTO readDTO = complaintService.createComplaint(author.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Complaint complaint = complaintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+        Assert.assertEquals(article.getId(), complaint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateComplaintForArticleWrongArticleId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongArticleId = UUID.randomUUID();
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(ARTICLE);
+        createDTO.setTargetObjectId(wrongArticleId);
+
+        complaintService.createComplaint(author.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateComplaintForComment() {
+        ApplicationUser author = testObjectFactory.createUser();
+        ApplicationUser articleAuthor = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(articleAuthor, ArticleStatus.PUBLISHED);
+        Comment c1 = testObjectFactory.createComment(articleAuthor, article.getId(), CommentStatus.APPROVED, ARTICLE);
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(COMMENT);
+        createDTO.setTargetObjectId(c1.getId());
+
+        ComplaintReadDTO readDTO = complaintService.createComplaint(author.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Complaint complaint = complaintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+        Assert.assertEquals(c1.getId(), complaint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateComplaintForCommentWrongCommentId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongCommentId = UUID.randomUUID();
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(COMMENT);
+        createDTO.setTargetObjectId(wrongCommentId);
+
+        complaintService.createComplaint(author.getId(), createDTO);
+    }
+
+    @Test
+    public void testCreateComplaintForPerson() {
+        ApplicationUser author = testObjectFactory.createUser();
+        Person person = testObjectFactory.createPerson();
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(PERSON);
+        createDTO.setTargetObjectId(person.getId());
+
+        ComplaintReadDTO readDTO = complaintService.createComplaint(author.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
+        Assert.assertNotNull(readDTO.getId());
+
+        Complaint complaint = complaintRepository.findById(readDTO.getId()).get();
+
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(complaint,
+                "moderatorId", "authorId");
+        Assert.assertEquals(readDTO.getAuthorId(), complaint.getAuthor().getId());
+        Assert.assertEquals(person.getId(), complaint.getTargetObjectId());
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testCreateComplaintForPersonWrongPersonId() {
+        ApplicationUser author = testObjectFactory.createUser();
+        UUID wrongPersonId = UUID.randomUUID();
+
+        ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
+        createDTO.setComplaintTitle("Complaint Title");
+        createDTO.setComplaintText("Text text text");
+        createDTO.setComplaintType(ComplaintType.SPAM);
+        createDTO.setTargetObjectType(PERSON);
+        createDTO.setTargetObjectId(wrongPersonId);
+
+        complaintService.createComplaint(author.getId(), createDTO);
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -374,7 +603,7 @@ public class ComplaintServiceTest extends BaseTest {
     }
 
     @Test
-    public void testModerateComplaint() {
+    public void testModerateNotCommentComplaint() {
         ApplicationUser author = testObjectFactory.createUser();
         ApplicationUser moderator = testObjectFactory.createUser();
 
@@ -383,6 +612,8 @@ public class ComplaintServiceTest extends BaseTest {
         moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
 
         Complaint c1 = testObjectFactory.createComplaint(author);
+        c1.setTargetObjectType(ARTICLE);   // not COMMENT
+        complaintRepository.save(c1);
 
         ComplaintReadDTO actualResult = complaintService.moderateComplaint(c1.getId(), moderDTO);
 
@@ -393,6 +624,195 @@ public class ComplaintServiceTest extends BaseTest {
         c1 = complaintRepository.findById(c1.getId()).get();
         Assert.assertEquals(moderator.getId(), c1.getModerator().getId());
         Assert.assertEquals(c1.getComplaintStatus(), ComplaintStatus.UNDER_INVESTIGATION);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testModerateComplaintWrongComplaintId() {
+        ApplicationUser moderator = testObjectFactory.createUser();
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+
+        UUID wrongComplaintId = UUID.randomUUID();
+
+        complaintService.moderateComplaint(wrongComplaintId, moderDTO);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testModerateComplaintWrongModeratorId() {
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(UUID.randomUUID()); // random id
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(author);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+    }
+
+    @Test
+    public void testDecreaseComplaintAuthorTrustLevelByOne() {
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        author.setTrustLevel(9.0);
+        applicationUserRepository.save(author);
+
+        Complaint c1 = testObjectFactory.createComplaint(author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setDecreaseComplaintAuthorTrustLevelByOne(true);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        ApplicationUser updatedAuthor = applicationUserRepository.findById(author.getId()).get();
+        Assert.assertEquals(8.0, updatedAuthor.getTrustLevel(), Double.MIN_NORMAL);
+    }
+
+    @Test
+    public void testDecreaseComplaintAuthorTrustLevelByOneFalseValue() {
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        author.setTrustLevel(9.0);
+        applicationUserRepository.save(author);
+
+        Complaint c1 = testObjectFactory.createComplaint(author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setDecreaseComplaintAuthorTrustLevelByOne(false);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        ApplicationUser updatedAuthor = applicationUserRepository.findById(author.getId()).get();
+        Assert.assertEquals(9.0, updatedAuthor.getTrustLevel(), Double.MIN_NORMAL);
+    }
+
+    @Test
+    public void testModerateCommentComplaintWithNewMessage() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Comment comment = testObjectFactory.createComment(commentAuthor, m1.getId(), CommentStatus.APPROVED, MOVIE);
+
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(comment.getId(), COMMENT, SPAM, author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setNewCommentMessage("new text message");
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        Comment updatedComment = commentRepository.findById(comment.getId()).get();
+        Assert.assertEquals(moderDTO.getNewCommentMessage(), updatedComment.getMessage());
+    }
+
+    @Test
+    public void testModerateCommentComplaintWithNewMessageEmptyString() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Comment comment = testObjectFactory.createComment(commentAuthor, m1.getId(), CommentStatus.APPROVED, MOVIE);
+
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(comment.getId(), COMMENT, SPAM, author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setNewCommentMessage("  "); // empty string
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        Comment updatedComment = commentRepository.findById(comment.getId()).get();
+        Assert.assertEquals(comment.getMessage(), updatedComment.getMessage());
+    }
+
+    @Test
+    public void testModerateCommentComplaintDeleteComment() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Comment comment = testObjectFactory.createComment(commentAuthor, m1.getId(), CommentStatus.APPROVED, MOVIE);
+
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(comment.getId(), COMMENT, SPAM, author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setDeleteComment(true);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        Assert.assertFalse(commentRepository.existsById(comment.getId()));
+    }
+
+    @Test
+    public void testModerateCommentComplaintDeleteCommentFalseValue() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Comment comment = testObjectFactory.createComment(commentAuthor, m1.getId(), CommentStatus.APPROVED, MOVIE);
+
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(comment.getId(), COMMENT, SPAM, author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setDeleteComment(false);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        Assert.assertTrue(commentRepository.existsById(comment.getId()));
+    }
+
+    @Test
+    public void testModerateCommentComplaintBlockCommentAuthor() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Comment comment = testObjectFactory.createComment(commentAuthor, m1.getId(), CommentStatus.APPROVED, MOVIE);
+
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(comment.getId(), COMMENT, SPAM, author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setBlockCommentAuthor(true);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        ApplicationUser updatedCommentAuthor = applicationUserRepository.findById(commentAuthor.getId()).get();
+        Assert.assertTrue(updatedCommentAuthor.getIsBlocked());
+    }
+
+    @Test
+    public void testModerateCommentComplaintBlockCommentAuthorFalseValue() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Comment comment = testObjectFactory.createComment(commentAuthor, m1.getId(), CommentStatus.APPROVED, MOVIE);
+
+        ApplicationUser moderator = testObjectFactory.createUser();
+        ApplicationUser author = testObjectFactory.createUser();
+        Complaint c1 = testObjectFactory.createComplaint(comment.getId(), COMMENT, SPAM, author);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.UNDER_INVESTIGATION);
+        moderDTO.setBlockCommentAuthor(false);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        ApplicationUser updatedCommentAuthor = applicationUserRepository.findById(commentAuthor.getId()).get();
+        Assert.assertFalse(updatedCommentAuthor.getIsBlocked());
     }
 
     @Test(expected = TransactionSystemException.class)

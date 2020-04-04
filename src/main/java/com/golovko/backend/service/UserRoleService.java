@@ -30,7 +30,7 @@ public class UserRoleService {
     public List<UserRoleReadDTO> getUserRoles(UUID userId) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, userId);
 
-        if (user.getUserRoles().isEmpty() || user.getUserRoles() == null) {
+        if (user.getUserRoles() == null || user.getUserRoles().isEmpty()) {
             throw new EntityNotFoundException("User " + userId + " has not any role.");
         }
 

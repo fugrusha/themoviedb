@@ -8,7 +8,7 @@ import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.exception.WrongTypeOfTargetObjectException;
+import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.LikeService;
 import org.assertj.core.api.Assertions;
@@ -98,8 +98,8 @@ public class LikeControllerTest extends BaseControllerTest {
         createDTO.setLikedObjectType(TargetObjectType.MOVIE_CAST);
         createDTO.setMeLiked(true);
 
-        WrongTypeOfTargetObjectException exception =
-                new WrongTypeOfTargetObjectException(ActionType.ADD_LIKE, createDTO.getLikedObjectType());
+        WrongTargetObjectTypeException exception =
+                new WrongTargetObjectTypeException(ActionType.ADD_LIKE, createDTO.getLikedObjectType());
 
         Mockito.when(likeService.createLike(userId, createDTO)).thenThrow(exception);
 
