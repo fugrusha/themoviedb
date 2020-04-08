@@ -18,7 +18,7 @@ public class MovieCastController {
     private MovieCastService movieCastService;
 
     @GetMapping
-    public PageResult<MovieCastReadDTO> getListOfMovieCast(@PathVariable UUID movieId, Pageable pageable) {
+    public PageResult<MovieCastReadDTO> getAllMovieCasts(@PathVariable UUID movieId, Pageable pageable) {
         return movieCastService.getAllMovieCasts(movieId, pageable);
     }
 
