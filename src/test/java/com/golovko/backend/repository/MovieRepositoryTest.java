@@ -3,15 +3,17 @@ package com.golovko.backend.repository;
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
+import com.golovko.backend.dto.movie.MovieInLeaderBoardDTO;
+import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 
 import java.time.Instant;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class MovieRepositoryTest extends BaseTest {
@@ -156,5 +158,31 @@ public class MovieRepositoryTest extends BaseTest {
             Set<UUID> actualResult = movieRepository.getIdsOfUnreleasedMovies().collect(Collectors.toSet());
             Assert.assertEquals(expectedResult, actualResult);
         });
+    }
+
+    @Test
+    public void testGetMoviesLeaderBoard() {
+        Set<UUID> movieIds = new HashSet<>();
+        for (int i = 0; i < 100; ++i) {
+            movieIds.add(testObjectFactory.createMovieInLeaderBoard().getId());
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, 100,
+                Sort.by(Sort.Direction.DESC, "averageRating"));
+        Page<MovieInLeaderBoardDTO> actualResult = movieRepository.getMoviesLeaderBoard(pageRequest);
+
+        Assertions.assertThat(actualResult.getContent()).isSortedAccordingTo(
+                Comparator.comparing(MovieInLeaderBoardDTO::getAverageRating).reversed());
+
+        Assert.assertEquals(movieIds, actualResult.stream()
+                .map(MovieInLeaderBoardDTO::getId)
+                .collect(Collectors.toSet()));
+
+        for (MovieInLeaderBoardDTO m : actualResult) {
+            Assert.assertNotNull(m.getAverageRating());
+            Assert.assertNotNull(m.getDislikesCount());
+            Assert.assertNotNull(m.getLikesCount());
+            Assert.assertNotNull(m.getMovieTitle());
+        }
     }
 }

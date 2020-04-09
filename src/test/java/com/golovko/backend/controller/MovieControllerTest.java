@@ -395,6 +395,40 @@ public class MovieControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @Test
+    public void testGetMoviesLeaderBoardWithPagingAndSorting() throws Exception {
+        MovieInLeaderBoardDTO readDTO = createMovieInLeaderBoardDTO();
+
+        int page = 1;
+        int size = 25;
+
+        PageResult<MovieInLeaderBoardDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(100);
+        result.setTotalPages(4);
+        result.setData(List.of(readDTO));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "averageRating"));
+
+        Mockito.when(movieService.getMoviesLeaderBoard(pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/movies/leader-board")
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "averageRating,desc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<MovieInLeaderBoardDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
+    }
+
+    private MovieInLeaderBoardDTO createMovieInLeaderBoardDTO() {
+        return generateObject(MovieInLeaderBoardDTO.class);
+    }
+
     private MovieReadDTO createMovieReadDTO() {
         return generateObject(MovieReadDTO.class);
     }

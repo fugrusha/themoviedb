@@ -5,10 +5,7 @@ import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.PageResult;
-import com.golovko.backend.dto.person.PersonCreateDTO;
-import com.golovko.backend.dto.person.PersonPatchDTO;
-import com.golovko.backend.dto.person.PersonPutDTO;
-import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.PersonRepository;
 import org.assertj.core.api.Assertions;
@@ -21,6 +18,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class PersonServiceTest extends BaseTest {
@@ -64,6 +62,18 @@ public class PersonServiceTest extends BaseTest {
         Assertions.assertThat(personService.getPeople(pageRequest).getData())
                 .extracting("id")
                 .isEqualTo(Arrays.asList(p1.getId(), p2.getId()));
+    }
+
+    @Test
+    public void testGetPersonLeaderBoard() {
+        Person p1 = testObjectFactory.createPerson();
+        Person p2 = testObjectFactory.createPerson();
+        Person p3 = testObjectFactory.createPerson();
+
+        List<PersonInLeaderBoardDTO> actualResult = personService.getPersonLeaderBoard();
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(p1.getId(), p2.getId(), p3.getId());
     }
 
     @Test(expected = EntityNotFoundException.class)

@@ -3,6 +3,7 @@ package com.golovko.backend.service;
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.UserRoleType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.repository.ApplicationUserRepository;
@@ -10,8 +11,13 @@ import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
 
 public class ApplicationUserServiceTest extends BaseTest {
@@ -21,6 +27,45 @@ public class ApplicationUserServiceTest extends BaseTest {
 
     @Autowired
     private ApplicationUserService applicationUserService;
+
+    @Test
+    public void testGetAllUsers() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        ApplicationUser u2 = testObjectFactory.createUser();
+        ApplicationUser u3 = testObjectFactory.createUser();
+
+        PageResult<UserReadDTO> actualResult = applicationUserService.getAllUsers(Pageable.unpaged());
+
+        Assertions.assertThat(actualResult.getData()).extracting("id")
+                .containsExactlyInAnyOrder(u1.getId(), u2.getId(), u3.getId());
+    }
+
+    @Test
+    public void testGetUsersLeaderBoardByMovieComments() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        ApplicationUser u2 = testObjectFactory.createUser();
+        ApplicationUser u3 = testObjectFactory.createUser();
+
+        List<UserInLeaderBoardDTO> actualResult = applicationUserService.getUsersLeaderBoard();
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(u1.getId(), u2.getId(), u3.getId());
+    }
+
+    @Test
+    public void testGetAllUsersWithPagingAndSorting() {
+        testObjectFactory.createUser();
+        ApplicationUser u2 = testObjectFactory.createUser();
+        ApplicationUser u3 = testObjectFactory.createUser();
+
+
+        PageRequest pageRequest = PageRequest.of(0, 2,
+                Sort.by(Sort.Direction.DESC, "createdAt"));
+
+        Assertions.assertThat(applicationUserService.getAllUsers(pageRequest).getData())
+                .extracting("id")
+                .isEqualTo(Arrays.asList(u3.getId(), u2.getId()));
+    }
 
     @Test
     public void testGetUserById() {

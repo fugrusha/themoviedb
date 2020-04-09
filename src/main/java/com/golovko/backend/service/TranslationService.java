@@ -225,6 +225,17 @@ public class TranslationService {
         return result;
     }
 
+    public <T> PageResult<T> toPageResult(Page<T> pageOfDTOs) {
+        PageResult<T> result = new PageResult<>();
+        result.setPage(pageOfDTOs.getNumber());
+        result.setPageSize(pageOfDTOs.getSize());
+        result.setTotalPages(pageOfDTOs.getTotalPages());
+        result.setTotalElements(pageOfDTOs.getTotalElements());
+        result.setData(pageOfDTOs.getContent());
+
+        return result;
+    }
+
     public <T> List<T> translateList(List<?> objects, Class<T> targetClass) {
         return objects.stream().map(o -> translate(o, targetClass)).collect(Collectors.toList());
     }

@@ -1,15 +1,15 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.controller.validation.ControllerValidationUtil;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserPutDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.PageResult;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.service.ApplicationUserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -19,7 +19,15 @@ public class ApplicationUserController {
     @Autowired
     private ApplicationUserService applicationUserService;
 
-    // TODO list of users for admin
+    @GetMapping
+    public PageResult<UserReadDTO> getAllUsers(Pageable pageable) {
+        return applicationUserService.getAllUsers(pageable);
+    }
+
+    @GetMapping("/leader-board")
+    public List<UserInLeaderBoardDTO> getUsersLeaderBoard() {
+        return applicationUserService.getUsersLeaderBoard();
+    }
 
     @GetMapping("/{id}")
     public UserReadDTO getUser(@PathVariable UUID id) {
