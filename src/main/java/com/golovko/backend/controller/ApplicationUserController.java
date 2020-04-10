@@ -34,6 +34,11 @@ public class ApplicationUserController {
         return applicationUserService.getUser(id);
     }
 
+    @GetMapping("/{id}/extended")
+    public UserReadExtendedDTO getExtendedUser(@PathVariable UUID id) {
+        return applicationUserService.getExtendedUser(id);
+    }
+
     @PostMapping
     public UserReadDTO createUser(@RequestBody @Valid UserCreateDTO createDTO) {
         ControllerValidationUtil.validateEquals(createDTO.getPassword(), createDTO.getPasswordConfirmation(),

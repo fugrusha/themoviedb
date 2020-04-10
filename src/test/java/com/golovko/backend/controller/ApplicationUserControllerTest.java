@@ -128,6 +128,23 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testGetExtendedUser() throws Exception {
+        UserReadExtendedDTO user = generateObject(UserReadExtendedDTO.class);
+
+        Mockito.when(applicationUserService.getExtendedUser(user.getId())).thenReturn(user);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/users/{id}/extended", user.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadExtendedDTO actualUser = objectMapper.readValue(resultJson, UserReadExtendedDTO.class);
+        Assertions.assertThat(actualUser).isEqualToComparingFieldByField(user);
+
+        Mockito.verify(applicationUserService).getExtendedUser(user.getId());
+    }
+
+    @Test
     public void testGetUserWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
 

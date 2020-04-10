@@ -1,10 +1,14 @@
 package com.golovko.backend.dto.user;
 
-import com.golovko.backend.domain.UserRoleType;
+import com.golovko.backend.dto.article.ArticleReadDTO;
+import com.golovko.backend.dto.comment.CommentReadDTO;
+import com.golovko.backend.dto.like.LikeReadDTO;
+import com.golovko.backend.dto.userrole.UserRoleReadDTO;
 import lombok.Data;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -20,12 +24,15 @@ public class UserReadExtendedDTO {
 
     private Double trustLevel;
 
-    private List<UserRoleType> userRoles;
+    private List<UserRoleReadDTO> userRoles;
+
+    private List<ArticleReadDTO> articles;
+
+    private Set<LikeReadDTO> likes;
+
+    private List<CommentReadDTO> comments;
 
     private Instant createdAt;
 
     private Instant updatedAt;
-
-    // TODO add liked movies
-    // TODO rated movies
 }

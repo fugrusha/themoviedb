@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -35,6 +36,12 @@ public class ApplicationUserService {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
         return translationService.translate(user, UserReadDTO.class);
+    }
+
+    @Transactional(readOnly = true)
+    public UserReadExtendedDTO getExtendedUser(UUID id) {
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+        return translationService.translate(user, UserReadExtendedDTO.class);
     }
 
     public UserReadDTO createUser(UserCreateDTO createDTO) {
