@@ -76,6 +76,12 @@
 			<version>1.10.1</version>
 			<scope>test</scope>
 		</dependency>
+
+		<dependency>
+			<groupId>org.bitbucket.brunneng.qb</groupId>
+			<artifactId>query-builder</artifactId>
+			<version>1.0.2</version>
+		</dependency>
 	</dependencies>
 
 	<build>
