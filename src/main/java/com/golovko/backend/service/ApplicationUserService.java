@@ -1,10 +1,10 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.domain.UserRoleType;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.user.*;
+import com.golovko.backend.exception.UserAlreadyExistsException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import com.golovko.backend.repository.UserRoleRepository;
@@ -44,12 +44,15 @@ public class ApplicationUserService {
         return translationService.translate(user, UserReadExtendedDTO.class);
     }
 
+    @Transactional
     public UserReadDTO createUser(UserCreateDTO createDTO) {
-        // TODO check if user exists
+        if (applicationUserRepository.findByEmail(createDTO.getEmail()) != null) {
+            throw new UserAlreadyExistsException(createDTO.getEmail());
+        }
+
         ApplicationUser user = translationService.translate(createDTO, ApplicationUser.class);
 
-        UserRole userRole = userRoleRepository.findByType(UserRoleType.USER);
-        user.getUserRoles().add(userRole);
+        user.getUserRoles().add(userRoleRepository.findByType(UserRoleType.USER));
         user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);

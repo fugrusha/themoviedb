@@ -5,6 +5,7 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.UserAlreadyExistsException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.UserRoleRepository;
 import org.assertj.core.api.Assertions;
@@ -137,6 +138,19 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         Assertions.assertThat(createdUser.getUserRoles()).extracting("type")
                 .containsExactlyInAnyOrder(UserRoleType.USER);
+    }
+
+    @Test
+    public void testCreateUserWithEmailThatAlreadyExists() {
+        UserCreateDTO create = new UserCreateDTO();
+        create.setUsername("Vitalik");
+        create.setPassword("123456");
+        create.setEmail("vetal@gmail.com");
+
+        applicationUserService.createUser(create);
+
+        Assertions.assertThatThrownBy(() -> applicationUserService.createUser(create))
+                .isInstanceOf(UserAlreadyExistsException.class);
     }
 
     @Test

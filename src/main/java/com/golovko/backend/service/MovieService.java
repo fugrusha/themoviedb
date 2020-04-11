@@ -34,6 +34,9 @@ public class MovieService {
     private LikeRepository likeRepository;
 
     @Autowired
+    private PersonRepository personRepository;
+
+    @Autowired
     private TranslationService translationService;
 
     @Autowired
@@ -120,5 +123,17 @@ public class MovieService {
 
             log.info("Release status of movie: {} is set to true", movieId);
         }
+    }
+
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
+    public void updatePredictedAverageRatingOfMovie(UUID movieId) {
+        Double newPredictedAverageRating = personRepository.calcMovieCastAverageRatingByMovieId(movieId);
+        Movie movie = repoHelper.getEntityById(Movie.class, movieId);
+
+        log.info("Setting new predicted average rating of movie: {}. Old value {}, new value {}", movieId,
+                movie.getPredictedAverageRating(), newPredictedAverageRating);
+
+        movie.setPredictedAverageRating(newPredictedAverageRating);
+        movieRepository.save(movie);
     }
 }

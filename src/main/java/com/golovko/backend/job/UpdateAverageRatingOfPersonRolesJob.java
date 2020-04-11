@@ -19,7 +19,7 @@ public class UpdateAverageRatingOfPersonRolesJob {
     private PersonService personService;
 
     @Transactional(readOnly = true)
-    @Scheduled(cron = "${update.average.mark.of.person.roles.job.cron}")
+    @Scheduled(cron = "${update.average.rating.of.person.roles.job.cron}")
     public void updateAverageRating() {
         log.info("Job started...");
 

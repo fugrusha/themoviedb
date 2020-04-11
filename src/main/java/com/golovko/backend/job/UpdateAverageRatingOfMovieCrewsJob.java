@@ -19,7 +19,7 @@ public class UpdateAverageRatingOfMovieCrewsJob {
     private MovieCrewRepository movieCrewRepository;
 
     @Transactional(readOnly = true)
-    @Scheduled(cron = "${update.average.mark.of.movieCrews.job.cron}")
+    @Scheduled(cron = "${update.average.rating.of.movieCrews.job.cron}")
     public void updateAverageRatingOfMovieCrews() {
         log.info("Job started...");
 

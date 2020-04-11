@@ -82,6 +82,22 @@ public class ApplicationUserRepositoryTest extends BaseTest {
     }
 
     @Test
+    public void testFindByEmail() {
+        String expectedEmail = "mynewtest@email.com";
+
+        testObjectFactory.createUser();
+        testObjectFactory.createUser();
+
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setEmail(expectedEmail);
+        applicationUserRepository.save(user);
+
+        ApplicationUser actualUser = applicationUserRepository.findByEmail(expectedEmail);
+        Assert.assertEquals(user.getId(), actualUser.getId());
+        Assert.assertEquals(expectedEmail, actualUser.getEmail());
+    }
+
+    @Test
     public void testGetUsersLeaderBoardByMovieComments() {
         Movie m1 = testObjectFactory.createMovie();
         Movie m2 = testObjectFactory.createMovie();

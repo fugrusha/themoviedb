@@ -42,7 +42,7 @@ public class GenreServiceTest extends BaseTest {
         Assertions.assertThat(readDTO).isEqualToComparingFieldByField(genre);
     }
 
-    // TODO to be or not to be // Will filter be better?
+
     @Test
     public void testGetExtendedGenre() {
         Genre genre = testObjectFactory.createGenre("comedy");

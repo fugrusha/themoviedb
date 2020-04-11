@@ -92,9 +92,9 @@ public class UserRoleControllerTest extends BaseControllerTest {
         UUID userId = UUID.randomUUID();
         UUID userRoleId = UUID.randomUUID();
 
-        List<UserRoleReadDTO> emptyList = new ArrayList<>();
+        List<UserRoleReadDTO> expectedResult = new ArrayList<>();
 
-        Mockito.when(userRoleService.removeRoleFromUser(userId, userRoleId)).thenReturn(emptyList);
+        Mockito.when(userRoleService.removeRoleFromUser(userId, userRoleId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(delete("/api/v1/users/{userId}/roles/{id}", userId, userRoleId))

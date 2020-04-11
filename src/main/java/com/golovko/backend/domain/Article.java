@@ -34,14 +34,14 @@ public class Article extends AbstractEntity {
 
     private Integer dislikesCount;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "article_person",
             joinColumns = @JoinColumn(name = "article_id"),
             inverseJoinColumns = @JoinColumn(name = "person_id"))
     private List<Person> people = new ArrayList<>();
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "article_movie",
             joinColumns = @JoinColumn(name = "article_id"),

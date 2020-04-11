@@ -23,6 +23,11 @@ public class PersonController {
         return personService.getPerson(id);
     }
 
+    @GetMapping("/{id}/extended")
+    public PersonReadExtendedDTO getPersonExtended(@PathVariable UUID id) {
+        return personService.getPersonExtended(id);
+    }
+
     @GetMapping
     public PageResult<PersonReadDTO> getAllPeople(Pageable pageable) {
         return personService.getPeople(pageable);

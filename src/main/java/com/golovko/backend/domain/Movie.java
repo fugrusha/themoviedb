@@ -37,6 +37,10 @@ public class Movie extends AbstractEntity {
     @Max(value = 10)
     private Double averageRating;
 
+    @Min(value = 0)
+    @Max(value = 10)
+    private Double predictedAverageRating;
+
     private Integer likesCount;
 
     private Integer dislikesCount;

@@ -49,7 +49,7 @@ public class UseRoleServiceTest extends BaseTest {
     }
 
     @Test(expected = EntityNotFoundException.class)
-    public void testGetUserRolesByUserIdEmptyList() {
+    public void testGetUserRolesByUserIdEmptyCollection() {
         ApplicationUser user = testObjectFactory.createUser();
         user.setUserRoles(new ArrayList<UserRole>());
         applicationUserRepository.save(user);

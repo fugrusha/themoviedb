@@ -25,7 +25,7 @@ public class ArticleController {
         return articleService.getArticle(id);
     }
 
-    @GetMapping // TODO add filter by Person and by Movie
+    @GetMapping
     public PageResult<ArticleReadDTO> getAllArticles(Pageable pageable) {
         return articleService.getAllPublishedArticles(pageable);
     }

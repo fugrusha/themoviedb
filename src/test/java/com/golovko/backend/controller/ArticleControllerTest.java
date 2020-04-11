@@ -411,9 +411,9 @@ public class ArticleControllerTest extends BaseControllerTest {
         UUID articleId = UUID.randomUUID();
         UUID personId = UUID.randomUUID();
 
-        List<PersonReadDTO> emptyList = new ArrayList<>();
+        List<PersonReadDTO> expectedResult = new ArrayList<>();
 
-        Mockito.when(articleService.removePersonFromArticle(articleId, personId)).thenReturn(emptyList);
+        Mockito.when(articleService.removePersonFromArticle(articleId, personId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(delete("/api/v1/articles/{articleId}/people/{id}", articleId, personId))
@@ -472,9 +472,9 @@ public class ArticleControllerTest extends BaseControllerTest {
         UUID articleId = UUID.randomUUID();
         UUID movieId = UUID.randomUUID();
 
-        List<MovieReadDTO> emptyList = new ArrayList<>();
+        List<MovieReadDTO> expectedResult = new ArrayList<>();
 
-        Mockito.when(articleService.removeMovieFromArticle(articleId, movieId)).thenReturn(emptyList);
+        Mockito.when(articleService.removeMovieFromArticle(articleId, movieId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(delete("/api/v1/articles/{articleId}/movies/{id}", articleId, movieId))
