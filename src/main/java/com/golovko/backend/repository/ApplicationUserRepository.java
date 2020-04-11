@@ -26,4 +26,5 @@ public interface ApplicationUserRepository extends CrudRepository<ApplicationUse
             + " order by u.trustLevel desc")
     List<UserInLeaderBoardDTO> getUsersLeaderBoard();
 
+    ApplicationUser findByEmail(String email);
 }

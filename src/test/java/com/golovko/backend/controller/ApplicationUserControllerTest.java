@@ -6,6 +6,7 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.ControllerValidationException;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.UserAlreadyExistsException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ApplicationUserService;
 import org.assertj.core.api.Assertions;
@@ -200,6 +201,32 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
 
         UserReadDTO actualUser = objectMapper.readValue(result, UserReadDTO.class);
         Assertions.assertThat(actualUser).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testCreateUserThrowsUserAlreadyExistsException() throws Exception {
+        UserCreateDTO createDTO = new UserCreateDTO();
+        createDTO.setUsername("david");
+        createDTO.setPassword("1234567890");
+        createDTO.setPasswordConfirmation("1234567890");
+        createDTO.setEmail("david101@email.com");
+
+        UserAlreadyExistsException ex = new UserAlreadyExistsException(createDTO.getEmail());
+
+        Mockito.when(applicationUserService.createUser(createDTO)).thenThrow(ex);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users")
+                .content(objectMapper.writeValueAsString(createDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isUnprocessableEntity())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo actualResult = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(actualResult.getMessage(), ex.getMessage());
+
+        Mockito.verify(applicationUserService).createUser(createDTO);
+
     }
 
     @Test
