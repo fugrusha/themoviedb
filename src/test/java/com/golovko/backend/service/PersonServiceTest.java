@@ -1,12 +1,11 @@
 package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
-import com.golovko.backend.domain.Gender;
-import com.golovko.backend.domain.Movie;
-import com.golovko.backend.domain.Person;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.person.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.PersonRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -29,6 +28,9 @@ public class PersonServiceTest extends BaseTest {
     @Autowired
     private PersonRepository personRepository;
 
+    @Autowired
+    private ArticleRepository articleRepository;
+
     @Test
     public void testGetPerson() {
         Person person = testObjectFactory.createPerson();
@@ -36,6 +38,31 @@ public class PersonServiceTest extends BaseTest {
         PersonReadDTO readDTO = personService.getPerson(person.getId());
 
         Assertions.assertThat(readDTO).isEqualToComparingFieldByField(person);
+    }
+
+    @Test
+    public void testGetPersonExtended() {
+        ApplicationUser articleAuthor = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(articleAuthor, ArticleStatus.PUBLISHED);
+        Movie movie = testObjectFactory.createMovie();
+        Person person = testObjectFactory.createPerson();
+        MovieCast movieCast = testObjectFactory.createMovieCast(person, movie);
+        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+
+        article.setPeople(List.of(person));
+        articleRepository.save(article);
+
+        PersonReadExtendedDTO actualResult = personService.getPersonExtended(person.getId());
+
+        Assertions.assertThat(actualResult).isEqualToIgnoringGivenFields(person,
+                "articles", "movieCasts", "movieCrews");
+
+        Assertions.assertThat(actualResult.getArticles()).extracting("id")
+                .containsExactlyInAnyOrder(article.getId());
+        Assertions.assertThat(actualResult.getMovieCasts()).extracting("id")
+                .containsExactlyInAnyOrder(movieCast.getId());
+        Assertions.assertThat(actualResult.getMovieCrews()).extracting("id")
+                .containsExactlyInAnyOrder(movieCrew.getId());
     }
 
     @Test
@@ -114,7 +141,7 @@ public class PersonServiceTest extends BaseTest {
 
         person = personRepository.findById(person.getId()).get();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO,
-                        "movieCrews", "movieCast", "articles");
+                "movieCrews", "movieCasts", "articles");
     }
 
     @Test
@@ -132,7 +159,7 @@ public class PersonServiceTest extends BaseTest {
         Assertions.assertThat(personAfterUpdate).hasNoNullFieldsOrPropertiesExcept("averageRatingByRoles",
                 "averageRatingByMovies");
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(personAfterUpdate,
-                        "movieCrews", "movieCast", "articles");
+                "movieCrews", "movieCasts", "articles");
     }
 
     @Test
@@ -151,7 +178,7 @@ public class PersonServiceTest extends BaseTest {
 
         person = personRepository.findById(person.getId()).get();
         Assertions.assertThat(person).isEqualToIgnoringGivenFields(readDTO,
-                "movieCrews", "movieCast", "articles");
+                "movieCrews", "movieCasts", "articles");
     }
 
     @Test
@@ -234,7 +261,8 @@ public class PersonServiceTest extends BaseTest {
         person.setGender(Gender.MALE);
         person.setAverageRatingByMovies(-0.01);
         person.setAverageRatingByRoles(-0.01);
-        personRepository.save(person);;
+        personRepository.save(person);
+        ;
     }
 
     @Test(expected = TransactionSystemException.class)
@@ -246,6 +274,7 @@ public class PersonServiceTest extends BaseTest {
         person.setGender(Gender.MALE);
         person.setAverageRatingByMovies(10.01);
         person.setAverageRatingByRoles(10.01);
-        personRepository.save(person);;
+        personRepository.save(person);
+        ;
     }
 }

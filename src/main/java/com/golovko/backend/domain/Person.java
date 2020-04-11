@@ -46,7 +46,7 @@ public class Person extends AbstractEntity {
     private Set<MovieCrew> movieCrews = new HashSet<>();
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCast> movieCast = new HashSet<>();
+    private Set<MovieCast> movieCasts = new HashSet<>();
 
     @ManyToMany(mappedBy = "people")
     private List<Article> articles = new ArrayList<>();

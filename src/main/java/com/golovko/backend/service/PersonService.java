@@ -49,6 +49,13 @@ public class PersonService {
         return translationService.translate(person, PersonReadDTO.class);
     }
 
+    @Transactional(readOnly = true)
+    public PersonReadExtendedDTO getPersonExtended(UUID id) {
+        Person person = repoHelper.getEntityById(Person.class, id);
+
+        return translationService.translate(person, PersonReadExtendedDTO.class);
+    }
+
     public PersonReadDTO createPerson(PersonCreateDTO createDTO) {
         Person person = translationService.translate(createDTO, Person.class);
 

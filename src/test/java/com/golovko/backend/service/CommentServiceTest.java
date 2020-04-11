@@ -400,7 +400,7 @@ public class CommentServiceTest extends BaseTest {
     }
 
     @Test
-    public void testGetCommentsByFilterWithEmptySets() {
+    public void testGetCommentsWithEmptySetsOfFilter() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
         Movie movie = testObjectFactory.createMovie();

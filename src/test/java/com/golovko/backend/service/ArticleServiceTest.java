@@ -249,7 +249,7 @@ public class ArticleServiceTest extends BaseTest {
     }
 
     @Test
-    public void testGetArticlesByFilterWithEmptySet() {
+    public void testGetArticlesWithEmptySetOfFilter() {
         ApplicationUser author = testObjectFactory.createUser();
         Article a1 = testObjectFactory.createArticle(author, PUBLISHED);
         Article a2 = testObjectFactory.createArticle(author, DRAFT);

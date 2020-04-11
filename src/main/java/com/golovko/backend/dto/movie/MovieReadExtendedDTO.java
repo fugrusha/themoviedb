@@ -26,6 +26,8 @@ public class MovieReadExtendedDTO {
 
     private Double averageRating;
 
+    private Double predictedAverageRating;
+
     private Integer likesCount;
 
     private Integer dislikesCount;

@@ -11,7 +11,7 @@ import org.springframework.test.web.servlet.MockMvc;
 @RunWith(SpringRunner.class)
 public abstract class BaseControllerTest {
 
-    protected RandomObjectGenerator generator = new RandomObjectGenerator();
+    private final RandomObjectGenerator generator = new RandomObjectGenerator();
 
     protected <T> T generateObject(Class<T> objectClass) {
         return generator.generateRandomObject(objectClass);

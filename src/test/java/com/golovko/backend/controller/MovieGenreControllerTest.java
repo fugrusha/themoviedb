@@ -68,9 +68,9 @@ public class MovieGenreControllerTest extends BaseControllerTest {
         UUID movieId = UUID.randomUUID();
         UUID genreId = UUID.randomUUID();
 
-        List<GenreReadDTO> emptyList = new ArrayList<>();
+        List<GenreReadDTO> expectedResult = new ArrayList<>();
 
-        Mockito.when(movieGenreService.removeGenreFromMovie(movieId, genreId)).thenReturn(emptyList);
+        Mockito.when(movieGenreService.removeGenreFromMovie(movieId, genreId)).thenReturn(expectedResult);
 
         String resultJson = mockMvc
                 .perform(delete("/api/v1/movies/{movieId}/genres/{id}", movieId, genreId))

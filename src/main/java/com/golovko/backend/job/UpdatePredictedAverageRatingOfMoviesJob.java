@@ -10,7 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-public class UpdateAverageRatingOfMoviesJob {
+public class UpdatePredictedAverageRatingOfMoviesJob {
 
     @Autowired
     private MovieRepository movieRepository;
@@ -19,15 +19,15 @@ public class UpdateAverageRatingOfMoviesJob {
     private MovieService movieService;
 
     @Transactional(readOnly = true)
-    @Scheduled(cron = "${update.average.rating.of.movies.job.cron}")
-    public void updateAverageRating() {
+    @Scheduled(cron = "${update.predicted.average.rating.of.movies.job.cron}")
+    public void updatePredictedAverageRating() {
         log.info("Job started...");
 
-        movieRepository.getIdsOfMovies().forEach(movieId -> {
+        movieRepository.getIdsOfUnreleasedMovies().forEach(movieId -> {
             try {
-                movieService.updateAverageRatingOfMovie(movieId);
+                movieService.updatePredictedAverageRatingOfMovie(movieId);
             } catch (Exception e) {
-                log.error("Failed to update average rating for movie: {}", movieId, e);
+                log.error("Failed to update predicted average rating for movie: {}", movieId, e);
             }
         });
 

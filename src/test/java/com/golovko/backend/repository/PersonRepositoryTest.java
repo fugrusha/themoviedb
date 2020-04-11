@@ -108,6 +108,24 @@ public class PersonRepositoryTest extends BaseTest {
         }
     }
 
+    @Test
+    public void testCalcPersonAverageRatingByMovieId() {
+        Movie m1 = testObjectFactory.createMovie();
+        Movie m2 = testObjectFactory.createMovie();
+
+        Person p1 = testObjectFactory.createPerson(5.0);
+        Person p2 = testObjectFactory.createPerson(3.0);
+        Person p3 = testObjectFactory.createPerson(4.0);
+
+        testObjectFactory.createMovieCast(p1, m1);
+        testObjectFactory.createMovieCast(p2, m1);
+        testObjectFactory.createMovieCast(p3, m2);
+
+        Double averageRating = personRepository.calcMovieCastAverageRatingByMovieId(m1.getId());
+
+        Assert.assertEquals(4.0, averageRating, Double.MIN_NORMAL);
+    }
+
     private Person createPerson() {
         Person person = new Person();
         person.setFirstName("name");
@@ -118,7 +136,7 @@ public class PersonRepositoryTest extends BaseTest {
         return personRepository.save(person);
     }
 
-    public MovieCast createMovieCast(Person person, Movie movie, boolean withRating) {
+    private MovieCast createMovieCast(Person person, Movie movie, boolean withRating) {
         MovieCast movieCast = new MovieCast();
         movieCast.setCharacter("character");
         movieCast.setDescription("character");

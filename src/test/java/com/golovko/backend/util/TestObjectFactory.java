@@ -68,21 +68,24 @@ public class TestObjectFactory {
     public Movie createMovie() {
         Movie movie = generateFlatEntityWithoutId(Movie.class);
         movie.setAverageRating(null);
+        movie.setPredictedAverageRating(null);
         movie.setIsReleased(true);
         return movieRepository.save(movie);
     }
 
-    public Movie createMovie(LocalDate releasedDate) {
+    public Movie createMovie(LocalDate releasedDate, boolean isReleased) {
         Movie movie = generateFlatEntityWithoutId(Movie.class);
         movie.setReleaseDate(releasedDate);
-        movie.setIsReleased(false);
+        movie.setIsReleased(isReleased);
         movie.setAverageRating(5.0);
+        movie.setPredictedAverageRating(null);
         return movieRepository.save(movie);
     }
 
     public Movie createMovie(Double averageRating) {
         Movie movie = generateFlatEntityWithoutId(Movie.class);
         movie.setAverageRating(averageRating);
+        movie.setPredictedAverageRating(null);
         return movieRepository.save(movie);
     }
 
@@ -102,6 +105,13 @@ public class TestObjectFactory {
         Person person = generateFlatEntityWithoutId(Person.class);
         person.setAverageRatingByRoles(null);
         person.setAverageRatingByMovies(null);
+        return personRepository.save(person);
+    }
+
+    public Person createPerson(Double averageRatingByMovies) {
+        Person person = generateFlatEntityWithoutId(Person.class);
+        person.setAverageRatingByRoles(null);
+        person.setAverageRatingByMovies(averageRatingByMovies);
         return personRepository.save(person);
     }
 

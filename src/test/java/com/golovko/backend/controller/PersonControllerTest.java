@@ -2,8 +2,13 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Gender;
+import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.PageResult;
+import com.golovko.backend.dto.article.ArticleReadDTO;
+import com.golovko.backend.dto.moviecast.MovieCastReadDTO;
+import com.golovko.backend.dto.moviecrew.MovieCrewReadDTO;
 import com.golovko.backend.dto.person.*;
+import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.PersonService;
 import org.assertj.core.api.Assertions;
@@ -347,11 +352,59 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService).deletePerson(id);
     }
 
+    @Test
+    public void testGetPersonWrongId() throws Exception {
+        UUID wrongId = UUID.randomUUID();
+
+        EntityNotFoundException exception = new EntityNotFoundException(Movie.class, wrongId);
+        Mockito.when(personService.getPerson(wrongId)).thenThrow(exception);
+
+        String result = mockMvc
+                .perform(get("/api/v1/people/{id}", wrongId))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse().getContentAsString();
+
+        Assert.assertTrue(result.contains(exception.getMessage()));
+    }
+
+    @Test
+    public void testGetPersonExtended() throws Exception {
+        ArticleReadDTO article = generateObject(ArticleReadDTO.class);
+        MovieCastReadDTO movieCast = generateObject(MovieCastReadDTO.class);
+        MovieCrewReadDTO movieCrew = generateObject(MovieCrewReadDTO.class);
+        PersonReadExtendedDTO personDTO = createPersonReadExtendedDTO(
+                List.of(article), List.of(movieCast), List.of(movieCrew));
+
+        Mockito.when(personService.getPersonExtended(personDTO.getId())).thenReturn(personDTO);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/people/{id}/extended", personDTO.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PersonReadExtendedDTO actualResult = objectMapper.readValue(resultJson, PersonReadExtendedDTO.class);
+        Assertions.assertThat(actualResult).isEqualToComparingFieldByField(personDTO);
+
+        Mockito.verify(personService).getPersonExtended(personDTO.getId());
+    }
+
     private PersonReadDTO createPersonReadDTO() {
         return generateObject(PersonReadDTO.class);
     }
 
     private PersonInLeaderBoardDTO createPersonInLeaderBoard() {
         return generateObject(PersonInLeaderBoardDTO.class);
+    }
+
+    private PersonReadExtendedDTO createPersonReadExtendedDTO(
+            List<ArticleReadDTO> articles,
+            List<MovieCastReadDTO> movieCasts,
+            List<MovieCrewReadDTO> movieCrews
+    ) {
+        PersonReadExtendedDTO dto = generateObject(PersonReadExtendedDTO.class);
+        dto.setArticles(articles);
+        dto.setMovieCasts(movieCasts);
+        dto.setMovieCrews(movieCrews);
+        return dto;
     }
 }

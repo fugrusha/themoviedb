@@ -27,4 +27,9 @@ public interface PersonRepository extends CrudRepository<Person, UUID> {
             + " from Person p"
             + " order by p.averageRatingByRoles desc")
     List<PersonInLeaderBoardDTO> getPersonLeaderBoard();
+
+    @Query("select avg(p.averageRatingByMovies) from Person p"
+            + " join p.movieCasts mc"
+            + " where mc.movie.id = :movieId")
+    Double calcMovieCastAverageRatingByMovieId(UUID movieId);
 }

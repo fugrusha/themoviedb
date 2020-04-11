@@ -50,13 +50,17 @@ public class UpdateAverageRatingOfMovieCrewsJobTest extends BaseTest {
     public void testMovieCrewsUpdateIndependently() {
         ApplicationUser u1 = testObjectFactory.createUser();
         ApplicationUser u2 = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
+        Movie movie1 = testObjectFactory.createMovie();
+        Movie movie2 = testObjectFactory.createMovie();
         Person person = testObjectFactory.createPerson();
 
-        MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
+        MovieCrew movieCrew1 = testObjectFactory.createMovieCrew(person, movie1);
+        MovieCrew movieCrew2 = testObjectFactory.createMovieCrew(person, movie2);
 
-        testObjectFactory.createRating(3, u1, movieCrew.getId(), MOVIE_CREW);
-        testObjectFactory.createRating(6, u2, movieCrew.getId(), MOVIE_CREW);
+        testObjectFactory.createRating(3, u1, movieCrew1.getId(), MOVIE_CREW);
+        testObjectFactory.createRating(6, u2, movieCrew1.getId(), MOVIE_CREW);
+        testObjectFactory.createRating(3, u1, movieCrew2.getId(), MOVIE_CREW);
+        testObjectFactory.createRating(6, u2, movieCrew2.getId(), MOVIE_CREW);
 
         UUID[] failedId = new UUID[1];
         Mockito.doAnswer(invocationOnMock -> {
