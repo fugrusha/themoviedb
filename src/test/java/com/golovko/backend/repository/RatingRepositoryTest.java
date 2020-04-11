@@ -116,4 +116,20 @@ public class RatingRepositoryTest extends BaseTest {
         Assert.assertFalse(ratingRepository.existsById(r1.getId()));
         Assert.assertTrue(ratingRepository.existsById(r2.getId()));
     }
+
+    @Test
+    public void testFindByAuthorIdAndRatedObjectId() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Movie m2 = testObjectFactory.createMovie();
+
+        Rating r1 = testObjectFactory.createRating(3, u1, m1.getId(), MOVIE);
+        testObjectFactory.createRating(3, u1, m2.getId(), MOVIE);
+
+        Rating rating = ratingRepository.findByAuthorIdAndRatedObjectId(u1.getId(), m1.getId());
+
+        Assert.assertEquals(r1.getId(), rating.getId());
+        Assert.assertEquals(u1.getId(), rating.getAuthor().getId());
+        Assert.assertEquals(m1.getId(), rating.getRatedObjectId());
+    }
 }

@@ -1,0 +1,9 @@
+<dataset>
+    <MOVIE_CAST ID="uuid'52050b6b-eefc-4f5f-9c22-58b29223be09'"
+                PERSON_ID="uuid'16a1bb99-ef3c-428f-9e7a-630e757e3db7'"
+                MOVIE_ID="uuid'e2fd72a2-777a-480d-85a4-1484a5b5406b'"
+                CHARACTER="some text"
+                MOVIE_CREW_TYPE="CAST"
+                DESCRIPTION="some text"
+                AVERAGE_RATING="4.5"/>
+</dataset>

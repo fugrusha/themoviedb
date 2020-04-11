@@ -39,9 +39,12 @@ public class ApplicationUser extends AbstractEntity {
             inverseJoinColumns = @JoinColumn(name = "user_role_id"))
     private List<UserRole> userRoles = new ArrayList<>();
 
-    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "author")
     private List<Article> articles = new ArrayList<>();
 
     @OneToMany(mappedBy = "author")
     private Set<Like> likes = new HashSet<>();
+
+    @OneToMany(mappedBy = "author")
+    private List<Comment> comments = new ArrayList<>();
 }

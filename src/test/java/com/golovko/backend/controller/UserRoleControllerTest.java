@@ -2,6 +2,8 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.dto.userrole.UserRoleReadDTO;
+import com.golovko.backend.exception.LinkDuplicatedException;
+import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.UserRoleService;
 import org.junit.Assert;
 import org.junit.Test;
@@ -23,7 +25,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
     private UserRoleService userRoleService;
 
     @Test
-    public void testGetUserRoleByUserId() throws Exception {
+    public void testGetUserRolesByUserId() throws Exception {
         UserRoleReadDTO readDTO = createUserRoleReadDTO();
         List<UserRoleReadDTO> expectedResult = List.of(readDTO);
 
@@ -46,7 +48,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
     public void testAddRoleToUser() throws Exception {
         UserRoleReadDTO readDTO = createUserRoleReadDTO();
         UUID userId = UUID.randomUUID();
-        UUID userRoleId = UUID.randomUUID();
+        UUID userRoleId = readDTO.getId();
 
         List<UserRoleReadDTO> expectedResult = List.of(readDTO);
 
@@ -59,6 +61,28 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
         List<UserRoleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(userRoleService).addUserRole(userId, userRoleId);
+    }
+
+    @Test
+    public void testDuplicatedRole() throws Exception {
+        UserRoleReadDTO readDTO = createUserRoleReadDTO();
+        UUID userId = UUID.randomUUID();
+        UUID userRoleId = UUID.randomUUID();
+
+        LinkDuplicatedException ex = new LinkDuplicatedException(
+                String.format("User %s already has role %s", userId, userRoleId));
+
+        Mockito.when(userRoleService.addUserRole(userId, userRoleId)).thenThrow(ex);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/roles/{id}", userId, userRoleId))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo actualResult = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(actualResult.getMessage(), ex.getMessage());
 
         Mockito.verify(userRoleService).addUserRole(userId, userRoleId);
     }

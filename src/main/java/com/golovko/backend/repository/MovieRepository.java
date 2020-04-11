@@ -1,6 +1,9 @@
 package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Movie;
+import com.golovko.backend.dto.movie.MovieInLeaderBoardDTO;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
@@ -42,4 +45,9 @@ public interface MovieRepository extends CrudRepository<Movie, UUID>, MovieRepos
 
     @Query("select m.id from Movie m where m.isReleased = false")
     Stream<UUID> getIdsOfUnreleasedMovies();
+
+    @Query("select new com.golovko.backend.dto.movie.MovieInLeaderBoardDTO(m.id,"
+            + " m.movieTitle, m.averageRating, m.likesCount, m.dislikesCount)"
+            + " from Movie m")
+    Page<MovieInLeaderBoardDTO> getMoviesLeaderBoard(Pageable pageable);
 }

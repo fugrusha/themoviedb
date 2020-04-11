@@ -51,6 +51,11 @@ public class MovieService {
         return translationService.toPageResult(movies, MovieReadDTO.class);
     }
 
+    public PageResult<MovieInLeaderBoardDTO> getMoviesLeaderBoard(Pageable pageable) {
+        Page<MovieInLeaderBoardDTO> movies = movieRepository.getMoviesLeaderBoard(pageable);
+        return translationService.toPageResult(movies);
+    }
+
     @Transactional(readOnly = true)
     public MovieReadExtendedDTO getMovieExtended(UUID id) {
         Movie movie = repoHelper.getEntityById(Movie.class, id);

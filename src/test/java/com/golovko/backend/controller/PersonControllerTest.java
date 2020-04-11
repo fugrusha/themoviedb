@@ -3,10 +3,7 @@ package com.golovko.backend.controller;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Gender;
 import com.golovko.backend.dto.PageResult;
-import com.golovko.backend.dto.person.PersonCreateDTO;
-import com.golovko.backend.dto.person.PersonPatchDTO;
-import com.golovko.backend.dto.person.PersonPutDTO;
-import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.*;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.PersonService;
 import org.assertj.core.api.Assertions;
@@ -71,6 +68,27 @@ public class PersonControllerTest extends BaseControllerTest {
         Assert.assertEquals(pageResult, actualResult);
 
         Mockito.verify(personService).getPeople(PageRequest.of(0, defaultPageSize));
+    }
+
+    @Test
+    public void testGetPersonLeaderBoard() throws Exception {
+        PersonInLeaderBoardDTO p1 = createPersonInLeaderBoard();
+        PersonInLeaderBoardDTO p2 = createPersonInLeaderBoard();
+        PersonInLeaderBoardDTO p3 = createPersonInLeaderBoard();
+
+        List<PersonInLeaderBoardDTO> expectedResult = List.of(p1, p2, p3);
+
+        Mockito.when(personService.getPersonLeaderBoard()).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/people/leader-board"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<PersonInLeaderBoardDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(personService).getPersonLeaderBoard();
     }
 
     @Test
@@ -331,5 +349,9 @@ public class PersonControllerTest extends BaseControllerTest {
 
     private PersonReadDTO createPersonReadDTO() {
         return generateObject(PersonReadDTO.class);
+    }
+
+    private PersonInLeaderBoardDTO createPersonInLeaderBoard() {
+        return generateObject(PersonInLeaderBoardDTO.class);
     }
 }

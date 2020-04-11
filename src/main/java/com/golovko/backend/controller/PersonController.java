@@ -1,16 +1,14 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.dto.PageResult;
-import com.golovko.backend.dto.person.PersonCreateDTO;
-import com.golovko.backend.dto.person.PersonPatchDTO;
-import com.golovko.backend.dto.person.PersonPutDTO;
-import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.*;
 import com.golovko.backend.service.PersonService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -28,6 +26,11 @@ public class PersonController {
     @GetMapping
     public PageResult<PersonReadDTO> getAllPeople(Pageable pageable) {
         return personService.getPeople(pageable);
+    }
+
+    @GetMapping("/leader-board")
+    public List<PersonInLeaderBoardDTO> getPersonLeaderBoard() {
+        return personService.getPersonLeaderBoard();
     }
 
     @PostMapping

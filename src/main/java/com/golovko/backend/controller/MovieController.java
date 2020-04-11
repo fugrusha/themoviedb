@@ -22,6 +22,11 @@ public class MovieController {
         return movieService.getMovies(filter, pageable);
     }
 
+    @GetMapping("/leader-board")
+    public PageResult<MovieInLeaderBoardDTO> getMoviesLeaderBoard(Pageable pageable) {
+        return movieService.getMoviesLeaderBoard(pageable);
+    }
+
     @GetMapping("/{id}")
     public MovieReadDTO getMovieById(@PathVariable UUID id) {
         return movieService.getMovie(id);

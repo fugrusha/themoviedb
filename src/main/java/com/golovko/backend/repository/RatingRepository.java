@@ -28,4 +28,6 @@ public interface RatingRepository extends CrudRepository<Rating, UUID> {
     @Query("delete from Rating r where r.ratedObjectId = :targetId"
             + " and r.ratedObjectType = :targetType")
     void deleteRatingsByRatedObjectId(UUID targetId, TargetObjectType targetType);
+
+    Rating findByAuthorIdAndRatedObjectId(UUID authorId, UUID targetId);
 }

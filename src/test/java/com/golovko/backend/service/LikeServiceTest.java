@@ -6,6 +6,7 @@ import com.golovko.backend.dto.like.LikeCreateDTO;
 import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
+import com.golovko.backend.exception.ActionOfUserDuplicatedException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.ArticleRepository;
@@ -17,7 +18,6 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -42,7 +42,7 @@ public class LikeServiceTest extends BaseTest {
     private LikeService likeService;
 
     @Test
-    public void testGetRatingById() {
+    public void testGetLikeById() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
         Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
@@ -72,10 +72,6 @@ public class LikeServiceTest extends BaseTest {
 
         Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
         Assert.assertNotNull(readDTO.getId());
-
-        Like like = likeRepository.findByIdAndUserId(readDTO.getId(), user.getId());
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(like, "authorId");
-        Assert.assertEquals(readDTO.getAuthorId(), like.getAuthor().getId());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -160,7 +156,7 @@ public class LikeServiceTest extends BaseTest {
     }
 
     @Test
-    public void testCreateSecondLikeForMovie() {
+    public void testCreateDuplicateLikeForMovie() {
         ApplicationUser user = testObjectFactory.createUser();
 
         Movie movie = testObjectFactory.createMovie();
@@ -174,9 +170,10 @@ public class LikeServiceTest extends BaseTest {
 
         likeService.createLike(user.getId(), createDTO); // first like was created
 
-        Assertions.assertThatThrownBy(() -> {
-            likeService.createLike(user.getId(), createDTO); // second like was created
-        }).isInstanceOf(ResponseStatusException.class);
+        Assertions.assertThatThrownBy(() -> likeService.createLike(user.getId(), createDTO))
+                .isInstanceOf(ActionOfUserDuplicatedException.class)
+                .hasMessage(String.format("User with id=%s has already %s for %s with id=%s",
+                        user.getId(), ActionType.ADD_LIKE, createDTO.getLikedObjectType(), movie.getId()));;
     }
 
     @Test(expected = WrongTargetObjectTypeException.class)
@@ -237,19 +234,6 @@ public class LikeServiceTest extends BaseTest {
         createDTO.setMeLiked(true);
         createDTO.setLikedObjectType(MOVIE);
         createDTO.setLikedObjectId(wrongMovieId);
-
-        likeService.createLike(user.getId(), createDTO);
-    }
-
-    @Test(expected = WrongTargetObjectTypeException.class)
-    public void testCreateLikeForWrongTargetObjectType() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
-
-        LikeCreateDTO createDTO = new LikeCreateDTO();
-        createDTO.setMeLiked(true);
-        createDTO.setLikedObjectType(PERSON);
-        createDTO.setLikedObjectId(movie.getId());
 
         likeService.createLike(user.getId(), createDTO);
     }

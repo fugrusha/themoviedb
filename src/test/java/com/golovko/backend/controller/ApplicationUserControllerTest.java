@@ -1,10 +1,9 @@
 package com.golovko.backend.controller;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.dto.user.UserCreateDTO;
-import com.golovko.backend.dto.user.UserPatchDTO;
-import com.golovko.backend.dto.user.UserPutDTO;
-import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.PageResult;
+import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.ControllerValidationException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
@@ -15,11 +14,14 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.util.List;
 import java.util.UUID;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -31,6 +33,82 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
 
     @MockBean
     private ApplicationUserService applicationUserService;
+
+    @Test
+    public void testGetAllUsers() throws Exception {
+        UserReadDTO u1 = generateObject(UserReadDTO.class);
+        UserReadDTO u2 = generateObject(UserReadDTO.class);
+        UserReadDTO u3 = generateObject(UserReadDTO.class);
+
+        PageResult<UserReadDTO> pageResult = new PageResult<>();
+        pageResult.setData(List.of(u1, u2, u3));
+
+        Mockito.when(applicationUserService.getAllUsers(PageRequest.of(0, defaultPageSize)))
+                .thenReturn(pageResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/users/"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<UserReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult.getData()).extracting(UserReadDTO::getId)
+                .containsExactlyInAnyOrder(u1.getId(), u2.getId(), u3.getId());
+
+        Mockito.verify(applicationUserService).getAllUsers(PageRequest.of(0, defaultPageSize));
+    }
+
+    @Test
+    public void testGetUsersLeaderBoardByMovieComments() throws Exception {
+        UserInLeaderBoardDTO u1 = generateObject(UserInLeaderBoardDTO.class);
+        UserInLeaderBoardDTO u2 = generateObject(UserInLeaderBoardDTO.class);
+        UserInLeaderBoardDTO u3 = generateObject(UserInLeaderBoardDTO.class);
+
+        List<UserInLeaderBoardDTO> expectedResult = List.of(u1, u2, u3);
+
+        Mockito.when(applicationUserService.getUsersLeaderBoard()).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/users/leader-board"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<UserInLeaderBoardDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(u1.getId(), u2.getId(), u3.getId());
+
+        Mockito.verify(applicationUserService).getUsersLeaderBoard();
+    }
+
+    @Test
+    public void testGetAllUsersWithPagingAndSorting() throws Exception {
+        UserReadDTO u1 = generateObject(UserReadDTO.class);
+
+        int page = 1;
+        int size = 30;
+
+        PageResult<UserReadDTO> result = new PageResult<>();
+        result.setPage(page);
+        result.setPageSize(size);
+        result.setTotalElements(120);
+        result.setTotalPages(4);
+        result.setData(List.of(u1));
+
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.ASC, "createdAt"));
+
+        Mockito.when(applicationUserService.getAllUsers(pageRequest)).thenReturn(result);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/users/")
+                .param("page", Integer.toString(page))
+                .param("size", Integer.toString(size))
+                .param("sort", "createdAt,asc"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        PageResult<UserReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(result, actualResult);
+    }
 
     @Test
     public void testGetUser() throws Exception {
@@ -47,6 +125,23 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualUser).isEqualToComparingFieldByField(user);
 
         Mockito.verify(applicationUserService).getUser(user.getId());
+    }
+
+    @Test
+    public void testGetExtendedUser() throws Exception {
+        UserReadExtendedDTO user = generateObject(UserReadExtendedDTO.class);
+
+        Mockito.when(applicationUserService.getExtendedUser(user.getId())).thenReturn(user);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/users/{id}/extended", user.getId()))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadExtendedDTO actualUser = objectMapper.readValue(resultJson, UserReadExtendedDTO.class);
+        Assertions.assertThat(actualUser).isEqualToComparingFieldByField(user);
+
+        Mockito.verify(applicationUserService).getExtendedUser(user.getId());
     }
 
     @Test

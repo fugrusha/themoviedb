@@ -9,7 +9,9 @@ import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Random;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
 
 @Component
 public class TestObjectFactory {
@@ -81,6 +83,18 @@ public class TestObjectFactory {
     public Movie createMovie(Double averageRating) {
         Movie movie = generateFlatEntityWithoutId(Movie.class);
         movie.setAverageRating(averageRating);
+        return movieRepository.save(movie);
+    }
+
+    public Movie createMovieInLeaderBoard() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("title");
+        movie.setDescription("description");
+        movie.setReleaseDate(LocalDate.of(2019, 02, 02));
+        movie.setIsReleased(true);
+        movie.setLikesCount(new Random().nextInt());
+        movie.setDislikesCount(new Random().nextInt());
+        movie.setAverageRating(ThreadLocalRandom.current().nextDouble(1, 10));
         return movieRepository.save(movie);
     }
 

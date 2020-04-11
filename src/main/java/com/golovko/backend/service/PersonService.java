@@ -2,10 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.dto.PageResult;
-import com.golovko.backend.dto.person.PersonCreateDTO;
-import com.golovko.backend.dto.person.PersonPatchDTO;
-import com.golovko.backend.dto.person.PersonPutDTO;
-import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.*;
 import com.golovko.backend.repository.MovieCastRepository;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.PersonRepository;
@@ -18,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -104,5 +102,9 @@ public class PersonService {
 
         person.setAverageRatingByMovies(averageRating);
         personRepository.save(person);
+    }
+
+    public List<PersonInLeaderBoardDTO> getPersonLeaderBoard() {
+        return personRepository.getPersonLeaderBoard();
     }
 }

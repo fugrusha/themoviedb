@@ -2,6 +2,7 @@ package com.golovko.backend.service;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.movie.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.job.UpdateAverageRatingOfMoviesJob;
@@ -20,6 +21,7 @@ import org.springframework.transaction.TransactionSystemException;
 
 import java.time.LocalDate;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -434,4 +436,32 @@ public class MovieServiceTest extends BaseTest {
         Movie updatedMovie = movieRepository.findById(movie.getId()).get();
         Assert.assertEquals(true, updatedMovie.getIsReleased());
     }
+
+    @Test
+    public void testGetMoviesLeaderBoard() {
+        Set<UUID> movieIds = new HashSet<>();
+        for (int i = 0; i < 100; ++i) {
+            movieIds.add(testObjectFactory.createMovieInLeaderBoard().getId());
+        }
+
+        PageRequest pageRequest = PageRequest.of(0, 100,
+                Sort.by(Sort.Direction.DESC, "averageRating"));
+
+        PageResult<MovieInLeaderBoardDTO> actualResult = movieService.getMoviesLeaderBoard(pageRequest);
+
+        Assertions.assertThat(actualResult.getData()).isSortedAccordingTo(
+                Comparator.comparing(MovieInLeaderBoardDTO::getAverageRating).reversed());
+
+        Assert.assertEquals(movieIds, actualResult.getData().stream()
+                .map(MovieInLeaderBoardDTO::getId)
+                .collect(Collectors.toSet()));
+
+        for (MovieInLeaderBoardDTO m : actualResult.getData()) {
+            Assert.assertNotNull(m.getAverageRating());
+            Assert.assertNotNull(m.getDislikesCount());
+            Assert.assertNotNull(m.getLikesCount());
+            Assert.assertNotNull(m.getMovieTitle());
+        }
+    }
+
 }

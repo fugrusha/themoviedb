@@ -3,13 +3,18 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.UserRole;
 import com.golovko.backend.domain.UserRoleType;
+import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import com.golovko.backend.repository.UserRoleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -33,7 +38,14 @@ public class ApplicationUserService {
         return translationService.translate(user, UserReadDTO.class);
     }
 
+    @Transactional(readOnly = true)
+    public UserReadExtendedDTO getExtendedUser(UUID id) {
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+        return translationService.translate(user, UserReadExtendedDTO.class);
+    }
+
     public UserReadDTO createUser(UserCreateDTO createDTO) {
+        // TODO check if user exists
         ApplicationUser user = translationService.translate(createDTO, ApplicationUser.class);
 
         UserRole userRole = userRoleRepository.findByType(UserRoleType.USER);
@@ -87,5 +99,14 @@ public class ApplicationUserService {
         applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);
+    }
+
+    public PageResult<UserReadDTO> getAllUsers(Pageable pageable) {
+        Page<ApplicationUser> users = applicationUserRepository.getAllUsers(pageable);
+        return translationService.toPageResult(users, UserReadDTO.class);
+    }
+
+    public List<UserInLeaderBoardDTO> getUsersLeaderBoard() {
+        return applicationUserRepository.getUsersLeaderBoard();
     }
 }
