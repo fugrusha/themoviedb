@@ -1,5 +1,6 @@
 package com.golovko.backend.exception.handler;
 
+import com.golovko.backend.exception.ActionOfUserDuplicatedException;
 import com.golovko.backend.exception.ControllerValidationException;
 import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.exception.LinkDuplicatedException;
@@ -20,6 +21,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({
+            ActionOfUserDuplicatedException.class,
             LinkDuplicatedException.class,
             ControllerValidationException.class,
             EntityWrongStatusException.class,

@@ -7,6 +7,7 @@ import com.golovko.backend.dto.like.LikeCreateDTO;
 import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
+import com.golovko.backend.exception.ActionOfUserDuplicatedException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.exception.handler.ErrorInfo;
@@ -87,6 +88,34 @@ public class LikeControllerTest extends BaseControllerTest {
 
         LikeReadDTO actualResult = objectMapper.readValue(resultJSON, LikeReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+    }
+
+    @Test
+    public void testCreateDuplicatedLike() throws Exception {
+        UUID userId = UUID.randomUUID();
+        LikeReadDTO readDTO = createLikeReadDTO(userId, true);
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setLikedObjectId(readDTO.getLikedObjectId());
+        createDTO.setLikedObjectType(readDTO.getLikedObjectType());
+        createDTO.setMeLiked(readDTO.getMeLiked());
+
+        ActionOfUserDuplicatedException ex = new ActionOfUserDuplicatedException(
+                        userId, ActionType.ADD_LIKE, createDTO.getLikedObjectType(), readDTO.getLikedObjectId());
+
+        Mockito.when(likeService.createLike(userId, createDTO)).thenThrow(ex);
+
+        String resultJSON = mockMvc
+                .perform(post("/api/v1/users/{userId}/likes/", userId, createDTO)
+                .content(objectMapper.writeValueAsString(createDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo actualResult = objectMapper.readValue(resultJSON, ErrorInfo.class);
+        Assert.assertEquals(actualResult.getMessage(), ex.getMessage());
+
+        Mockito.verify(likeService).createLike(userId, createDTO);
     }
 
     @Test

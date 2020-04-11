@@ -6,6 +6,7 @@ import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
+import com.golovko.backend.exception.ActionOfUserDuplicatedException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
@@ -46,14 +47,22 @@ public class RatingService {
 
     @Transactional
     public RatingReadDTO createRating(UUID targetId, RatingCreateDTO createDTO) {
-        Rating rating = translationService.translate(createDTO, Rating.class);
+        checkIfRatingIsAlreadyExists(targetId, createDTO);
 
         validateTargetObject(targetId, createDTO);
 
+        Rating rating = translationService.translate(createDTO, Rating.class);
         rating.setRatedObjectId(targetId);
         rating = ratingRepository.save(rating);
 
         return translationService.translate(rating, RatingReadDTO.class);
+    }
+
+    private void checkIfRatingIsAlreadyExists(UUID targetId, RatingCreateDTO dto) {
+        if (ratingRepository.findByAuthorIdAndRatedObjectId(dto.getAuthorId(), targetId) != null) {
+            throw new ActionOfUserDuplicatedException(
+                    dto.getAuthorId(), ActionType.ADD_RATING, dto.getRatedObjectType(), targetId);
+        }
     }
 
     private void validateTargetObject(UUID targetId, RatingCreateDTO createDTO) {

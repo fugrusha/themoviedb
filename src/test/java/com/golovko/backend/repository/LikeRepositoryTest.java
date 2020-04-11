@@ -81,7 +81,7 @@ public class LikeRepositoryTest extends BaseTest {
         testObjectFactory.createLike(true, user2, movie1.getId(), MOVIE); // wrong user
         testObjectFactory.createLike(true, user2, movie2.getId(), MOVIE); // wrong user
 
-        Like likeFromDb = likeRepository.findByUserIdAndLikedObjectId(user1.getId(), movie1.getId());
+        Like likeFromDb = likeRepository.findByAuthorIdAndLikedObjectId(user1.getId(), movie1.getId());
         Assert.assertEquals(like.getId(), likeFromDb.getId());
     }
 

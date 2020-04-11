@@ -1,6 +1,7 @@
 package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.golovko.backend.domain.ActionType;
 import com.golovko.backend.domain.Rating;
 import com.golovko.backend.domain.TargetObjectType;
 import com.golovko.backend.dto.PageResult;
@@ -8,6 +9,7 @@ import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
+import com.golovko.backend.exception.ActionOfUserDuplicatedException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.RatingService;
@@ -158,6 +160,38 @@ public class MovieCastRatingControllerTest extends BaseControllerTest {
 
         RatingReadDTO actualResult = objectMapper.readValue(resultString, RatingReadDTO.class);
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
+
+        Mockito.verify(ratingService).createRating(movieCastId, createDTO);
+    }
+
+    @Test
+    public void testCreateDuplicatedMovieCastRating() throws Exception {
+        UUID movieId = UUID.randomUUID();
+        UUID movieCastId = UUID.randomUUID();
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(UUID.randomUUID());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE_CAST);
+
+        RatingReadDTO readDTO = createRatingReadDTO(7, movieCastId);
+
+        ActionOfUserDuplicatedException ex = new ActionOfUserDuplicatedException(
+                createDTO.getAuthorId(), ActionType.ADD_RATING,
+                createDTO.getRatedObjectType(), readDTO.getRatedObjectId());
+
+        Mockito.when(ratingService.createRating(movieCastId, createDTO)).thenThrow(ex);
+
+        String resultString = mockMvc
+                .perform(post("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/ratings/",
+                        movieId, movieCastId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo actualResult = objectMapper.readValue(resultString, ErrorInfo.class);
+        Assert.assertEquals(actualResult.getMessage(), ex.getMessage());
 
         Mockito.verify(ratingService).createRating(movieCastId, createDTO);
     }

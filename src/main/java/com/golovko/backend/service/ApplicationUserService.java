@@ -45,6 +45,7 @@ public class ApplicationUserService {
     }
 
     public UserReadDTO createUser(UserCreateDTO createDTO) {
+        // TODO check if user exists
         ApplicationUser user = translationService.translate(createDTO, ApplicationUser.class);
 
         UserRole userRole = userRoleRepository.findByType(UserRoleType.USER);

@@ -5,15 +5,14 @@ import com.golovko.backend.dto.like.LikeCreateDTO;
 import com.golovko.backend.dto.like.LikePatchDTO;
 import com.golovko.backend.dto.like.LikePutDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
+import com.golovko.backend.exception.ActionOfUserDuplicatedException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -47,10 +46,7 @@ public class LikeService {
 
     @Transactional(isolation = Isolation.READ_COMMITTED)
     public LikeReadDTO createLike(UUID userId, LikeCreateDTO createDTO) {
-        if (likeRepository.findByUserIdAndLikedObjectId(userId, createDTO.getLikedObjectId()) != null) {
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "User's like or dislike for this entity already exists");
-        }
+        checkIfLikeIsAlreadyExists(userId, createDTO);
 
         validateTargetObject(createDTO);
 
@@ -66,6 +62,13 @@ public class LikeService {
         }
 
         return translationService.translate(like, LikeReadDTO.class);
+    }
+
+    private void checkIfLikeIsAlreadyExists(UUID userId, LikeCreateDTO dto) {
+        if (likeRepository.findByAuthorIdAndLikedObjectId(userId, dto.getLikedObjectId()) != null) {
+            throw new ActionOfUserDuplicatedException(
+                    userId, ActionType.ADD_LIKE, dto.getLikedObjectType(), dto.getLikedObjectId());
+        }
     }
 
     private void validateTargetObject(LikeCreateDTO createDTO) {
