@@ -55,9 +55,9 @@ public class LikeService {
         like.setAuthor(repoHelper.getReferenceIfExist(ApplicationUser.class, userId));
         like = likeRepository.save(like);
 
-        if (createDTO.getMeLiked().equals(true)) {
+        if (createDTO.getMeLiked()) {
             incrementLikeField(createDTO.getLikedObjectType(), createDTO.getLikedObjectId());
-        } else if (createDTO.getMeLiked().equals(false)) {
+        } else if (!createDTO.getMeLiked()) {
             incrementDislikeField(createDTO.getLikedObjectType(), createDTO.getLikedObjectId());
         }
 

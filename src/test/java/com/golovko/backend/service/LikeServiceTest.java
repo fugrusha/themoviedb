@@ -42,7 +42,7 @@ public class LikeServiceTest extends BaseTest {
     private LikeService likeService;
 
     @Test
-    public void testGetRatingById() {
+    public void testGetLikeById() {
         ApplicationUser user = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
         Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
@@ -72,10 +72,6 @@ public class LikeServiceTest extends BaseTest {
 
         Assertions.assertThat(createDTO).isEqualToComparingFieldByField(readDTO);
         Assert.assertNotNull(readDTO.getId());
-
-        Like like = likeRepository.findByIdAndUserId(readDTO.getId(), user.getId());
-        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(like, "authorId");
-        Assert.assertEquals(readDTO.getAuthorId(), like.getAuthor().getId());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -238,19 +234,6 @@ public class LikeServiceTest extends BaseTest {
         createDTO.setMeLiked(true);
         createDTO.setLikedObjectType(MOVIE);
         createDTO.setLikedObjectId(wrongMovieId);
-
-        likeService.createLike(user.getId(), createDTO);
-    }
-
-    @Test(expected = WrongTargetObjectTypeException.class)
-    public void testCreateLikeForWrongTargetObjectType() {
-        ApplicationUser user = testObjectFactory.createUser();
-        Movie movie = testObjectFactory.createMovie();
-
-        LikeCreateDTO createDTO = new LikeCreateDTO();
-        createDTO.setMeLiked(true);
-        createDTO.setLikedObjectType(PERSON);
-        createDTO.setLikedObjectId(movie.getId());
 
         likeService.createLike(user.getId(), createDTO);
     }

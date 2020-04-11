@@ -68,6 +68,31 @@ public class LikeControllerTest extends BaseControllerTest {
     }
 
     @Test
+    public void testCreateLikeNullValue() throws Exception {
+        UUID userId = UUID.randomUUID();
+        LikeReadDTO readDTO = createLikeReadDTO(userId, true);
+
+        LikeCreateDTO createDTO = new LikeCreateDTO();
+        createDTO.setLikedObjectId(readDTO.getLikedObjectId());
+        createDTO.setLikedObjectType(readDTO.getLikedObjectType());
+        createDTO.setMeLiked(null);
+
+        Mockito.when(likeService.createLike(userId, createDTO)).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/likes/", userId, createDTO)
+                .content(objectMapper.writeValueAsString(createDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(likeService, Mockito.never()).createLike(any(), any());
+    }
+
+    @Test
     public void testCreateLike() throws Exception {
         UUID userId = UUID.randomUUID();
         LikeReadDTO readDTO = createLikeReadDTO(userId, true);

@@ -107,7 +107,7 @@ public class ArticleService {
     public List<PersonReadDTO> getArticlePeople(UUID articleId) {
         Article article = repoHelper.getEntityById(Article.class, articleId);
 
-        if (article.getPeople().isEmpty() || article.getPeople() == null) {
+        if (article.getPeople() == null || article.getPeople().isEmpty()) {
             throw new EntityNotFoundException("Article " + articleId + " has not any mentioned person.");
         }
 
@@ -148,7 +148,7 @@ public class ArticleService {
     public List<MovieReadDTO> getArticleMovies(UUID articleId) {
         Article article = repoHelper.getEntityById(Article.class, articleId);
 
-        if (article.getMovies().isEmpty() || article.getMovies() == null) {
+        if (article.getMovies() == null || article.getMovies().isEmpty()) {
             throw new EntityNotFoundException("Article " + articleId + " has not any mentioned movie.");
         }
 
