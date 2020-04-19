@@ -12,4 +12,6 @@ import java.util.UUID;
 public interface GenreRepository extends CrudRepository<Genre, UUID> {
 
     Page<Genre> findAll(Pageable pageable);
+
+    Genre findByGenreName(String genreName);
 }

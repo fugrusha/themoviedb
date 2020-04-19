@@ -19,10 +19,8 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
     public Page<Movie> findByFilter(MovieFilter filter, Pageable pageable) {
         JpaQueryBuilder qb = new JpaQueryBuilder(entityManager);
         qb.append("select m from Movie m");
+        qb.appendJoin("join m.genres g");
 
-        if (filter.getGenreNames() != null && !filter.getGenreNames().isEmpty()) {
-            qb.append("join m.genres g");
-        }
         if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()
                 || filter.getPersonId() != null) {
             qb.append("join m.movieCrews mcr");

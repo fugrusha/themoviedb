@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -92,12 +93,12 @@ public class PersonServiceTest extends BaseTest {
     }
 
     @Test
-    public void testGetPersonLeaderBoard() {
+    public void testGetTopRatedPerson() {
         Person p1 = testObjectFactory.createPerson();
         Person p2 = testObjectFactory.createPerson();
         Person p3 = testObjectFactory.createPerson();
 
-        List<PersonInLeaderBoardDTO> actualResult = personService.getPersonLeaderBoard();
+        List<PersonTopRatedDTO> actualResult = personService.getTopRatedPeople();
 
         Assertions.assertThat(actualResult).extracting("id")
                 .containsExactlyInAnyOrder(p1.getId(), p2.getId(), p3.getId());
@@ -134,6 +135,9 @@ public class PersonServiceTest extends BaseTest {
         patchDTO.setLastName("Bulgakova");
         patchDTO.setBio("some bio");
         patchDTO.setGender(Gender.FEMALE);
+        patchDTO.setBirthday(LocalDate.of(1990, 10, 10));
+        patchDTO.setImageUrl("url");
+        patchDTO.setPlaceOfBirth("city");
 
         PersonReadDTO readDTO = personService.patchPerson(person.getId(), patchDTO);
 

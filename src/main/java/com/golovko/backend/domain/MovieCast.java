@@ -14,7 +14,6 @@ import javax.validation.constraints.Size;
 @Setter
 public class MovieCast extends AbstractEntity {
 
-    @NotNull
     @Size(min = 1, max = 1000)
     private String description;
 

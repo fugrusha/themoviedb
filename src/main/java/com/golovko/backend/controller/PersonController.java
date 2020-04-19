@@ -33,9 +33,9 @@ public class PersonController {
         return personService.getPeople(pageable);
     }
 
-    @GetMapping("/leader-board")
-    public List<PersonInLeaderBoardDTO> getPersonLeaderBoard() {
-        return personService.getPersonLeaderBoard();
+    @GetMapping("/top-rated")
+    public List<PersonTopRatedDTO> getTopRatedPeople() {
+        return personService.getTopRatedPeople();
     }
 
     @PostMapping

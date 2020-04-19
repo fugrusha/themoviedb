@@ -18,5 +18,6 @@
     <include file="db/changelog/updates/Home-work-19.xml" />
     <include file="db/changelog/updates/Home-work-19-1.xml" />
     <include file="db/changelog/updates/Home-work-20.xml" />
+    <include file="db/changelog/updates/Home-work-21.xml" />
 
 </databaseChangeLog>

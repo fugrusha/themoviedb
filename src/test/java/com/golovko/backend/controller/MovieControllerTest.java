@@ -321,7 +321,7 @@ public class MovieControllerTest extends BaseControllerTest {
     public void testGetMoviesWithFilter() throws Exception {
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(UUID.randomUUID());
-        filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
+        filter.setMovieCrewTypes(Set.of(MovieCrewType.SOUND, MovieCrewType.WRITER));
         filter.setReleasedFrom(LocalDate.parse("1980-07-10"));
         filter.setReleasedTo(LocalDate.parse("1992-07-10"));
         filter.setGenreNames(Set.of("Comedy", "Fantasy"));
@@ -350,7 +350,7 @@ public class MovieControllerTest extends BaseControllerTest {
 
         String resultJson = mockMvc.perform(get("/api/v1/movies")
             .param("personId", filter.getPersonId().toString())
-            .param("movieCrewTypes", "COMPOSER, WRITER")
+            .param("movieCrewTypes", "SOUND, WRITER")
             .param("releasedFrom", filter.getReleasedFrom().toString())
             .param("releasedTo", filter.getReleasedTo().toString())
             .param("genreNames", "Comedy, Fantasy"))
@@ -397,12 +397,12 @@ public class MovieControllerTest extends BaseControllerTest {
 
     @Test
     public void testGetMoviesLeaderBoardWithPagingAndSorting() throws Exception {
-        MovieInLeaderBoardDTO readDTO = createMovieInLeaderBoardDTO();
+        MoviesTopRatedDTO readDTO = createMovieInLeaderBoardDTO();
 
         int page = 1;
         int size = 25;
 
-        PageResult<MovieInLeaderBoardDTO> result = new PageResult<>();
+        PageResult<MoviesTopRatedDTO> result = new PageResult<>();
         result.setPage(page);
         result.setPageSize(size);
         result.setTotalElements(100);
@@ -411,22 +411,22 @@ public class MovieControllerTest extends BaseControllerTest {
 
         PageRequest pageRequest = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "averageRating"));
 
-        Mockito.when(movieService.getMoviesLeaderBoard(pageRequest)).thenReturn(result);
+        Mockito.when(movieService.getTopRatedMovies(pageRequest)).thenReturn(result);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/movies/leader-board")
+                .perform(get("/api/v1/movies/top-rated")
                 .param("page", Integer.toString(page))
                 .param("size", Integer.toString(size))
                 .param("sort", "averageRating,desc"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        PageResult<MovieInLeaderBoardDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        PageResult<MoviesTopRatedDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assert.assertEquals(result, actualResult);
     }
 
-    private MovieInLeaderBoardDTO createMovieInLeaderBoardDTO() {
-        return generateObject(MovieInLeaderBoardDTO.class);
+    private MoviesTopRatedDTO createMovieInLeaderBoardDTO() {
+        return generateObject(MoviesTopRatedDTO.class);
     }
 
     private MovieReadDTO createMovieReadDTO() {

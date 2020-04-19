@@ -3,7 +3,7 @@ package com.golovko.backend.repository;
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.domain.Person;
-import com.golovko.backend.dto.movie.MovieInLeaderBoardDTO;
+import com.golovko.backend.dto.movie.MoviesTopRatedDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -161,7 +161,7 @@ public class MovieRepositoryTest extends BaseTest {
     }
 
     @Test
-    public void testGetMoviesLeaderBoard() {
+    public void testGetTopRatedMovies() {
         Set<UUID> movieIds = new HashSet<>();
         for (int i = 0; i < 100; ++i) {
             movieIds.add(testObjectFactory.createMovieInLeaderBoard().getId());
@@ -169,20 +169,31 @@ public class MovieRepositoryTest extends BaseTest {
 
         PageRequest pageRequest = PageRequest.of(0, 100,
                 Sort.by(Sort.Direction.DESC, "averageRating"));
-        Page<MovieInLeaderBoardDTO> actualResult = movieRepository.getMoviesLeaderBoard(pageRequest);
+        Page<MoviesTopRatedDTO> actualResult = movieRepository.getTopRatedMovies(pageRequest);
 
         Assertions.assertThat(actualResult.getContent()).isSortedAccordingTo(
-                Comparator.comparing(MovieInLeaderBoardDTO::getAverageRating).reversed());
+                Comparator.comparing(MoviesTopRatedDTO::getAverageRating).reversed());
 
         Assert.assertEquals(movieIds, actualResult.stream()
-                .map(MovieInLeaderBoardDTO::getId)
+                .map(MoviesTopRatedDTO::getId)
                 .collect(Collectors.toSet()));
 
-        for (MovieInLeaderBoardDTO m : actualResult) {
+        for (MoviesTopRatedDTO m : actualResult) {
             Assert.assertNotNull(m.getAverageRating());
             Assert.assertNotNull(m.getDislikesCount());
             Assert.assertNotNull(m.getLikesCount());
             Assert.assertNotNull(m.getMovieTitle());
         }
+    }
+
+    @Test
+    public void testExistsMovieByMovieTitle() {
+        Movie m1 = testObjectFactory.createMovie();
+        testObjectFactory.createMovie();
+        testObjectFactory.createMovie();
+
+        String movieTitle = m1.getMovieTitle();
+
+        Assert.assertTrue(movieRepository.existsMovieByMovieTitle(movieTitle));
     }
 }

@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class PersonInLeaderBoardDTO {
+public class PersonTopRatedDTO {
 
     private UUID id;
 

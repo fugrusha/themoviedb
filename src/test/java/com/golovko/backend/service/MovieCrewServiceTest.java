@@ -161,7 +161,7 @@ public class MovieCrewServiceTest extends BaseTest {
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person, movie);
 
         MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
-        patchDTO.setMovieCrewType(MovieCrewType.COMPOSER);
+        patchDTO.setMovieCrewType(MovieCrewType.SOUND);
         patchDTO.setDescription("New text");
         patchDTO.setPersonId(person.getId());;
 

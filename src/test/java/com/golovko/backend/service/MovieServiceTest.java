@@ -108,6 +108,8 @@ public class MovieServiceTest extends BaseTest {
         patchDTO.setDescription("another description");
         patchDTO.setIsReleased(true);
         patchDTO.setReleaseDate(LocalDate.parse("2002-02-03"));
+        patchDTO.setPosterUrl("poster url");
+        patchDTO.setTrailerUrl("trailer url");
 
         MovieReadDTO readDTO = movieService.patchMovie(movie.getId(), patchDTO);
 
@@ -250,13 +252,13 @@ public class MovieServiceTest extends BaseTest {
         Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4), false);
         Movie m4 = testObjectFactory.createMovie(LocalDate.of(1944, 5, 4), false);
 
-        testObjectFactory.createMovieCrew(person2, m1, MovieCrewType.COMPOSER);
+        testObjectFactory.createMovieCrew(person2, m1, MovieCrewType.SOUND);
         testObjectFactory.createMovieCrew(person2, m2, MovieCrewType.WRITER);
         testObjectFactory.createMovieCrew(person1, m3, MovieCrewType.PRODUCER);
         testObjectFactory.createMovieCrew(person2, m4, MovieCrewType.COSTUME_DESIGNER);
 
         MovieFilter filter = new MovieFilter();
-        filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
+        filter.setMovieCrewTypes(Set.of(MovieCrewType.SOUND, MovieCrewType.WRITER));
         List<MovieReadDTO> filteredMovies = movieService.getMovies(filter, Pageable.unpaged()).getData();
         assertThat(filteredMovies).extracting("id")
                 .containsExactlyInAnyOrder(m1.getId(), m2.getId());
@@ -314,14 +316,14 @@ public class MovieServiceTest extends BaseTest {
         Movie m3 = testObjectFactory.createMovie(LocalDate.of(1980, 5, 4), false); // no
         Movie m4 = testObjectFactory.createMovie(LocalDate.of(1987, 5, 4), false);
 
-        testObjectFactory.createMovieCrew(person2, m1, MovieCrewType.COMPOSER);
+        testObjectFactory.createMovieCrew(person2, m1, MovieCrewType.SOUND);
         testObjectFactory.createMovieCrew(person2, m2, MovieCrewType.WRITER);
         testObjectFactory.createMovieCrew(person1, m3, MovieCrewType.PRODUCER);
         testObjectFactory.createMovieCrew(person2, m4, MovieCrewType.COSTUME_DESIGNER);
 
         MovieFilter filter = new MovieFilter();
         filter.setPersonId(person2.getId());
-        filter.setMovieCrewTypes(Set.of(MovieCrewType.COMPOSER, MovieCrewType.WRITER));
+        filter.setMovieCrewTypes(Set.of(MovieCrewType.SOUND, MovieCrewType.WRITER));
         filter.setReleasedFrom(LocalDate.of(1980, 5, 4));
         filter.setReleasedTo(LocalDate.of(1992, 5, 4));
         filter.setGenreNames(Set.of(genre.getGenreName()));
@@ -440,7 +442,7 @@ public class MovieServiceTest extends BaseTest {
     }
 
     @Test
-    public void testGetMoviesLeaderBoard() {
+    public void testGetTopRatedMovies() {
         Set<UUID> movieIds = new HashSet<>();
         for (int i = 0; i < 100; ++i) {
             movieIds.add(testObjectFactory.createMovieInLeaderBoard().getId());
@@ -449,16 +451,16 @@ public class MovieServiceTest extends BaseTest {
         PageRequest pageRequest = PageRequest.of(0, 100,
                 Sort.by(Sort.Direction.DESC, "averageRating"));
 
-        PageResult<MovieInLeaderBoardDTO> actualResult = movieService.getMoviesLeaderBoard(pageRequest);
+        PageResult<MoviesTopRatedDTO> actualResult = movieService.getTopRatedMovies(pageRequest);
 
         Assertions.assertThat(actualResult.getData()).isSortedAccordingTo(
-                Comparator.comparing(MovieInLeaderBoardDTO::getAverageRating).reversed());
+                Comparator.comparing(MoviesTopRatedDTO::getAverageRating).reversed());
 
         Assert.assertEquals(movieIds, actualResult.getData().stream()
-                .map(MovieInLeaderBoardDTO::getId)
+                .map(MoviesTopRatedDTO::getId)
                 .collect(Collectors.toSet()));
 
-        for (MovieInLeaderBoardDTO m : actualResult.getData()) {
+        for (MoviesTopRatedDTO m : actualResult.getData()) {
             Assert.assertNotNull(m.getAverageRating());
             Assert.assertNotNull(m.getDislikesCount());
             Assert.assertNotNull(m.getLikesCount());

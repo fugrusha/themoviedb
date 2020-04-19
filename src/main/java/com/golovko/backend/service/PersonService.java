@@ -111,7 +111,7 @@ public class PersonService {
         personRepository.save(person);
     }
 
-    public List<PersonInLeaderBoardDTO> getPersonLeaderBoard() {
-        return personRepository.getPersonLeaderBoard();
+    public List<PersonTopRatedDTO> getTopRatedPeople() {
+        return personRepository.getTopRatedPeople();
     }
 }

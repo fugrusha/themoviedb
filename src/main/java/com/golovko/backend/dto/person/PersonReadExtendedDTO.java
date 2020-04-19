@@ -7,6 +7,7 @@ import com.golovko.backend.dto.moviecrew.MovieCrewReadDTO;
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -20,6 +21,12 @@ public class PersonReadExtendedDTO {
     private String lastName;
 
     private String bio;
+
+    private LocalDate birthday;
+
+    private String placeOfBirth;
+
+    private String imageUrl;
 
     private Gender gender;
 

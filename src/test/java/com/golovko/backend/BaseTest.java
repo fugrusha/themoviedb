@@ -1,6 +1,7 @@
 package com.golovko.backend;
 
 import com.golovko.backend.util.TestObjectFactory;
+import org.bitbucket.brunneng.br.RandomObjectGenerator;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -13,6 +14,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from external_system_import",
         "delete from like",
         "delete from misprint",
         "delete from rating",
@@ -35,6 +37,12 @@ public abstract class BaseTest {
 
     @Autowired
     protected TransactionTemplate transactionTemplate;
+
+    private final RandomObjectGenerator generator = new RandomObjectGenerator();
+
+    protected <T> T generateObject(Class<T> objectClass) {
+        return generator.generateRandomObject(objectClass);
+    }
 
     protected void inTransaction (Runnable runnable) {
         transactionTemplate.executeWithoutResult(status -> {

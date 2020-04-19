@@ -19,6 +19,10 @@ public class MovieReadDTO {
 
     private Boolean isReleased;
 
+    private String posterUrl;
+
+    private String trailerUrl;
+
     private Double averageRating;
 
     private Double predictedAverageRating;
