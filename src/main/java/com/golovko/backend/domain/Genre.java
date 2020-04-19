@@ -19,7 +19,6 @@ public class Genre extends AbstractEntity {
     @Size(min = 1, max = 100)
     private String genreName;
 
-    @NotNull
     @Size(min = 1, max = 500)
     private String description;
 

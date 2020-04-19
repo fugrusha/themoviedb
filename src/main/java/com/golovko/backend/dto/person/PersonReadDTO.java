@@ -4,6 +4,7 @@ import com.golovko.backend.domain.Gender;
 import lombok.Data;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Data
@@ -16,6 +17,12 @@ public class PersonReadDTO {
     private String lastName;
 
     private String bio;
+
+    private LocalDate birthday;
+
+    private String placeOfBirth;
+
+    private String imageUrl;
 
     private Gender gender;
 

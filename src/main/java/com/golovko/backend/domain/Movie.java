@@ -30,6 +30,12 @@ public class Movie extends AbstractEntity {
     @Size(min = 1, max = 1000)
     private String description;
 
+    @Size(min = 1, max = 100)
+    private String posterUrl;
+
+    @Size(min = 1, max = 100)
+    private String trailerUrl;
+
     @NotNull
     private Boolean isReleased;
 

@@ -225,7 +225,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         UUID movieId = readDTO.getMovieId();
 
         MovieCrewPutDTO updateDTO = new MovieCrewPutDTO();
-        updateDTO.setMovieCrewType(MovieCrewType.COMPOSER);
+        updateDTO.setMovieCrewType(MovieCrewType.SOUND);
         updateDTO.setDescription("New text");
         updateDTO.setPersonId(UUID.randomUUID());
 
@@ -285,7 +285,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
     @Test
     public void testPatchMovieCrew() throws Exception {
         MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
-        patchDTO.setMovieCrewType(MovieCrewType.COMPOSER);
+        patchDTO.setMovieCrewType(MovieCrewType.SOUND);
         patchDTO.setDescription("New text");
         patchDTO.setPersonId(UUID.randomUUID());
 

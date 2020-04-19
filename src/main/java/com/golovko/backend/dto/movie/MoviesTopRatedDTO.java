@@ -7,7 +7,7 @@ import java.util.UUID;
 
 @Data
 @AllArgsConstructor
-public class MovieInLeaderBoardDTO {
+public class MoviesTopRatedDTO {
 
     private UUID id;
 

@@ -1,0 +1,241 @@
+package com.golovko.backend.service.importer;
+
+import com.golovko.backend.BaseTest;
+import com.golovko.backend.client.themoviedb.TheMovieDbClient;
+import com.golovko.backend.client.themoviedb.dto.*;
+import com.golovko.backend.domain.Genre;
+import com.golovko.backend.domain.Movie;
+import com.golovko.backend.exception.ImportAlreadyPerformedException;
+import com.golovko.backend.exception.ImportedEntityAlreadyExistsException;
+import com.golovko.backend.repository.MovieRepository;
+import org.assertj.core.api.Assertions;
+import org.junit.Assert;
+import org.junit.Test;
+import org.mockito.Mockito;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.boot.test.mock.mockito.SpyBean;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
+import static com.golovko.backend.domain.MovieCrewType.*;
+import static org.mockito.ArgumentMatchers.any;
+
+public class MovieImporterServiceTest extends BaseTest {
+
+    @MockBean
+    private TheMovieDbClient theMovieDbClient;
+
+    @Autowired
+    private MovieRepository movieRepository;
+
+    @SpyBean
+    private MovieImporterService movieImporterService;
+
+    @Test
+    public void testMovieImport()
+            throws ImportedEntityAlreadyExistsException, ImportAlreadyPerformedException {
+        String externalMovieId = "id200";
+        MovieReadDTO readDTO = createMovieReadDTO();
+
+        Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(readDTO);
+        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+
+        UUID movieId = movieImporterService.importMovie(externalMovieId);
+        Movie movie = movieRepository.findById(movieId).get();
+
+        Assert.assertEquals(readDTO.getTitle(), movie.getMovieTitle());
+    }
+
+    @Test
+    public void testMovieImportAlreadyExists() {
+        String externalMovieId = "id200";
+
+        Movie existingMovie = testObjectFactory.createMovie();
+
+        MovieReadDTO readDTO = createMovieReadDTO();
+        readDTO.setTitle(existingMovie.getMovieTitle());
+
+        Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(readDTO);
+
+        ImportedEntityAlreadyExistsException ex = Assertions.catchThrowableOfType(
+                () -> movieImporterService.importMovie(externalMovieId),
+                ImportedEntityAlreadyExistsException.class);
+
+        Assertions.assertThat(ex.getMessage()).contains(existingMovie.getMovieTitle());
+    }
+
+    @Test
+    public void testNoCallToClientOnDuplicateImport()
+            throws ImportAlreadyPerformedException, ImportedEntityAlreadyExistsException {
+        String externalMovieId = "id200";
+        MovieReadDTO readDTO = createMovieReadDTO();
+
+        Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(readDTO);
+        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+
+        movieImporterService.importMovie(externalMovieId);
+        Mockito.verify(theMovieDbClient).getMovie(externalMovieId, null);
+        Mockito.reset(theMovieDbClient);
+
+        Assertions.assertThatThrownBy(() -> movieImporterService.importMovie(externalMovieId))
+                .isInstanceOf(ImportAlreadyPerformedException.class);
+
+        Mockito.verifyNoInteractions(theMovieDbClient);
+    }
+
+    @Test
+    public void testMovieImportWithNotExistedGenre()
+            throws ImportedEntityAlreadyExistsException, ImportAlreadyPerformedException {
+        String externalMovieId = "id200";
+
+        GenreShortDTO genreDTO = createGenreShortDTO();
+        MovieReadDTO movieDTO = createMovieWithGenresDTO(List.of(genreDTO));
+
+        Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(movieDTO);
+        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+
+        UUID movieId = movieImporterService.importMovie(externalMovieId);
+
+        inTransaction(() -> {
+            Movie movie = movieRepository.findById(movieId).get();
+
+            Assert.assertEquals(movieDTO.getTitle(), movie.getMovieTitle());
+            Assert.assertNotNull(movie.getGenres());
+        });
+    }
+
+    @Test
+    public void testMovieImportWithExistedGenre()
+            throws ImportedEntityAlreadyExistsException, ImportAlreadyPerformedException {
+        String externalMovieId = "id200";
+
+        Genre genre = testObjectFactory.createGenre("Thriller");
+        GenreShortDTO genreDTO = createGenreShortDTO();
+        genreDTO.setName(genre.getGenreName());
+
+        MovieReadDTO movieDTO = createMovieWithGenresDTO(List.of(genreDTO));
+
+        Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(movieDTO);
+        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+
+        UUID movieId = movieImporterService.importMovie(externalMovieId);
+
+        inTransaction(() -> {
+            Movie movie = movieRepository.findById(movieId).get();
+
+            Assert.assertEquals(movieDTO.getTitle(), movie.getMovieTitle());
+            Assert.assertEquals(1, movieDTO.getGenres().size());
+            Assertions.assertThat(movie.getGenres()).extracting("genreName")
+                    .contains(genreDTO.getName());
+        });
+    }
+
+    @Test
+    public void testMovieImportWithEmptyGenres()
+            throws ImportedEntityAlreadyExistsException, ImportAlreadyPerformedException {
+        String externalMovieId = "id200";
+
+        MovieReadDTO movieDTO = createMovieWithGenresDTO(new ArrayList<GenreShortDTO>());
+
+        Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(movieDTO);
+        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+
+        UUID movieId = movieImporterService.importMovie(externalMovieId);
+
+        inTransaction(() -> {
+            Movie movie = movieRepository.findById(movieId).get();
+
+            Assert.assertEquals(movieDTO.getTitle(), movie.getMovieTitle());
+            Assert.assertTrue(movie.getGenres().isEmpty());
+        });
+    }
+
+    @Test
+    public void testMovieImportWithCredits()
+            throws ImportedEntityAlreadyExistsException, ImportAlreadyPerformedException {
+        String externalMovieId = "id200";
+
+        List<CastReadDTO> casts = List.of(createCastReadDTO());
+        List<CrewReadDTO> crews = new ArrayList<>();
+        crews.add(createCrewReadDTO("Editing"));
+        crews.add(createCrewReadDTO("Camera"));
+        crews.add(createCrewReadDTO("Costume & Make-Up"));
+        crews.add(createCrewReadDTO("Sound"));
+        crews.add(createCrewReadDTO("Lighting"));
+        crews.add(createCrewReadDTO("Art"));
+        crews.add(createCrewReadDTO("Directing"));
+        crews.add(createCrewReadDTO("Crew"));
+        crews.add(createCrewReadDTO("Production"));
+        crews.add(createCrewReadDTO("Visual Effects"));
+        crews.add(createCrewReadDTO("Writing"));
+
+        MovieCreditsReadDTO movieCredits = createMovieCredits(casts, crews);
+
+        MovieReadDTO movieDTO = createMovieWithGenresDTO(new ArrayList<GenreShortDTO>());
+
+        Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(movieDTO);
+        Mockito.when(theMovieDbClient.getMovieCastAndCrew(externalMovieId, null)).thenReturn(movieCredits);
+//        Mockito.doNothing().when(movieImporterService).importPerson(any()); // FIXME works only for the first iteration
+
+        UUID movieId = movieImporterService.importMovie(externalMovieId);
+
+        inTransaction(() -> {
+            Movie movie = movieRepository.findById(movieId).get();
+
+            Assert.assertEquals(movieDTO.getTitle(), movie.getMovieTitle());
+            Assert.assertTrue(movie.getGenres().isEmpty());
+
+            Assertions.assertThat(movie.getMovieCasts()).extracting("movieCrewType").contains(CAST);
+
+            Assertions.assertThat(movie.getMovieCrews()).extracting("movieCrewType")
+                    .containsExactlyInAnyOrder(EDITOR, CAMERA, COSTUME_DESIGNER, SOUND,
+                            LIGHTING, ART, DIRECTOR, WRITER, CREW, PRODUCER, VISUAL_EFFECTS);
+        });
+    }
+
+    private MovieReadDTO createMovieReadDTO() {
+        MovieReadDTO dto = generateObject(MovieReadDTO.class);
+        dto.setReleaseDate("1998-12-11");
+        dto.setStatus("Released");
+        return dto;
+    }
+
+    private MovieReadDTO createMovieWithGenresDTO(List<GenreShortDTO> genres) {
+        MovieReadDTO dto = generateObject(MovieReadDTO.class);
+        dto.setReleaseDate("1998-12-11");
+        dto.setStatus("Released");
+        dto.setGenres(genres);
+        return dto;
+    }
+
+    private GenreShortDTO createGenreShortDTO() {
+        return generateObject(GenreShortDTO.class);
+    }
+
+    private MovieCreditsReadDTO createMovieCredits(List<CastReadDTO> cast, List<CrewReadDTO> crew) {
+        MovieCreditsReadDTO dto = generateObject(MovieCreditsReadDTO.class);
+        dto.setCast(cast);
+        dto.setCrew(crew);
+        return dto;
+    }
+
+    private CastReadDTO createCastReadDTO() {
+        return generateObject(CastReadDTO.class);
+    }
+
+    private CrewReadDTO createCrewReadDTO(String department) {
+        CrewReadDTO dto = generateObject(CrewReadDTO.class);
+        dto.setDepartment(department);
+        return dto;
+    }
+
+    private PersonReadDTO createPersonReadDTO() {
+        PersonReadDTO dto = generateObject(PersonReadDTO.class);
+        dto.setName("Alisa Winter");
+        dto.setBirthday("1988-05-12");
+        return dto;
+    }
+}

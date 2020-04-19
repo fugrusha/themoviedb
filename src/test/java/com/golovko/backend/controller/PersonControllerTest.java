@@ -22,6 +22,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 
@@ -76,24 +77,24 @@ public class PersonControllerTest extends BaseControllerTest {
     }
 
     @Test
-    public void testGetPersonLeaderBoard() throws Exception {
-        PersonInLeaderBoardDTO p1 = createPersonInLeaderBoard();
-        PersonInLeaderBoardDTO p2 = createPersonInLeaderBoard();
-        PersonInLeaderBoardDTO p3 = createPersonInLeaderBoard();
+    public void testGetTopRatedPerson() throws Exception {
+        PersonTopRatedDTO p1 = createPersonInLeaderBoard();
+        PersonTopRatedDTO p2 = createPersonInLeaderBoard();
+        PersonTopRatedDTO p3 = createPersonInLeaderBoard();
 
-        List<PersonInLeaderBoardDTO> expectedResult = List.of(p1, p2, p3);
+        List<PersonTopRatedDTO> expectedResult = List.of(p1, p2, p3);
 
-        Mockito.when(personService.getPersonLeaderBoard()).thenReturn(expectedResult);
+        Mockito.when(personService.getTopRatedPeople()).thenReturn(expectedResult);
 
         String resultJson = mockMvc
-                .perform(get("/api/v1/people/leader-board"))
+                .perform(get("/api/v1/people/top-rated"))
                 .andExpect(status().isOk())
                 .andReturn().getResponse().getContentAsString();
 
-        List<PersonInLeaderBoardDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        List<PersonTopRatedDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assert.assertEquals(expectedResult, actualResult);
 
-        Mockito.verify(personService).getPersonLeaderBoard();
+        Mockito.verify(personService).getTopRatedPeople();
     }
 
     @Test
@@ -219,6 +220,9 @@ public class PersonControllerTest extends BaseControllerTest {
         patchDTO.setLastName("Bulgakova");
         patchDTO.setBio("some text");
         patchDTO.setGender(Gender.FEMALE);
+        patchDTO.setBirthday(LocalDate.parse("2010-10-01"));
+        patchDTO.setImageUrl("url");
+        patchDTO.setPlaceOfBirth("city");
 
         Mockito.when(personService.patchPerson(readDTO.getId(), patchDTO)).thenReturn(readDTO);
 
@@ -392,8 +396,8 @@ public class PersonControllerTest extends BaseControllerTest {
         return generateObject(PersonReadDTO.class);
     }
 
-    private PersonInLeaderBoardDTO createPersonInLeaderBoard() {
-        return generateObject(PersonInLeaderBoardDTO.class);
+    private PersonTopRatedDTO createPersonInLeaderBoard() {
+        return generateObject(PersonTopRatedDTO.class);
     }
 
     private PersonReadExtendedDTO createPersonReadExtendedDTO(

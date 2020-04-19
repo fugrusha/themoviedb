@@ -1,0 +1,46 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="create table ExternalSystemImport" author="andrew">
+        <createTable tableName="external_system_import">
+            <column name="id" type="uuid">
+                <constraints primaryKey="true"/>
+            </column>
+            <column name="entity_type" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="entity_id" type="uuid">
+                <constraints nullable="false"/>
+            </column>
+            <column name="id_in_external_system" type="varchar(30)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </createTable>
+    </changeSet>
+
+    <changeSet id="add columns to movie" author="andrew">
+        <addColumn tableName="movie">
+            <column name="poster_url" type="varchar(100)"/>
+            <column name="trailer_url" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add column to person" author="andrew">
+        <addColumn tableName="person">
+            <column name="birthday" type="date"/>
+            <column name="place_of_birth" type="varchar(100)"/>
+            <column name="image_url" type="varchar(100)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="drop constraints" author="andrew">
+        <dropNotNullConstraint tableName="movie_cast" columnName="description"/>
+        <dropNotNullConstraint tableName="genre" columnName="description"/>
+    </changeSet>
+
+</databaseChangeLog>

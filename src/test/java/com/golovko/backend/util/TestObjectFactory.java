@@ -52,6 +52,9 @@ public class TestObjectFactory {
     @Autowired
     private MisprintRepository misprintRepository;
 
+    @Autowired
+    private ExternalSystemImportRepository esiRepository;
+
     protected RandomObjectGenerator flatGenerator;
     {
         Configuration c = new Configuration();
@@ -105,6 +108,7 @@ public class TestObjectFactory {
         Person person = generateFlatEntityWithoutId(Person.class);
         person.setAverageRatingByRoles(null);
         person.setAverageRatingByMovies(null);
+        person.setBirthday(LocalDate.of(1990, 01, 10));
         return personRepository.save(person);
     }
 
@@ -112,6 +116,7 @@ public class TestObjectFactory {
         Person person = generateFlatEntityWithoutId(Person.class);
         person.setAverageRatingByRoles(null);
         person.setAverageRatingByMovies(averageRatingByMovies);
+        person.setBirthday(LocalDate.of(1990, 01, 10));
         return personRepository.save(person);
     }
 
@@ -120,6 +125,7 @@ public class TestObjectFactory {
         person.setLastName(lastName);
         person.setAverageRatingByRoles(null);
         person.setAverageRatingByMovies(null);
+        person.setBirthday(LocalDate.of(1990, 01, 10));
         return personRepository.save(person);
     }
 
@@ -285,5 +291,16 @@ public class TestObjectFactory {
         like.setLikedObjectType(targetType);
         like.setLikedObjectId(likedObjectId);
         return likeRepository.save(like);
+    }
+
+    public ExternalSystemImport createESI(
+            String idInExternalSystem,
+            ImportedEntityType entityType
+    ) {
+        ExternalSystemImport esi = new ExternalSystemImport();
+        esi.setIdInExternalSystem(idInExternalSystem);
+        esi.setEntityType(entityType);
+        esi.setEntityId(UUID.randomUUID());
+        return esiRepository.save(esi);
     }
 }

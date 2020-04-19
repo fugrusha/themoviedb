@@ -2,7 +2,7 @@ package com.golovko.backend.repository;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
-import com.golovko.backend.dto.person.PersonInLeaderBoardDTO;
+import com.golovko.backend.dto.person.PersonTopRatedDTO;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
@@ -91,16 +91,16 @@ public class PersonRepositoryTest extends BaseTest {
             createMovieCast(p, m, false);
         }
 
-        List<PersonInLeaderBoardDTO> actualResult = personRepository.getPersonLeaderBoard();
+        List<PersonTopRatedDTO> actualResult = personRepository.getTopRatedPeople();
 
         Assertions.assertThat(actualResult).isSortedAccordingTo(
-                Comparator.comparing(PersonInLeaderBoardDTO::getAverageRatingByRoles).reversed());
+                Comparator.comparing(PersonTopRatedDTO::getAverageRatingByRoles).reversed());
 
         Assert.assertEquals(personIds, actualResult.stream()
-                .map(PersonInLeaderBoardDTO::getId)
+                .map(PersonTopRatedDTO::getId)
                 .collect(Collectors.toSet()));
 
-        for (PersonInLeaderBoardDTO p : actualResult) {
+        for (PersonTopRatedDTO p : actualResult) {
             Assert.assertNotNull(p.getFirstName());
             Assert.assertNotNull(p.getLastName());
             Assert.assertNotNull(p.getAverageRatingByRoles());

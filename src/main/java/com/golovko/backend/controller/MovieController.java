@@ -22,9 +22,12 @@ public class MovieController {
         return movieService.getMovies(filter, pageable);
     }
 
-    @GetMapping("/leader-board")
-    public PageResult<MovieInLeaderBoardDTO> getMoviesLeaderBoard(Pageable pageable) {
-        return movieService.getMoviesLeaderBoard(pageable);
+    // TODO getLatest
+    // TODO getUpcoming
+
+    @GetMapping("/top-rated")
+    public PageResult<MoviesTopRatedDTO> getTopRatedMovies(Pageable pageable) {
+        return movieService.getTopRatedMovies(pageable);
     }
 
     @GetMapping("/{id}")

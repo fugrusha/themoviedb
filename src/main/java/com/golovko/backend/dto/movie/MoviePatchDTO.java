@@ -17,4 +17,10 @@ public class MoviePatchDTO {
     private String description;
 
     private Boolean isReleased;
+
+    @Size(min = 1, max = 100)
+    private String posterUrl;
+
+    @Size(min = 1, max = 100)
+    private String trailerUrl;
 }

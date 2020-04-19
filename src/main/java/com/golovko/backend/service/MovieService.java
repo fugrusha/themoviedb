@@ -54,8 +54,8 @@ public class MovieService {
         return translationService.toPageResult(movies, MovieReadDTO.class);
     }
 
-    public PageResult<MovieInLeaderBoardDTO> getMoviesLeaderBoard(Pageable pageable) {
-        Page<MovieInLeaderBoardDTO> movies = movieRepository.getMoviesLeaderBoard(pageable);
+    public PageResult<MoviesTopRatedDTO> getTopRatedMovies(Pageable pageable) {
+        Page<MoviesTopRatedDTO> movies = movieRepository.getTopRatedMovies(pageable);
         return translationService.toPageResult(movies);
     }
 

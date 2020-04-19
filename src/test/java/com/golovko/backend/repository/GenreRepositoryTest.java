@@ -52,11 +52,21 @@ public class GenreRepositoryTest extends BaseTest {
         Genre g2 = testObjectFactory.createGenre("Horror");
         Genre g3 = testObjectFactory.createGenre("Comedy");
 
-
         Page<Genre> genres = genreRepository.findAll(Pageable.unpaged());
 
         Assertions.assertThat(genres).extracting(Genre::getId)
                 .containsExactlyInAnyOrder(g3.getId(), g2.getId(), g1.getId());
+    }
 
+    @Test
+    public void testExistsByGenreName() {
+        Genre g1 = testObjectFactory.createGenre("Thriller");
+        testObjectFactory.createGenre("Horror");
+        testObjectFactory.createGenre("Comedy");
+
+        Genre genre = genreRepository.findByGenreName("Thriller");
+
+        Assert.assertEquals(g1.getId(), genre.getId());
+        Assert.assertNull(genreRepository.findByGenreName("Action"));
     }
 }
