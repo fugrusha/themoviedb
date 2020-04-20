@@ -79,7 +79,24 @@ public class PersonRepositoryTest extends BaseTest {
     }
 
     @Test
-    public void testGetPersonLeaderBoard() {
+    public void testFindByFullName() {
+        Person p1 = testObjectFactory.createPerson();
+        p1.setFirstName("Alex");
+        p1.setLastName("Cooper");
+
+        Person p2 = testObjectFactory.createPerson();
+        p2.setFirstName("Bob");       // wrong Name
+        p2.setLastName("Cooper");
+
+        personRepository.saveAll(List.of(p1, p2));
+
+        Person person = personRepository.findByFullName("Alex Cooper");
+
+        Assert.assertEquals(p1.getId(), person.getId());
+    }
+
+    @Test
+    public void testGetTopRatedPerson() {
         Set<UUID> personIds = new HashSet<>();
         for (int i = 0; i < 100; ++i) {
             Movie m = testObjectFactory.createMovie();

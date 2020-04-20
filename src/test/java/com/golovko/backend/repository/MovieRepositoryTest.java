@@ -13,6 +13,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -188,12 +189,13 @@ public class MovieRepositoryTest extends BaseTest {
 
     @Test
     public void testExistsMovieByMovieTitle() {
-        Movie m1 = testObjectFactory.createMovie();
-        testObjectFactory.createMovie();
-        testObjectFactory.createMovie();
+        LocalDate releaseDate = LocalDate.of(1995, 5, 5);
+
+        Movie m1 = testObjectFactory.createMovie(releaseDate, true);
+        testObjectFactory.createMovie(releaseDate, true);
 
         String movieTitle = m1.getMovieTitle();
 
-        Assert.assertTrue(movieRepository.existsMovieByMovieTitle(movieTitle));
+        Assert.assertTrue(movieRepository.existsMovieByMovieTitleAndReleaseDate(movieTitle, releaseDate));
     }
 }

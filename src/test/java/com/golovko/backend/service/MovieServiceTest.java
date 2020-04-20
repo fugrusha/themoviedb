@@ -110,6 +110,8 @@ public class MovieServiceTest extends BaseTest {
         patchDTO.setReleaseDate(LocalDate.parse("2002-02-03"));
         patchDTO.setPosterUrl("poster url");
         patchDTO.setTrailerUrl("trailer url");
+        patchDTO.setRevenue(49000000);
+        patchDTO.setRuntime(130);
 
         MovieReadDTO readDTO = movieService.patchMovie(movie.getId(), patchDTO);
 
@@ -371,6 +373,18 @@ public class MovieServiceTest extends BaseTest {
         movie.setDescription("");
         movie.setIsReleased(true);
         movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movieRepository.save(movie);
+    }
+
+    @Test(expected = TransactionSystemException.class)
+    public void testSaveMoviePositiveOrZeroValidation() {
+        Movie movie = new Movie();
+        movie.setMovieTitle("title");
+        movie.setDescription("description");
+        movie.setIsReleased(true);
+        movie.setReleaseDate(LocalDate.of(2019, 5, 12));
+        movie.setRuntime(-100);
+        movie.setRevenue(-1000);
         movieRepository.save(movie);
     }
 

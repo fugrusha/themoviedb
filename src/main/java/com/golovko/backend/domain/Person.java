@@ -25,7 +25,7 @@ public class Person extends AbstractEntity {
     private String lastName;
 
     @NotNull
-    @Size(min = 1, max = 1000)
+    @Size(min = 1, max = 3000)
     private String bio;
 
     @Past

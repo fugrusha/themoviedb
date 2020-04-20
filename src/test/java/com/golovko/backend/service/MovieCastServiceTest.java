@@ -202,7 +202,8 @@ public class MovieCastServiceTest extends BaseTest {
         patchDTO.setCharacter("New Character");
         patchDTO.setDescription("New text");
         patchDTO.setPersonId(person.getId());
-        ;
+        patchDTO.setGender(Gender.MALE);
+        patchDTO.setOrderNumber(5);
 
         MovieCastReadDTO readDTO = movieCastService.patchMovieCast(patchDTO, movieCast.getId(), movie.getId());
 

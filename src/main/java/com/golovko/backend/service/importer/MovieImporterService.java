@@ -6,6 +6,7 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.exception.ImportAlreadyPerformedException;
 import com.golovko.backend.exception.ImportedEntityAlreadyExistsException;
 import com.golovko.backend.repository.*;
+import com.golovko.backend.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -51,7 +52,9 @@ public class MovieImporterService {
 
         MovieReadDTO movieDTO = theMovieDbClient.getMovie(externalMovieId, null);
 
-        boolean isMovieExist = movieRepository.existsMovieByMovieTitle(movieDTO.getTitle());
+        boolean isMovieExist = movieRepository.existsMovieByMovieTitleAndReleaseDate(movieDTO.getTitle(),
+                LocalDate.parse(movieDTO.getReleaseDate()));
+
         if (isMovieExist) {
             throw new ImportedEntityAlreadyExistsException("Movie with title="
                     + movieDTO.getTitle() + "already exists");
@@ -65,7 +68,7 @@ public class MovieImporterService {
         movieRepository.save(movie);
         externalSystemImportService.createExternalSystemImport(movie, externalMovieId);
 
-        // TODO productionCompanies, productionCountries, revenue, runtime
+        // TODO productionCompanies, productionCountries
         importMovieCredits(externalMovieId, movie);
 
         log.info("Movie with external id={} imported", externalMovieId);
@@ -76,16 +79,14 @@ public class MovieImporterService {
         List<Genre> genresForMovie = new ArrayList<>();
 
         for (GenreShortDTO dto : genres) {
-            externalSystemImportService.validateNotImported(Genre.class, dto.getId());
-
             Genre genre = genreRepository.findByGenreName(dto.getName());
 
             if (genre == null) {
                 genre = createGenre(dto.getName());
+                externalSystemImportService.createExternalSystemImport(genre, dto.getId());
             }
 
             genresForMovie.add(genre);
-            externalSystemImportService.createExternalSystemImport(genre, dto.getId());
 
             log.info("Genre {} is added to movie {}", genre.getGenreName(), movie.getMovieTitle());
         }
@@ -113,18 +114,23 @@ public class MovieImporterService {
         Set<MovieCrew> movieCrews = new HashSet<>();
 
         for (CrewReadDTO crewDTO : crews) {
-            MovieCrew mc = new MovieCrew();
-            mc.setMovie(movie);
-//            mc.setPerson(importPerson(crewDTO.getPersonId())); //TODO
-            mc.setDescription(crewDTO.getJob());
-            mc.setMovieCrewType(getMovieCrewType(crewDTO.getDepartment()));
-            movieCrewRepository.save(mc);
+            try {
+                MovieCrew mc = new MovieCrew();
+                mc.setMovie(movie);
+                mc.setPerson(importPerson(crewDTO.getPersonId()));
+                mc.setDescription(crewDTO.getJob());
+                mc.setMovieCrewType(getMovieCrewType(crewDTO.getDepartment()));
+                movieCrewRepository.save(mc);
 
-            externalSystemImportService.createExternalSystemImport(mc, crewDTO.getCreditId());
-            movieCrews.add(mc);
+                externalSystemImportService.createExternalSystemImport(mc, crewDTO.getCreditId());
+                movieCrews.add(mc);
+            } catch (Exception e) {
+                log.error("Failed to import person with id={}: {}", crewDTO.getPersonId(), e.getMessage());
+            }
+
         }
 
-        movie.setMovieCrews(movieCrews);
+        movie.getMovieCrews().addAll(movieCrews);
         log.info("Imported {} crew members for movie: {}", movieCrews.size(), movie.getMovieTitle());
     }
 
@@ -132,18 +138,33 @@ public class MovieImporterService {
         Set<MovieCast> movieCasts = new HashSet<>();
 
         for (CastReadDTO castDTO : casts) {
-            MovieCast mc = new MovieCast();
-            mc.setMovie(movie);
-//            mc.setPerson(importPerson(castDTO.getPersonId())); //TODO
-            mc.setMovieCrewType(MovieCrewType.CAST);
-            mc.setCharacter(castDTO.getCharacter());
-            movieCastRepository.save(mc);
+            try {
+                MovieCast mc = new MovieCast();
+                mc.setMovie(movie);
+                mc.setPerson(importPerson(castDTO.getPersonId()));
+                mc.setMovieCrewType(MovieCrewType.CAST);
+                mc.setCharacter(castDTO.getCharacter());
+                mc.setOrderNumber(castDTO.getOrder());
 
-            externalSystemImportService.createExternalSystemImport(mc, castDTO.getCastId());
-            movieCasts.add(mc);
+                if (castDTO.getGender().equals(1)) {
+                    mc.setGender(Gender.FEMALE);
+                } else if (castDTO.getGender().equals(2)) {
+                    mc.setGender(Gender.MALE);
+                } else {
+                    mc.setGender(Gender.UNDEFINED);
+                }
+
+                movieCastRepository.save(mc);
+
+                externalSystemImportService.createExternalSystemImport(mc, castDTO.getCastId());
+                movieCasts.add(mc);
+            } catch (Exception e) {
+                log.error("Failed to import person with id={}: {}", castDTO.getPersonId(), e.getMessage());
+            }
+
         }
 
-        movie.setMovieCasts(movieCasts);
+        movie.getMovieCasts().addAll(movieCasts);
         log.info("Imported {} cast members for movie: {}", movieCasts.size(), movie.getMovieTitle());
     }
 
@@ -178,19 +199,27 @@ public class MovieImporterService {
     }
 
     public Person importPerson(String personId) {
+        log.info("Importing person with external id={}", personId);
 
         UUID entityId = externalSystemImportService.getImportedEntityId(Person.class, personId);
 
-        if (entityId == null) {
-            PersonReadDTO readDTO = theMovieDbClient.getPerson(personId, null);
-            Person person = createPerson(readDTO);
-            externalSystemImportService.createExternalSystemImport(person, personId);
-
-            log.info("Imported person {} with external id={}", readDTO.getName(), personId);
-            return person;
-        } else {
+        if (entityId != null) {
             return repoHelper.getReferenceIfExist(Person.class, entityId);
         }
+
+        PersonReadDTO readDTO = theMovieDbClient.getPerson(personId, null);
+
+        Person existedPerson = personRepository.findByFullName(readDTO.getName());
+
+        if (existedPerson != null) {
+            return existedPerson;
+        }
+
+        Person newPerson = createPerson(readDTO);
+        externalSystemImportService.createExternalSystemImport(newPerson, personId);
+
+        log.info("Imported Person {} with external id={}", readDTO.getName(), personId);
+        return newPerson;
     }
 
     private Movie createMovie(MovieReadDTO dto) {
@@ -199,6 +228,8 @@ public class MovieImporterService {
         movie.setReleaseDate(LocalDate.parse(dto.getReleaseDate()));
         movie.setDescription(dto.getOverview());
         movie.setIsReleased(dto.getStatus().equals("Released"));
+        movie.setRevenue(dto.getRevenue());
+        movie.setRuntime(dto.getRuntime());
         return movie;
     }
 
@@ -212,9 +243,33 @@ public class MovieImporterService {
         Person person = new Person();
         person.setFirstName(readDTO.getName().split(" ")[0]);
         person.setLastName(readDTO.getName().split(" ")[1]);
-        person.setBirthday(LocalDate.parse(readDTO.getBirthday()));
-        person.setPlaceOfBirth(readDTO.getPlaceOfBirth());
-        person.setBio(readDTO.getBiography());
+
+        if (!Utils.empty(readDTO.getBirthday())) {
+            person.setBirthday(LocalDate.parse(readDTO.getBirthday()));
+        } else {
+            person.setBirthday(LocalDate.of(1900, 1, 1));
+        }
+
+        if (!Utils.empty(readDTO.getPlaceOfBirth())) {
+            person.setPlaceOfBirth(readDTO.getPlaceOfBirth());
+        } else {
+            person.setPlaceOfBirth("Unknown");
+        }
+
+        if (!Utils.empty(readDTO.getBiography())) {
+            person.setBio(readDTO.getBiography());
+        } else {
+            person.setBio(String.format("Biography for %s will be added later", readDTO.getName()));
+        }
+
+        if (readDTO.getGender().equals(1)) {
+            person.setGender(Gender.FEMALE);
+        } else if (readDTO.getGender().equals(2)) {
+            person.setGender(Gender.MALE);
+        } else {
+            person.setGender(Gender.UNDEFINED);
+        }
+
         return personRepository.save(person);
     }
 }

@@ -9,6 +9,8 @@ public class PersonReadDTO {
 
     private String name;
 
+    private Integer gender;
+
     private String birthday;
 
     private String biography;

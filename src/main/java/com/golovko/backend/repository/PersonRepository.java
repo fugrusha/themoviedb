@@ -32,4 +32,8 @@ public interface PersonRepository extends CrudRepository<Person, UUID> {
             + " join p.movieCasts mc"
             + " where mc.movie.id = :movieId")
     Double calcMovieCastAverageRatingByMovieId(UUID movieId);
+
+    @Query("select p from Person p"
+            + " where lower(concat(p.firstName, ' ', p.lastName)) = lower(:name)")
+    Person findByFullName(String name);
 }

@@ -32,6 +32,11 @@ public class MovieCast extends AbstractEntity {
     @Size(min = 1, max = 50)
     private String character;
 
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
+    private Integer orderNumber;
+
     @NotNull
     @Column(updatable = false)
     @Enumerated(EnumType.STRING)

@@ -140,6 +140,8 @@ public class MovieControllerTest extends BaseControllerTest {
         MovieCreateDTO createDTO = new MovieCreateDTO();
         createDTO.setMovieTitle("Guess Who".repeat(100));
         createDTO.setDescription("12345".repeat(1000));
+        createDTO.setPosterUrl("poster url".repeat(1000));
+        createDTO.setTrailerUrl("trailer url".repeat(1000));
         createDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
         createDTO.setIsReleased(false);
 
@@ -161,8 +163,33 @@ public class MovieControllerTest extends BaseControllerTest {
         MovieCreateDTO createDTO = new MovieCreateDTO();
         createDTO.setMovieTitle("");
         createDTO.setDescription("");
+        createDTO.setPosterUrl("");
+        createDTO.setTrailerUrl("");
         createDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
         createDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(createDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).createMovie(any());
+    }
+
+    @Test
+    public void testCreateMoviePositiveOrZeroValidationException() throws Exception {
+        MovieCreateDTO createDTO = new MovieCreateDTO();
+        createDTO.setMovieTitle("title");
+        createDTO.setDescription("text");
+        createDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
+        createDTO.setIsReleased(false);
+        createDTO.setRevenue(-20);
+        createDTO.setRuntime(-10);
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/movies")
@@ -184,6 +211,8 @@ public class MovieControllerTest extends BaseControllerTest {
         patchDTO.setDescription("some description");
         patchDTO.setIsReleased(true);
         patchDTO.setReleaseDate(LocalDate.parse("1800-07-10"));
+        patchDTO.setRevenue(10000);
+        patchDTO.setRuntime(130);
 
         MovieReadDTO readDTO = createMovieReadDTO();
 
@@ -205,8 +234,6 @@ public class MovieControllerTest extends BaseControllerTest {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         patchDTO.setMovieTitle("");
         patchDTO.setDescription("");
-        patchDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        patchDTO.setIsReleased(false);
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{id}", UUID.randomUUID())
@@ -226,8 +253,25 @@ public class MovieControllerTest extends BaseControllerTest {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
         patchDTO.setMovieTitle("Guess Who".repeat(100));
         patchDTO.setDescription("12345".repeat(1000));
-        patchDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
-        patchDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(patch("/api/v1/movies/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(patchDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
+    }
+
+    @Test
+    public void testPatchMoviePositiveOrZeroValidationException() throws Exception {
+        MoviePatchDTO patchDTO = new MoviePatchDTO();
+        patchDTO.setRuntime(-10);
+        patchDTO.setRevenue(-10);
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{id}", UUID.randomUUID())
@@ -293,6 +337,25 @@ public class MovieControllerTest extends BaseControllerTest {
         updateDTO.setDescription("12345".repeat(1000));
         updateDTO.setReleaseDate(LocalDate.parse("1990-12-05"));
         updateDTO.setIsReleased(false);
+
+        String resultJson = mockMvc
+                .perform(put("/api/v1/movies/{id}", UUID.randomUUID())
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(updateDTO)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
+    }
+
+    @Test
+    public void testUpdateMoviePositiveOrZeroValidationException() throws Exception {
+        MoviePutDTO updateDTO = new MoviePutDTO();
+        updateDTO.setRevenue(-10);
+        updateDTO.setRuntime(-10);
 
         String resultJson = mockMvc
                 .perform(put("/api/v1/movies/{id}", UUID.randomUUID())

@@ -19,5 +19,9 @@ public class MovieReadDTO {
 
     private String overview;
 
+    private Integer runtime;
+
+    private Integer revenue;
+
     private List<GenreShortDTO> genres;
 }

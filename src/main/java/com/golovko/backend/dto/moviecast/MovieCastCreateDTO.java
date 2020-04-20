@@ -1,5 +1,6 @@
 package com.golovko.backend.dto.moviecast;
 
+import com.golovko.backend.domain.Gender;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
@@ -18,4 +19,8 @@ public class MovieCastCreateDTO {
     @NotNull
     @Size(min = 1, max = 50)
     private String character;
+
+    private Gender gender;
+
+    private Integer orderNumber;
 }

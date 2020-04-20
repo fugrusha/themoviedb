@@ -30,6 +30,8 @@
                 CHARACTER="some text"
                 MOVIE_CREW_TYPE="CAST"
                 DESCRIPTION="some text"
+                ORDER_NUMBER="1"
+                GENDER="MALE"
     />
 
     <RATING ID="uuid'6aeb4359-86d0-48bc-a4eb-4fdfb212fbae'"
