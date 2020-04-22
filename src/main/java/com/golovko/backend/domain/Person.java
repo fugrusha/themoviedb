@@ -7,9 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Getter
@@ -50,10 +48,10 @@ public class Person extends AbstractEntity {
     private Double averageRatingByMovies;
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCrew> movieCrews = new HashSet<>();
+    private List<MovieCrew> movieCrews = new ArrayList<>();
 
     @OneToMany(mappedBy = "person", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCast> movieCasts = new HashSet<>();
+    private List<MovieCast> movieCasts = new ArrayList<>();
 
     @ManyToMany(mappedBy = "people")
     private List<Article> articles = new ArrayList<>();

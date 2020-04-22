@@ -69,8 +69,8 @@ public class MovieServiceTest extends BaseTest {
         MovieCrew movieCrew = testObjectFactory.createMovieCrew(person2, movie);
 
         movie.setGenres(List.of(genre));
-        movie.setMovieCasts(Set.of(movieCast));
-        movie.setMovieCrews(Set.of(movieCrew));
+        movie.setMovieCasts(List.of(movieCast));
+        movie.setMovieCrews(List.of(movieCrew));
         Movie extendedMovie = movieRepository.save(movie);
 
         MovieReadExtendedDTO extendedDTO = movieService.getMovieExtended(extendedMovie.getId());

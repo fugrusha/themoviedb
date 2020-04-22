@@ -7,9 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Setter
@@ -55,10 +53,10 @@ public class Movie extends AbstractEntity {
     private Integer dislikesCount;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCrew> movieCrews = new HashSet<MovieCrew>();
+    private List<MovieCrew> movieCrews = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCast> movieCasts = new HashSet<MovieCast>();
+    private List<MovieCast> movieCasts = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(
