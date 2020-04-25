@@ -152,7 +152,7 @@ public class PersonImporterServiceTest extends BaseTest {
     private PersonReadDTO createPersonReadDTO() {
         PersonReadDTO dto = generateObject(PersonReadDTO.class);
         dto.setName("Alisa Winter");
-        dto.setBirthday("1988-05-12");
+        dto.setBirthday(LocalDate.of(1988,2,10));
         dto.setGender(2);
         return dto;
     }

@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -49,7 +48,7 @@ public class MovieImporterService {
         MovieReadDTO movieDTO = theMovieDbClient.getMovie(externalMovieId, null);
 
         boolean isMovieExist = movieRepository.existsMovieByMovieTitleAndReleaseDate(movieDTO.getTitle(),
-                LocalDate.parse(movieDTO.getReleaseDate()));
+                movieDTO.getReleaseDate());
 
         if (isMovieExist) {
             throw new ImportedEntityAlreadyExistsException("Movie with title="
@@ -93,7 +92,7 @@ public class MovieImporterService {
     private Movie createMovie(MovieReadDTO dto) {
         Movie movie = new Movie();
         movie.setMovieTitle(dto.getTitle());
-        movie.setReleaseDate(LocalDate.parse(dto.getReleaseDate()));
+        movie.setReleaseDate(dto.getReleaseDate());
         movie.setDescription(dto.getOverview());
         movie.setIsReleased(dto.getStatus().equals("Released"));
         movie.setRevenue(dto.getRevenue());

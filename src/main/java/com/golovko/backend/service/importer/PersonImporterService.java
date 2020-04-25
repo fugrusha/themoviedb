@@ -57,7 +57,7 @@ public class PersonImporterService {
         Person newPerson = createPerson(readDTO);
         externalSystemImportService.createExternalSystemImport(newPerson, externalPersonId);
 
-        log.info("Imported Person {} with external id={}", readDTO.getName(), externalPersonId);
+        log.info("Imported person {} with external id={}", readDTO.getName(), externalPersonId);
         return newPerson;
     }
 
@@ -66,8 +66,8 @@ public class PersonImporterService {
         person.setFirstName(readDTO.getName().split(" ")[0]);
         person.setLastName(readDTO.getName().split(" ")[1]);
 
-        if (!Utils.empty(readDTO.getBirthday())) {
-            person.setBirthday(LocalDate.parse(readDTO.getBirthday()));
+        if (readDTO.getBirthday() != null) {
+            person.setBirthday(readDTO.getBirthday());
         } else {
             person.setBirthday(LocalDate.of(1900, 1, 1));
         }

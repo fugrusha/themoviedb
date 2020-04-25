@@ -1,6 +1,10 @@
 package com.golovko.backend.client.themoviedb.dto;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Data;
+
+import java.time.LocalDate;
 
 @Data
 public class PersonReadDTO {
@@ -11,7 +15,8 @@ public class PersonReadDTO {
 
     private Integer gender;
 
-    private String birthday;
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate birthday;
 
     private String biography;
 

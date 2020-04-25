@@ -7,6 +7,7 @@ import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.LinkDuplicatedException;
 import com.golovko.backend.repository.MovieRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class MovieGenreService {
     public List<GenreReadDTO> getMovieGenres(UUID movieId) {
         Movie movie = repoHelper.getEntityById(Movie.class, movieId);
 
-        if (movie.getGenres() == null || movie.getGenres().isEmpty()) {
+        if (CollectionUtils.isEmpty(movie.getGenres())) {
             throw new EntityNotFoundException("Movie " + movieId + " has not any genre.");
         }
 

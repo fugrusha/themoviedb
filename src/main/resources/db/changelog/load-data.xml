@@ -8,7 +8,7 @@
         <loadUpdateData tableName="application_user" file="db/data/users.csv" separator=";" primaryKey="id">
             <column name="id" type="uuid"/>
             <column name="username" type="string"/>
-            <column name="password" type="string"/>
+            <column name="encoded_password" type="string"/>
             <column name="email" type="string"/>
             <column name="is_blocked" type="boolean"/>
             <column name="trust_level" type="numeric"/>

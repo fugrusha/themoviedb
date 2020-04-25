@@ -18,7 +18,7 @@ public class ApplicationUser extends AbstractEntity {
     private String username;
 
     @NotNull
-    private String password;
+    private String encodedPassword;
 
     @NotNull
     @Email

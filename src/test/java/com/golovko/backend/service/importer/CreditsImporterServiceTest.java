@@ -14,6 +14,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -382,7 +383,7 @@ public class CreditsImporterServiceTest extends BaseTest {
     private PersonReadDTO createPersonReadDTO() {
         PersonReadDTO dto = generateObject(PersonReadDTO.class);
         dto.setName("Alisa Winter");
-        dto.setBirthday("1988-05-12");
+        dto.setBirthday(LocalDate.of(1998, 2, 10));
         dto.setGender(2);
         return dto;
     }

@@ -17,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -60,7 +61,7 @@ public class MovieImporterServiceTest extends BaseTest {
 
         MovieReadDTO readDTO = createMovieReadDTO();
         readDTO.setTitle(existingMovie.getMovieTitle());
-        readDTO.setReleaseDate(existingMovie.getReleaseDate().toString());
+        readDTO.setReleaseDate(existingMovie.getReleaseDate());
 
         Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(readDTO);
 
@@ -159,14 +160,14 @@ public class MovieImporterServiceTest extends BaseTest {
 
     private MovieReadDTO createMovieReadDTO() {
         MovieReadDTO dto = generateObject(MovieReadDTO.class);
-        dto.setReleaseDate("1998-12-11");
+        dto.setReleaseDate(LocalDate.of(2000,10,10));
         dto.setStatus("Released");
         return dto;
     }
 
     private MovieReadDTO createMovieWithGenresDTO(List<GenreShortDTO> genres) {
         MovieReadDTO dto = generateObject(MovieReadDTO.class);
-        dto.setReleaseDate("1998-12-11");
+        dto.setReleaseDate(LocalDate.of(2000,10,10));
         dto.setStatus("Released");
         dto.setGenres(genres);
         return dto;
