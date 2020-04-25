@@ -132,7 +132,7 @@ public class TestObjectFactory {
     public ApplicationUser createUser() {
         ApplicationUser user = generateFlatEntityWithoutId(ApplicationUser.class);
         user.setTrustLevel(5.0);
-        user.setPassword("123456789");
+        user.setEncodedPassword("123456789");
         user.setEmail("vetal@gmail.com");
         user.setIsBlocked(false);
         return applicationUserRepository.save(user);
@@ -141,7 +141,7 @@ public class TestObjectFactory {
     public ApplicationUser createUser(Double trustLevel, Boolean isBlocked) {
         ApplicationUser user = new ApplicationUser();
         user.setUsername("Vitalka");
-        user.setPassword("123456789");
+        user.setEncodedPassword("123456789");
         user.setEmail("vetal@gmail.com");
         user.setTrustLevel(5.0);
         user.setIsBlocked(isBlocked);

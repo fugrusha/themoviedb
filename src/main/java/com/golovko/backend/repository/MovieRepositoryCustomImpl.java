@@ -2,6 +2,7 @@ package com.golovko.backend.repository;
 
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.movie.MovieFilter;
+import org.apache.commons.collections.CollectionUtils;
 import org.bitbucket.brunneng.qb.JpaQueryBuilder;
 import org.bitbucket.brunneng.qb.SpringQueryBuilderUtils;
 import org.springframework.data.domain.Page;
@@ -21,7 +22,7 @@ public class MovieRepositoryCustomImpl implements MovieRepositoryCustom {
         qb.append("select m from Movie m");
         qb.appendJoin("join m.genres g");
 
-        if (filter.getMovieCrewTypes() != null && !filter.getMovieCrewTypes().isEmpty()
+        if (CollectionUtils.isNotEmpty(filter.getMovieCrewTypes())
                 || filter.getPersonId() != null) {
             qb.append("join m.movieCrews mcr");
         }

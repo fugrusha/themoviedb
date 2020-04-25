@@ -10,6 +10,7 @@ import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import com.golovko.backend.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -145,7 +146,7 @@ public class ComplaintService {
     private void moderateCommentComplaint(UUID commentId, ComplaintModerateDTO dto) {
         Comment comment = repoHelper.getEntityById(Comment.class, commentId);
 
-        if (dto.getNewCommentMessage() != null && !dto.getNewCommentMessage().trim().isEmpty()) {
+        if (!Utils.empty(dto.getNewCommentMessage())) {
             comment.setMessage(dto.getNewCommentMessage());
         }
         if (dto.getDeleteComment() != null && dto.getDeleteComment()) {

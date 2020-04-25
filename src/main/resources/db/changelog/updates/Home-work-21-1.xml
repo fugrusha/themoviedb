@@ -1,0 +1,28 @@
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.8.xsd">
+
+    <changeSet id="drop constraints" author="andrew">
+        <dropColumn tableName="person" columnName="bio"/>
+        <addColumn tableName="person">
+            <column name="bio" type="varchar(3000)"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add columns to movie_cast" author="andrew">
+        <addColumn tableName="movie_cast">
+            <column name="gender" type="varchar(30)"/>
+            <column name="order_number" type="int"/>
+        </addColumn>
+    </changeSet>
+
+    <changeSet id="add revenue and runtime columns to movie" author="andrew">
+        <addColumn tableName="movie">
+            <column name="runtime" type="int"/>
+            <column name="revenue" type="int"/>
+        </addColumn>
+    </changeSet>
+
+</databaseChangeLog>

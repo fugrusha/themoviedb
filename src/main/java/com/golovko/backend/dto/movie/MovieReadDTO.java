@@ -23,6 +23,10 @@ public class MovieReadDTO {
 
     private String trailerUrl;
 
+    private Integer runtime;
+
+    private Integer revenue;
+
     private Double averageRating;
 
     private Double predictedAverageRating;

@@ -7,9 +7,7 @@ import javax.persistence.*;
 import javax.validation.constraints.Email;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Setter
@@ -20,7 +18,7 @@ public class ApplicationUser extends AbstractEntity {
     private String username;
 
     @NotNull
-    private String password;
+    private String encodedPassword;
 
     @NotNull
     @Email
@@ -43,7 +41,7 @@ public class ApplicationUser extends AbstractEntity {
     private List<Article> articles = new ArrayList<>();
 
     @OneToMany(mappedBy = "author")
-    private Set<Like> likes = new HashSet<>();
+    private List<Like> likes = new ArrayList<>();
 
     @OneToMany(mappedBy = "author")
     private List<Comment> comments = new ArrayList<>();

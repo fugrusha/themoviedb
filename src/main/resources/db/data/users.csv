@@ -1,4 +1,4 @@
-id;username;password;email;is_blocked;trust_level;created_at;updated_at
+id;username;encoded_password;email;is_blocked;trust_level;created_at;updated_at
 83c8e93c-48d8-4093-a9db-455b849f5b2f;admin;admin;admin@gmail.com;false;10;2017-02-03T11:35:30;2020-02-01T12:12:12
 d48ff3ef-284b-4a13-9f2f-5293c6faee48;moderator1;moderator1;moderator1@gmail.com;false;10;2018-03-03T11:35:30;2020-01-06T14:40:00
 1236c964-2ca7-4231-acd7-2d01f929d607;moderator2;moderator2;moderator2@gmail.com;false;9;2018-09-03T14:00:30;2020-02-15T16:50:00

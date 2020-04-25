@@ -13,5 +13,7 @@ public class CastReadDTO {
     @JsonProperty("id")
     private String personId;
 
-    // TODO add order, gender
+    private Integer gender;
+
+    private Integer order;
 }

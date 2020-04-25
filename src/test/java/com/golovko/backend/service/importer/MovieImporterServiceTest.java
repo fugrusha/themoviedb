@@ -2,7 +2,8 @@ package com.golovko.backend.service.importer;
 
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.client.themoviedb.TheMovieDbClient;
-import com.golovko.backend.client.themoviedb.dto.*;
+import com.golovko.backend.client.themoviedb.dto.GenreShortDTO;
+import com.golovko.backend.client.themoviedb.dto.MovieReadDTO;
 import com.golovko.backend.domain.Genre;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.exception.ImportAlreadyPerformedException;
@@ -16,11 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.boot.test.mock.mockito.SpyBean;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import static com.golovko.backend.domain.MovieCrewType.*;
 import static org.mockito.ArgumentMatchers.any;
 
 public class MovieImporterServiceTest extends BaseTest {
@@ -32,6 +33,9 @@ public class MovieImporterServiceTest extends BaseTest {
     private MovieRepository movieRepository;
 
     @SpyBean
+    private CreditsImporterService creditsImporterService;
+
+    @Autowired
     private MovieImporterService movieImporterService;
 
     @Test
@@ -41,7 +45,7 @@ public class MovieImporterServiceTest extends BaseTest {
         MovieReadDTO readDTO = createMovieReadDTO();
 
         Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(readDTO);
-        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+        Mockito.doNothing().when(creditsImporterService).importMovieCredits(any(), any());
 
         UUID movieId = movieImporterService.importMovie(externalMovieId);
         Movie movie = movieRepository.findById(movieId).get();
@@ -57,6 +61,7 @@ public class MovieImporterServiceTest extends BaseTest {
 
         MovieReadDTO readDTO = createMovieReadDTO();
         readDTO.setTitle(existingMovie.getMovieTitle());
+        readDTO.setReleaseDate(existingMovie.getReleaseDate());
 
         Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(readDTO);
 
@@ -74,7 +79,7 @@ public class MovieImporterServiceTest extends BaseTest {
         MovieReadDTO readDTO = createMovieReadDTO();
 
         Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(readDTO);
-        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+        Mockito.doNothing().when(creditsImporterService).importMovieCredits(any(), any());
 
         movieImporterService.importMovie(externalMovieId);
         Mockito.verify(theMovieDbClient).getMovie(externalMovieId, null);
@@ -95,7 +100,7 @@ public class MovieImporterServiceTest extends BaseTest {
         MovieReadDTO movieDTO = createMovieWithGenresDTO(List.of(genreDTO));
 
         Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(movieDTO);
-        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+        Mockito.doNothing().when(creditsImporterService).importMovieCredits(any(), any());
 
         UUID movieId = movieImporterService.importMovie(externalMovieId);
 
@@ -119,7 +124,7 @@ public class MovieImporterServiceTest extends BaseTest {
         MovieReadDTO movieDTO = createMovieWithGenresDTO(List.of(genreDTO));
 
         Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(movieDTO);
-        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+        Mockito.doNothing().when(creditsImporterService).importMovieCredits(any(), any());
 
         UUID movieId = movieImporterService.importMovie(externalMovieId);
 
@@ -141,7 +146,7 @@ public class MovieImporterServiceTest extends BaseTest {
         MovieReadDTO movieDTO = createMovieWithGenresDTO(new ArrayList<GenreShortDTO>());
 
         Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(movieDTO);
-        Mockito.doNothing().when(movieImporterService).importMovieCredits(any(), any());
+        Mockito.doNothing().when(creditsImporterService).importMovieCredits(any(), any());
 
         UUID movieId = movieImporterService.importMovie(externalMovieId);
 
@@ -150,62 +155,19 @@ public class MovieImporterServiceTest extends BaseTest {
 
             Assert.assertEquals(movieDTO.getTitle(), movie.getMovieTitle());
             Assert.assertTrue(movie.getGenres().isEmpty());
-        });
-    }
-
-    @Test
-    public void testMovieImportWithCredits()
-            throws ImportedEntityAlreadyExistsException, ImportAlreadyPerformedException {
-        String externalMovieId = "id200";
-
-        List<CastReadDTO> casts = List.of(createCastReadDTO());
-        List<CrewReadDTO> crews = new ArrayList<>();
-        crews.add(createCrewReadDTO("Editing"));
-        crews.add(createCrewReadDTO("Camera"));
-        crews.add(createCrewReadDTO("Costume & Make-Up"));
-        crews.add(createCrewReadDTO("Sound"));
-        crews.add(createCrewReadDTO("Lighting"));
-        crews.add(createCrewReadDTO("Art"));
-        crews.add(createCrewReadDTO("Directing"));
-        crews.add(createCrewReadDTO("Crew"));
-        crews.add(createCrewReadDTO("Production"));
-        crews.add(createCrewReadDTO("Visual Effects"));
-        crews.add(createCrewReadDTO("Writing"));
-
-        MovieCreditsReadDTO movieCredits = createMovieCredits(casts, crews);
-
-        MovieReadDTO movieDTO = createMovieWithGenresDTO(new ArrayList<GenreShortDTO>());
-
-        Mockito.when(theMovieDbClient.getMovie(externalMovieId, null)).thenReturn(movieDTO);
-        Mockito.when(theMovieDbClient.getMovieCastAndCrew(externalMovieId, null)).thenReturn(movieCredits);
-//        Mockito.doNothing().when(movieImporterService).importPerson(any()); // FIXME works only for the first iteration
-
-        UUID movieId = movieImporterService.importMovie(externalMovieId);
-
-        inTransaction(() -> {
-            Movie movie = movieRepository.findById(movieId).get();
-
-            Assert.assertEquals(movieDTO.getTitle(), movie.getMovieTitle());
-            Assert.assertTrue(movie.getGenres().isEmpty());
-
-            Assertions.assertThat(movie.getMovieCasts()).extracting("movieCrewType").contains(CAST);
-
-            Assertions.assertThat(movie.getMovieCrews()).extracting("movieCrewType")
-                    .containsExactlyInAnyOrder(EDITOR, CAMERA, COSTUME_DESIGNER, SOUND,
-                            LIGHTING, ART, DIRECTOR, WRITER, CREW, PRODUCER, VISUAL_EFFECTS);
         });
     }
 
     private MovieReadDTO createMovieReadDTO() {
         MovieReadDTO dto = generateObject(MovieReadDTO.class);
-        dto.setReleaseDate("1998-12-11");
+        dto.setReleaseDate(LocalDate.of(2000,10,10));
         dto.setStatus("Released");
         return dto;
     }
 
     private MovieReadDTO createMovieWithGenresDTO(List<GenreShortDTO> genres) {
         MovieReadDTO dto = generateObject(MovieReadDTO.class);
-        dto.setReleaseDate("1998-12-11");
+        dto.setReleaseDate(LocalDate.of(2000,10,10));
         dto.setStatus("Released");
         dto.setGenres(genres);
         return dto;
@@ -213,29 +175,5 @@ public class MovieImporterServiceTest extends BaseTest {
 
     private GenreShortDTO createGenreShortDTO() {
         return generateObject(GenreShortDTO.class);
-    }
-
-    private MovieCreditsReadDTO createMovieCredits(List<CastReadDTO> cast, List<CrewReadDTO> crew) {
-        MovieCreditsReadDTO dto = generateObject(MovieCreditsReadDTO.class);
-        dto.setCast(cast);
-        dto.setCrew(crew);
-        return dto;
-    }
-
-    private CastReadDTO createCastReadDTO() {
-        return generateObject(CastReadDTO.class);
-    }
-
-    private CrewReadDTO createCrewReadDTO(String department) {
-        CrewReadDTO dto = generateObject(CrewReadDTO.class);
-        dto.setDepartment(department);
-        return dto;
-    }
-
-    private PersonReadDTO createPersonReadDTO() {
-        PersonReadDTO dto = generateObject(PersonReadDTO.class);
-        dto.setName("Alisa Winter");
-        dto.setBirthday("1988-05-12");
-        return dto;
     }
 }

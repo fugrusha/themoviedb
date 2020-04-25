@@ -5,5 +5,7 @@
                 CHARACTER="some text"
                 MOVIE_CREW_TYPE="CAST"
                 DESCRIPTION="some text"
+                ORDER_NUMBER="1"
+                GENDER="MALE"
                 AVERAGE_RATING="4.5"/>
 </dataset>

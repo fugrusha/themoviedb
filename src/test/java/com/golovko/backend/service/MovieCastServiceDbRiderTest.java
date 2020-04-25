@@ -16,7 +16,7 @@ public class MovieCastServiceDbRiderTest extends BaseTest {
     private MovieCastService movieCastService;
 
     @Test
-    @DataSet(value = "/datasets/testCalcAverageRatingOfMovieCast.xml", disableConstraints = true)
+    @DataSet(value = "/datasets/testCalcAverageRatingOfMovieCast.xml")
     @ExpectedDataSet(value = "/datasets/testCalcAverageRatingOfMovieCast_result.xml")
     public void testCalcAverageRatingOfMovieCast() {
         UUID movieCastId = UUID.fromString("52050b6b-eefc-4f5f-9c22-58b29223be09");

@@ -155,37 +155,38 @@ public class ApplicationUserServiceTest extends BaseTest {
 
     @Test
     public void testPatchUser() {
-        ApplicationUser applicationUser = testObjectFactory.createUser();
+        ApplicationUser user = testObjectFactory.createUser();
 
         UserPatchDTO patch = new UserPatchDTO();
         patch.setUsername("Volodya");
         patch.setEmail("vovka@mail.ru");
         patch.setPassword("098765");
+        patch.setPasswordConfirmation("098765");
 
-        UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patch);
+        UserReadDTO readDTO = applicationUserService.patchUser(user.getId(), patch);
 
         Assertions.assertThat(patch).isEqualToIgnoringGivenFields(readDTO,
                 "password", "passwordConfirmation");
 
-        applicationUser = applicationUserRepository.findById(readDTO.getId()).get();
-        Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(readDTO,
-                "password", "passwordConfirmation", "articles", "likes", "userRoles", "comments");
+        user = applicationUserRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
+                "encodedPassword", "articles", "likes", "userRoles", "comments");
     }
 
     @Test
     public void testPatchUserEmptyPatch() {
-        ApplicationUser applicationUser = testObjectFactory.createUser();
+        ApplicationUser user = testObjectFactory.createUser();
 
         UserPatchDTO patchDTO = new UserPatchDTO();
-        UserReadDTO readDTO = applicationUserService.patchUser(applicationUser.getId(), patchDTO);
+        UserReadDTO readDTO = applicationUserService.patchUser(user.getId(), patchDTO);
 
         Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
 
         ApplicationUser userAfterUpdate = applicationUserRepository.findById(readDTO.getId()).get();
 
         Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(applicationUser).isEqualToIgnoringGivenFields(userAfterUpdate,
-                "password", "passwordConfirmation", "articles", "likes", "userRoles", "comments");
+        Assertions.assertThat(user).isEqualToIgnoringGivenFields(userAfterUpdate,
+                "encodedPassword", "articles", "likes", "userRoles", "comments");
     }
 
     @Test
@@ -204,15 +205,15 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
-                "password", "passwordConfirmation", "articles", "likes", "userRoles", "comments");
+                "encodedPassword", "passwordConfirmation", "articles", "likes", "userRoles", "comments");
     }
 
     @Test
     public void testDeleteUser() {
-        ApplicationUser applicationUser = testObjectFactory.createUser();
-        applicationUserService.deleteUser(applicationUser.getId());
+        ApplicationUser user = testObjectFactory.createUser();
+        applicationUserService.deleteUser(user.getId());
 
-        Assert.assertFalse(applicationUserRepository.existsById(applicationUser.getId()));
+        Assert.assertFalse(applicationUserRepository.existsById(user.getId()));
     }
 
     @Test(expected = EntityNotFoundException.class)

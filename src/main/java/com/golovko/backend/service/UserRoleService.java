@@ -7,6 +7,7 @@ import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.LinkDuplicatedException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,7 @@ public class UserRoleService {
     public List<UserRoleReadDTO> getUserRoles(UUID userId) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, userId);
 
-        if (user.getUserRoles() == null || user.getUserRoles().isEmpty()) {
+        if (CollectionUtils.isEmpty(user.getUserRoles())) {
             throw new EntityNotFoundException("User " + userId + " has not any role.");
         }
 

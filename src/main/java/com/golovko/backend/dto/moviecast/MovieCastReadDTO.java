@@ -1,5 +1,6 @@
 package com.golovko.backend.dto.moviecast;
 
+import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.MovieCrewType;
 import lombok.Data;
 
@@ -14,6 +15,10 @@ public class MovieCastReadDTO {
     private String description;
 
     private String character;
+
+    private Gender gender;
+
+    private Integer orderNumber;
 
     private MovieCrewType movieCrewType;
 

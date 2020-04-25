@@ -1,5 +1,6 @@
 package com.golovko.backend.dto.moviecast;
 
+import com.golovko.backend.domain.Gender;
 import lombok.Data;
 
 import javax.validation.constraints.Size;
@@ -15,4 +16,8 @@ public class MovieCastPutDTO {
     private String character;
 
     private UUID personId;
+
+    private Gender gender;
+
+    private Integer orderNumber;
 }

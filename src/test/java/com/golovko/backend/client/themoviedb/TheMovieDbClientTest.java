@@ -21,6 +21,7 @@ public class TheMovieDbClientTest extends BaseTest {
         Assert.assertEquals(movieId, readDTO.getId());
         Assert.assertEquals("Star Trek: Insurrection", readDTO.getOriginalTitle());
         Assert.assertEquals("Звёздный путь 9: Восстание", readDTO.getTitle());
+        Assertions.assertThat(readDTO).hasNoNullFieldsOrProperties();
     }
 
     @Test
@@ -68,10 +69,12 @@ public class TheMovieDbClientTest extends BaseTest {
         MovieCreditsReadDTO readDTO = theMovieDbClient.getMovieCastAndCrew(movieId, null);
 
         Assert.assertNotNull(readDTO.getCast());
+        Assertions.assertThat(readDTO.getCast().get(0)).hasNoNullFieldsOrProperties();
         Assertions.assertThat(readDTO.getCast()).extracting("character")
-        .contains("Captain Jean-Luc Picard");
+                .contains("Captain Jean-Luc Picard");
 
         Assert.assertNotNull(readDTO.getCrew());
+        Assertions.assertThat(readDTO.getCrew().get(0)).hasNoNullFieldsOrProperties();
         Assertions.assertThat(readDTO.getCrew()).extracting("department")
                 .contains("Sound");
     }

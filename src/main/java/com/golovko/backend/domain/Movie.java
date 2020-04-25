@@ -4,15 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
-import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Size;
+import javax.validation.constraints.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Setter
@@ -36,6 +31,12 @@ public class Movie extends AbstractEntity {
     @Size(min = 1, max = 100)
     private String trailerUrl;
 
+    @PositiveOrZero
+    private Integer runtime;
+
+    @PositiveOrZero
+    private Integer revenue;
+
     @NotNull
     private Boolean isReleased;
 
@@ -52,10 +53,10 @@ public class Movie extends AbstractEntity {
     private Integer dislikesCount;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCrew> movieCrews = new HashSet<MovieCrew>();
+    private List<MovieCrew> movieCrews = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<MovieCast> movieCasts = new HashSet<MovieCast>();
+    private List<MovieCast> movieCasts = new ArrayList<>();
 
     @ManyToMany
     @JoinTable(

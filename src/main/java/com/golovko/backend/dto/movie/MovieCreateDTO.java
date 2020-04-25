@@ -3,6 +3,7 @@ package com.golovko.backend.dto.movie;
 import lombok.Data;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.PositiveOrZero;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
 
@@ -28,4 +29,10 @@ public class MovieCreateDTO {
 
     @Size(min = 1, max = 100)
     private String trailerUrl;
+
+    @PositiveOrZero
+    private Integer runtime;
+
+    @PositiveOrZero
+    private Integer revenue;
 }

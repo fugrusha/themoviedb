@@ -14,6 +14,7 @@ import com.golovko.backend.repository.ArticleRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -107,7 +108,7 @@ public class ArticleService {
     public List<PersonReadDTO> getArticlePeople(UUID articleId) {
         Article article = repoHelper.getEntityById(Article.class, articleId);
 
-        if (article.getPeople() == null || article.getPeople().isEmpty()) {
+        if (CollectionUtils.isEmpty(article.getPeople())) {
             throw new EntityNotFoundException("Article " + articleId + " has not any mentioned person.");
         }
 
@@ -148,7 +149,7 @@ public class ArticleService {
     public List<MovieReadDTO> getArticleMovies(UUID articleId) {
         Article article = repoHelper.getEntityById(Article.class, articleId);
 
-        if (article.getMovies() == null || article.getMovies().isEmpty()) {
+        if (CollectionUtils.isEmpty(article.getMovies())) {
             throw new EntityNotFoundException("Article " + articleId + " has not any mentioned movie.");
         }
 

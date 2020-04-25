@@ -137,7 +137,7 @@ public class ApplicationUserRepositoryTest extends BaseTest {
     private ApplicationUser createUser() {
         ApplicationUser user = new ApplicationUser();
         user.setUsername("username");
-        user.setPassword("123456789");
+        user.setEncodedPassword("123456789");
         user.setEmail("vetal@gmail.com");
         user.setIsBlocked(false);
         user.setTrustLevel(ThreadLocalRandom.current().nextDouble(1, 100));

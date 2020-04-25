@@ -8,7 +8,6 @@ import lombok.Data;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -28,6 +27,10 @@ public class MovieReadExtendedDTO {
 
     private String trailerUrl;
 
+    private Integer runtime;
+
+    private Integer revenue;
+
     private Double averageRating;
 
     private Double predictedAverageRating;
@@ -42,7 +45,7 @@ public class MovieReadExtendedDTO {
 
     private List<GenreReadDTO> genres;
 
-    private Set<MovieCrewReadDTO> movieCrews;
+    private List<MovieCrewReadDTO> movieCrews;
 
-    private Set<MovieCastReadDTO> movieCasts;
+    private List<MovieCastReadDTO> movieCasts;
 }

@@ -1,5 +1,6 @@
 package com.golovko.backend.service;
 
+import com.golovko.backend.config.SecurityConfig;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.UserRoleType;
 import com.golovko.backend.dto.PageResult;
@@ -8,6 +9,7 @@ import com.golovko.backend.exception.UserAlreadyExistsException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import com.golovko.backend.repository.UserRoleRepository;
+import com.golovko.backend.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -28,6 +30,9 @@ public class ApplicationUserService {
 
     @Autowired
     private TranslationService translationService;
+
+    @Autowired
+    private SecurityConfig securityConfig;
 
     @Autowired
     private RepositoryHelper repoHelper;
@@ -52,6 +57,7 @@ public class ApplicationUserService {
 
         ApplicationUser user = translationService.translate(createDTO, ApplicationUser.class);
 
+        user.setEncodedPassword(securityConfig.passwordEncoder().encode(createDTO.getPassword()));
         user.getUserRoles().add(userRoleRepository.findByType(UserRoleType.USER));
         user = applicationUserRepository.save(user);
 
@@ -62,6 +68,11 @@ public class ApplicationUserService {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
         translationService.map(patch, user);
+
+        if (!Utils.empty(patch.getPassword())) {
+            user.setEncodedPassword(securityConfig.passwordEncoder().encode(patch.getPassword()));
+        }
+
         user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);
@@ -71,6 +82,9 @@ public class ApplicationUserService {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
         translationService.map(update, user);
+        if (!Utils.empty(update.getPassword())) {
+            user.setEncodedPassword(securityConfig.passwordEncoder().encode(update.getPassword()));
+        }
         user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);

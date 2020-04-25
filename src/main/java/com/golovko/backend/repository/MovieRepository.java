@@ -9,13 +9,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.util.UUID;
 import java.util.stream.Stream;
 
 @Repository
 public interface MovieRepository extends CrudRepository<Movie, UUID>, MovieRepositoryCustom {
 
-    boolean existsMovieByMovieTitle(String movieTitle); // TODO add releaseDate
+    boolean existsMovieByMovieTitleAndReleaseDate(String movieTitle, LocalDate releaseDate);
 
     @Query("select m.id from Movie m")
     Stream<UUID> getIdsOfMovies();

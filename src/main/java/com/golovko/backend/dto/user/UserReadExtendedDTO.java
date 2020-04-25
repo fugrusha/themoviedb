@@ -8,7 +8,6 @@ import lombok.Data;
 
 import java.time.Instant;
 import java.util.List;
-import java.util.Set;
 import java.util.UUID;
 
 @Data
@@ -28,7 +27,7 @@ public class UserReadExtendedDTO {
 
     private List<ArticleReadDTO> articles;
 
-    private Set<LikeReadDTO> likes;
+    private List<LikeReadDTO> likes;
 
     private List<CommentReadDTO> comments;
 
