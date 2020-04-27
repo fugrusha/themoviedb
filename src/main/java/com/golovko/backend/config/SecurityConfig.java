@@ -22,8 +22,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
         http.authorizeRequests()
                 .antMatchers("/health").anonymous()
                 .anyRequest().authenticated()
-                .and()
-                .httpBasic()
+                .and().httpBasic()
                 .and().csrf().disable();
 
         http.sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);

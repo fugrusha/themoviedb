@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.util.List;
 
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
@@ -131,5 +132,23 @@ public class RatingRepositoryTest extends BaseTest {
         Assert.assertEquals(r1.getId(), rating.getId());
         Assert.assertEquals(u1.getId(), rating.getAuthor().getId());
         Assert.assertEquals(m1.getId(), rating.getRatedObjectId());
+    }
+
+    @Test
+    public void testFindByAuthorId() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        ApplicationUser u2 = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Movie m2 = testObjectFactory.createMovie();
+
+        Rating r1 = testObjectFactory.createRating(3, u1, m1.getId(), MOVIE);
+        Rating r2 = testObjectFactory.createRating(3, u1, m2.getId(), MOVIE);
+        testObjectFactory.createRating(3, u2, m1.getId(), MOVIE);
+        testObjectFactory.createRating(3, u2, m2.getId(), MOVIE);
+
+        List<Rating> ratings = ratingRepository.findByAuthorId(u1.getId());
+
+        Assertions.assertThat(ratings).extracting("id")
+                .containsExactlyInAnyOrder(r1.getId(), r2.getId());
     }
 }

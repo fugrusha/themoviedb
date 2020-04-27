@@ -82,9 +82,11 @@ public class ApplicationUserService {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
         translationService.map(update, user);
+
         if (!Utils.empty(update.getPassword())) {
             user.setEncodedPassword(securityConfig.passwordEncoder().encode(update.getPassword()));
         }
+
         user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 @Repository
 public interface ApplicationUserRepository extends CrudRepository<ApplicationUser, UUID> {
@@ -27,4 +28,7 @@ public interface ApplicationUserRepository extends CrudRepository<ApplicationUse
     List<UserInLeaderBoardDTO> getUsersLeaderBoard();
 
     ApplicationUser findByEmail(String email);
+
+    @Query("select u.id from ApplicationUser u")
+    Stream<UUID> getUserIds();
 }

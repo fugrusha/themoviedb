@@ -45,4 +45,10 @@ public class ApplicationUser extends AbstractEntity {
 
     @OneToMany(mappedBy = "author")
     private List<Comment> comments = new ArrayList<>();
+
+    @ManyToMany
+    @JoinTable(name = "user_match",
+            joinColumns = @JoinColumn(name = "user_id" ),
+            inverseJoinColumns = @JoinColumn(name = "match_id"))
+    private List<ApplicationUser> topMatches = new ArrayList<>();
 }

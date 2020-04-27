@@ -98,6 +98,19 @@ public class ApplicationUserRepositoryTest extends BaseTest {
     }
 
     @Test
+    public void testGetUserIds() {
+        Set<UUID> expectedResult = new HashSet<>();
+        expectedResult.add(testObjectFactory.createUser().getId());
+        expectedResult.add(testObjectFactory.createUser().getId());
+        expectedResult.add(testObjectFactory.createUser().getId());
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Set<UUID> actualResult = applicationUserRepository.getUserIds().collect(Collectors.toSet());
+            Assert.assertEquals(expectedResult, actualResult);
+        });
+    }
+
+    @Test
     public void testGetUsersLeaderBoardByMovieComments() {
         Movie m1 = testObjectFactory.createMovie();
         Movie m2 = testObjectFactory.createMovie();

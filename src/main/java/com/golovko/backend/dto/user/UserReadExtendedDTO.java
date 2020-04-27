@@ -31,6 +31,8 @@ public class UserReadExtendedDTO {
 
     private List<CommentReadDTO> comments;
 
+    private List<UserReadDTO> topMatches;
+
     private Instant createdAt;
 
     private Instant updatedAt;
