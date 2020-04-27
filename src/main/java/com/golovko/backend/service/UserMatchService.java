@@ -89,16 +89,16 @@ public class UserMatchService {
         log.info("Found {} common rated objects", currentUserRatings.size());
 
         if (currentUserRatings.size() > 1) {
-            double[] xArray = currentUserRatings.stream().mapToDouble(Double::doubleValue).toArray();
-            double[] yArray = anotherUserRatings.stream().mapToDouble(Double::doubleValue).toArray();
+            double[] xsArray = currentUserRatings.stream().mapToDouble(Double::doubleValue).toArray();
+            double[] ysArray = anotherUserRatings.stream().mapToDouble(Double::doubleValue).toArray();
 
-            return calcPearsonCorrelation(xArray, yArray);
+            return calcPearsonCorrelation(xsArray, ysArray);
         }
 
         return 0.0;
     }
 
-    private double calcPearsonCorrelation(double[] xArray, double[] yArray) {
-        return new PearsonsCorrelation().correlation(xArray, yArray);
+    private double calcPearsonCorrelation(double[] xsArray, double[] ysArray) {
+        return new PearsonsCorrelation().correlation(xsArray, ysArray);
     }
 }

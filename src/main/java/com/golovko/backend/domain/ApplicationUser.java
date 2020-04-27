@@ -48,7 +48,7 @@ public class ApplicationUser extends AbstractEntity {
 
     @ManyToMany
     @JoinTable(name = "user_match",
-            joinColumns = @JoinColumn(name = "user_id" ),
+            joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "match_id"))
     private List<ApplicationUser> topMatches = new ArrayList<>();
 }

@@ -46,6 +46,7 @@ public class ApplicationUserService {
     @Transactional(readOnly = true)
     public UserReadExtendedDTO getExtendedUser(UUID id) {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
+
         return translationService.translate(user, UserReadExtendedDTO.class);
     }
 
@@ -58,6 +59,7 @@ public class ApplicationUserService {
         ApplicationUser user = translationService.translate(createDTO, ApplicationUser.class);
 
         user.setEncodedPassword(securityConfig.passwordEncoder().encode(createDTO.getPassword()));
+
         user.getUserRoles().add(userRoleRepository.findByType(UserRoleType.USER));
         user = applicationUserRepository.save(user);
 
@@ -83,9 +85,7 @@ public class ApplicationUserService {
 
         translationService.map(update, user);
 
-        if (!Utils.empty(update.getPassword())) {
-            user.setEncodedPassword(securityConfig.passwordEncoder().encode(update.getPassword()));
-        }
+        user.setEncodedPassword(securityConfig.passwordEncoder().encode(update.getPassword()));
 
         user = applicationUserRepository.save(user);
 
