@@ -19,6 +19,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
@@ -35,6 +36,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
     @MockBean
     private ApplicationUserService applicationUserService;
 
+    @WithMockUser
     @Test
     public void testGetAllUsers() throws Exception {
         UserReadDTO u1 = generateObject(UserReadDTO.class);
@@ -59,6 +61,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService).getAllUsers(PageRequest.of(0, defaultPageSize));
     }
 
+    @WithMockUser
     @Test
     public void testGetUsersLeaderBoardByMovieComments() throws Exception {
         UserInLeaderBoardDTO u1 = generateObject(UserInLeaderBoardDTO.class);
@@ -81,6 +84,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService).getUsersLeaderBoard();
     }
 
+    @WithMockUser
     @Test
     public void testGetAllUsersWithPagingAndSorting() throws Exception {
         UserReadDTO u1 = generateObject(UserReadDTO.class);
@@ -111,6 +115,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetUser() throws Exception {
         UserReadDTO user = generateObject(UserReadDTO.class);
@@ -128,6 +133,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService).getUser(user.getId());
     }
 
+    @WithMockUser
     @Test
     public void testGetExtendedUser() throws Exception {
         UserReadExtendedDTO user = generateObject(UserReadExtendedDTO.class);
@@ -145,6 +151,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService).getExtendedUser(user.getId());
     }
 
+    @WithMockUser
     @Test
     public void testGetUserWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
@@ -160,6 +167,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testGetUserIdTypeMismatch() throws Exception {
         String invalidId = "123";
@@ -333,6 +341,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).createUser(any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchUser() throws Exception {
         UserPatchDTO patchDTO = new UserPatchDTO();
@@ -356,6 +365,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Assert.assertEquals(readDTO, actualUser);
     }
 
+    @WithMockUser
     @Test
     public void testPatchUserShortPassword() throws Exception {
         UserPatchDTO patchDTO = new UserPatchDTO();
@@ -378,6 +388,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchUserPasswordWithSpaces() throws Exception {
         UserPatchDTO patchDTO = new UserPatchDTO();
@@ -400,6 +411,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchUserDifferentPasswords() throws Exception {
         UserPatchDTO patchDTO = new UserPatchDTO();
@@ -423,6 +435,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateUser() throws Exception {
         UserPutDTO updateDTO = new UserPutDTO();
@@ -446,7 +459,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Assert.assertEquals(readDTO, actualUser);
     }
 
-
+    @WithMockUser
     @Test
     public void testUpdateUserShortPassword() throws Exception {
         UserPutDTO updateDTO = new UserPutDTO();
@@ -469,6 +482,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateUserPasswordWithSpaces() throws Exception {
         UserPutDTO updateDTO = new UserPutDTO();
@@ -491,6 +505,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateUserDifferentPasswords() throws Exception {
         UserPutDTO updateDTO = new UserPutDTO();
@@ -514,6 +529,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteUser() throws Exception {
         UUID id = UUID.randomUUID();
@@ -524,6 +540,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService).deleteUser(id);
     }
 
+    @WithMockUser
     @Test
     public void testBanUser() throws Exception {
         UserReadDTO readDTO = generateObject(UserReadDTO.class);
@@ -540,6 +557,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService).ban(readDTO.getId());
     }
 
+    @WithMockUser
     @Test
     public void testPardonUser() throws Exception {
         UserReadDTO readDTO = generateObject(UserReadDTO.class);

@@ -27,6 +27,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -51,6 +52,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
     @MockBean
     private ApplicationUserService applicationUserService;
 
+    @WithMockUser
     @Test
     public void testGetComplaintsWithFilter() throws Exception {
         ComplaintFilter filter = new ComplaintFilter();
@@ -94,6 +96,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService).getAllComplaints(filter, PageRequest.of(0, defaultPageSize));
     }
 
+    @WithMockUser
     @Test
     public void testModerateComplaint() throws Exception {
         ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
@@ -119,6 +122,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService).moderateComplaint(complaintDTO.getId(), moderDTO);
     }
 
+    @WithMockUser
     @Test
     public void testModerateComplaintNotNUllValidationException() throws Exception {
         ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
@@ -136,6 +140,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService, Mockito.never()).moderateComplaint(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testSetUserTrustLevel() throws Exception {
         UserTrustLevelDTO dto = new UserTrustLevelDTO();
@@ -158,6 +163,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService).changeTrustLevel(readDTO.getId(), dto);
     }
 
+    @WithMockUser
     @Test
     public void testSetUserTrustLevelNotNullValidationException() throws Exception {
         UserTrustLevelDTO dto = new UserTrustLevelDTO();
@@ -175,6 +181,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testSetUserTrustLevelMaxValueValidationException() throws Exception {
         UserTrustLevelDTO dto = new UserTrustLevelDTO();
@@ -193,6 +200,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testSetUserTrustLevelMinValueValidationException() throws Exception {
         UserTrustLevelDTO dto = new UserTrustLevelDTO();
@@ -211,6 +219,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(applicationUserService, Mockito.never()).changeTrustLevel(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testGetCommentsByFilter() throws Exception {
         CommentReadDTO readDTO = createCommentReadDTO();
@@ -240,6 +249,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(commentService).getCommentsByFilter(filter, PageRequest.of(0, defaultPageSize));
     }
 
+    @WithMockUser
     @Test
     public void testModerateComment() throws Exception {
         CommentModerateDTO dto = new CommentModerateDTO();
@@ -263,6 +273,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(commentService).moderateComment(readDTO.getId(), dto);
     }
 
+    @WithMockUser
     @Test
     public void testChangeCommentStatusValidationException() throws Exception {
         CommentModerateDTO moderateDTO = new CommentModerateDTO();
@@ -280,6 +291,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).moderateComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testGetCommentsWithPagingAndSorting() throws Exception {
         CommentReadDTO readDTO = createCommentReadDTO();
@@ -311,6 +323,7 @@ public class ModeratorControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetComplaintsWithPagingAndSorting() throws Exception {
         ComplaintReadDTO readDTO = createComplaintReadDTO(UUID.randomUUID(), UUID.randomUUID());

@@ -3,6 +3,7 @@ package com.golovko.backend.config;
 import com.golovko.backend.security.UserDetailsServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -21,6 +22,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
                 .antMatchers("/health").anonymous()
+                .antMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/articles/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/genres/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/movies/**").permitAll()
+                .antMatchers(HttpMethod.GET, "/api/v1/people/**").permitAll()
                 .anyRequest().authenticated()
                 .and().httpBasic()
                 .and().csrf().disable();

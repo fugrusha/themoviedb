@@ -4,6 +4,7 @@ import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.movie.MovieReadDTO;
+import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -41,8 +42,8 @@ public class SecurityIntegrationTest extends BaseTest {
     public void testGetMoviesNoSecurity() {
         RestTemplate restTemplate = new RestTemplate();
         Assertions.assertThatThrownBy(() -> restTemplate.exchange(
-                "http://localhost:8080/api/v1/movies", HttpMethod.GET, HttpEntity.EMPTY,
-                new ParameterizedTypeReference<PageResult<MovieReadDTO>>() {}))
+                "http://localhost:8080/api/v1/users", HttpMethod.GET, HttpEntity.EMPTY,
+                new ParameterizedTypeReference<PageResult<UserReadDTO>>() {}))
                 .isInstanceOf(HttpClientErrorException.class)
                 .extracting("statusCode").isEqualTo(HttpStatus.UNAUTHORIZED);
     }

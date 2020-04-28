@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.UUID;
@@ -33,6 +34,7 @@ public class LikeControllerTest extends BaseControllerTest {
     @MockBean
     private LikeService likeService;
 
+    @WithMockUser
     @Test
     public void testGetLikeById() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -51,6 +53,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Mockito.verify(likeService).getLike(userId, readDTO.getId());
     }
 
+    @WithMockUser
     @Test
     public void testGetLikeWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
@@ -67,6 +70,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Assert.assertTrue(result.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateLikeNullValue() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -92,6 +96,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Mockito.verify(likeService, Mockito.never()).createLike(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateLike() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -115,6 +120,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateDuplicatedLike() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -143,6 +149,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Mockito.verify(likeService).createLike(userId, createDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateLikeWrongTypeOfTargetObjectException() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -167,6 +174,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateLikeValidationException() throws Exception {
         LikeCreateDTO createDTO = new LikeCreateDTO();
@@ -184,6 +192,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Mockito.verify(likeService, Mockito.never()).createLike(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchLike() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -206,6 +215,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateLike() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -228,6 +238,7 @@ public class LikeControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testDeleteLike() throws Exception {
         UUID id = UUID.randomUUID();

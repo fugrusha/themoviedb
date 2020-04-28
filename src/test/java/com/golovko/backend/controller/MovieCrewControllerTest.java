@@ -19,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -141,6 +142,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(ex.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrew() throws Exception {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
@@ -164,6 +166,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualReadDTO).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrewNotNullValidationException() throws Exception {
         MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
@@ -181,6 +184,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Mockito.verify(movieCrewService, Mockito.never()).createMovieCrew(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrewMinSizeValidationException() throws Exception {
         MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
@@ -200,6 +204,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Mockito.verify(movieCrewService, Mockito.never()).createMovieCrew(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrewMaxSizeValidationException() throws Exception {
         MovieCrewCreateDTO createDTO = new MovieCrewCreateDTO();
@@ -219,6 +224,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Mockito.verify(movieCrewService, Mockito.never()).createMovieCrew(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCrew() throws Exception {
         MovieCrewReadDTO readDTO = createMovieCrewReadDTO();
@@ -242,6 +248,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualMovieParticipation).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCrewMinSizeValidationException() throws Exception {
         MovieCrewPutDTO updateDTO = new MovieCrewPutDTO();
@@ -262,6 +269,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Mockito.verify(movieCrewService, Mockito.never()).updateMovieCrew(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCrewMaxSizeValidationException() throws Exception {
         MovieCrewPutDTO updateDTO = new MovieCrewPutDTO();
@@ -282,6 +290,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Mockito.verify(movieCrewService, Mockito.never()).updateMovieCrew(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCrew() throws Exception {
         MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
@@ -305,6 +314,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualMovieParticipation).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCrewMinSizeValidationException() throws Exception {
         MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
@@ -325,6 +335,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Mockito.verify(movieCrewService, Mockito.never()).patchMovieCrew(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCrewMaxSizeValidationException() throws Exception {
         MovieCrewPatchDTO patchDTO = new MovieCrewPatchDTO();
@@ -345,6 +356,7 @@ public class MovieCrewControllerTest extends BaseControllerTest {
         Mockito.verify(movieCrewService, Mockito.never()).patchMovieCrew(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteMovieCrew() throws Exception {
         UUID id = UUID.randomUUID();

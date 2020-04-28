@@ -17,6 +17,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -137,6 +138,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(ex.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateGenre() throws Exception {
         GenreCreateDTO createDTO = new GenreCreateDTO();
@@ -158,6 +160,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateGenreNotNullValidationException() throws Exception {
         GenreCreateDTO createDTO = new GenreCreateDTO();
@@ -175,6 +178,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Mockito.verify(genreService, Mockito.never()).createGenre(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateGenreMinSizeValidationException() throws Exception {
         GenreCreateDTO createDTO = new GenreCreateDTO();
@@ -194,6 +198,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Mockito.verify(genreService, Mockito.never()).createGenre(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateGenreMaxSizeValidationException() throws Exception {
         GenreCreateDTO createDTO = new GenreCreateDTO();
@@ -213,6 +218,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Mockito.verify(genreService, Mockito.never()).createGenre(any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchGenre() throws Exception {
         GenrePatchDTO patchDTO = new GenrePatchDTO();
@@ -234,6 +240,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchGenreMinSizeValidationException() throws Exception {
         GenrePatchDTO patchDTO = new GenrePatchDTO();
@@ -253,6 +260,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Mockito.verify(genreService, Mockito.never()).patchGenre(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchGenreMaxSizeValidationException() throws Exception {
         GenrePatchDTO patchDTO = new GenrePatchDTO();
@@ -272,6 +280,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Mockito.verify(genreService, Mockito.never()).patchGenre(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateGenre() throws Exception {
         GenrePutDTO putDTO = new GenrePutDTO();
@@ -293,7 +302,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
-
+    @WithMockUser
     @Test
     public void testUpdateGenreMinSizeValidationException() throws Exception {
         GenrePutDTO putDTO = new GenrePutDTO();
@@ -313,6 +322,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Mockito.verify(genreService, Mockito.never()).updateGenre(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateGenreMaxSizeValidationException() throws Exception {
         GenrePutDTO putDTO = new GenrePutDTO();
@@ -332,6 +342,7 @@ public class GenreControllerTest extends BaseControllerTest {
         Mockito.verify(genreService, Mockito.never()).updateGenre(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteGenre() throws Exception {
         UUID genreId = UUID.randomUUID();

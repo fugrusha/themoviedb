@@ -20,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.time.LocalDate;
@@ -127,6 +128,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testCreatePerson() throws Exception {
         PersonCreateDTO createDTO = new PersonCreateDTO();
@@ -152,6 +154,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService).createPerson(createDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreatePersonNotNullValidationException() throws Exception {
         PersonCreateDTO createDTO = new PersonCreateDTO();
@@ -169,6 +172,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService, Mockito.never()).createPerson(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreatePersonMinSizeValidationException() throws Exception {
         PersonCreateDTO createDTO = new PersonCreateDTO();
@@ -190,6 +194,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService, Mockito.never()).createPerson(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreatePersonMaxSizeValidationException() throws Exception {
         PersonCreateDTO createDTO = new PersonCreateDTO();
@@ -211,6 +216,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService, Mockito.never()).createPerson(any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchPerson() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
@@ -238,6 +244,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Assert.assertEquals(readDTO, actualPerson);
     }
 
+    @WithMockUser
     @Test
     public void testPatchPersonMinSizeValidationException() throws Exception {
         PersonPatchDTO patchDTO = new PersonPatchDTO();
@@ -259,6 +266,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService, Mockito.never()).patchPerson(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchPersonMaxSizeValidationException() throws Exception {
         PersonPatchDTO patchDTO = new PersonPatchDTO();
@@ -280,6 +288,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService, Mockito.never()).patchPerson(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdatePerson() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
@@ -304,6 +313,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Assert.assertEquals(readDTO, actualPerson);
     }
 
+    @WithMockUser
     @Test
     public void testUpdatePersonMinSizeValidationException() throws Exception {
         PersonPutDTO updateDTO = new PersonPutDTO();
@@ -325,6 +335,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService, Mockito.never()).patchPerson(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdatePersonMaxSizeValidationException() throws Exception {
         PersonPutDTO updateDTO = new PersonPutDTO();
@@ -346,6 +357,7 @@ public class PersonControllerTest extends BaseControllerTest {
         Mockito.verify(personService, Mockito.never()).patchPerson(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeletePerson() throws Exception {
         UUID id = UUID.randomUUID();

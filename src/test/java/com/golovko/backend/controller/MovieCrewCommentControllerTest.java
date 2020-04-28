@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -99,6 +100,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrewComment() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -126,6 +128,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService).createComment(readDTO.getTargetObjectId(), createDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrewCommentBlockedUserException() throws Exception {
         UUID movieCrewId = UUID.randomUUID();
@@ -150,6 +153,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrewCommentNotNullValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -168,6 +172,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrewCommentMinSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -189,6 +194,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCrewCommentMaxSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -210,6 +216,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCrewComment() throws Exception {
         UUID movieCrewId = UUID.randomUUID();
@@ -233,6 +240,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCrewCommentMinSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
@@ -252,6 +260,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCrewCommentMaxSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();;
@@ -271,6 +280,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCrewComment() throws Exception {
         UUID movieCrewId = UUID.randomUUID();
@@ -294,6 +304,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCrewCommentMinSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
@@ -313,6 +324,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCrewCommentMaxSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
@@ -332,6 +344,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteMovieCrewComment() throws Exception {
         UUID movieCrewId = UUID.randomUUID();

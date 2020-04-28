@@ -10,6 +10,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +25,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
     @MockBean
     private UserRoleService userRoleService;
 
+    @WithMockUser
     @Test
     public void testGetUserRolesByUserId() throws Exception {
         UserRoleReadDTO readDTO = createUserRoleReadDTO();
@@ -44,6 +46,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
         Mockito.verify(userRoleService).getUserRoles(userId);
     }
 
+    @WithMockUser
     @Test
     public void testAddRoleToUser() throws Exception {
         UserRoleReadDTO readDTO = createUserRoleReadDTO();
@@ -65,6 +68,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
         Mockito.verify(userRoleService).addUserRole(userId, userRoleId);
     }
 
+    @WithMockUser
     @Test
     public void testDuplicatedRole() throws Exception {
         UserRoleReadDTO readDTO = createUserRoleReadDTO();
@@ -87,6 +91,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
         Mockito.verify(userRoleService).addUserRole(userId, userRoleId);
     }
 
+    @WithMockUser
     @Test
     public void testRemoveRoleFromUser() throws Exception {
         UUID userId = UUID.randomUUID();
