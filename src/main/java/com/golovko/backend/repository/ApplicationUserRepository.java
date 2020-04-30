@@ -31,4 +31,6 @@ public interface ApplicationUserRepository extends CrudRepository<ApplicationUse
 
     @Query("select u.id from ApplicationUser u")
     Stream<UUID> getUserIds();
+
+    boolean existsByIdAndEmail(UUID id, String email);
 }

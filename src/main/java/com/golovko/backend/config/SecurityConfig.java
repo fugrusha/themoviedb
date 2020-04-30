@@ -27,6 +27,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.GET, "/api/v1/genres/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/movies/**").permitAll()
                 .antMatchers(HttpMethod.GET, "/api/v1/people/**").permitAll()
+                .antMatchers("/swagger-ui.html", "/webjars/springfox-swagger-ui/**",
+                        "/v2/api-docs", "/swagger-resources/**", "/", "/csrf").anonymous()
                 .anyRequest().authenticated()
                 .and().httpBasic()
                 .and().csrf().disable();

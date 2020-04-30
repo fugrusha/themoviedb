@@ -172,7 +172,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
     public void testGetUserIdTypeMismatch() throws Exception {
         String invalidId = "123";
 
-        String errorMsg = "Invalid type of id. It should be of type java.util.UUID";
+        String errorMsg = "Invalid type of userId. It should be of type java.util.UUID";
 
         ErrorInfo expectedErrorInfo = new ErrorInfo(
                 HttpStatus.BAD_REQUEST,

@@ -27,7 +27,7 @@ public class UserMatchServiceTest extends BaseTest {
     private RatingRepository ratingRepository;
 
     @Test
-    public void testUpdateTopMatchersForUserWithZeroCorrelation() {
+    public void testUpdateTopMatchesForUserWithZeroCorrelation() {
         ApplicationUser u1 = testObjectFactory.createUser();
         ApplicationUser u2 = testObjectFactory.createUser();
         ApplicationUser u3 = testObjectFactory.createUser();
@@ -63,7 +63,7 @@ public class UserMatchServiceTest extends BaseTest {
     }
 
     @Test
-    public void testUpdateTopMatchersForUser() {
+    public void testUpdateTopMatchesForUser() {
         ApplicationUser u1 = testObjectFactory.createUser();
 
         Movie m1 = testObjectFactory.createMovie();
@@ -98,7 +98,7 @@ public class UserMatchServiceTest extends BaseTest {
     }
 
     @Test
-    public void testDescOrderOfTopMathcers() {
+    public void testDescOrderOfTopMatches() {
         ApplicationUser u1 = testObjectFactory.createUser();
         ApplicationUser u2 = testObjectFactory.createUser();
         ApplicationUser u3 = testObjectFactory.createUser();
