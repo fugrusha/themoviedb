@@ -8,6 +8,7 @@ import org.junit.Test;
 import org.mockito.Mockito;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -42,6 +43,7 @@ public class MovieGenreControllerTest extends BaseControllerTest {
         Mockito.verify(movieGenreService).getMovieGenres(movieId);
     }
 
+    @WithMockUser
     @Test
     public void testAddGenreToMovie() throws Exception {
         GenreReadDTO readDTO = createGenreReadDTO();
@@ -63,6 +65,7 @@ public class MovieGenreControllerTest extends BaseControllerTest {
         Mockito.verify(movieGenreService).addGenreToMovie(movieId, genreId);
     }
 
+    @WithMockUser
     @Test
     public void testRemoveGenreFromMovie() throws Exception {
         UUID movieId = UUID.randomUUID();

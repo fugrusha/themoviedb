@@ -19,6 +19,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -145,6 +146,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testDeleteMovieCast() throws Exception {
         UUID id = UUID.randomUUID();
@@ -156,6 +158,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Mockito.verify(movieCastService).deleteMovieCast(id, movieId);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCast() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -180,6 +183,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualMovieCast).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCastNotNullValidationException() throws Exception {
         MovieCastCreateDTO createDTO = new MovieCastCreateDTO();
@@ -197,6 +201,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Mockito.verify(movieCastService, Mockito.never()).createMovieCast(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCastMinSizeValidationException() throws Exception {
         MovieCastCreateDTO createDTO = new MovieCastCreateDTO();
@@ -217,6 +222,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Mockito.verify(movieCastService, Mockito.never()).createMovieCast(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCastMaxSizeValidationException() throws Exception {
         MovieCastCreateDTO createDTO = new MovieCastCreateDTO();
@@ -237,6 +243,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Mockito.verify(movieCastService, Mockito.never()).createMovieCast(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCast() throws Exception {
         MovieCastPutDTO updateDTO = new MovieCastPutDTO();
@@ -262,6 +269,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualMovieCast).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCastMinSizeValidationException() throws Exception {
         MovieCastPutDTO updateDTO = new MovieCastPutDTO();
@@ -283,6 +291,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Mockito.verify(movieCastService, Mockito.never()).updateMovieCast(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCastMaxSizeValidationException() throws Exception {
         MovieCastPutDTO updateDTO = new MovieCastPutDTO();
@@ -304,6 +313,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Mockito.verify(movieCastService, Mockito.never()).updateMovieCast(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCast() throws Exception {
         MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
@@ -329,6 +339,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualMovieCast).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCastMinSizeValidationException() throws Exception {
         MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();
@@ -350,6 +361,7 @@ public class MovieCastControllerTest extends BaseControllerTest {
         Mockito.verify(movieCastService, Mockito.never()).patchMovieCast(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCastMaxSizeValidationException() throws Exception {
         MovieCastPatchDTO patchDTO = new MovieCastPatchDTO();

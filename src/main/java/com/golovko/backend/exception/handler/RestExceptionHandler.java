@@ -6,6 +6,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -50,6 +51,14 @@ public class RestExceptionHandler extends ResponseEntityExceptionHandler {
         String errorMessage = ex.getBindingResult().getFieldErrors().toString();
 
         ErrorInfo errorInfo = new ErrorInfo(httpStatus, ex.getClass(), errorMessage);
+        return new ResponseEntity<>(errorInfo, new HttpHeaders(), httpStatus);
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<Object> handleAccessDeniedException(AccessDeniedException e) {
+        HttpStatus httpStatus = HttpStatus.FORBIDDEN;
+        ErrorInfo errorInfo = new ErrorInfo(httpStatus, e.getClass(), e.getMessage());
+
         return new ResponseEntity<>(errorInfo, new HttpHeaders(), httpStatus);
     }
 }

@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -94,6 +95,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Assert.assertTrue(result.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieComment() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -120,6 +122,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService).createComment(movieId, createDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCommentBlockedUserException() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -144,6 +147,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultString.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCommentNotNullValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -161,6 +165,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCommentMinSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -181,6 +186,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCommentMaxSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -201,6 +207,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieComment() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -223,6 +230,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCommentMinSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
@@ -242,6 +250,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCommentMaxSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
@@ -261,6 +270,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieComment() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -283,6 +293,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCommentMinSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
@@ -302,6 +313,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCommentMaxSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
@@ -321,6 +333,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteMovieCommentTest() throws Exception {
         UUID movieId = UUID.randomUUID();

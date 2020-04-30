@@ -26,6 +26,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -46,6 +47,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
     @MockBean
     private ArticleService articleService;
 
+    @WithMockUser
     @Test
     public void testConfirmModeration() throws Exception {
         MisprintReadDTO readDTO = createMisprintReadDTO();
@@ -72,6 +74,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService).confirmModeration(readDTO.getId(), confirmDTO);
     }
 
+    @WithMockUser
     @Test
     public void testConfirmMisprintNotNullValidationException() throws Exception {
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
@@ -89,6 +92,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testConfirmMisprintMinSizeValidationException() throws Exception {
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
@@ -111,6 +115,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testConfirmMisprintMaxSizeValidationException() throws Exception {
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
@@ -133,6 +138,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testConfirmMisprintNegativeIndexValidationException() throws Exception {
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
@@ -155,6 +161,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testConfirmMisprintWrongIndexesValidationException() throws Exception {
         MisprintConfirmDTO confirmDTO = new MisprintConfirmDTO();
@@ -179,6 +186,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).confirmModeration(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testRejectModeration() throws Exception {
         MisprintReadDTO readDTO = createMisprintReadDTO();
@@ -205,6 +213,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService).rejectModeration(readDTO.getId(), rejectDTO);
     }
 
+    @WithMockUser
     @Test
     public void testRejectMisprintNotNullValidationException() throws Exception {
         MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
@@ -222,6 +231,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).rejectModeration(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testRejectMisprintMaxSizeValidationException() throws Exception {
         MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
@@ -243,6 +253,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).rejectModeration(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testRejectMisprintMinSizeValidationException() throws Exception {
         MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
@@ -264,6 +275,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).rejectModeration(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testRejectMisprintStatusCode422() throws Exception {
         UUID misprintId = UUID.randomUUID();
@@ -288,6 +300,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(ex.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testConfirmMisprintStatusCode422() throws Exception { ;
         UUID misprintId = UUID.randomUUID();
@@ -313,6 +326,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(ex.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByArticleId() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -333,6 +347,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(pageResult, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByMovieId() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -353,6 +368,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(pageResult, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByPersonId() throws Exception {
         UUID personId = UUID.randomUUID();
@@ -373,6 +389,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(pageResult, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByMovieCastId() throws Exception {
         UUID movieCastId = UUID.randomUUID();
@@ -393,6 +410,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(pageResult, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByMovieCrewId() throws Exception {
         UUID movieCrewId = UUID.randomUUID();
@@ -413,6 +431,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(pageResult, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsByArticleIdAndMisprintId() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -430,6 +449,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByMovieIdAndMisprintId() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -447,6 +467,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByPersonIdAndMisprintId() throws Exception {
         UUID personId = UUID.randomUUID();
@@ -464,6 +485,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByMovieCastIdAndMisprintId() throws Exception {
         UUID movieCastId = UUID.randomUUID();
@@ -481,6 +503,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsByMovieCrewIdAndMisprintId() throws Exception {
         UUID movieCrewId = UUID.randomUUID();
@@ -498,6 +521,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsWithFilter() throws Exception {
         MisprintFilter filter = new MisprintFilter();
@@ -529,6 +553,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService).getMisprintsByFilter(filter, PageRequest.of(0, defaultPageSize));
     }
 
+    @WithMockUser
     @Test
     public void testGetArticlesByFilter() throws Exception {
         ArticleManagerFilter filter = new ArticleManagerFilter();
@@ -556,6 +581,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).getArticlesByFilter(filter, PageRequest.of(0, defaultPageSize));
     }
 
+    @WithMockUser
     @Test
     public void testGetArticlesWithPagingAndSorting() throws Exception {
         ArticleManagerFilter filter = new ArticleManagerFilter();
@@ -587,6 +613,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsWithPagingAndSorting() throws Exception {
         MisprintFilter filter = new MisprintFilter();
@@ -618,6 +645,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetArticlesWithBigPage() throws Exception {
         ArticleManagerFilter filter = new ArticleManagerFilter();
@@ -649,6 +677,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsByArticleIdWithPagingAndSorting() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -680,6 +709,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsByMovieIdWithPagingAndSorting() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -711,6 +741,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsByPersonIdWithPagingAndSorting() throws Exception {
         UUID personId = UUID.randomUUID();
@@ -742,6 +773,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsByMovieCastIdWithPagingAndSorting() throws Exception {
         UUID movieCastId = UUID.randomUUID();
@@ -773,6 +805,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsByMovieCrewIdWithPagingAndSorting() throws Exception {
         UUID movieCrewId = UUID.randomUUID();

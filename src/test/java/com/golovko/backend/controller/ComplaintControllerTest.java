@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -36,6 +37,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
     @MockBean
     private ComplaintService complaintService;
 
+    @WithMockUser
     @Test
     public void testGetComplaintById() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -54,6 +56,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService).getComplaint(userId, readDTO.getId());
     }
 
+    @WithMockUser
     @Test
     public void testGetAllUserComplaints() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -79,6 +82,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService).getUserComplaints(userId, PageRequest.of(0, defaultPageSize));
     }
 
+    @WithMockUser
     @Test
     public void testGetUserComplaintsWithPagingAndSorting() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -110,6 +114,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetComplaintByWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
@@ -127,6 +132,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Assert.assertTrue(result.contains(ex.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateComplaint() throws Exception {
         ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
@@ -153,6 +159,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateComplaintNotNullValidationException() throws Exception {
         ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
@@ -170,6 +177,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService, Mockito.never()).createComplaint(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateComplaintMinSizeValidationException() throws Exception {
         ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
@@ -192,6 +200,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService, Mockito.never()).createComplaint(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateComplaintMaxSizeValidationException() throws Exception {
         ComplaintCreateDTO createDTO = new ComplaintCreateDTO();
@@ -214,6 +223,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService, Mockito.never()).createComplaint(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchComplaint() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -238,6 +248,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchComplaintMinSizeValidationException() throws Exception {
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
@@ -259,6 +270,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService, Mockito.never()).patchComplaint(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchComplaintMaxSizeValidationException() throws Exception {
         ComplaintPatchDTO patchDTO = new ComplaintPatchDTO();
@@ -280,6 +292,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService, Mockito.never()).patchComplaint(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateComplaint() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -304,6 +317,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualComplaint).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateComplaintMinSizeValidationException() throws Exception {
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
@@ -325,6 +339,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService, Mockito.never()).updateComplaint(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateComplaintMaxSizeValidationException() throws Exception {
         ComplaintPutDTO updateDTO = new ComplaintPutDTO();
@@ -346,6 +361,7 @@ public class ComplaintControllerTest extends BaseControllerTest {
         Mockito.verify(complaintService, Mockito.never()).updateComplaint(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteComplaint() throws Exception {
         UUID id = UUID.randomUUID();

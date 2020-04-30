@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -100,6 +101,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCastComment() throws Exception {
         UUID movieCastId = UUID.randomUUID();
@@ -128,6 +130,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService).createComment(movieCastId, createDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCastCommentBlockedUserException() throws Exception {
         UUID movieCastId = UUID.randomUUID();
@@ -153,6 +156,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCastCommentNotNullValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -171,6 +175,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCastCommentMinSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -192,6 +197,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieCastCommentMaxSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -213,6 +219,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCastComment() throws Exception {
         UUID movieCastId = UUID.randomUUID();
@@ -237,6 +244,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCastCommentMinSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
@@ -256,6 +264,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieCastCommentMaxSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();;
@@ -275,6 +284,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCastComment() throws Exception {
         UUID movieCastId = UUID.randomUUID();
@@ -299,6 +309,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCastCommentMinSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
@@ -318,6 +329,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieCastCommentMaxSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
@@ -337,6 +349,7 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteMovieCastComment() throws Exception {
         UUID movieCastId = UUID.randomUUID();

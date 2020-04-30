@@ -18,6 +18,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -33,6 +34,7 @@ public class MisprintControllerTest extends BaseControllerTest {
     @MockBean
     private MisprintService misprintService;
 
+    @WithMockUser
     @Test
     public void testGetMisprintComplaintById() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -52,6 +54,7 @@ public class MisprintControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService).getMisprintComplaint(userId, readDTO.getId());
     }
 
+    @WithMockUser
     @Test
     public void testGetAllMisprintsReportedByUser() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -77,6 +80,7 @@ public class MisprintControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService).getAllUserMisprintComplaints(userId, PageRequest.of(0, defaultPageSize));
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintsWithPagingAndSorting() throws Exception {
         UUID userId = UUID.randomUUID();
@@ -109,6 +113,7 @@ public class MisprintControllerTest extends BaseControllerTest {
         Assert.assertEquals(result, actualResult);
     }
 
+    @WithMockUser
     @Test
     public void testGetMisprintComplaintByWrongId() throws Exception {
         UUID wrongId = UUID.randomUUID();
@@ -126,6 +131,7 @@ public class MisprintControllerTest extends BaseControllerTest {
         Assert.assertTrue(result.contains(ex.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMisprintComplaint() throws Exception {
         MisprintCreateDTO createDTO = new MisprintCreateDTO();
@@ -152,6 +158,7 @@ public class MisprintControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMisprintNotNullValidationException() throws Exception {
         MisprintCreateDTO createDTO = new MisprintCreateDTO();
@@ -169,6 +176,7 @@ public class MisprintControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).createMisprintComplaint(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMisprintMinSizeValidationException() throws Exception {
         MisprintCreateDTO createDTO = new MisprintCreateDTO();
@@ -190,6 +198,7 @@ public class MisprintControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).createMisprintComplaint(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMisprintMaxSizeValidationException() throws Exception {
         MisprintCreateDTO createDTO = new MisprintCreateDTO();
@@ -211,6 +220,7 @@ public class MisprintControllerTest extends BaseControllerTest {
         Mockito.verify(misprintService, Mockito.never()).createMisprintComplaint(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteMisprintComplaint() throws Exception {
         UUID id = UUID.randomUUID();

@@ -98,6 +98,52 @@ public class ApplicationUserRepositoryTest extends BaseTest {
     }
 
     @Test
+    public void testGetUserIds() {
+        Set<UUID> expectedResult = new HashSet<>();
+        expectedResult.add(testObjectFactory.createUser().getId());
+        expectedResult.add(testObjectFactory.createUser().getId());
+        expectedResult.add(testObjectFactory.createUser().getId());
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Set<UUID> actualResult = applicationUserRepository.getUserIds().collect(Collectors.toSet());
+            Assert.assertEquals(expectedResult, actualResult);
+        });
+    }
+
+    @Test
+    public void testExistsByIdAndEmail() {
+        String email = "mynewtest@email.com";
+
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setEmail(email);
+        applicationUserRepository.save(user);
+
+        Assert.assertTrue(applicationUserRepository.existsByIdAndEmail(user.getId(), email));
+    }
+
+    @Test
+    public void testExistsByIdAndEmailWrongEmail() {
+        String email = "mynewtest@email.com";
+
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setEmail(email);
+        applicationUserRepository.save(user);
+
+        Assert.assertFalse(applicationUserRepository.existsByIdAndEmail(user.getId(), "wrong@mail.com"));
+    }
+
+    @Test
+    public void testExistsByIdAndEmailWrongId() {
+        String email = "mynewtest@email.com";
+
+        ApplicationUser user = testObjectFactory.createUser();
+        user.setEmail(email);
+        applicationUserRepository.save(user);
+
+        Assert.assertFalse(applicationUserRepository.existsByIdAndEmail(UUID.randomUUID(), email));
+    }
+
+    @Test
     public void testGetUsersLeaderBoardByMovieComments() {
         Movie m1 = testObjectFactory.createMovie();
         Movie m2 = testObjectFactory.createMovie();

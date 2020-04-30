@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
@@ -95,6 +96,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Assert.assertTrue(result.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovie() throws Exception {
         MovieCreateDTO createDTO = new MovieCreateDTO();
@@ -118,6 +120,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualMovie).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieNotNullValidationException() throws Exception {
         MovieCreateDTO createDTO = new MovieCreateDTO();
@@ -135,6 +138,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).createMovie(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieMinSizeValidationException() throws Exception {
         MovieCreateDTO createDTO = new MovieCreateDTO();
@@ -158,6 +162,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).createMovie(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieMaxSizeValidationException() throws Exception {
         MovieCreateDTO createDTO = new MovieCreateDTO();
@@ -181,6 +186,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).createMovie(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMoviePositiveOrZeroValidationException() throws Exception {
         MovieCreateDTO createDTO = new MovieCreateDTO();
@@ -204,6 +210,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).createMovie(any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovie() throws Exception {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
@@ -229,6 +236,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Assert.assertEquals(readDTO, actualMovie);
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieMinSizeValidationException() throws Exception {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
@@ -248,6 +256,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieMaxSizeValidationException() throws Exception {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
@@ -267,6 +276,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMoviePositiveOrZeroValidationException() throws Exception {
         MoviePatchDTO patchDTO = new MoviePatchDTO();
@@ -286,6 +296,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovie() throws Exception {
         MoviePutDTO updateDTO = new MoviePutDTO();
@@ -309,6 +320,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Assert.assertEquals(readDTO, actualMovie);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieMinSizeValidationException() throws Exception {
         MoviePutDTO updateDTO = new MoviePutDTO();
@@ -330,6 +342,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieMaxSizeValidationException() throws Exception {
         MoviePutDTO updateDTO = new MoviePutDTO();
@@ -351,6 +364,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMoviePositiveOrZeroValidationException() throws Exception {
         MoviePutDTO updateDTO = new MoviePutDTO();
@@ -370,6 +384,7 @@ public class MovieControllerTest extends BaseControllerTest {
         Mockito.verify(movieService, Mockito.never()).patchMovie(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteMovie() throws Exception {
         UUID id = UUID.randomUUID();

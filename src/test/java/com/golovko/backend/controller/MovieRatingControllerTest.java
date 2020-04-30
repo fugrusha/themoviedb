@@ -22,6 +22,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -128,6 +129,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Assert.assertTrue(result.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieRating() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -154,6 +156,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService).createRating(movieId, createDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateDuplicatedMovieRating() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -184,6 +187,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService).createRating(movieId, createDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieRatingNotNullValidationException() throws Exception {
         RatingCreateDTO createDTO = new RatingCreateDTO();
@@ -201,6 +205,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService, Mockito.never()).createRating(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieRating() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -223,6 +228,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieRating() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -245,6 +251,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testDeleteMovieRating() throws Exception {
         UUID movieId = UUID.randomUUID();
@@ -256,6 +263,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService).deleteRating(movieId, ratingId);
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieRatingMinValueValidationException() throws Exception {
         RatingCreateDTO createDTO = new RatingCreateDTO();
@@ -276,6 +284,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService, Mockito.never()).createRating(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateMovieRatingMaxValueValidationException() throws Exception {
         RatingCreateDTO createDTO = new RatingCreateDTO();
@@ -296,6 +305,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService, Mockito.never()).createRating(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieRatingMaxValueValidationException() throws Exception {
         RatingPatchDTO patchDTO = new RatingPatchDTO();
@@ -315,6 +325,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService, Mockito.never()).patchRating(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchMovieRatingMinValueValidationException() throws Exception {
         RatingPatchDTO patchDTO = new RatingPatchDTO();
@@ -334,6 +345,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService, Mockito.never()).patchRating(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieRatingMaxValueValidationException() throws Exception {
         RatingPutDTO putDTO = new RatingPutDTO();
@@ -353,6 +365,7 @@ public class MovieRatingControllerTest extends BaseControllerTest {
         Mockito.verify(ratingService, Mockito.never()).updateRating(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateMovieRatingMinValueValidationException() throws Exception {
         RatingPutDTO putDTO = new RatingPutDTO();

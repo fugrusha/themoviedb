@@ -20,6 +20,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.ArrayList;
@@ -117,6 +118,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).getArticleExtended(extendedDTO.getId());
     }
 
+    @WithMockUser
     @Test
     public void testCreateArticle() throws Exception {
         ArticleReadDTO readDTO = createArticleReadDTO();
@@ -142,6 +144,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).createArticle(createDTO);
     }
 
+    @WithMockUser
     @Test
     public void testCreateArticleNotNullValidationFailed() throws Exception {
         ArticleCreateDTO createDTO = new ArticleCreateDTO();
@@ -159,6 +162,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService, Mockito.never()).createArticle(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateArticleMinSizeValidationFailed() throws Exception {
         ArticleCreateDTO createDTO = new ArticleCreateDTO();
@@ -180,6 +184,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService, Mockito.never()).createArticle(any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateArticleMaxSizeValidationFailed() throws Exception {
         ArticleCreateDTO createDTO = new ArticleCreateDTO();
@@ -201,6 +206,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService, Mockito.never()).createArticle(any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateArticle() throws Exception {
         ArticleReadDTO readDTO = createArticleReadDTO();
@@ -223,6 +229,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualArticle).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateArticleMinSizeValidationFailed() throws Exception {
         ArticlePutDTO updateDTO = new ArticlePutDTO();
@@ -243,6 +250,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService, Mockito.never()).updateArticle(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateArticleMaxSizeValidationFailed() throws Exception {
         ArticlePutDTO updateDTO = new ArticlePutDTO();
@@ -263,6 +271,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService, Mockito.never()).updateArticle(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchArticle() throws Exception {
         ArticleReadDTO readDTO = createArticleReadDTO();
@@ -285,6 +294,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualArticle).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchArticleMinSizeValidationFailed() throws Exception {
         ArticlePatchDTO patchDTO = new ArticlePatchDTO();
@@ -305,6 +315,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService, Mockito.never()).patchArticle(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchArticleMaxSizeValidationFailed() throws Exception {
         ArticlePatchDTO patchDTO = new ArticlePatchDTO();
@@ -325,6 +336,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService, Mockito.never()).patchArticle(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteArticle() throws Exception {
         UUID id = UUID.randomUUID();
@@ -385,6 +397,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).getArticlePeople(articleId);
     }
 
+    @WithMockUser
     @Test
     public void testAddPersonToArticle() throws Exception {
         PersonReadDTO readDTO = createPersonReadDTO();
@@ -406,6 +419,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).addPersonToArticle(articleId, personId);
     }
 
+    @WithMockUser
     @Test
     public void testRemovePersonFromArticle() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -446,6 +460,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).getArticleMovies(articleId);
     }
 
+    @WithMockUser
     @Test
     public void testAddMovieToArticle() throws Exception {
         MovieReadDTO readDTO = createMovieReadDTO();
@@ -467,6 +482,7 @@ public class ArticleControllerTest extends BaseControllerTest {
         Mockito.verify(articleService).addMovieToArticle(articleId, movieId);
     }
 
+    @WithMockUser
     @Test
     public void testRemoveMovieFromArticle() throws Exception {
         UUID articleId = UUID.randomUUID();

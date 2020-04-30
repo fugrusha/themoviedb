@@ -21,6 +21,7 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
+import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.List;
@@ -94,6 +95,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Assert.assertTrue(result.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -120,7 +122,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService).createComment(articleId, createDTO);
     }
 
-
+    @WithMockUser
     @Test
     public void testCreateArticleCommentBlockedUserException() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -145,6 +147,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Assert.assertTrue(resultString.contains(exception.getMessage()));
     }
 
+    @WithMockUser
     @Test
     public void testCreateArticleCommentNotNullValidationFailed() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -164,6 +167,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateArticleCommentMinSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -184,6 +188,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testCreateArticleCommentMaxSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
@@ -204,6 +209,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).createComment(any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -226,6 +232,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testUpdateArticleCommentMinSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
@@ -245,6 +252,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testUpdateArticleCommentMaxSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();;
@@ -264,6 +272,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).updateComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
@@ -286,6 +295,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
     }
 
+    @WithMockUser
     @Test
     public void testPatchArticleCommentMinSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
@@ -305,6 +315,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testPatchArticleCommentMaxSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
@@ -322,6 +333,7 @@ public class ArticleCommentControllerTest extends BaseControllerTest {
         Mockito.verify(commentService, Mockito.never()).patchComment(any(), any(), any());
     }
 
+    @WithMockUser
     @Test
     public void testDeleteArticleComment() throws Exception {
         UUID articleId = UUID.randomUUID();
