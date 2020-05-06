@@ -25,6 +25,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1")
+@Moderator
 public class ModeratorController {
 
     @Autowired
@@ -37,7 +38,6 @@ public class ModeratorController {
     private ApplicationUserService applicationUserService;
 
     @ApiOperation(value = "Change trust level of user", notes = "Needs MODERATOR authority")
-    @Moderator
     @PostMapping("/users/{id}/set-trust-level")
     public UserReadDTO setTrustLevelToUser(
             @PathVariable UUID id,
@@ -47,7 +47,6 @@ public class ModeratorController {
 
     @ApiPageable
     @ApiOperation(value = "Get all comments by filter", notes = "Needs MODERATOR authority")
-    @Moderator
     @GetMapping("/comments")
     public PageResult<CommentReadDTO> getCommentsByFilter(
             CommentFilter filter,
@@ -57,7 +56,6 @@ public class ModeratorController {
     }
 
     @ApiOperation(value = "Moderate comment by id", notes = "Needs MODERATOR authority")
-    @Moderator
     @PostMapping("/comments/{id}/moderate")
     public CommentReadDTO changeCommentStatus(
             @PathVariable UUID id,
@@ -68,7 +66,6 @@ public class ModeratorController {
 
     @ApiPageable
     @ApiOperation(value = "Get all complaints by filter", notes = "Needs MODERATOR authority")
-    @Moderator
     @GetMapping("/complaints")
     public PageResult<ComplaintReadDTO> getAllComplaints(
             ComplaintFilter filter,
@@ -78,7 +75,6 @@ public class ModeratorController {
     }
 
     @ApiOperation(value = "Moderate complaint", notes = "Needs MODERATOR authority")
-    @Moderator
     @PostMapping("/complaints/{id}/moderate")
     public ComplaintReadDTO moderateComplaint(
             @PathVariable UUID id,
