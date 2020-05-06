@@ -152,17 +152,6 @@ public class TestObjectFactory {
         return applicationUserRepository.save(user);
     }
 
-    public ApplicationUser createUser(String email, String password, UserRoleType roleType) {
-        ApplicationUser user = generateFlatEntityWithoutId(ApplicationUser.class);
-        user.setTrustLevel(5.0);
-        user.setEncodedPassword(password);
-        user.setEmail(email);
-        user.setIsBlocked(false);
-        UserRole userRole = userRoleRepository.findByType(roleType);
-        user.getUserRoles().add(userRole);
-        return applicationUserRepository.save(user);
-    }
-
     public Complaint createComplaint(
             ApplicationUser author
     ) {
