@@ -168,6 +168,7 @@ public class ApplicationUserServiceTest extends BaseTest {
         patch.setEmail("vovka@mail.ru");
         patch.setPassword("098765");
         patch.setPasswordConfirmation("098765");
+        patch.setGender(Gender.MALE);
 
         UserReadDTO readDTO = applicationUserService.patchUser(user.getId(), patch);
 

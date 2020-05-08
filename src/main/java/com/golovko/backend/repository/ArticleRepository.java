@@ -17,22 +17,22 @@ public interface ArticleRepository extends CrudRepository<Article, UUID>, Articl
     Page<Article> findByStatus(ArticleStatus status, Pageable pageable);
 
     @Modifying
-    @Query("update Article a set a.likesCount=(a.likesCount + 1)"
+    @Query("update Article a set a.likesCount=(coalesce(a.likesCount, 0) + 1)"
             + " where a.id = :articleId")
     void incrementLikesCountField(UUID articleId);
 
     @Modifying
-    @Query("update Article a set a.likesCount=(a.likesCount - 1)"
+    @Query("update Article a set a.likesCount=(coalesce(a.likesCount, 0) - 1)"
             + " where a.id = :articleId")
     void decrementLikesCountField(UUID articleId);
 
     @Modifying
-    @Query("update Article a set a.dislikesCount=(a.dislikesCount + 1)"
+    @Query("update Article a set a.dislikesCount=(coalesce(a.dislikesCount, 0) + 1)"
             + " where a.id = :articleId")
     void incrementDislikesCountField(UUID articleId);
 
     @Modifying
-    @Query("update Article a set a.dislikesCount=(a.dislikesCount - 1)"
+    @Query("update Article a set a.dislikesCount=(coalesce(a.dislikesCount, 0) - 1)"
             + " where a.id = :articleId")
     void decrementDislikesCountField(UUID articleId);
 }

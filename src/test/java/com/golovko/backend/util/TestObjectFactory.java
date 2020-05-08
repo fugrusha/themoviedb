@@ -101,8 +101,8 @@ public class TestObjectFactory {
         movie.setDescription("description");
         movie.setReleaseDate(LocalDate.of(2019, 02, 02));
         movie.setIsReleased(true);
-        movie.setLikesCount(new Random().nextInt());
-        movie.setDislikesCount(new Random().nextInt());
+        movie.setLikesCount(new Random().nextInt(1000));
+        movie.setDislikesCount(new Random().nextInt(1000));
         movie.setAverageRating(ThreadLocalRandom.current().nextDouble(1, 10));
         return movieRepository.save(movie);
     }

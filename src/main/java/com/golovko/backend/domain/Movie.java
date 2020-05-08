@@ -48,8 +48,10 @@ public class Movie extends AbstractEntity {
     @Max(value = 10)
     private Double predictedAverageRating;
 
+    @Min(value = 0)
     private Integer likesCount;
 
+    @Min(value = 0)
     private Integer dislikesCount;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true)

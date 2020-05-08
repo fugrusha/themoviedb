@@ -15,7 +15,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 @ActiveProfiles("test")
 @Sql(statements = {
         "delete from external_system_import",
-        "delete from like",
+        "delete from like_entity",
         "delete from misprint",
         "delete from rating",
         "delete from genre_movie",

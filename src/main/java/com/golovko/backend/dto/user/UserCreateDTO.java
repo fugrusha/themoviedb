@@ -1,5 +1,6 @@
 package com.golovko.backend.dto.user;
 
+import com.golovko.backend.domain.Gender;
 import lombok.Data;
 
 import javax.validation.constraints.Email;
@@ -23,4 +24,6 @@ public class UserCreateDTO {
     @NotNull
     @Email
     private String email;
+
+    private Gender gender;
 }

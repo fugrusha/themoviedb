@@ -70,19 +70,18 @@ public class LikeRepositoryTest extends BaseTest {
     }
 
     @Test
-    public void testFindByUserIdAndLikedObjectId() {
+    public void testExistsLikeByUserIdAndLikedObjectId() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Movie movie1 = testObjectFactory.createMovie();
         Movie movie2 = testObjectFactory.createMovie();
 
-        Like like = testObjectFactory.createLike(true, user1, movie1.getId(), MOVIE);
+        testObjectFactory.createLike(true, user1, movie1.getId(), MOVIE);
         testObjectFactory.createLike(true, user1, movie2.getId(), MOVIE);
         testObjectFactory.createLike(true, user2, movie1.getId(), MOVIE); // wrong user
         testObjectFactory.createLike(true, user2, movie2.getId(), MOVIE); // wrong user
 
-        Like likeFromDb = likeRepository.findByAuthorIdAndLikedObjectId(user1.getId(), movie1.getId());
-        Assert.assertEquals(like.getId(), likeFromDb.getId());
+        Assert.assertTrue(likeRepository.existsLikeEntityByAuthorIdAndLikedObjectId(user1.getId(), movie1.getId()));
     }
 
     @Test
