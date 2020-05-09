@@ -101,6 +101,7 @@
         <loadUpdateData tableName="comment" file="db/data/comments.csv" separator=";" primaryKey="id">
             <column name="id" type="uuid"/>
             <column name="message" type="string"/>
+            <column name="spoiler" type="string"/>
             <column name="status" type="string" />
             <column name="likes_count" type="numeric" />
             <column name="dislikes_count" type="numeric" />

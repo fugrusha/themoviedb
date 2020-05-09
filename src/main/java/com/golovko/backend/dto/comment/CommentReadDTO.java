@@ -14,6 +14,8 @@ public class CommentReadDTO {
 
     private String message;
 
+    private String spoiler;
+
     private CommentStatus status;
 
     private Integer likesCount;

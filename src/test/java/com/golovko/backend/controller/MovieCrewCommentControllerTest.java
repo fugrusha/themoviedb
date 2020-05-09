@@ -105,6 +105,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
     public void testCreateMovieCrewComment() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("message text");
+        createDTO.setSpoiler("spoiler");
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
 
@@ -135,6 +136,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("message text");
+        createDTO.setSpoiler("spoiler");
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
 
@@ -177,6 +179,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
     public void testCreateMovieCrewCommentMinSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("");
+        createDTO.setSpoiler("");
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
 
@@ -199,6 +202,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
     public void testCreateMovieCrewCommentMaxSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("comment message".repeat(100));
+        createDTO.setSpoiler("spoiler".repeat(1000));
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
 
@@ -224,6 +228,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("message text");
+        putDTO.setSpoiler("spoiler");
 
         Mockito.when(commentService.updateComment(movieCrewId, readDTO.getId(), putDTO))
                 .thenReturn(readDTO);
@@ -245,6 +250,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
     public void testUpdateMovieCrewCommentMinSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("");
+        putDTO.setSpoiler("");
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
@@ -265,6 +271,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
     public void testUpdateMovieCrewCommentMaxSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();;
         putDTO.setMessage("comment message".repeat(100));
+        putDTO.setSpoiler("spoiler".repeat(1000));
 
         String resultJson = mockMvc
                 .perform(put("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
@@ -288,6 +295,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("New message");
+        patchDTO.setSpoiler("New spoiler");
 
         Mockito.when(commentService.patchComment(movieCrewId, readDTO.getId(), patchDTO))
                 .thenReturn(readDTO);
@@ -309,6 +317,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
     public void testPatchMovieCrewCommentMinSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("");
+        patchDTO.setSpoiler("");
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",
@@ -329,6 +338,7 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
     public void testPatchMovieCrewCommentMaxSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("comment message".repeat(100));
+        patchDTO.setSpoiler("New spoiler".repeat(100));
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments/{id}",

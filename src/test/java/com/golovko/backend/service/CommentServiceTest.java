@@ -6,6 +6,7 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
 import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.TextBetweenIndexesNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
@@ -293,11 +294,48 @@ public class CommentServiceTest extends BaseTest {
     }
 
     @Test
-    public void testPatchComment() {
+    public void testCreateCommentWithSpoiler() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text with spoiler");
+        createDTO.setSpoiler("spoiler");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        CommentReadDTO readDTO = commentService.createComment(movie.getId(), createDTO);
+
+        Assertions.assertThat(createDTO).isEqualToIgnoringGivenFields(readDTO, "authorId");
+        Assert.assertNotNull(readDTO.getId());
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(comment, "authorId");
+        Assert.assertEquals(createDTO.getSpoiler(), comment.getSpoiler());
+    }
+
+    @Test(expected = TextBetweenIndexesNotFoundException.class)
+    public void testCreateCommentWithSpoilerNotMatchWithMessage() {
+        ApplicationUser commentAuthor = testObjectFactory.createUser();
+        Movie movie = testObjectFactory.createMovie();
+
+        CommentCreateDTO createDTO = new CommentCreateDTO();
+        createDTO.setMessage("message text with spoiler");
+        createDTO.setSpoiler("wrong spoiler");
+        createDTO.setAuthorId(commentAuthor.getId());
+        createDTO.setTargetObjectType(MOVIE);
+
+        commentService.createComment(movie.getId(), createDTO);
+    }
+
+    @Test
+    public void testPatchCommentWithoutSpoiler() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
         Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+        c.setSpoiler(null);
+        commentRepository.save(c);
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("New message");
@@ -331,7 +369,42 @@ public class CommentServiceTest extends BaseTest {
     }
 
     @Test
-    public void testUpdateComment() {
+    public void testPatchCommentWithSpoiler() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+
+        CommentPatchDTO patchDTO = new CommentPatchDTO();
+        patchDTO.setMessage("New message with spoiler");
+        patchDTO.setSpoiler("spoiler");
+
+        CommentReadDTO readDTO = commentService.patchComment(article.getId(), c.getId(), patchDTO);
+
+        Assertions.assertThat(patchDTO).isEqualToComparingFieldByField(readDTO);
+
+        Comment commentAfterUpdate = commentRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(commentAfterUpdate).isEqualToIgnoringGivenFields(readDTO, "author");
+        Assert.assertEquals(commentAfterUpdate.getAuthor().getId(), readDTO.getAuthorId());
+        Assert.assertEquals(patchDTO.getSpoiler(), commentAfterUpdate.getSpoiler());
+    }
+
+    @Test(expected = TextBetweenIndexesNotFoundException.class)
+    public void testPatchCommentWithSpoilerNotMatchWithMessage() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+
+        CommentPatchDTO patchDTO = new CommentPatchDTO();
+        patchDTO.setMessage("New message with spoiler");
+        patchDTO.setSpoiler("wrong spoiler");
+
+        commentService.patchComment(article.getId(), c.getId(), patchDTO);
+    }
+
+    @Test
+    public void testUpdateCommentWithoutSpoiler() {
         ApplicationUser user1 = testObjectFactory.createUser();
         ApplicationUser user2 = testObjectFactory.createUser();
         Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
@@ -347,6 +420,41 @@ public class CommentServiceTest extends BaseTest {
         Comment comment = commentRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(comment).isEqualToIgnoringGivenFields(readDTO, "author");
         Assert.assertEquals(comment.getAuthor().getId(), readDTO.getAuthorId());
+    }
+
+    @Test
+    public void testUpdateCommentWithSpoiler() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+
+        CommentPutDTO putDTO = new CommentPutDTO();
+        putDTO.setMessage("message text with spoiler");
+        putDTO.setSpoiler("spoiler");
+
+        CommentReadDTO readDTO = commentService.updateComment(article.getId(), c.getId(), putDTO);
+
+        Assertions.assertThat(putDTO).isEqualToComparingFieldByField(readDTO);
+
+        Comment comment = commentRepository.findById(readDTO.getId()).get();
+        Assertions.assertThat(comment).isEqualToIgnoringGivenFields(readDTO, "author");
+        Assert.assertEquals(comment.getAuthor().getId(), readDTO.getAuthorId());
+        Assert.assertEquals(putDTO.getSpoiler(), comment.getSpoiler());
+    }
+
+    @Test(expected = TextBetweenIndexesNotFoundException.class)
+    public void testUpdateCommentWithSpoilerNotMatchWithMessage() {
+        ApplicationUser user1 = testObjectFactory.createUser();
+        ApplicationUser user2 = testObjectFactory.createUser();
+        Article article = testObjectFactory.createArticle(user1, ArticleStatus.PUBLISHED);
+        Comment c = testObjectFactory.createComment(user2, article.getId(), APPROVED, ARTICLE);
+
+        CommentPutDTO putDTO = new CommentPutDTO();
+        putDTO.setMessage("message text with spoiler");
+        putDTO.setSpoiler("wrong spoiler");
+
+        commentService.updateComment(article.getId(), c.getId(), putDTO);
     }
 
     @Test
