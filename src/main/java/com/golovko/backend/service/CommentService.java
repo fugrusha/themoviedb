@@ -140,20 +140,20 @@ public class CommentService {
 
     private void validateTargetObject(UUID targetObjectId, CommentCreateDTO createDTO) {
         switch (createDTO.getTargetObjectType()) {
-            case MOVIE_CAST:
-                repoHelper.getReferenceIfExist(MovieCast.class, targetObjectId);
-                break;
-            case MOVIE_CREW:
-                repoHelper.getReferenceIfExist(MovieCrew.class, targetObjectId);
-                break;
-            case MOVIE:
-                repoHelper.getReferenceIfExist(Movie.class, targetObjectId);
-                break;
-            case ARTICLE:
-                repoHelper.getReferenceIfExist(Article.class, targetObjectId);
-                break;
-            default:
-                throw new WrongTargetObjectTypeException(ActionType.CREATE_COMMENT, createDTO.getTargetObjectType());
+          case MOVIE_CAST:
+              repoHelper.getReferenceIfExist(MovieCast.class, targetObjectId);
+              break;
+          case MOVIE_CREW:
+              repoHelper.getReferenceIfExist(MovieCrew.class, targetObjectId);
+              break;
+          case MOVIE:
+              repoHelper.getReferenceIfExist(Movie.class, targetObjectId);
+              break;
+          case ARTICLE:
+              repoHelper.getReferenceIfExist(Article.class, targetObjectId);
+              break;
+          default:
+              throw new WrongTargetObjectTypeException(ActionType.CREATE_COMMENT, createDTO.getTargetObjectType());
         }
     }
 

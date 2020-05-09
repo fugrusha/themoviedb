@@ -6,6 +6,9 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.ArticleCreateDTO;
 import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
+import com.golovko.backend.dto.comment.CommentCreateDTO;
+import com.golovko.backend.dto.comment.CommentModerateDTO;
+import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.dto.genre.GenreCreateDTO;
 import com.golovko.backend.dto.genre.GenreReadDTO;
 import com.golovko.backend.dto.like.LikeCreateDTO;
@@ -22,9 +25,12 @@ import com.golovko.backend.dto.moviecrew.MovieCrewCreateDTO;
 import com.golovko.backend.dto.moviecrew.MovieCrewReadDTO;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.rating.RatingCreateDTO;
+import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.dto.user.UserCreateDTO;
 import com.golovko.backend.dto.user.UserPatchDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
+import com.golovko.backend.dto.user.UserTrustLevelDTO;
 import com.golovko.backend.dto.userrole.UserRoleReadDTO;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.UserRoleRepository;
@@ -45,6 +51,9 @@ import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
+
+import static com.golovko.backend.domain.TargetObjectType.COMMENT;
+import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
 @ActiveProfiles({"another-profile"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -789,6 +798,172 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
                 MovieReadExtendedDTO.class);
 
         Assert.assertEquals(movieCreateDTO.getMovieTitle(), u1MovieReadExtendedDTOResponse.getBody().getMovieTitle());
+
+        // FINAL_19 u1 writes a review on the film with a spoiler and adds high rating
+        // u1 adds comment
+        CommentCreateDTO commentCreateDTO = new CommentCreateDTO();
+        commentCreateDTO.setMessage("message text with spoiler");
+        commentCreateDTO.setSpoiler("spoiler");
+        commentCreateDTO.setAuthorId(u1UserId);
+        commentCreateDTO.setTargetObjectType(MOVIE);
+
+        ResponseEntity<CommentReadDTO> u1CommentReadDTOResponse = getResponse(
+                "/movies/" + movieId + "/comments/",
+                HttpMethod.POST,
+                commentCreateDTO,
+                getAuthHeaders(U1_EMAIL, U1_PASSWORD),
+                CommentReadDTO.class);
+
+        UUID u1CommentId = u1CommentReadDTOResponse.getBody().getId();
+
+        Assertions.assertThat(commentCreateDTO).isEqualToComparingFieldByField(u1CommentReadDTOResponse.getBody());
+        Assert.assertEquals(movieId, u1CommentReadDTOResponse.getBody().getTargetObjectId());
+        Assert.assertEquals(CommentStatus.PENDING, u1CommentReadDTOResponse.getBody().getStatus());
+
+        // u1 adds rating
+        RatingCreateDTO u1RatingCreateDTO = new RatingCreateDTO();
+        u1RatingCreateDTO.setRating(9);
+        u1RatingCreateDTO.setAuthorId(u1UserId);
+        u1RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
+
+        ResponseEntity<RatingReadDTO> u1RatingReadDTOResponse = getResponse(
+                "/movies/" + movieId + "/ratings/",
+                HttpMethod.POST,
+                u1RatingCreateDTO,
+                getAuthHeaders(U1_EMAIL, U1_PASSWORD),
+                RatingReadDTO.class);
+
+        Assertions.assertThat(u1RatingCreateDTO).isEqualToComparingFieldByField(u1RatingReadDTOResponse.getBody());
+        Assert.assertEquals(movieId, u1RatingReadDTOResponse.getBody().getRatedObjectId());
+
+        // FINAL_20 u2 gets movie and don't see comment cause it is not passed moderation yet
+        ResponseEntity<PageResult<CommentReadDTO>> u2MovieCommentsReadDTOResponse = getPageResultResponse(
+                "/movies/" + movieId + "/comments/",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD));
+
+        Assert.assertEquals(0, u2MovieCommentsReadDTOResponse.getBody().getData().size());
+
+        // FINAL_21 u2 adds rating to movie
+        RatingCreateDTO u2RatingCreateDTO = new RatingCreateDTO();
+        u2RatingCreateDTO.setRating(7);
+        u2RatingCreateDTO.setAuthorId(u2UserId);
+        u2RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
+
+        ResponseEntity<RatingReadDTO> u2RatingReadDTOResponse = getResponse(
+                "/movies/" + movieId + "/ratings/",
+                HttpMethod.POST,
+                u2RatingCreateDTO,
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD),
+                RatingReadDTO.class);
+
+        Assertions.assertThat(u2RatingCreateDTO).isEqualToComparingFieldByField(u2RatingReadDTOResponse.getBody());
+        Assert.assertEquals(movieId, u2RatingReadDTOResponse.getBody().getRatedObjectId());
+
+        // FINAL_22 m1 opens movie and list of pending comments and notices 1 pending comment
+        ResponseEntity<MovieReadExtendedDTO> u2MovieReadExtendedDTOResponse = getResponse(
+                "/movies/" + movieId + "/extended/",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD),
+                MovieReadExtendedDTO.class);
+
+        Assert.assertEquals(movieCreateDTO.getMovieTitle(), u2MovieReadExtendedDTOResponse.getBody().getMovieTitle());
+
+        // u2 opens list of pending comments and notices 1 pending comment
+        ResponseEntity<PageResult<CommentReadDTO>> m1PendingCommentReadDTOResponse = getPageResultResponse(
+                "/comments/?statuses=PENDING",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(M1_EMAIL, M1_PASSWORD));
+
+        Assert.assertEquals(1, m1PendingCommentReadDTOResponse.getBody().getData().size());
+
+        // FINAL_23
+        // m1 moderates pending comment and approves it
+        CommentModerateDTO commentModerateDTO = new CommentModerateDTO();
+        commentModerateDTO.setNewStatus(CommentStatus.APPROVED);
+
+        ResponseEntity<CommentReadDTO> m1ModeratesCommentResponse = getResponse(
+                "/comments/" + u1CommentId + "/moderate/",
+                HttpMethod.POST,
+                commentModerateDTO,
+                getAuthHeaders(M1_EMAIL, M1_PASSWORD),
+                CommentReadDTO.class);
+
+        Assert.assertEquals(HttpStatus.OK, m1ModeratesCommentResponse.getStatusCode());
+        Assert.assertEquals(CommentStatus.APPROVED, m1ModeratesCommentResponse.getBody().getStatus());
+
+        // m1 sets u1 trust level higher than 5, so u1 comments don't need to moderate anymore
+        UserTrustLevelDTO trustLevelDTO = new UserTrustLevelDTO();
+        trustLevelDTO.setTrustLevel(6.5);
+
+        ResponseEntity<UserReadDTO> m1ChangedU1TrustLevelResponse = getResponse(
+                "/users/" + u1UserId + "/set-trust-level/",
+                HttpMethod.POST,
+                trustLevelDTO,
+                getAuthHeaders(M1_EMAIL, M1_PASSWORD),
+                UserReadDTO.class);
+
+        Assert.assertEquals(HttpStatus.OK, m1ChangedU1TrustLevelResponse.getStatusCode());
+        Assert.assertEquals(trustLevelDTO.getTrustLevel(), m1ChangedU1TrustLevelResponse.getBody().getTrustLevel());
+
+        // FINAL_24 u3 opens movie and adds rating to it. Sees one approved comment
+        ResponseEntity<MovieReadExtendedDTO> u3MovieReadExtendedDTOResponse = getResponse(
+                "/movies/" + movieId + "/extended/",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                MovieReadExtendedDTO.class);
+
+        Assert.assertEquals(movieCreateDTO.getMovieTitle(), u3MovieReadExtendedDTOResponse.getBody().getMovieTitle());
+
+        // u3 adds rating
+        RatingCreateDTO u3RatingCreateDTO = new RatingCreateDTO();
+        u3RatingCreateDTO.setRating(3);
+        u3RatingCreateDTO.setAuthorId(u3UserId);
+        u3RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
+
+        ResponseEntity<RatingReadDTO> u3RatingReadDTOResponse = getResponse(
+                "/movies/" + movieId + "/ratings/",
+                HttpMethod.POST,
+                u3RatingCreateDTO,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                RatingReadDTO.class);
+
+        Assertions.assertThat(u3RatingCreateDTO).isEqualToComparingFieldByField(u3RatingReadDTOResponse.getBody());
+        Assert.assertEquals(movieId, u3RatingReadDTOResponse.getBody().getRatedObjectId());
+
+        //u3 sees approved 1 comment
+        ResponseEntity<PageResult<CommentReadDTO>> u3MovieCommentsReadDTOResponse = getPageResultResponse(
+                "/movies/" + movieId + "/comments/",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD));
+
+        Assert.assertEquals(1, u3MovieCommentsReadDTOResponse.getBody().getData().size());
+
+        // FINAL_25 u3 adds like to comment
+        LikeCreateDTO u3LikeCreateDTO = createLikeDTO(u1CommentId, COMMENT, true);
+
+        ResponseEntity<LikeReadDTO> u3CommentLikeReadDTOResponse = getResponse(
+                "/users/" + u3UserId + "/likes/",
+                HttpMethod.POST,
+                u3LikeCreateDTO,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                LikeReadDTO.class);
+
+        Assert.assertEquals(u1CommentId, u3CommentLikeReadDTOResponse.getBody().getLikedObjectId());
+
+        ResponseEntity<CommentReadDTO> u3CommentReadDTOResponse = getResponse(
+                "/movies/" + movieId + "/comments/" + u1CommentId,
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                CommentReadDTO.class);
+
+        Assert.assertEquals((Integer) 1, u3CommentReadDTOResponse.getBody().getLikesCount());
     }
 
     private <T> ResponseEntity<T> getResponse(

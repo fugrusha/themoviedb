@@ -32,7 +32,7 @@ public class MovieController {
     // TODO getUpcoming
 
     @ApiPageable
-    @ApiOperation(value = "Get top rated movies" , notes = "Sorted by average rating")
+    @ApiOperation(value = "Get top rated movies", notes = "Sorted by average rating")
     @GetMapping("/top-rated")
     public PageResult<MoviesTopRatedDTO> getTopRatedMovies(@ApiIgnore Pageable pageable) {
         return movieService.getTopRatedMovies(pageable);
