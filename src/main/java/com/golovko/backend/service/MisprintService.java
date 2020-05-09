@@ -151,6 +151,7 @@ public class MisprintService {
         }
     }
 
+    // TODO refactor targetObjectId in dto. Only one usage of it
     private void closeSimilarMisprints(MisprintConfirmDTO dto, String misprintText) {
         misprintRepository.findSimilarMisprints(dto.getTargetObjectId(), misprintText, ComplaintStatus.INITIATED)
                 .forEach(m -> {
@@ -214,7 +215,7 @@ public class MisprintService {
                     + text.substring(dto.getEndIndex());
 
             setter.accept(newText);
-        } else {
+        } else { // TODO create own exception
             throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
                     "Text could not be replaced."
                             + " The text of mistake does not match with the text passed between indexes");

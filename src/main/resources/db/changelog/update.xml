@@ -23,5 +23,6 @@
     <include file="db/changelog/updates/Home-work-22.xml" />
     <include file="db/changelog/updates/Home-work-22-1.xml" />
     <include file="db/changelog/updates/Home-work-23.xml" />
+    <include file="db/changelog/updates/Home-work-23-1.xml" />
 
 </databaseChangeLog>
