@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.EnumType;
 import javax.persistence.Enumerated;
 import javax.persistence.ManyToOne;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.UUID;
@@ -20,12 +21,17 @@ public class Comment extends AbstractEntity {
     @Size(min = 1, max = 500)
     private String message;
 
+    @Size(min = 1, max = 500)
+    private String spoiler;
+
     @NotNull
     @Enumerated(value = EnumType.STRING)
     private CommentStatus status;
 
+    @Min(value = 0)
     private Integer likesCount;
 
+    @Min(value = 0)
     private Integer dislikesCount;
 
     @NotNull

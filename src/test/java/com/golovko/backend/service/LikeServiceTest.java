@@ -209,7 +209,7 @@ public class LikeServiceTest extends BaseTest {
         ApplicationUser user = testObjectFactory.createUser();
 
         Movie movie = testObjectFactory.createMovie();
-        movie.setLikesCount(5);
+        movie.setLikesCount(null);
         movieRepository.save(movie);
 
         LikeCreateDTO createDTO = new LikeCreateDTO();
@@ -222,7 +222,7 @@ public class LikeServiceTest extends BaseTest {
         Assert.assertEquals(readDTO.getLikedObjectId(), movie.getId());
 
         Movie updatedMovie = movieRepository.findById(readDTO.getLikedObjectId()).get();
-        Assert.assertEquals(updatedMovie.getLikesCount(), (Integer) 6);
+        Assert.assertEquals((Integer) 1, updatedMovie.getLikesCount());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -244,7 +244,7 @@ public class LikeServiceTest extends BaseTest {
         Movie movie = testObjectFactory.createMovie();
 
         Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
-        c1.setLikesCount(5);
+        c1.setLikesCount(null);
         commentRepository.save(c1);
 
         LikeCreateDTO createDTO = new LikeCreateDTO();
@@ -257,7 +257,7 @@ public class LikeServiceTest extends BaseTest {
         Assert.assertEquals(readDTO.getLikedObjectId(), c1.getId());
 
         Comment updatedComment = commentRepository.findById(readDTO.getLikedObjectId()).get();
-        Assert.assertEquals(updatedComment.getLikesCount(), (Integer) 6);
+        Assert.assertEquals((Integer) 1, updatedComment.getLikesCount());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -278,7 +278,7 @@ public class LikeServiceTest extends BaseTest {
         ApplicationUser author = testObjectFactory.createUser();
 
         Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
-        a1.setLikesCount(5);
+        a1.setLikesCount(null);
         articleRepository.save(a1);
 
         LikeCreateDTO createDTO = new LikeCreateDTO();
@@ -291,7 +291,7 @@ public class LikeServiceTest extends BaseTest {
         Assert.assertEquals(readDTO.getLikedObjectId(), a1.getId());
 
         Article updatedArticle = articleRepository.findById(readDTO.getLikedObjectId()).get();
-        Assert.assertEquals(updatedArticle.getLikesCount(), (Integer) 6);
+        Assert.assertEquals((Integer) 1, updatedArticle.getLikesCount());
     }
 
     @Test(expected = EntityNotFoundException.class)
@@ -320,7 +320,7 @@ public class LikeServiceTest extends BaseTest {
         likeService.deleteLike(user.getId(), like.getId());
 
         Movie updatedMovie = movieRepository.findById(movie.getId()).get();
-        Assert.assertEquals(updatedMovie.getLikesCount(), (Integer) 4);
+        Assert.assertEquals((Integer) 4, updatedMovie.getLikesCount());
     }
 
     @Test
@@ -337,7 +337,7 @@ public class LikeServiceTest extends BaseTest {
         likeService.deleteLike(user.getId(), like.getId());
 
         Comment updatedComment = commentRepository.findById(c1.getId()).get();
-        Assert.assertEquals(updatedComment.getLikesCount(), (Integer) 4);
+        Assert.assertEquals((Integer) 4, updatedComment.getLikesCount());
     }
 
     @Test
@@ -353,7 +353,7 @@ public class LikeServiceTest extends BaseTest {
         likeService.deleteLike(author.getId(), like.getId());
 
         Article updatedArticle = articleRepository.findById(a1.getId()).get();
-        Assert.assertEquals(updatedArticle.getLikesCount(), (Integer) 4);
+        Assert.assertEquals((Integer) 4, updatedArticle.getLikesCount());
     }
 
     @Test
@@ -361,7 +361,7 @@ public class LikeServiceTest extends BaseTest {
         ApplicationUser user = testObjectFactory.createUser();
 
         Movie movie = testObjectFactory.createMovie();
-        movie.setDislikesCount(5);
+        movie.setDislikesCount(null);
         movieRepository.save(movie);
 
         LikeCreateDTO createDTO = new LikeCreateDTO();
@@ -374,7 +374,7 @@ public class LikeServiceTest extends BaseTest {
         Assert.assertEquals(readDTO.getLikedObjectId(), movie.getId());
 
         Movie updatedMovie = movieRepository.findById(readDTO.getLikedObjectId()).get();
-        Assert.assertEquals(updatedMovie.getDislikesCount(), (Integer) 6);
+        Assert.assertEquals((Integer) 1, updatedMovie.getDislikesCount());
     }
 
     @Test
@@ -383,7 +383,7 @@ public class LikeServiceTest extends BaseTest {
         Movie movie = testObjectFactory.createMovie();
 
         Comment c1 = testObjectFactory.createComment(user, movie.getId(), APPROVED, MOVIE);
-        c1.setDislikesCount(5);
+        c1.setDislikesCount(null);
         commentRepository.save(c1);
 
         LikeCreateDTO createDTO = new LikeCreateDTO();
@@ -396,7 +396,7 @@ public class LikeServiceTest extends BaseTest {
         Assert.assertEquals(readDTO.getLikedObjectId(), c1.getId());
 
         Comment updatedComment = commentRepository.findById(readDTO.getLikedObjectId()).get();
-        Assert.assertEquals(updatedComment.getDislikesCount(), (Integer) 6);
+        Assert.assertEquals((Integer) 1, updatedComment.getDislikesCount());
     }
 
     @Test
@@ -404,7 +404,7 @@ public class LikeServiceTest extends BaseTest {
         ApplicationUser author = testObjectFactory.createUser();
 
         Article a1 = testObjectFactory.createArticle(author, ArticleStatus.PUBLISHED);
-        a1.setDislikesCount(5);
+        a1.setDislikesCount(null);
         articleRepository.save(a1);
 
         LikeCreateDTO createDTO = new LikeCreateDTO();
@@ -417,7 +417,7 @@ public class LikeServiceTest extends BaseTest {
         Assert.assertEquals(readDTO.getLikedObjectId(), a1.getId());
 
         Article updatedArticle = articleRepository.findById(readDTO.getLikedObjectId()).get();
-        Assert.assertEquals(updatedArticle.getDislikesCount(), (Integer) 6);
+        Assert.assertEquals((Integer) 1, updatedArticle.getDislikesCount());
     }
 
     @Test
@@ -433,7 +433,7 @@ public class LikeServiceTest extends BaseTest {
         likeService.deleteLike(user.getId(), dislike.getId());
 
         Movie updatedMovie = movieRepository.findById(movie.getId()).get();
-        Assert.assertEquals(updatedMovie.getDislikesCount(), (Integer) 4);
+        Assert.assertEquals((Integer) 4, updatedMovie.getDislikesCount());
     }
 
     @Test
@@ -450,7 +450,7 @@ public class LikeServiceTest extends BaseTest {
         likeService.deleteLike(user.getId(), dislike.getId());
 
         Comment updatedComment = commentRepository.findById(c1.getId()).get();
-        Assert.assertEquals(updatedComment.getDislikesCount(), (Integer) 4);
+        Assert.assertEquals((Integer) 4, updatedComment.getDislikesCount());
     }
 
     @Test
@@ -466,7 +466,7 @@ public class LikeServiceTest extends BaseTest {
         likeService.deleteLike(author.getId(), dislike.getId());
 
         Article updatedArticle = articleRepository.findById(a1.getId()).get();
-        Assert.assertEquals(updatedArticle.getDislikesCount(), (Integer) 4);
+        Assert.assertEquals((Integer) 4, updatedArticle.getDislikesCount());
     }
 
     @Test(expected = TransactionSystemException.class)

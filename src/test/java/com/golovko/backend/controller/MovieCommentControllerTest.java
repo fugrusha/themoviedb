@@ -102,6 +102,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
 
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("message text");
+        createDTO.setSpoiler("spoiler");
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE);
 
@@ -130,6 +131,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
 
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("message text");
+        createDTO.setSpoiler("spoiler");
         createDTO.setAuthorId(authorId);
         createDTO.setTargetObjectType(TargetObjectType.MOVIE);
 
@@ -170,6 +172,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
     public void testCreateMovieCommentMinSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("");
+        createDTO.setSpoiler("");
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE);
 
@@ -191,6 +194,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
     public void testCreateMovieCommentMaxSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("comment message".repeat(100));
+        createDTO.setSpoiler("spoiler".repeat(1000));
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE);
 
@@ -215,6 +219,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
 
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("message text");
+        putDTO.setSpoiler("new spoiler");
 
         Mockito.when(commentService.updateComment(movieId, readDTO.getId(), putDTO))
                 .thenReturn(readDTO);
@@ -235,6 +240,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
     public void testUpdateMovieCommentMinSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("");
+        putDTO.setSpoiler("");
 
         String resultJson = mockMvc
                 .perform(put("/api/v1/movies/{movieId}/comments/{id}",
@@ -255,6 +261,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
     public void testUpdateMovieCommentMaxSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("comment message".repeat(100));
+        putDTO.setSpoiler("new spoiler".repeat(1000));
 
         String resultJson = mockMvc
                 .perform(put("/api/v1/movies/{movieId}/comments/{id}",
@@ -278,6 +285,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("New message");
+        patchDTO.setSpoiler("new spoiler");
 
         Mockito.when(commentService.patchComment(movieId, readDTO.getId(), patchDTO))
                 .thenReturn(readDTO);
@@ -298,6 +306,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
     public void testPatchMovieCommentMinSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("");
+        patchDTO.setSpoiler("");
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/comments/{id}",
@@ -318,6 +327,7 @@ public class MovieCommentControllerTest extends BaseControllerTest {
     public void testPatchMovieCommentMaxSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("comment message".repeat(100));
+        patchDTO.setSpoiler("new spoiler".repeat(1000));
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/comments/{id}",

@@ -24,7 +24,4 @@ public class MisprintConfirmDTO {
 
     @NotNull
     private UUID moderatorId;
-
-    @NotNull
-    private UUID targetObjectId;
 }

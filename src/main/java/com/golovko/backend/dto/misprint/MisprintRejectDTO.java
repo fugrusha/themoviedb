@@ -19,7 +19,4 @@ public class MisprintRejectDTO {
 
     @NotNull
     private UUID moderatorId;
-
-    @NotNull
-    private UUID targetObjectId;
 }

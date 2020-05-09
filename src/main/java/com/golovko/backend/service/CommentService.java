@@ -5,10 +5,12 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
 import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.TextBetweenIndexesNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import com.golovko.backend.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -65,6 +67,10 @@ public class CommentService {
 
         validateTargetObject(targetObjectId, createDTO);
 
+        if (!Utils.empty(createDTO.getSpoiler())) {
+            checkIfMessageContainsSpoilerText(createDTO.getSpoiler(), createDTO.getMessage());
+        }
+
         Comment comment = translationService.translate(createDTO, Comment.class);
 
         if (user.getTrustLevel() < 5) {
@@ -80,29 +86,15 @@ public class CommentService {
         return translationService.translate(comment, CommentReadDTO.class);
     }
 
-    private void validateTargetObject(UUID targetObjectId, CommentCreateDTO createDTO) {
-        switch (createDTO.getTargetObjectType()) {
-          case MOVIE_CAST:
-              repoHelper.getReferenceIfExist(MovieCast.class, targetObjectId);
-              break;
-          case MOVIE_CREW:
-              repoHelper.getReferenceIfExist(MovieCrew.class, targetObjectId);
-              break;
-          case MOVIE:
-              repoHelper.getReferenceIfExist(Movie.class, targetObjectId);
-              break;
-          case ARTICLE:
-              repoHelper.getReferenceIfExist(Article.class, targetObjectId);
-              break;
-          default:
-              throw new WrongTargetObjectTypeException(ActionType.CREATE_COMMENT, createDTO.getTargetObjectType());
-        }
-    }
-
     public CommentReadDTO updateComment(UUID targetObjectId, UUID id, CommentPutDTO putDTO) {
         Comment comment = getCommentRequired(targetObjectId, id);
 
         translationService.map(putDTO, comment);
+
+        if (!Utils.empty(comment.getSpoiler())) {
+            checkIfMessageContainsSpoilerText(comment.getSpoiler(), comment.getMessage());
+        }
+
         comment = commentRepository.save(comment);
 
         return translationService.translate(comment, CommentReadDTO.class);
@@ -112,6 +104,11 @@ public class CommentService {
         Comment comment = getCommentRequired(targetObjectId, id);
 
         translationService.map(patchDTO, comment);
+
+        if (!Utils.empty(comment.getSpoiler()) && !Utils.empty(patchDTO.getSpoiler())) {
+            checkIfMessageContainsSpoilerText(comment.getSpoiler(), comment.getMessage());
+        }
+
         comment = commentRepository.save(comment);
 
         return translationService.translate(comment, CommentReadDTO.class);
@@ -139,5 +136,30 @@ public class CommentService {
     private Comment getCommentRequired(UUID targetObjectId, UUID commentId) {
         return Optional.ofNullable(commentRepository.findByIdAndTargetId(commentId, targetObjectId))
                 .orElseThrow(() -> new EntityNotFoundException(Comment.class, commentId, targetObjectId));
+    }
+
+    private void validateTargetObject(UUID targetObjectId, CommentCreateDTO createDTO) {
+        switch (createDTO.getTargetObjectType()) {
+          case MOVIE_CAST:
+              repoHelper.getReferenceIfExist(MovieCast.class, targetObjectId);
+              break;
+          case MOVIE_CREW:
+              repoHelper.getReferenceIfExist(MovieCrew.class, targetObjectId);
+              break;
+          case MOVIE:
+              repoHelper.getReferenceIfExist(Movie.class, targetObjectId);
+              break;
+          case ARTICLE:
+              repoHelper.getReferenceIfExist(Article.class, targetObjectId);
+              break;
+          default:
+              throw new WrongTargetObjectTypeException(ActionType.CREATE_COMMENT, createDTO.getTargetObjectType());
+        }
+    }
+
+    private void checkIfMessageContainsSpoilerText(String spoiler, String message) {
+        if (!message.contains(spoiler)) {
+            throw new TextBetweenIndexesNotFoundException("Message text does not contain text of spoiler");
+        }
     }
 }

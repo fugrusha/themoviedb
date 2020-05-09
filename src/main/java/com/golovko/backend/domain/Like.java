@@ -10,6 +10,7 @@ import java.util.UUID;
 @Entity
 @Getter
 @Setter
+@Table(name = "like_entity")
 public class Like extends AbstractEntity {
 
     @NotNull

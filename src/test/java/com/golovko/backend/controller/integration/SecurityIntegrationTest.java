@@ -1,9 +1,7 @@
 package com.golovko.backend.controller.integration;
 
 import com.golovko.backend.BaseTest;
-import com.golovko.backend.domain.ApplicationUser;
-import com.golovko.backend.domain.UserRole;
-import com.golovko.backend.domain.UserRoleType;
+import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.movie.MovieReadDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
@@ -231,6 +229,28 @@ public class SecurityIntegrationTest extends BaseTest {
         ResponseEntity<UserReadDTO> response = restTemplate.exchange(
                 "http://localhost:8080/api/v1/users/" + user1.getId(), HttpMethod.GET, httpEntity,
                 new ParameterizedTypeReference<>() {});
+
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void testDeleteLikeWithCurrentUserAuthority() {
+        String email = "test@mail.com";
+        String password = "pass123";
+
+        ApplicationUser user1 = createUser(email, password, UserRoleType.USER);
+        Movie movie = testObjectFactory.createMovie();
+        Like like = testObjectFactory.createLike(true, user1, movie.getId(), TargetObjectType.MOVIE);
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", getBasicAuthorizationHeaderValue(email, password));
+        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+
+        ResponseEntity<Void> response = restTemplate
+                .exchange("http://localhost:8080/api/v1/users/" + user1.getId() + "/likes/" + like.getId(),
+                    HttpMethod.DELETE, httpEntity, Void.class);
 
         Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     }

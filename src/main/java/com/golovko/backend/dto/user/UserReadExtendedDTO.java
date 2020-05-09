@@ -1,5 +1,6 @@
 package com.golovko.backend.dto.user;
 
+import com.golovko.backend.domain.Gender;
 import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
@@ -18,6 +19,8 @@ public class UserReadExtendedDTO {
     private String username;
 
     private String email;
+
+    private Gender gender;
 
     private Boolean isBlocked;
 

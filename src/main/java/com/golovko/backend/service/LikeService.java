@@ -65,7 +65,7 @@ public class LikeService {
     }
 
     private void checkIfLikeIsAlreadyExists(UUID userId, LikeCreateDTO dto) {
-        if (likeRepository.findByAuthorIdAndLikedObjectId(userId, dto.getLikedObjectId()) != null) {
+        if (likeRepository.existsLikeEntityByAuthorIdAndLikedObjectId(userId, dto.getLikedObjectId())) {
             throw new ActionOfUserDuplicatedException(
                     userId, ActionType.ADD_LIKE, dto.getLikedObjectType(), dto.getLikedObjectId());
         }

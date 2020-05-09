@@ -23,6 +23,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1")
+@ContentManager
 public class ContentManagerController {
 
     @Autowired
@@ -32,7 +33,6 @@ public class ContentManagerController {
     private ArticleService articleService;
 
     @ApiOperation(value = "Confirm misprint moderation", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @PostMapping("/misprints/{id}/confirm")
     public MisprintReadDTO confirmModeration(
             @PathVariable UUID id,
@@ -44,7 +44,6 @@ public class ContentManagerController {
     }
 
     @ApiOperation(value = "Reject misprint moderation", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @PostMapping("/misprints/{id}/reject")
     public MisprintReadDTO rejectModeration(
             @PathVariable UUID id,
@@ -55,7 +54,6 @@ public class ContentManagerController {
 
     @ApiPageable
     @ApiOperation(value = "Get all misprints by filter", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/misprints")
     public PageResult<MisprintReadDTO> getAllMisprints(
             MisprintFilter filter,
@@ -66,7 +64,6 @@ public class ContentManagerController {
 
     @ApiPageable
     @ApiOperation(value = "Get all misprints for single article", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/articles/{articleId}/misprints/")
     public PageResult<MisprintReadDTO> getAllMisprintsByArticleId(
             @PathVariable UUID articleId,
@@ -76,7 +73,6 @@ public class ContentManagerController {
     }
 
     @ApiOperation(value = "Get single misprint for article", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/articles/{articleId}/misprints/{id}")
     public MisprintReadDTO getMisprintByArticleId(
             @PathVariable UUID articleId,
@@ -87,7 +83,6 @@ public class ContentManagerController {
 
     @ApiPageable
     @ApiOperation(value = "Get all misprints for single movie", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/movies/{movieId}/misprints/")
     public PageResult<MisprintReadDTO> getAllMisprintsByMovieId(
             @PathVariable UUID movieId,
@@ -97,7 +92,6 @@ public class ContentManagerController {
     }
 
     @ApiOperation(value = "Get single misprint for movie", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/movies/{movieId}/misprints/{id}")
     public MisprintReadDTO getMisprintByMovieId(
             @PathVariable UUID movieId,
@@ -108,7 +102,6 @@ public class ContentManagerController {
 
     @ApiPageable
     @ApiOperation(value = "Get all misprints for single person", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/people/{personId}/misprints/")
     public PageResult<MisprintReadDTO> getAllMisprintsByPersonId(
             @PathVariable UUID personId,
@@ -118,7 +111,6 @@ public class ContentManagerController {
     }
 
     @ApiOperation(value = "Get single misprint for person", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/people/{personId}/misprints/{id}")
     public MisprintReadDTO getMisprintByPersonId(
             @PathVariable UUID personId,
@@ -129,7 +121,6 @@ public class ContentManagerController {
 
     @ApiPageable
     @ApiOperation(value = "Get all misprints for movie cast", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/movie-casts/{movieCastId}/misprints/")
     public PageResult<MisprintReadDTO> getAllMisprintsByMovieCastIdId(
             @PathVariable UUID movieCastId,
@@ -139,7 +130,6 @@ public class ContentManagerController {
     }
 
     @ApiOperation(value = "Get misprint for movie cast", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/movie-casts/{movieCastId}/misprints/{id}")
     public MisprintReadDTO getMisprintByMovieCastId(
             @PathVariable UUID movieCastId,
@@ -150,7 +140,6 @@ public class ContentManagerController {
 
     @ApiPageable
     @ApiOperation(value = "Get all misprints for movie crew", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/movie-crews/{movieCrewId}/misprints/")
     public PageResult<MisprintReadDTO> getAllMisprintsByMovieCrewId(
             @PathVariable UUID movieCrewId,
@@ -160,7 +149,6 @@ public class ContentManagerController {
     }
 
     @ApiOperation(value = "Get misprint for movie crew", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/movie-crews/{movieCrewId}/misprints/{id}")
     public MisprintReadDTO getMisprintByMovieCrewId(
             @PathVariable UUID movieCrewId,
@@ -171,7 +159,6 @@ public class ContentManagerController {
 
     @ApiPageable
     @ApiOperation(value = "Get all articles by filter", notes = "Needs CONTENT_MANAGER authority")
-    @ContentManager
     @GetMapping("/articles/filter")
     public PageResult<ArticleReadDTO> getArticlesByFilter(
             ArticleManagerFilter filter,

@@ -25,6 +25,9 @@ public class ApplicationUser extends AbstractEntity {
     @Column(unique = true)
     private String email;
 
+    @Enumerated(EnumType.STRING)
+    private Gender gender;
+
     @NotNull
     private Boolean isBlocked = false;
 

@@ -16,7 +16,7 @@ public interface LikeRepository extends CrudRepository<Like, UUID> {
             + " and l.author.id = :userId")
     Like findByIdAndUserId(UUID likeId, UUID userId);
 
-    Like findByAuthorIdAndLikedObjectId(UUID userId, UUID likedObjectId);
+    boolean existsLikeEntityByAuthorIdAndLikedObjectId(UUID userId, UUID likedObjectId);
 
     @Modifying
     @Query("delete from Like l where l.likedObjectId = :targetId"

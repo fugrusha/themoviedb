@@ -4,6 +4,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 import java.util.ArrayList;
@@ -30,8 +31,10 @@ public class Article extends AbstractEntity {
     @ManyToOne
     private ApplicationUser author;
 
+    @Min(value = 0)
     private Integer likesCount;
 
+    @Min(value = 0)
     private Integer dislikesCount;
 
     @ManyToMany(fetch = FetchType.LAZY)

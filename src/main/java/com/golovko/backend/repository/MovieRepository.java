@@ -27,22 +27,22 @@ public interface MovieRepository extends CrudRepository<Movie, UUID>, MovieRepos
     Double calcAverageRatingOfPersonMovies(UUID personId);
 
     @Modifying
-    @Query("update Movie m set m.likesCount=(m.likesCount + 1)"
+    @Query("update Movie m set m.likesCount=(coalesce(m.likesCount, 0) + 1)"
             + " where m.id = :movieId")
     void incrementLikesCountField(UUID movieId);
 
     @Modifying
-    @Query("update Movie m set m.likesCount=(m.likesCount - 1)"
+    @Query("update Movie m set m.likesCount=(coalesce(m.likesCount, 0) - 1)"
             + " where m.id = :movieId")
     void decrementLikesCountField(UUID movieId);
 
     @Modifying
-    @Query("update Movie m set m.dislikesCount=(m.dislikesCount + 1)"
+    @Query("update Movie m set m.dislikesCount=(coalesce(m.dislikesCount, 0) + 1)"
             + " where m.id = :movieId")
     void incrementDislikesCountField(UUID movieId);
 
     @Modifying
-    @Query("update Movie m set m.dislikesCount=(m.dislikesCount - 1)"
+    @Query("update Movie m set m.dislikesCount=(coalesce(m.dislikesCount, 0) - 1)"
             + " where m.id = :movieId")
     void decrementDislikesCountField(UUID movieId);
 

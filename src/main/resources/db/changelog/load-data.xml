@@ -101,6 +101,7 @@
         <loadUpdateData tableName="comment" file="db/data/comments.csv" separator=";" primaryKey="id">
             <column name="id" type="uuid"/>
             <column name="message" type="string"/>
+            <column name="spoiler" type="string"/>
             <column name="status" type="string" />
             <column name="likes_count" type="numeric" />
             <column name="dislikes_count" type="numeric" />
@@ -161,7 +162,7 @@
     </changeSet>
 
     <changeSet id="load likes" author="andrew" runOnChange="true">
-        <loadUpdateData tableName="like" file="db/data/likes.csv" separator=";" primaryKey="id">
+        <loadUpdateData tableName="like_entity" file="db/data/likes.csv" separator=";" primaryKey="id">
             <column name="id" type="uuid"/>
             <column name="me_like" type="boolean"/>
             <column name="author_id" type="uuid"/>

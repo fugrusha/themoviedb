@@ -21,7 +21,6 @@ public class Misprint extends AbstractEntity {
     @Size(min = 1, max = 150)
     private String misprintText;
 
-    @NotNull
     @Size(min = 1, max = 150)
     private String replaceTo;
 

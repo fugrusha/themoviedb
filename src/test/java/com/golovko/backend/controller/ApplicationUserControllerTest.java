@@ -2,6 +2,7 @@ package com.golovko.backend.controller;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.ApplicationUser;
+import com.golovko.backend.domain.Gender;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.user.*;
 import com.golovko.backend.exception.ControllerValidationException;
@@ -195,6 +196,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         createDTO.setPassword("1234567890");
         createDTO.setPasswordConfirmation("1234567890");
         createDTO.setEmail("david101@email.com");
+        createDTO.setGender(Gender.MALE);
 
         UserReadDTO readDTO = generateObject(UserReadDTO.class);
 
@@ -218,6 +220,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         createDTO.setPassword("1234567890");
         createDTO.setPasswordConfirmation("1234567890");
         createDTO.setEmail("david101@email.com");
+        createDTO.setGender(Gender.MALE);
 
         UserAlreadyExistsException ex = new UserAlreadyExistsException(createDTO.getEmail());
 
@@ -349,6 +352,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         patchDTO.setPassword("securedPassword");
         patchDTO.setPasswordConfirmation("securedPassword");
         patchDTO.setEmail("david101@email.com");
+        patchDTO.setGender(Gender.MALE);
 
         UserReadDTO readDTO = generateObject(UserReadDTO.class);
 
@@ -443,6 +447,7 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         updateDTO.setPasswordConfirmation("securedPassword");
         updateDTO.setPassword("securedPassword");
         updateDTO.setEmail("new_user_email@gmail.com");
+        updateDTO.setGender(Gender.MALE);
 
         UserReadDTO readDTO = generateObject(UserReadDTO.class);
 
