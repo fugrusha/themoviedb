@@ -5,16 +5,15 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.exception.TextBetweenIndexesNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -145,15 +144,14 @@ public class MisprintService {
 
             setStatusClosedAndSave(dto, misprint);
 
-            closeSimilarMisprints(dto, misprint.getMisprintText());
+            closeSimilarMisprints(dto, misprint.getMisprintText(), misprint.getTargetObjectId());
 
             return translationService.translate(misprint, MisprintReadDTO.class);
         }
     }
 
-    // TODO refactor targetObjectId in dto. Only one usage of it
-    private void closeSimilarMisprints(MisprintConfirmDTO dto, String misprintText) {
-        misprintRepository.findSimilarMisprints(dto.getTargetObjectId(), misprintText, ComplaintStatus.INITIATED)
+    private void closeSimilarMisprints(MisprintConfirmDTO dto, String misprintText, UUID targetObjectId) {
+        misprintRepository.findSimilarMisprints(targetObjectId, misprintText, ComplaintStatus.INITIATED)
                 .forEach(m -> {
                     setStatusClosedAndSave(dto, m);
 
@@ -199,9 +197,7 @@ public class MisprintService {
               movieCrewRepository.save(movieCrew);
               break;
           default:
-              throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                      String.format("It is not allowed to fix misprint in %s entity",
-                              misprint.getTargetObjectType()));
+              throw new WrongTargetObjectTypeException(ActionType.MODERATE_MISPRINT, misprint.getTargetObjectType());
         }
     }
 
@@ -215,10 +211,9 @@ public class MisprintService {
                     + text.substring(dto.getEndIndex());
 
             setter.accept(newText);
-        } else { // TODO create own exception
-            throw new ResponseStatusException(HttpStatus.UNPROCESSABLE_ENTITY,
-                    "Text could not be replaced."
-                            + " The text of mistake does not match with the text passed between indexes");
+        } else {
+            throw new TextBetweenIndexesNotFoundException("Text could not be replaced."
+                    + " The text of mistake does not match with the text passed between indexes");
         }
     }
 

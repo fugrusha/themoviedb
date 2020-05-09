@@ -744,7 +744,6 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         c1ConfirmDTO.setStartIndex(28);
         c1ConfirmDTO.setEndIndex(36);
         c1ConfirmDTO.setReplaceTo("musician");
-        c1ConfirmDTO.setTargetObjectId(articleId);
 
         ResponseEntity<MisprintReadDTO> c1MisprintReadDTOResponse = getResponse(
                 "/misprints/" + u3MisprintId + "/confirm",

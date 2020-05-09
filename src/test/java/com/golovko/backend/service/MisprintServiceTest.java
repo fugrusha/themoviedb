@@ -6,6 +6,7 @@ import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.misprint.*;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.EntityWrongStatusException;
+import com.golovko.backend.exception.TextBetweenIndexesNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.*;
 import lombok.AllArgsConstructor;
@@ -18,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.transaction.TransactionSystemException;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 
@@ -400,7 +400,7 @@ public class MisprintServiceTest extends BaseTest {
         Assert.assertEquals(expectedResult, actualResult);
     }
 
-    @Test(expected = ResponseStatusException.class)
+    @Test(expected = TextBetweenIndexesNotFoundException.class)
     public void testReplaceMisprintInTextWrongIndex() {
         String textBeforeUpdate = "simply dummy text of the printing and typesetting industry.";
         String misprintText = "dummy";
@@ -415,7 +415,7 @@ public class MisprintServiceTest extends BaseTest {
         misprintService.replaceMisprint(object::getText, object::setText, misprintText, confirmDTO);
     }
 
-    @Test(expected = ResponseStatusException.class)
+    @Test(expected = TextBetweenIndexesNotFoundException.class)
     public void testReplaceMisprintAtAlreadyUpdatedText() {
         String alreadyUpdatedText = "simply DUMMY text of the printing and typesetting industry.";
         String misprintText = "dummy";
@@ -632,7 +632,7 @@ public class MisprintServiceTest extends BaseTest {
         Assert.assertEquals(expectedText, updatedMovieCrew.getDescription());
     }
 
-    @Test(expected = ResponseStatusException.class)
+    @Test(expected = WrongTargetObjectTypeException.class)
     public void testConfirmModerationWrongTargetObjectType() {
         ApplicationUser user = testObjectFactory.createUser();
         Person person = testObjectFactory.createPerson();
@@ -693,7 +693,6 @@ public class MisprintServiceTest extends BaseTest {
         confirmDTO.setStartIndex(7);
         confirmDTO.setEndIndex(12);
         confirmDTO.setReplaceTo("REPLACED_TEXT");
-        confirmDTO.setTargetObjectId(person.getId());
 
         MisprintReadDTO readDTO = misprintService.confirmModeration(m1.getId(), confirmDTO);
 

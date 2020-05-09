@@ -57,7 +57,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         confirmDTO.setStartIndex(5);
         confirmDTO.setEndIndex(20);
         confirmDTO.setReplaceTo("new text");
-        confirmDTO.setTargetObjectId(UUID.randomUUID());
 
         Mockito.when(misprintService.confirmModeration(readDTO.getId(), confirmDTO)).thenReturn(readDTO);
 
@@ -100,7 +99,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         confirmDTO.setStartIndex(5);
         confirmDTO.setEndIndex(20);
         confirmDTO.setReplaceTo("");
-        confirmDTO.setTargetObjectId(UUID.randomUUID());
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
@@ -123,7 +121,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         confirmDTO.setStartIndex(5);
         confirmDTO.setEndIndex(20);
         confirmDTO.setReplaceTo("misprint".repeat(1000));
-        confirmDTO.setTargetObjectId(UUID.randomUUID());
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
@@ -146,7 +143,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         confirmDTO.setStartIndex(-5);
         confirmDTO.setEndIndex(-20);
         confirmDTO.setReplaceTo("new text");
-        confirmDTO.setTargetObjectId(UUID.randomUUID());
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
@@ -169,7 +165,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         confirmDTO.setStartIndex(20); // grater than end index
         confirmDTO.setEndIndex(10);
         confirmDTO.setReplaceTo("new text");
-        confirmDTO.setTargetObjectId(UUID.randomUUID());
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/misprints/{id}/confirm", UUID.randomUUID())
@@ -195,7 +190,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         rejectDTO.setModeratorId(UUID.randomUUID());
         rejectDTO.setStatus(ComplaintStatus.CLOSED);
         rejectDTO.setReason("whatever");
-        rejectDTO.setTargetObjectId(UUID.randomUUID());
 
         Mockito.when(misprintService.rejectModeration(readDTO.getId(), rejectDTO))
                 .thenReturn(readDTO);
@@ -237,8 +231,7 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         MisprintRejectDTO rejectDTO = new MisprintRejectDTO();
         rejectDTO.setModeratorId(UUID.randomUUID());
         rejectDTO.setStatus(ComplaintStatus.CLOSED);
-        rejectDTO.setReason("whatever".repeat(100));
-        rejectDTO.setTargetObjectId(UUID.randomUUID());
+        rejectDTO.setReason("whatever".repeat(100));;
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/misprints/{id}/reject", UUID.randomUUID())
@@ -260,7 +253,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         rejectDTO.setModeratorId(UUID.randomUUID());
         rejectDTO.setStatus(ComplaintStatus.CLOSED);
         rejectDTO.setReason("");
-        rejectDTO.setTargetObjectId(UUID.randomUUID());
 
         String resultJson = mockMvc
                 .perform(post("/api/v1/misprints/{id}/reject", UUID.randomUUID())
@@ -284,7 +276,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         rejectDTO.setModeratorId(UUID.randomUUID());
         rejectDTO.setStatus(ComplaintStatus.CLOSED);
         rejectDTO.setReason("whatever");
-        rejectDTO.setTargetObjectId(UUID.randomUUID());
 
         EntityWrongStatusException ex = new EntityWrongStatusException(Misprint.class, misprintId);
 
@@ -310,7 +301,6 @@ public class ContentManagerControllerTest extends BaseControllerTest {
         confirmDTO.setStartIndex(5);
         confirmDTO.setEndIndex(20);
         confirmDTO.setReplaceTo("new text");
-        confirmDTO.setTargetObjectId(UUID.randomUUID());
 
         EntityWrongStatusException ex = new EntityWrongStatusException(Misprint.class, misprintId);
 

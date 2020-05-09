@@ -19,6 +19,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 public class RestExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler({
+            TextBetweenIndexesNotFoundException.class,
+            BlockedUserException.class,
             UserAlreadyExistsException.class,
             ActionOfUserDuplicatedException.class,
             LinkDuplicatedException.class,
