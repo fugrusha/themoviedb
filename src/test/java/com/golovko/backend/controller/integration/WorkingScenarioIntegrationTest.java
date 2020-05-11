@@ -34,9 +34,9 @@ import com.golovko.backend.dto.user.UserTrustLevelDTO;
 import com.golovko.backend.dto.userrole.UserRoleReadDTO;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.UserRoleRepository;
+import com.golovko.backend.util.MyParameterizedTypeImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,6 +47,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.RestTemplate;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
@@ -68,25 +70,24 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    private static UUID moderatorRoleId;
-    private static UUID contentManagerRoleId;
-    private static UUID userRoleId;
     private final String API_URL = "http://localhost:8080/api/v1";
-    private final String ADMIN_EMAIL = "admin@mail.com";
-    private final String ADMIN_PASSWORD = "admin_password";
-    private final String M1_EMAIL = "moderator1@mail.com";
-    private final String M1_PASSWORD = "moderator1_password";
-    private final String C1_EMAIL = "content_manager1@mail.com";
-    private final String C1_PASSWORD = "content_manager1_password";
-    private final String U1_PASSWORD = "user1_password";
-    private final String U1_EMAIL = "user1@mail.com";
-    private final String U2_PASSWORD = "user2_password";
-    private final String U2_EMAIL = "user2@mail.com";
-    private final String U3_PASSWORD = "user3_password";
-    private final String U3_EMAIL = "user3@mail.com";
 
-    @Before
-    public void setup() {
+    @Test
+    public void testWorkingScenario() {
+        final String ADMIN_EMAIL = "admin@mail.com";
+        final String ADMIN_PASSWORD = "admin_password";
+        final String M1_EMAIL = "moderator1@mail.com";
+        final String M1_PASSWORD = "moderator1_password";
+        final String C1_EMAIL = "content_manager1@mail.com";
+        final String C1_PASSWORD = "content_manager1_password";
+        final String U1_PASSWORD = "user1_password";
+        final String U1_EMAIL = "user1@mail.com";
+        final String U2_PASSWORD = "user2_password";
+        final String U2_EMAIL = "user2@mail.com";
+        final String U3_PASSWORD = "user3_password";
+        final String U3_EMAIL = "user3@mail.com";
+
+        // create admin
         ApplicationUser a1 = new ApplicationUser();
         a1.setUsername("super_admin");
         a1.setTrustLevel(10.0);
@@ -97,123 +98,116 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         a1.getUserRoles().add(userRole);
         applicationUserRepository.save(a1);
 
-        moderatorRoleId = userRoleRepository.findByType(UserRoleType.MODERATOR).getId();
-        contentManagerRoleId = userRoleRepository.findByType(UserRoleType.CONTENT_MANAGER).getId();
-        userRoleId = userRoleRepository.findByType(UserRoleType.USER).getId();
-    }
+        UUID moderatorRoleId = userRoleRepository.findByType(UserRoleType.MODERATOR).getId();
+        UUID contentManagerRoleId = userRoleRepository.findByType(UserRoleType.CONTENT_MANAGER).getId();
+        UUID userRoleId = userRoleRepository.findByType(UserRoleType.USER).getId();
 
-    @Test
-    public void testWorkingScenario() {
         // check if repo contains only 1 record
         Assert.assertEquals(1, applicationUserRepository.count());
         // check if user has ADMIN authority
-        ApplicationUser a1 = applicationUserRepository.findByEmail(ADMIN_EMAIL);
-        Assert.assertEquals(UserRoleType.ADMIN, a1.getUserRoles().get(0).getType());
+        ApplicationUser admin = applicationUserRepository.findByEmail(ADMIN_EMAIL);
+        Assert.assertEquals(UserRoleType.ADMIN, admin.getUserRoles().get(0).getType());
 
         // FINAL_1 register user m1
-        UserCreateDTO m1CreateDTO = createUserM1();
+        UserCreateDTO m1CreateDTO = createUserDTO(M1_EMAIL, M1_PASSWORD, Gender.FEMALE);
 
-        ResponseEntity<UserReadDTO> m1ReadDTOResponse = getResponse(
+        UserReadDTO m1ReadDTO = performRequest(
                 "/users",
                 HttpMethod.POST,
                 m1CreateDTO,
                 null,
                 UserReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, m1ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(m1ReadDTOResponse.getBody()).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(m1CreateDTO).isEqualToComparingOnlyGivenFields(m1ReadDTOResponse.getBody(),
+        Assertions.assertThat(m1ReadDTO).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(m1CreateDTO).isEqualToComparingOnlyGivenFields(m1ReadDTO,
                 "username", "email");
-        UUID m1UserId = m1ReadDTOResponse.getBody().getId();
+        UUID m1UserId = m1ReadDTO.getId();
 
         // FINAL_2 a1 gives m1 the role of moderator
-        ResponseEntity<List<UserRoleReadDTO>> m1UserRolesResponse = getListResponse(
+        List<UserRoleReadDTO> m1UserRoles = performListRequest(
                 "/users/" + m1UserId + "/roles/" + moderatorRoleId,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(ADMIN_EMAIL, ADMIN_PASSWORD));
+                getAuthHeaders(ADMIN_EMAIL, ADMIN_PASSWORD),
+                UserRoleReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, m1UserRolesResponse.getStatusCode());
-        Assert.assertEquals(2, m1UserRolesResponse.getBody().size());
-        Assertions.assertThat(m1UserRolesResponse.getBody()).extracting("id")
-                .containsExactlyInAnyOrder(userRoleId.toString(), moderatorRoleId.toString());
+
+        Assert.assertEquals(2, m1UserRoles.size());
+        Assertions.assertThat(m1UserRoles).extracting("id")
+                .containsExactlyInAnyOrder(userRoleId, moderatorRoleId);
 
         // FINAL_3 register user c1
-        UserCreateDTO c1CreateDTO = createUserC1();
+        UserCreateDTO c1CreateDTO = createUserDTO(C1_EMAIL, C1_PASSWORD, Gender.MALE);
 
-        ResponseEntity<UserReadDTO> c1ReadDTOResponse = getResponse(
+        UserReadDTO c1ReadDTO = performRequest(
                 "/users",
                 HttpMethod.POST,
                 c1CreateDTO,
                 null,
                 UserReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, c1ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(c1ReadDTOResponse.getBody()).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(c1CreateDTO).isEqualToComparingOnlyGivenFields(c1ReadDTOResponse.getBody(),
+        Assertions.assertThat(c1ReadDTO).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(c1CreateDTO).isEqualToComparingOnlyGivenFields(c1ReadDTO,
                 "username", "email");
-        UUID c1UserId = c1ReadDTOResponse.getBody().getId();
+        UUID c1UserId = c1ReadDTO.getId();
 
         // FINAL_4 a1 gives c1 the role of content manager
-        ResponseEntity<List<UserRoleReadDTO>> c1UserRolesResponse = getListResponse(
+        List<UserRoleReadDTO> c1UserRoles = performListRequest(
                 "/users/" + c1UserId + "/roles/" + contentManagerRoleId,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(ADMIN_EMAIL, ADMIN_PASSWORD));
+                getAuthHeaders(ADMIN_EMAIL, ADMIN_PASSWORD),
+                UserRoleReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, c1UserRolesResponse.getStatusCode());
-        Assert.assertEquals(2, c1UserRolesResponse.getBody().size());
-        Assertions.assertThat(c1UserRolesResponse.getBody()).extracting("id")
-                .containsExactlyInAnyOrder(userRoleId.toString(), contentManagerRoleId.toString());
+        Assert.assertEquals(2, c1UserRoles.size());
+        Assertions.assertThat(c1UserRoles).extracting("id")
+                .containsExactlyInAnyOrder(userRoleId, contentManagerRoleId);
 
         // FINAL_5 Three regular users are registered. Men: u1, u2 and woman: u3
         // register u1
-        UserCreateDTO u1CreateDTO = createUserU1();
+        UserCreateDTO u1CreateDTO = createUserDTO(U1_EMAIL, U1_PASSWORD, Gender.MALE);
 
-        ResponseEntity<UserReadDTO> u1ReadDTOResponse = getResponse(
+        UserReadDTO u1ReadDTO = performRequest(
                 "/users",
                 HttpMethod.POST,
                 u1CreateDTO,
                 null,
                 UserReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, u1ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(u1ReadDTOResponse.getBody()).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(u1CreateDTO).isEqualToComparingOnlyGivenFields(u1ReadDTOResponse.getBody(),
+        Assertions.assertThat(u1ReadDTO).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(u1CreateDTO).isEqualToComparingOnlyGivenFields(u1ReadDTO,
                 "username", "email", "gender");
-        UUID u1UserId = u1ReadDTOResponse.getBody().getId();
+        UUID u1UserId = u1ReadDTO.getId();
 
         // register u2
-        UserCreateDTO u2CreateDTO = createUserU2();
+        UserCreateDTO u2CreateDTO = createUserDTO(U2_EMAIL, U2_PASSWORD, Gender.MALE);
 
-        ResponseEntity<UserReadDTO> u2ReadDTOResponse = getResponse(
+        UserReadDTO u2ReadDTO = performRequest(
                 "/users",
                 HttpMethod.POST,
                 u2CreateDTO,
                 null,
                 UserReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, u2ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(u2ReadDTOResponse.getBody()).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(u2CreateDTO).isEqualToComparingOnlyGivenFields(u2ReadDTOResponse.getBody(),
+        Assertions.assertThat(u2ReadDTO).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(u2CreateDTO).isEqualToComparingOnlyGivenFields(u2ReadDTO,
                 "username", "email", "gender");
-        UUID u2UserId = u2ReadDTOResponse.getBody().getId();
+        UUID u2UserId = u2ReadDTO.getId();
 
         // register u3
-        UserCreateDTO u3CreateDTO = createUserU3();
+        UserCreateDTO u3CreateDTO = createUserDTO(U3_EMAIL, U3_PASSWORD, Gender.FEMALE);
 
-        ResponseEntity<UserReadDTO> u3ReadDTOResponse = getResponse(
+        UserReadDTO u3ReadDTO = performRequest(
                 "/users",
                 HttpMethod.POST,
                 u3CreateDTO,
                 null,
                 UserReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, u3ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(u3ReadDTOResponse.getBody()).hasNoNullFieldsOrProperties();
-        Assertions.assertThat(u3CreateDTO).isEqualToComparingOnlyGivenFields(u3ReadDTOResponse.getBody(),
+        Assertions.assertThat(u3ReadDTO).hasNoNullFieldsOrProperties();
+        Assertions.assertThat(u3CreateDTO).isEqualToComparingOnlyGivenFields(u3ReadDTO,
                 "username", "email", "gender");
-        UUID u3UserId = u3ReadDTOResponse.getBody().getId();
+        UUID u3UserId = u3ReadDTO.getId();
 
         // FINAL_6 u2 changes the name in his profile.
         UserPatchDTO u2PatchDTO = new UserPatchDTO();
@@ -233,519 +227,495 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         // create movie
         MovieCreateDTO movieCreateDTO = createMovieDTO();
 
-        ResponseEntity<MovieReadDTO> movieReadDTOResponse = getResponse(
+        MovieReadDTO movieReadDTO = performRequest(
                 "/movies/",
                 HttpMethod.POST,
                 movieCreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, movieReadDTOResponse.getStatusCode());
-        Assertions.assertThat(movieCreateDTO).isEqualToIgnoringNullFields(movieReadDTOResponse.getBody());
-        UUID movieId = movieReadDTOResponse.getBody().getId();
+        Assertions.assertThat(movieCreateDTO).isEqualToIgnoringNullFields(movieReadDTO);
+        UUID movieId = movieReadDTO.getId();
 
         // create genres
         GenreCreateDTO biographyGenre = createGenreDTO("Biography");
         GenreCreateDTO comedyGenre = createGenreDTO("Comedy");
         GenreCreateDTO dramaGenre = createGenreDTO("Drama");
 
-        ResponseEntity<GenreReadDTO> g1ReadDTOResponse = getResponse(
+        GenreReadDTO g1ReadDTO = performRequest(
                 "/genres/",
                 HttpMethod.POST,
                 biographyGenre,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 GenreReadDTO.class);
 
-        UUID biographyGenreId = g1ReadDTOResponse.getBody().getId();
+        UUID biographyGenreId = g1ReadDTO.getId();
 
-        ResponseEntity<GenreReadDTO> g2ReadDTOResponse = getResponse(
+        GenreReadDTO g2ReadDTO = performRequest(
                 "/genres/",
                 HttpMethod.POST,
                 comedyGenre,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 GenreReadDTO.class);
 
-        UUID comedyGenreId = g2ReadDTOResponse.getBody().getId();
+        UUID comedyGenreId = g2ReadDTO.getId();
 
-        ResponseEntity<GenreReadDTO> g3ReadDTOResponse = getResponse(
+        GenreReadDTO g3ReadDTO = performRequest(
                 "/genres/",
                 HttpMethod.POST,
                 dramaGenre,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 GenreReadDTO.class);
 
-        UUID dramaGenreId = g3ReadDTOResponse.getBody().getId();
+        UUID dramaGenreId = g3ReadDTO.getId();
 
         // add genres to movie
 
-        getListResponse("/movies/" + movieId + "/genres/" + biographyGenreId,
+        performListRequest("/movies/" + movieId + "/genres/" + biographyGenreId,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                GenreReadDTO.class);
 
-        getListResponse("/movies/" + movieId + "/genres/" + comedyGenreId,
+        performListRequest("/movies/" + movieId + "/genres/" + comedyGenreId,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                GenreReadDTO.class);
 
-        ResponseEntity<List<GenreReadDTO>> movieGenreResponse = getListResponse(
+        List<GenreReadDTO> movieGenres = performListRequest(
                 "/movies/" + movieId + "/genres/" + dramaGenreId,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                GenreReadDTO.class);
 
-        Assert.assertEquals(3, movieGenreResponse.getBody().size());
-        Assertions.assertThat(movieGenreResponse.getBody())
-                .extracting("id").containsExactlyInAnyOrder(
-                        biographyGenreId.toString(), comedyGenreId.toString(), dramaGenreId.toString());
+        Assert.assertEquals(3, movieGenres.size());
+        Assertions.assertThat(movieGenres).extracting("id")
+                .containsExactlyInAnyOrder(biographyGenreId, comedyGenreId, dramaGenreId);
 
         // create person director
         PersonCreateDTO p1CreateDTO = createP1();
 
-        ResponseEntity<PersonReadDTO> p1ReadDTOResponse = getResponse(
+        PersonReadDTO p1ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p1CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p1ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p1ReadDTOResponse.getBody()).isEqualToIgnoringNullFields(p1ReadDTOResponse.getBody());
-        UUID directorId = p1ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p1CreateDTO).isEqualToIgnoringNullFields(p1ReadDTO);
+        UUID directorId = p1ReadDTO.getId();
 
         // create crew director
         MovieCrewCreateDTO crew1CreateDTO = createCrewDTO(directorId, MovieCrewType.DIRECTOR);
 
-        ResponseEntity<MovieCrewReadDTO> crew1ReadDTOResponse = getResponse(
+        MovieCrewReadDTO crew1ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-crews/",
                 HttpMethod.POST,
                 crew1CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCrewReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, crew1ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(crew1CreateDTO).isEqualToIgnoringNullFields(crew1ReadDTOResponse.getBody());
+        Assertions.assertThat(crew1CreateDTO).isEqualToIgnoringNullFields(crew1ReadDTO);
 
         // create person writer1
         PersonCreateDTO p2CreateDTO = createP2();
 
-        ResponseEntity<PersonReadDTO> p2ReadDTOResponse = getResponse(
+        PersonReadDTO p2ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p2CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p2ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p2CreateDTO).isEqualToIgnoringNullFields(p2ReadDTOResponse.getBody());
-        UUID writer1Id = p2ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p2CreateDTO).isEqualToIgnoringNullFields(p2ReadDTO);
+        UUID writer1Id = p2ReadDTO.getId();
 
         // create crew writer1
         MovieCrewCreateDTO crew2CreateDTO = createCrewDTO(writer1Id, MovieCrewType.WRITER);
 
-        ResponseEntity<MovieCrewReadDTO> crew2ReadDTOResponse = getResponse(
+        MovieCrewReadDTO crew2ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-crews/",
                 HttpMethod.POST,
                 crew2CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCrewReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, crew2ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(crew2CreateDTO).isEqualToIgnoringNullFields(crew2ReadDTOResponse.getBody());
+        Assertions.assertThat(crew2CreateDTO).isEqualToIgnoringNullFields(crew2ReadDTO);
 
         // create person writer
         PersonCreateDTO p3CreateDTO = createP3();
 
-        ResponseEntity<PersonReadDTO> p3ReadDTOResponse = getResponse(
+        PersonReadDTO p3ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p3CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p3ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p3CreateDTO).isEqualToIgnoringNullFields(p3ReadDTOResponse.getBody());
-        UUID writer2Id = p3ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p3CreateDTO).isEqualToIgnoringNullFields(p3ReadDTO);
+        UUID writer2Id = p3ReadDTO.getId();
 
         // create crew writer2
         MovieCrewCreateDTO crew3CreateDTO = createCrewDTO(writer2Id, MovieCrewType.WRITER);
 
-        ResponseEntity<MovieCrewReadDTO> crew3ReadDTOResponse = getResponse(
+        MovieCrewReadDTO crew3ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-crews/",
                 HttpMethod.POST,
                 crew3CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCrewReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, crew3ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(crew3CreateDTO).isEqualToIgnoringNullFields(crew3ReadDTOResponse.getBody());
+        Assertions.assertThat(crew3CreateDTO).isEqualToIgnoringNullFields(crew3ReadDTO);
 
         // create actor
         PersonCreateDTO p4CreateDTO = createP4();
 
-        ResponseEntity<PersonReadDTO> p4ReadDTOResponse = getResponse(
+        PersonReadDTO p4ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p4CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p4ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p4CreateDTO).isEqualToIgnoringNullFields(p4ReadDTOResponse.getBody());
-        UUID actor1Id = p4ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p4CreateDTO).isEqualToIgnoringNullFields(p4ReadDTO);
+        UUID actor1Id = p4ReadDTO.getId();
 
         // create cast
         MovieCastCreateDTO cast1CreateDTO = createCast1DTO(actor1Id);
 
-        ResponseEntity<MovieCastReadDTO> cast1ReadDTOResponse = getResponse(
+        MovieCastReadDTO cast1ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-casts/",
                 HttpMethod.POST,
                 cast1CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCastReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, cast1ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(cast1CreateDTO).isEqualToIgnoringNullFields(cast1ReadDTOResponse.getBody());
+        Assertions.assertThat(cast1CreateDTO).isEqualToIgnoringNullFields(cast1ReadDTO);
 
         // create person actor
         PersonCreateDTO p5CreateDTO = createP5();
 
-        ResponseEntity<PersonReadDTO> p5ReadDTOResponse = getResponse(
+        PersonReadDTO p5ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p5CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p5ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p5CreateDTO).isEqualToIgnoringNullFields(p5ReadDTOResponse.getBody());
-        UUID actor2Id = p5ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p5CreateDTO).isEqualToIgnoringNullFields(p5ReadDTO);
+        UUID actor2Id = p5ReadDTO.getId();
 
         // create cast
         MovieCastCreateDTO cast2CreateDTO = createCast2DTO(actor2Id);
 
-        ResponseEntity<MovieCastReadDTO> cast2ReadDTOResponse = getResponse(
+        MovieCastReadDTO cast2ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-casts/",
                 HttpMethod.POST,
                 cast2CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCastReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, cast2ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(cast2CreateDTO).isEqualToIgnoringNullFields(cast2ReadDTOResponse.getBody());
+        Assertions.assertThat(cast2CreateDTO).isEqualToIgnoringNullFields(cast2ReadDTO);
 
         // create person actor
         PersonCreateDTO p6CreateDTO = createP6();
 
-        ResponseEntity<PersonReadDTO> p6ReadDTOResponse = getResponse(
+        PersonReadDTO p6ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p6CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p6ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p6CreateDTO).isEqualToIgnoringNullFields(p6ReadDTOResponse.getBody());
-        UUID actor3Id = p6ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p6CreateDTO).isEqualToIgnoringNullFields(p6ReadDTO);
+        UUID actor3Id = p6ReadDTO.getId();
 
         // create cast
         MovieCastCreateDTO cast3CreateDTO = createCast3DTO(actor3Id);
 
-        ResponseEntity<MovieCastReadDTO> cast3ReadDTOResponse = getResponse(
+        MovieCastReadDTO cast3ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-casts/",
                 HttpMethod.POST,
                 cast3CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCastReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, cast3ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(cast3CreateDTO).isEqualToIgnoringNullFields(cast3ReadDTOResponse.getBody());
+        Assertions.assertThat(cast3CreateDTO).isEqualToIgnoringNullFields(cast3ReadDTO);
 
         // create person producer
         PersonCreateDTO p7CreateDTO = createP7();
 
-        ResponseEntity<PersonReadDTO> p7ReadDTOResponse = getResponse(
+        PersonReadDTO p7ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p7CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p7ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p7CreateDTO).isEqualToIgnoringNullFields(p7ReadDTOResponse.getBody());
-        UUID producerId = p7ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p7CreateDTO).isEqualToIgnoringNullFields(p7ReadDTO);
+        UUID producerId = p7ReadDTO.getId();
 
         // create crew producer
         MovieCrewCreateDTO crew4CreateDTO = createCrewDTO(producerId, MovieCrewType.PRODUCER);
 
-        ResponseEntity<MovieCrewReadDTO> crew4ReadDTOResponse = getResponse(
+        MovieCrewReadDTO crew4ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-crews/",
                 HttpMethod.POST,
                 crew4CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCrewReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, crew4ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(crew4CreateDTO).isEqualToIgnoringNullFields(crew4ReadDTOResponse.getBody());
+        Assertions.assertThat(crew4CreateDTO).isEqualToIgnoringNullFields(crew4ReadDTO);
 
         // create person composer
         PersonCreateDTO p8CreateDTO = createP8();
 
-        ResponseEntity<PersonReadDTO> p8ReadDTOResponse = getResponse(
+        PersonReadDTO p8ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p8CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p8ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p8CreateDTO).isEqualToIgnoringNullFields(p8ReadDTOResponse.getBody());
-        UUID composerId = p8ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p8CreateDTO).isEqualToIgnoringNullFields(p8ReadDTO);
+        UUID composerId = p8ReadDTO.getId();
 
         // create crew composer
         MovieCrewCreateDTO crew5CreateDTO = createCrewDTO(composerId, MovieCrewType.SOUND);
 
-        ResponseEntity<MovieCrewReadDTO> crew5ReadDTOResponse = getResponse(
+        MovieCrewReadDTO crew5ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-crews/",
                 HttpMethod.POST,
                 crew5CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCrewReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, crew5ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(crew5CreateDTO).isEqualToIgnoringNullFields(crew5ReadDTOResponse.getBody());
+        Assertions.assertThat(crew5CreateDTO).isEqualToIgnoringNullFields(crew5ReadDTO);
 
         // create person costume designer
         PersonCreateDTO p9CreateDTO = createP9();
 
-        ResponseEntity<PersonReadDTO> p9ReadDTOResponse = getResponse(
+        PersonReadDTO p9ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p9CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p9ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p9CreateDTO).isEqualToIgnoringNullFields(p9ReadDTOResponse.getBody());
-        UUID costumeDesignerId = p9ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p9CreateDTO).isEqualToIgnoringNullFields(p9ReadDTO);
+        UUID costumeDesignerId = p9ReadDTO.getId();
 
         // create crew costume designer
         MovieCrewCreateDTO crew6CreateDTO = createCrewDTO(costumeDesignerId, MovieCrewType.COSTUME_DESIGNER);
 
-        ResponseEntity<MovieCrewReadDTO> crew6ReadDTOResponse = getResponse(
+        MovieCrewReadDTO crew6ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-crews/",
                 HttpMethod.POST,
                 crew6CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCrewReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, crew6ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(crew6CreateDTO).isEqualToIgnoringNullFields(crew6ReadDTOResponse.getBody());
+        Assertions.assertThat(crew6CreateDTO).isEqualToIgnoringNullFields(crew6ReadDTO);
 
         // create visual effects designer
         PersonCreateDTO p10CreateDTO = createP10();
 
-        ResponseEntity<PersonReadDTO> p10ReadDTOResponse = getResponse(
+        PersonReadDTO p10ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p10CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p10ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p10CreateDTO).isEqualToIgnoringNullFields(p10ReadDTOResponse.getBody());
-        UUID visualEffectsDesignerId = p10ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p10CreateDTO).isEqualToIgnoringNullFields(p10ReadDTO);
+        UUID visualEffectsDesignerId = p10ReadDTO.getId();
 
         // create crew visual effects designer
         MovieCrewCreateDTO crew7CreateDTO = createCrewDTO(visualEffectsDesignerId, MovieCrewType.VISUAL_EFFECTS);
 
-        ResponseEntity<MovieCrewReadDTO> crew7ReadDTOResponse = getResponse(
+        MovieCrewReadDTO crew7ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-crews/",
                 HttpMethod.POST,
                 crew7CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCrewReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, crew7ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(crew7CreateDTO).isEqualToIgnoringNullFields(crew7ReadDTOResponse.getBody());
+        Assertions.assertThat(crew7CreateDTO).isEqualToIgnoringNullFields(crew7ReadDTO);
 
         // create person editor
         PersonCreateDTO p11CreateDTO = createP11();
 
-        ResponseEntity<PersonReadDTO> p11ReadDTOResponse = getResponse(
+        PersonReadDTO p11ReadDTO = performRequest(
                 "/people/",
                 HttpMethod.POST,
                 p11CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 PersonReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, p11ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(p11CreateDTO).isEqualToIgnoringNullFields(p11ReadDTOResponse.getBody());
-        UUID editorId = p11ReadDTOResponse.getBody().getId();
+        Assertions.assertThat(p11CreateDTO).isEqualToIgnoringNullFields(p11ReadDTO);
+        UUID editorId = p11ReadDTO.getId();
 
         // create crew editor
         MovieCrewCreateDTO crew8CreateDTO = createCrewDTO(editorId, MovieCrewType.VISUAL_EFFECTS);
 
-        ResponseEntity<MovieCrewReadDTO> crew8ReadDTOResponse = getResponse(
+        MovieCrewReadDTO crew8ReadDTO = performRequest(
                 "/movies/" + movieId + "/movie-crews/",
                 HttpMethod.POST,
                 crew8CreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCrewReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, crew8ReadDTOResponse.getStatusCode());
-        Assertions.assertThat(crew8CreateDTO).isEqualToIgnoringNullFields(crew8ReadDTOResponse.getBody());
+        Assertions.assertThat(crew8CreateDTO).isEqualToIgnoringNullFields(crew8ReadDTO);
 
         // FINAL_8 c1 add article about movie
         ArticleCreateDTO articleCreateDTO = createArticleDTO(c1UserId);
 
-        ResponseEntity<ArticleReadDTO> articleReadDTOResponse = getResponse(
+        ArticleReadDTO articleReadDTO = performRequest(
                 "/articles/",
                 HttpMethod.POST,
                 articleCreateDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 ArticleReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, articleReadDTOResponse.getStatusCode());
-        UUID articleId = articleReadDTOResponse.getBody().getId();
+        UUID articleId = articleReadDTO.getId();
 
         // add related movie to article
-        ResponseEntity<List<MovieReadDTO>> relatedMoviesResponse = getListResponse(
+        List<MovieReadDTO> relatedMovies = performListRequest(
                 "/articles/" + articleId + "/movies/" + movieId,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                MovieReadDTO.class);
 
-        Assert.assertEquals(1, relatedMoviesResponse.getBody().size());
-        Assertions.assertThat(relatedMoviesResponse.getBody()).extracting("id")
-                .contains(movieId.toString());
+        Assert.assertEquals(1, relatedMovies.size());
+        Assertions.assertThat(relatedMovies).extracting("id").contains(movieId);
 
         // add related people to article
-        getListResponse("/articles/" + articleId + "/people/" + actor1Id,
+        performListRequest("/articles/" + articleId + "/people/" + actor1Id,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                PersonReadDTO.class);
 
-        getListResponse("/articles/" + articleId + "/people/" + actor2Id,
+        performListRequest("/articles/" + articleId + "/people/" + actor2Id,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                PersonReadDTO.class);
 
-        ResponseEntity<List<PersonReadDTO>> relatedPeopleResponse = getListResponse(
+        List<PersonReadDTO> relatedPeople = performListRequest(
                 "/articles/" + articleId + "/people/" + actor3Id,
                 HttpMethod.POST,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                PersonReadDTO.class);
 
-        Assert.assertEquals(3, relatedPeopleResponse.getBody().size());
-        Assertions.assertThat(relatedPeopleResponse.getBody())
-                .extracting("id").containsExactlyInAnyOrder(
-                        actor1Id.toString(), actor2Id.toString(), actor3Id.toString());
+        Assert.assertEquals(3, relatedPeople.size());
+        Assertions.assertThat(relatedPeople).extracting("id")
+                .containsExactlyInAnyOrder(actor1Id, actor2Id, actor3Id);
 
         // FINAL_9 u1 opens article
-        ResponseEntity<ArticleReadExtendedDTO> articleReadExtendedDTOResponse = getResponse(
+        ArticleReadExtendedDTO articleReadExtendedDTO = performRequest(
                 "/articles/" + articleId + "/extended/",
                 HttpMethod.GET,
                 null,
                 getAuthHeaders(U1_EMAIL, U1_PASSWORD),
                 ArticleReadExtendedDTO.class);
 
-        Assert.assertEquals(articleCreateDTO.getTitle(), articleReadExtendedDTOResponse.getBody().getTitle());
-        Assert.assertEquals(1, articleReadExtendedDTOResponse.getBody().getMovies().size());
-        Assert.assertEquals(3, articleReadExtendedDTOResponse.getBody().getPeople().size());
+        Assert.assertEquals(articleCreateDTO.getTitle(), articleReadExtendedDTO.getTitle());
+        Assert.assertEquals(1, articleReadExtendedDTO.getMovies().size());
+        Assert.assertEquals(3, articleReadExtendedDTO.getPeople().size());
 
         // FINAL_10 u1 and u2 add likes to article
         LikeCreateDTO likeCreateDTO = createLikeDTO(articleId, TargetObjectType.ARTICLE, true);
 
-        getResponse("/users/" + u1UserId + "/likes/",
+        performRequest("/users/" + u1UserId + "/likes/",
                 HttpMethod.POST,
                 likeCreateDTO,
                 getAuthHeaders(U1_EMAIL, U1_PASSWORD),
                 LikeReadDTO.class);
 
-        getResponse("/users/" + u2UserId + "/likes/",
+        performRequest("/users/" + u2UserId + "/likes/",
                 HttpMethod.POST,
                 likeCreateDTO,
                 getAuthHeaders(U2_EMAIL, U2_PASSWORD),
                 LikeReadDTO.class);
 
-        ResponseEntity<ArticleReadDTO> updatedArticleReadDTOResponse = getResponse(
+        ArticleReadDTO updatedArticleReadDTO = performRequest(
                 "/articles/" + articleId, HttpMethod.GET,
                 null, null, ArticleReadDTO.class);
 
-        Assert.assertEquals((Integer) 2, updatedArticleReadDTOResponse.getBody().getLikesCount());
+        Assert.assertEquals((Integer) 2, updatedArticleReadDTO.getLikesCount());
 
         // FINAL_11 User u3 - mistakenly adds like to article, and then cancels it
         // u3 adds like
-        ResponseEntity<LikeReadDTO> u3LikeReadDTOResponse = getResponse(
+        LikeReadDTO u3LikeReadDTO = performRequest(
                 "/users/" + u3UserId + "/likes/",
                 HttpMethod.POST,
                 likeCreateDTO,
                 getAuthHeaders(U3_EMAIL, U3_PASSWORD),
                 LikeReadDTO.class);
 
-        ResponseEntity<ArticleReadDTO> updated1ArticleReadDTOResponse = getResponse(
+        ArticleReadDTO updated1ArticleReadDTO = performRequest(
                 "/articles/" + articleId, HttpMethod.GET,
                 null, null, ArticleReadDTO.class);
 
-         Assert.assertEquals((Integer) 3, updated1ArticleReadDTOResponse.getBody().getLikesCount());
+         Assert.assertEquals((Integer) 3, updated1ArticleReadDTO.getLikesCount());
 
         // u3 deletes her like
-        ResponseEntity<Void> deleteLikeResponse = getResponse(
-                "/users/" + u3UserId + "/likes/" + u3LikeReadDTOResponse.getBody().getId(),
+        performRequest("/users/" + u3UserId + "/likes/" + u3LikeReadDTO.getId(),
                 HttpMethod.DELETE,
                 null,
                 getAuthHeaders(U3_EMAIL, U3_PASSWORD),
                 Void.class);
 
-        Assert.assertEquals(HttpStatus.OK, deleteLikeResponse.getStatusCode());
-
-        ResponseEntity<ArticleReadDTO> updated2ArticleReadDTOResponse = getResponse(
+        ArticleReadDTO updated2ArticleReadDTO = performRequest(
                 "/articles/" + articleId, HttpMethod.GET,
                 null, null, ArticleReadDTO.class);
 
-         Assert.assertEquals((Integer) 2, updated2ArticleReadDTOResponse.getBody().getLikesCount());
+         Assert.assertEquals((Integer) 2, updated2ArticleReadDTO.getLikesCount());
 
         // FINAL_12 user u3 adds dislike to article
         LikeCreateDTO dislikeCreateDTO = createLikeDTO(articleId, TargetObjectType.ARTICLE, false);
 
-        getResponse("/users/" + u3UserId + "/likes/",
+        performRequest("/users/" + u3UserId + "/likes/",
                 HttpMethod.POST,
                 dislikeCreateDTO,
                 getAuthHeaders(U3_EMAIL, U3_PASSWORD),
                 LikeReadDTO.class);
 
-        ResponseEntity<ArticleReadDTO> updated3ArticleReadDTOResponse = getResponse(
+        ArticleReadDTO updated3ArticleReadDTO = performRequest(
                 "/articles/" + articleId, HttpMethod.GET,
                 null, null, ArticleReadDTO.class);
 
-         Assert.assertEquals((Integer) 1, updated3ArticleReadDTOResponse.getBody().getDislikesCount());
+         Assert.assertEquals((Integer) 1, updated3ArticleReadDTO.getDislikesCount());
 
         // FINAL_13 u3 creates misprint for article without replaceTo text
         MisprintCreateDTO u3MisprintCreateDTO = createMisprintDTO(articleId, TargetObjectType.ARTICLE);
 
-        ResponseEntity<MisprintReadDTO> u3MisprintReadDTOResponse = getResponse(
+        MisprintReadDTO u3MisprintReadDTO = performRequest(
                 "/users/" + u3UserId + "/misprints/",
                 HttpMethod.POST,
                 u3MisprintCreateDTO,
                 getAuthHeaders(U3_EMAIL, U3_PASSWORD),
                 MisprintReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, u3MisprintReadDTOResponse.getStatusCode());
-        UUID u3MisprintId = u3MisprintReadDTOResponse.getBody().getId();
+        UUID u3MisprintId = u3MisprintReadDTO.getId();
 
         // FINAL_14 c1 opens list of misprint complaints with one complaint
-        ResponseEntity<PageResult<MisprintReadDTO>> allMisprintResponse1 = getPageResultResponse(
+        PageResult<MisprintReadDTO> allMisprints1 = performPageRequest(
                 "/misprints/",
                 HttpMethod.GET,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                MisprintReadDTO.class);
 
-        Assert.assertEquals(1, allMisprintResponse1.getBody().getData().size());
-        Assertions.assertThat(allMisprintResponse1.getBody().getData()).extracting("id")
-                .contains(u3MisprintId.toString());
-        Assertions.assertThat(allMisprintResponse1.getBody().getData()).extracting("status")
-                .contains(ComplaintStatus.INITIATED.toString());
+        Assert.assertEquals(1, allMisprints1.getData().size());
+        Assertions.assertThat(allMisprints1.getData()).extracting("id").contains(u3MisprintId);
+        Assertions.assertThat(allMisprints1.getData()).extracting("status")
+                .contains(ComplaintStatus.INITIATED);
 
         // FINAL_15 c1 moderates complaint and fixes mistake in the article
         MisprintConfirmDTO c1ConfirmDTO = new MisprintConfirmDTO();
@@ -754,50 +724,51 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         c1ConfirmDTO.setEndIndex(36);
         c1ConfirmDTO.setReplaceTo("musician");
 
-        ResponseEntity<MisprintReadDTO> c1MisprintReadDTOResponse = getResponse(
+        MisprintReadDTO c1MisprintReadDTO = performRequest(
                 "/misprints/" + u3MisprintId + "/confirm",
                 HttpMethod.POST,
                 c1ConfirmDTO,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MisprintReadDTO.class);
 
-        Assert.assertEquals(c1UserId, c1MisprintReadDTOResponse.getBody().getModeratorId());
-        Assert.assertEquals(ComplaintStatus.CLOSED, c1MisprintReadDTOResponse.getBody().getStatus());
+        Assert.assertEquals(c1UserId, c1MisprintReadDTO.getModeratorId());
+        Assert.assertEquals(ComplaintStatus.CLOSED, c1MisprintReadDTO.getStatus());
 
         // check if mistake in article was fixed
-        ResponseEntity<ArticleReadDTO> updated4ArticleReadDTOResponse = getResponse(
+        ArticleReadDTO updated4ArticleReadDTO = performRequest(
                 "/articles/" + articleId, HttpMethod.GET, null, null, ArticleReadDTO.class);
-        Assert.assertTrue(updated4ArticleReadDTOResponse.getBody().getText().contains("musician"));
+        Assert.assertTrue(updated4ArticleReadDTO.getText().contains("musician"));
 
         // FINAL_16 c1 opens list of misprint complaints with zero complaint
-        ResponseEntity<PageResult<MisprintReadDTO>> allMisprintResponse2 = getPageResultResponse(
+        PageResult<MisprintReadDTO> allMisprints2 = performPageRequest(
                 "/misprints/?statuses=INITIATED",
                 HttpMethod.GET,
                 null,
-                getAuthHeaders(C1_EMAIL, C1_PASSWORD));
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                MisprintReadDTO.class);
 
-        Assert.assertEquals(0, allMisprintResponse2.getBody().getData().size());
+        Assert.assertEquals(0, allMisprints2.getData().size());
 
         // FINAL_17 unregistered user opens article and sees 2 likes and 1 dislike
-        ResponseEntity<ArticleReadExtendedDTO> articleReadExtendedDTOResponse2 = getResponse(
+        ArticleReadExtendedDTO articleReadExtendedDTO2 = performRequest(
                 "/articles/" + articleId + "/extended/",
                 HttpMethod.GET,
                 null,
                 null,
                 ArticleReadExtendedDTO.class);
 
-        Assert.assertEquals((Integer) 1, articleReadExtendedDTOResponse2.getBody().getDislikesCount());
-        Assert.assertEquals((Integer) 2, articleReadExtendedDTOResponse2.getBody().getLikesCount());
+        Assert.assertEquals((Integer) 1, articleReadExtendedDTO2.getDislikesCount());
+        Assert.assertEquals((Integer) 2, articleReadExtendedDTO2.getLikesCount());
 
         // FINAL_18 u1 opens movie
-        ResponseEntity<MovieReadExtendedDTO> u1MovieReadExtendedDTOResponse = getResponse(
+        MovieReadExtendedDTO u1MovieReadExtendedDTO = performRequest(
                 "/movies/" + movieId + "/extended/",
                 HttpMethod.GET,
                 null,
                 getAuthHeaders(U1_EMAIL, U1_PASSWORD),
                 MovieReadExtendedDTO.class);
 
-        Assert.assertEquals(movieCreateDTO.getMovieTitle(), u1MovieReadExtendedDTOResponse.getBody().getMovieTitle());
+        Assert.assertEquals(movieCreateDTO.getMovieTitle(), u1MovieReadExtendedDTO.getMovieTitle());
 
         // FINAL_19 u1 writes a review on the film with a spoiler and adds high rating
         // u1 adds comment
@@ -807,18 +778,18 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         commentCreateDTO.setAuthorId(u1UserId);
         commentCreateDTO.setTargetObjectType(MOVIE);
 
-        ResponseEntity<CommentReadDTO> u1CommentReadDTOResponse = getResponse(
+        CommentReadDTO u1CommentReadDTO = performRequest(
                 "/movies/" + movieId + "/comments/",
                 HttpMethod.POST,
                 commentCreateDTO,
                 getAuthHeaders(U1_EMAIL, U1_PASSWORD),
                 CommentReadDTO.class);
 
-        UUID u1CommentId = u1CommentReadDTOResponse.getBody().getId();
+        UUID u1CommentId = u1CommentReadDTO.getId();
 
-        Assertions.assertThat(commentCreateDTO).isEqualToComparingFieldByField(u1CommentReadDTOResponse.getBody());
-        Assert.assertEquals(movieId, u1CommentReadDTOResponse.getBody().getTargetObjectId());
-        Assert.assertEquals(CommentStatus.PENDING, u1CommentReadDTOResponse.getBody().getStatus());
+        Assertions.assertThat(commentCreateDTO).isEqualToComparingFieldByField(u1CommentReadDTO);
+        Assert.assertEquals(movieId, u1CommentReadDTO.getTargetObjectId());
+        Assert.assertEquals(CommentStatus.PENDING, u1CommentReadDTO.getStatus());
 
         // u1 adds rating
         RatingCreateDTO u1RatingCreateDTO = new RatingCreateDTO();
@@ -826,24 +797,25 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         u1RatingCreateDTO.setAuthorId(u1UserId);
         u1RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
 
-        ResponseEntity<RatingReadDTO> u1RatingReadDTOResponse = getResponse(
+        RatingReadDTO u1RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
                 HttpMethod.POST,
-                u1RatingCreateDTO,
-                getAuthHeaders(U1_EMAIL, U1_PASSWORD),
-                RatingReadDTO.class);
+               u1RatingCreateDTO,
+               getAuthHeaders(U1_EMAIL, U1_PASSWORD),
+               RatingReadDTO.class);
 
-        Assertions.assertThat(u1RatingCreateDTO).isEqualToComparingFieldByField(u1RatingReadDTOResponse.getBody());
-        Assert.assertEquals(movieId, u1RatingReadDTOResponse.getBody().getRatedObjectId());
+        Assertions.assertThat(u1RatingCreateDTO).isEqualToComparingFieldByField(u1RatingReadDTO);
+        Assert.assertEquals(movieId, u1RatingReadDTO.getRatedObjectId());
 
         // FINAL_20 u2 gets movie and don't see comment cause it is not passed moderation yet
-        ResponseEntity<PageResult<CommentReadDTO>> u2MovieCommentsReadDTOResponse = getPageResultResponse(
+        PageResult<CommentReadDTO> u2MovieCommentsReadDTO = performPageRequest(
                 "/movies/" + movieId + "/comments/",
                 HttpMethod.GET,
                 null,
-                getAuthHeaders(U2_EMAIL, U2_PASSWORD));
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD),
+                CommentReadDTO.class);
 
-        Assert.assertEquals(0, u2MovieCommentsReadDTOResponse.getBody().getData().size());
+        Assert.assertEquals(0, u2MovieCommentsReadDTO.getData().size());
 
         // FINAL_21 u2 adds rating to movie
         RatingCreateDTO u2RatingCreateDTO = new RatingCreateDTO();
@@ -851,73 +823,73 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         u2RatingCreateDTO.setAuthorId(u2UserId);
         u2RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
 
-        ResponseEntity<RatingReadDTO> u2RatingReadDTOResponse = getResponse(
+        RatingReadDTO u2RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
                 HttpMethod.POST,
                 u2RatingCreateDTO,
                 getAuthHeaders(U2_EMAIL, U2_PASSWORD),
                 RatingReadDTO.class);
 
-        Assertions.assertThat(u2RatingCreateDTO).isEqualToComparingFieldByField(u2RatingReadDTOResponse.getBody());
-        Assert.assertEquals(movieId, u2RatingReadDTOResponse.getBody().getRatedObjectId());
+        Assertions.assertThat(u2RatingCreateDTO).isEqualToComparingFieldByField(u2RatingReadDTO);
+        Assert.assertEquals(movieId, u2RatingReadDTO.getRatedObjectId());
 
         // FINAL_22 m1 opens movie and list of pending comments and notices 1 pending comment
-        ResponseEntity<MovieReadExtendedDTO> u2MovieReadExtendedDTOResponse = getResponse(
+        MovieReadExtendedDTO u2MovieReadExtendedDTO = performRequest(
                 "/movies/" + movieId + "/extended/",
                 HttpMethod.GET,
                 null,
                 getAuthHeaders(U2_EMAIL, U2_PASSWORD),
                 MovieReadExtendedDTO.class);
 
-        Assert.assertEquals(movieCreateDTO.getMovieTitle(), u2MovieReadExtendedDTOResponse.getBody().getMovieTitle());
+        Assert.assertEquals(movieCreateDTO.getMovieTitle(), u2MovieReadExtendedDTO.getMovieTitle());
 
         // u2 opens list of pending comments and notices 1 pending comment
-        ResponseEntity<PageResult<CommentReadDTO>> m1PendingCommentReadDTOResponse = getPageResultResponse(
+        PageResult<CommentReadDTO> m1PendingCommentReadDTO = performPageRequest(
                 "/comments/?statuses=PENDING",
                 HttpMethod.GET,
                 null,
-                getAuthHeaders(M1_EMAIL, M1_PASSWORD));
+                getAuthHeaders(M1_EMAIL, M1_PASSWORD),
+                CommentReadDTO.class);
 
-        Assert.assertEquals(1, m1PendingCommentReadDTOResponse.getBody().getData().size());
+        Assert.assertEquals(1, m1PendingCommentReadDTO.getData().size());
+        UUID u1PendingCommentId = m1PendingCommentReadDTO.getData().get(0).getId();
 
         // FINAL_23
         // m1 moderates pending comment and approves it
         CommentModerateDTO commentModerateDTO = new CommentModerateDTO();
         commentModerateDTO.setNewStatus(CommentStatus.APPROVED);
 
-        ResponseEntity<CommentReadDTO> m1ModeratesCommentResponse = getResponse(
-                "/comments/" + u1CommentId + "/moderate/",
+        CommentReadDTO m1ModeratesComment = performRequest(
+                "/comments/" + u1PendingCommentId + "/moderate/",
                 HttpMethod.POST,
                 commentModerateDTO,
                 getAuthHeaders(M1_EMAIL, M1_PASSWORD),
                 CommentReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, m1ModeratesCommentResponse.getStatusCode());
-        Assert.assertEquals(CommentStatus.APPROVED, m1ModeratesCommentResponse.getBody().getStatus());
+        Assert.assertEquals(CommentStatus.APPROVED, m1ModeratesComment.getStatus());
 
         // m1 sets u1 trust level higher than 5, so u1 comments don't need to moderate anymore
         UserTrustLevelDTO trustLevelDTO = new UserTrustLevelDTO();
         trustLevelDTO.setTrustLevel(6.5);
 
-        ResponseEntity<UserReadDTO> m1ChangedU1TrustLevelResponse = getResponse(
+        UserReadDTO m1ChangedU1TrustLevel = performRequest(
                 "/users/" + u1UserId + "/set-trust-level/",
                 HttpMethod.POST,
                 trustLevelDTO,
                 getAuthHeaders(M1_EMAIL, M1_PASSWORD),
                 UserReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.OK, m1ChangedU1TrustLevelResponse.getStatusCode());
-        Assert.assertEquals(trustLevelDTO.getTrustLevel(), m1ChangedU1TrustLevelResponse.getBody().getTrustLevel());
+        Assert.assertEquals(trustLevelDTO.getTrustLevel(), m1ChangedU1TrustLevel.getTrustLevel());
 
         // FINAL_24 u3 opens movie and adds rating to it. Sees one approved comment
-        ResponseEntity<MovieReadExtendedDTO> u3MovieReadExtendedDTOResponse = getResponse(
+        MovieReadExtendedDTO u3MovieReadExtendedDTO = performRequest(
                 "/movies/" + movieId + "/extended/",
                 HttpMethod.GET,
                 null,
                 getAuthHeaders(U3_EMAIL, U3_PASSWORD),
                 MovieReadExtendedDTO.class);
 
-        Assert.assertEquals(movieCreateDTO.getMovieTitle(), u3MovieReadExtendedDTOResponse.getBody().getMovieTitle());
+        Assert.assertEquals(movieCreateDTO.getMovieTitle(), u3MovieReadExtendedDTO.getMovieTitle());
 
         // u3 adds rating
         RatingCreateDTO u3RatingCreateDTO = new RatingCreateDTO();
@@ -925,75 +897,109 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         u3RatingCreateDTO.setAuthorId(u3UserId);
         u3RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
 
-        ResponseEntity<RatingReadDTO> u3RatingReadDTOResponse = getResponse(
+        RatingReadDTO u3RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
                 HttpMethod.POST,
                 u3RatingCreateDTO,
                 getAuthHeaders(U3_EMAIL, U3_PASSWORD),
                 RatingReadDTO.class);
 
-        Assertions.assertThat(u3RatingCreateDTO).isEqualToComparingFieldByField(u3RatingReadDTOResponse.getBody());
-        Assert.assertEquals(movieId, u3RatingReadDTOResponse.getBody().getRatedObjectId());
+        Assertions.assertThat(u3RatingCreateDTO).isEqualToComparingFieldByField(u3RatingReadDTO);
+        Assert.assertEquals(movieId, u3RatingReadDTO.getRatedObjectId());
 
         //u3 sees approved 1 comment
-        ResponseEntity<PageResult<CommentReadDTO>> u3MovieCommentsReadDTOResponse = getPageResultResponse(
+        PageResult<CommentReadDTO> u3MovieCommentsReadDTO = performPageRequest(
                 "/movies/" + movieId + "/comments/",
                 HttpMethod.GET,
                 null,
-                getAuthHeaders(U3_EMAIL, U3_PASSWORD));
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                CommentReadDTO.class);
 
-        Assert.assertEquals(1, u3MovieCommentsReadDTOResponse.getBody().getData().size());
+        Assert.assertEquals(1, u3MovieCommentsReadDTO.getData().size());
 
         // FINAL_25 u3 adds like to comment
         LikeCreateDTO u3LikeCreateDTO = createLikeDTO(u1CommentId, COMMENT, true);
 
-        ResponseEntity<LikeReadDTO> u3CommentLikeReadDTOResponse = getResponse(
+        LikeReadDTO u3CommentLikeReadDTO = performRequest(
                 "/users/" + u3UserId + "/likes/",
                 HttpMethod.POST,
                 u3LikeCreateDTO,
                 getAuthHeaders(U3_EMAIL, U3_PASSWORD),
                 LikeReadDTO.class);
 
-        Assert.assertEquals(u1CommentId, u3CommentLikeReadDTOResponse.getBody().getLikedObjectId());
+        Assert.assertEquals(u1CommentId, u3CommentLikeReadDTO.getLikedObjectId());
 
-        ResponseEntity<CommentReadDTO> u3CommentReadDTOResponse = getResponse(
+        CommentReadDTO u3CommentReadDTO = performRequest(
                 "/movies/" + movieId + "/comments/" + u1CommentId,
                 HttpMethod.GET,
                 null,
                 getAuthHeaders(U3_EMAIL, U3_PASSWORD),
                 CommentReadDTO.class);
 
-        Assert.assertEquals((Integer) 1, u3CommentReadDTOResponse.getBody().getLikesCount());
+        Assert.assertEquals((Integer) 1, u3CommentReadDTO.getLikesCount());
     }
 
-    private <T> ResponseEntity<T> getResponse(
+    private <T> T performRequest(
             String url, HttpMethod httpMethod, Object body, HttpHeaders headers, Class<T> responseClass
     ) {
-        return new RestTemplate()
-                .exchange(API_URL + url,
-                        httpMethod,
-                        new HttpEntity<>(body, headers),
-                        responseClass);
+        ResponseEntity<T> response = new RestTemplate().exchange(
+                API_URL + url,
+                httpMethod,
+                new HttpEntity<>(body, headers),
+                responseClass);
+
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        return response.getBody();
     }
 
-    private <T> ResponseEntity<PageResult<T>> getPageResultResponse(
-            String url, HttpMethod httpMethod, Object body, HttpHeaders headers
+    private <T> PageResult<T> performPageRequest(
+            String url, HttpMethod httpMethod, Object body, HttpHeaders headers, Class<T> responseClass
     ) {
-        return new RestTemplate()
+        ResponseEntity<PageResult<T>> response =  new RestTemplate()
                 .exchange(API_URL + url,
                         httpMethod,
                         new HttpEntity<>(body, headers),
-                        new ParameterizedTypeReference<>() {});
+                        new ParameterizedTypeReference<PageResult<T>>() {
+                            public Type getType() {
+                                return new MyParameterizedTypeImpl((ParameterizedType) super.getType(),
+                                        new Type[] {responseClass});
+                            }
+                        });
+
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        return response.getBody();
     }
 
-    private <T> ResponseEntity<List<T>> getListResponse(
-            String url, HttpMethod httpMethod, Object body, HttpHeaders headers
+    private <T> List<T> performListRequest(
+            String url, HttpMethod httpMethod, Object body, HttpHeaders headers, Class<T> responseClass
     ) {
-        return new RestTemplate()
-                .exchange(API_URL + url,
-                        httpMethod,
-                        new HttpEntity<>(body, headers),
-                        new ParameterizedTypeReference<>() {});
+        ResponseEntity<List<T>> response = new RestTemplate().exchange(
+                API_URL + url,
+                httpMethod,
+                new HttpEntity<>(body, headers),
+                new ParameterizedTypeReference<List<T>>() {
+                    public Type getType() {
+                        return new MyParameterizedTypeImpl((ParameterizedType) super.getType(),
+                                new Type[] {responseClass});
+                    }
+                });
+
+        Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
+
+        return response.getBody();
+    }
+
+    private HttpHeaders getAuthHeaders(String email, String password) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", getBasicAuthorizationHeaderValue(email, password));
+        return headers;
+    }
+
+    private String getBasicAuthorizationHeaderValue(String email, String password) {
+        return "Basic " + new String(Base64.getEncoder()
+                .encode(String.format("%s:%s", email, password).getBytes()));
     }
 
     private MisprintCreateDTO createMisprintDTO(UUID targetObjectId, TargetObjectType objectType) {
@@ -1068,64 +1074,12 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         return dto;
     }
 
-    private HttpHeaders getAuthHeaders(String email, String password) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Authorization", getBasicAuthorizationHeaderValue(email, password));
-        return headers;
-    }
-
-    private String getBasicAuthorizationHeaderValue(String email, String password) {
-        return "Basic " + new String(Base64.getEncoder()
-                .encode(String.format("%s:%s", email, password).getBytes()));
-    }
-
-    private UserCreateDTO createUserM1() {
-        UserCreateDTO dto = new UserCreateDTO();
-        dto.setUsername("moderator_david");
-        dto.setPassword(M1_PASSWORD);
-        dto.setPasswordConfirmation(M1_PASSWORD);
-        dto.setEmail(M1_EMAIL);
-        dto.setGender(Gender.FEMALE);
-        return dto;
-    }
-
-    private UserCreateDTO createUserC1() {
-        UserCreateDTO dto = new UserCreateDTO();
-        dto.setUsername("content_manager1");
-        dto.setPassword(C1_PASSWORD);
-        dto.setPasswordConfirmation(C1_PASSWORD);
-        dto.setEmail(C1_EMAIL);
-        dto.setGender(Gender.FEMALE);
-        return dto;
-    }
-
-    private UserCreateDTO createUserU1() {
-        UserCreateDTO dto = new UserCreateDTO();
-        dto.setUsername("user1");
-        dto.setPassword(U1_PASSWORD);
-        dto.setPasswordConfirmation(U1_PASSWORD);
-        dto.setEmail(U1_EMAIL);
-        dto.setGender(Gender.MALE);
-        return dto;
-    }
-
-    private UserCreateDTO createUserU2() {
-        UserCreateDTO dto = new UserCreateDTO();
-        dto.setUsername("user2");
-        dto.setPassword(U2_PASSWORD);
-        dto.setPasswordConfirmation(U2_PASSWORD);
-        dto.setEmail(U2_EMAIL);
-        dto.setGender(Gender.MALE);
-        return dto;
-    }
-
-    private UserCreateDTO createUserU3() {
-        UserCreateDTO dto = new UserCreateDTO();
-        dto.setUsername("user3");
-        dto.setPassword(U3_PASSWORD);
-        dto.setPasswordConfirmation(U3_PASSWORD);
-        dto.setEmail(U3_EMAIL);
-        dto.setGender(Gender.FEMALE);
+    private UserCreateDTO createUserDTO(String email, String password, Gender gender) {
+        UserCreateDTO dto = generateObject(UserCreateDTO.class);
+        dto.setPassword(password);
+        dto.setPasswordConfirmation(password);
+        dto.setEmail(email);
+        dto.setGender(gender);
         return dto;
     }
 
