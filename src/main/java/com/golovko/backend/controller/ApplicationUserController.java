@@ -4,6 +4,7 @@ import com.golovko.backend.controller.documentation.ApiPageable;
 import com.golovko.backend.controller.security.Admin;
 import com.golovko.backend.controller.security.AdminOrCurrentUser;
 import com.golovko.backend.controller.security.AdminOrModeratorOrCurrentUser;
+import com.golovko.backend.controller.security.CurrentUser;
 import com.golovko.backend.controller.validation.ControllerValidationUtil;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.user.*;
@@ -71,8 +72,6 @@ public class ApplicationUserController {
             notes = "Needs ADMIN or current user authorities. Empty fields will not be updated.")
     @PatchMapping("/{userId}")
     public UserReadDTO patchUser(@PathVariable UUID userId, @RequestBody @Valid UserPatchDTO patch) {
-        ControllerValidationUtil.validateEquals(patch.getPassword(), patch.getPasswordConfirmation(),
-                "password", "passwordConfirmation");
         return applicationUserService.patchUser(userId, patch);
     }
 
@@ -81,8 +80,6 @@ public class ApplicationUserController {
             notes = "Needs ADMIN or current user authorities. All fields will be updated.")
     @PutMapping("/{userId}")
     public UserReadDTO updateUser(@PathVariable UUID userId, @RequestBody @Valid UserPutDTO update) {
-        ControllerValidationUtil.validateEquals(update.getPassword(), update.getPasswordConfirmation(),
-                "password", "passwordConfirmation");
         return applicationUserService.updateUser(userId, update);
     }
 
@@ -105,5 +102,14 @@ public class ApplicationUserController {
     @PostMapping("/{userId}/pardon")
     public UserReadDTO pardonUser(@PathVariable UUID userId) {
         return applicationUserService.pardon(userId);
+    }
+
+    @CurrentUser
+    @ApiOperation(value = "Reset password", notes = "Needs current user authority.")
+    @PostMapping("/{userId}/reset-password")
+    public UserReadDTO resetPassword(@PathVariable UUID userId, @RequestBody @Valid ResetPasswordDTO resetDTO) {
+        ControllerValidationUtil.validateEquals(resetDTO.getPassword(), resetDTO.getPasswordConfirmation(),
+                "password", "passwordConfirmation");
+        return applicationUserService.resetPassword(userId, resetDTO);
     }
 }

@@ -349,8 +349,6 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
     public void testPatchUser() throws Exception {
         UserPatchDTO patchDTO = new UserPatchDTO();
         patchDTO.setUsername("david");
-        patchDTO.setPassword("securedPassword");
-        patchDTO.setPasswordConfirmation("securedPassword");
         patchDTO.setEmail("david101@email.com");
         patchDTO.setGender(Gender.MALE);
 
@@ -371,81 +369,9 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
 
     @WithMockUser
     @Test
-    public void testPatchUserShortPassword() throws Exception {
-        UserPatchDTO patchDTO = new UserPatchDTO();
-        patchDTO.setUsername("david");
-        patchDTO.setPassword("1234567");
-        patchDTO.setPasswordConfirmation("1234567");
-        patchDTO.setEmail("david101@email.com");
-
-        String resultJson = mockMvc
-                .perform(patch("/api/v1/users/{id}", UUID.randomUUID())
-                .content(objectMapper.writeValueAsString(patchDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
-        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
-        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
-
-        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
-    }
-
-    @WithMockUser
-    @Test
-    public void testPatchUserPasswordWithSpaces() throws Exception {
-        UserPatchDTO patchDTO = new UserPatchDTO();
-        patchDTO.setUsername("david");
-        patchDTO.setPassword("1234 56789");
-        patchDTO.setPasswordConfirmation("1234 56789");
-        patchDTO.setEmail("david101@email.com");
-
-        String resultJson = mockMvc
-                .perform(patch("/api/v1/users/{id}", UUID.randomUUID())
-                .content(objectMapper.writeValueAsString(patchDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
-        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
-        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
-
-        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
-    }
-
-    @WithMockUser
-    @Test
-    public void testPatchUserDifferentPasswords() throws Exception {
-        UserPatchDTO patchDTO = new UserPatchDTO();
-        patchDTO.setUsername("david");
-        patchDTO.setPassword("123456789");
-        patchDTO.setPasswordConfirmation("xyxyxyxyxyxyxy");
-        patchDTO.setEmail("david101@email.com");
-
-        String resultJson = mockMvc
-                .perform(patch("/api/v1/users/{id}", UUID.randomUUID())
-                .content(objectMapper.writeValueAsString(patchDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorInfo errorInfo = objectMapper.readValue(resultJson, ErrorInfo.class);
-        Assert.assertTrue(errorInfo.getMessage().contains("password"));
-        Assert.assertTrue(errorInfo.getMessage().contains("passwordConfirmation"));
-        Assert.assertEquals(ControllerValidationException.class, errorInfo.getExceptionClass());
-
-        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
-    }
-
-    @WithMockUser
-    @Test
     public void testUpdateUser() throws Exception {
         UserPutDTO updateDTO = new UserPutDTO();
         updateDTO.setUsername("new username");
-        updateDTO.setPasswordConfirmation("securedPassword");
-        updateDTO.setPassword("securedPassword");
         updateDTO.setEmail("new_user_email@gmail.com");
         updateDTO.setGender(Gender.MALE);
 
@@ -462,76 +388,6 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
 
         UserReadDTO actualUser = objectMapper.readValue(resultJson, UserReadDTO.class);
         Assert.assertEquals(readDTO, actualUser);
-    }
-
-    @WithMockUser
-    @Test
-    public void testUpdateUserShortPassword() throws Exception {
-        UserPutDTO updateDTO = new UserPutDTO();
-        updateDTO.setUsername("david");
-        updateDTO.setPassword("1234567");
-        updateDTO.setPasswordConfirmation("1234567");
-        updateDTO.setEmail("david101@email.com");
-
-        String resultJson = mockMvc
-                .perform(put("/api/v1/users/{id}", UUID.randomUUID())
-                .content(objectMapper.writeValueAsString(updateDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
-        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
-        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
-
-        Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
-    }
-
-    @WithMockUser
-    @Test
-    public void testUpdateUserPasswordWithSpaces() throws Exception {
-        UserPutDTO updateDTO = new UserPutDTO();
-        updateDTO.setUsername("david");
-        updateDTO.setPassword("1234 56789");
-        updateDTO.setPasswordConfirmation("1234 56789");
-        updateDTO.setEmail("david101@email.com");
-
-        String resultJson = mockMvc
-                .perform(put("/api/v1/users/{id}", UUID.randomUUID())
-                .content(objectMapper.writeValueAsString(updateDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
-        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
-        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
-
-        Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
-    }
-
-    @WithMockUser
-    @Test
-    public void testUpdateUserDifferentPasswords() throws Exception {
-        UserPutDTO updateDTO = new UserPutDTO();
-        updateDTO.setUsername("david");
-        updateDTO.setPassword("123456789");
-        updateDTO.setPasswordConfirmation("xyxyxyxyxyxyxy");
-        updateDTO.setEmail("david101@email.com");
-
-        String resultJson = mockMvc
-                .perform(put("/api/v1/users/{id}", UUID.randomUUID())
-                .content(objectMapper.writeValueAsString(updateDTO))
-                .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse().getContentAsString();
-
-        ErrorInfo errorInfo = objectMapper.readValue(resultJson, ErrorInfo.class);
-        Assert.assertTrue(errorInfo.getMessage().contains("password"));
-        Assert.assertTrue(errorInfo.getMessage().contains("passwordConfirmation"));
-        Assert.assertEquals(ControllerValidationException.class, errorInfo.getExceptionClass());
-
-        Mockito.verify(applicationUserService, Mockito.never()).updateUser(any(), any());
     }
 
     @WithMockUser
@@ -577,5 +433,135 @@ public class ApplicationUserControllerTest extends BaseControllerTest {
         Assert.assertEquals(actualResult, readDTO);
 
         Mockito.verify(applicationUserService).pardon(readDTO.getId());
+    }
+
+    @WithMockUser
+    @Test
+    public void testResetPassword() throws Exception {
+        UserReadDTO readDTO = generateObject(UserReadDTO.class);
+
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        resetPasswordDTO.setPassword("new_password");
+        resetPasswordDTO.setPasswordConfirmation("new_password");
+
+        Mockito.when(applicationUserService.resetPassword(readDTO.getId(), resetPasswordDTO))
+                .thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/reset-password", readDTO.getId())
+                .content(objectMapper.writeValueAsString(resetPasswordDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        UserReadDTO actualResult = objectMapper.readValue(resultJson, UserReadDTO.class);
+        Assert.assertEquals(actualResult, readDTO);
+
+        Mockito.verify(applicationUserService).resetPassword(readDTO.getId(), resetPasswordDTO);
+    }
+
+    @WithMockUser
+    @Test
+    public void testResetPasswordShortPassword() throws Exception {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        resetPasswordDTO.setPassword("123456");
+        resetPasswordDTO.setPasswordConfirmation("123456");
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/reset-password", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(resetPasswordDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
+    }
+
+    @WithMockUser
+    @Test
+    public void testResetPasswordWithSpaces() throws Exception {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        resetPasswordDTO.setPassword("1234 56789");
+        resetPasswordDTO.setPasswordConfirmation("1234 56789");
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/reset-password", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(resetPasswordDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
+    }
+
+    @WithMockUser
+    @Test
+    public void testResetPasswordDifferentPasswords() throws Exception {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        resetPasswordDTO.setPassword("123456789");
+        resetPasswordDTO.setPasswordConfirmation("qwertypassword");
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/reset-password", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(resetPasswordDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo errorInfo = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(errorInfo.getMessage().contains("password"));
+        Assert.assertTrue(errorInfo.getMessage().contains("passwordConfirmation"));
+        Assert.assertEquals(ControllerValidationException.class, errorInfo.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
+    }
+
+    @WithMockUser
+    @Test
+    public void testResetPasswordEmptyFields() throws Exception {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        resetPasswordDTO.setPassword("");
+        resetPasswordDTO.setPasswordConfirmation("");
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/reset-password", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(resetPasswordDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertTrue(error.getMessage().contains("Password should contain at least 8 characters without spaces"));
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
+    }
+
+    @WithMockUser
+    @Test
+    public void testResetPasswordNullFields() throws Exception {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        resetPasswordDTO.setPassword(null);
+        resetPasswordDTO.setPasswordConfirmation(null);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{id}/reset-password", UUID.randomUUID())
+                .content(objectMapper.writeValueAsString(resetPasswordDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo error = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(MethodArgumentNotValidException.class, error.getExceptionClass());
+
+        Mockito.verify(applicationUserService, Mockito.never()).patchUser(any(), any());
     }
 }

@@ -226,8 +226,6 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         // FINAL_6 u2 changes the name in his profile.
         UserPatchDTO u2PatchDTO = new UserPatchDTO();
         u2PatchDTO.setUsername("new_username");
-        u2PatchDTO.setPassword(U2_PASSWORD);
-        u2PatchDTO.setPasswordConfirmation(U2_PASSWORD);
 
         ResponseEntity<UserReadDTO> u2UpdatedReadDTOResponse = new RestTemplate(new HttpComponentsClientHttpRequestFactory())
                 .exchange(API_URL + "/users/" + u2UserId, HttpMethod.PATCH,

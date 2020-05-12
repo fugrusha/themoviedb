@@ -166,8 +166,6 @@ public class ApplicationUserServiceTest extends BaseTest {
         UserPatchDTO patch = new UserPatchDTO();
         patch.setUsername("Volodya");
         patch.setEmail("vovka@mail.ru");
-        patch.setPassword("098765");
-        patch.setPasswordConfirmation("098765");
         patch.setGender(Gender.MALE);
 
         UserReadDTO readDTO = applicationUserService.patchUser(user.getId(), patch);
@@ -202,8 +200,8 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         UserPutDTO updateDTO = new UserPutDTO();
         updateDTO.setUsername("new username");
-        updateDTO.setPassword("new password");
         updateDTO.setEmail("new_email@gmail.com");
+        updateDTO.setGender(Gender.MALE);
 
         UserReadDTO readDTO = applicationUserService.updateUser(user.getId(), updateDTO);
 
@@ -283,5 +281,28 @@ public class ApplicationUserServiceTest extends BaseTest {
         ApplicationUser user = testObjectFactory.createUser();
         user.setEmail("wrongemail");
         applicationUserRepository.save(user);
+    }
+
+    @Test(expected = EntityNotFoundException.class)
+    public void testResetPasswordUserNotFound() {
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        resetPasswordDTO.setPassword("new_password");
+        resetPasswordDTO.setPasswordConfirmation("new_password");
+
+        applicationUserService.resetPassword(UUID.randomUUID(), resetPasswordDTO);
+    }
+
+    @Test
+    public void testResetPassword() {
+        ApplicationUser user = testObjectFactory.createUser();;
+
+        ResetPasswordDTO resetPasswordDTO = new ResetPasswordDTO();
+        resetPasswordDTO.setPassword("new_password");
+        resetPasswordDTO.setPasswordConfirmation("new_password");
+
+        applicationUserService.resetPassword(user.getId(), resetPasswordDTO);
+
+        ApplicationUser updatedUser = applicationUserRepository.findById(user.getId()).get();
+        Assert.assertNotEquals(user.getEncodedPassword(), updatedUser.getEncodedPassword());
     }
 }

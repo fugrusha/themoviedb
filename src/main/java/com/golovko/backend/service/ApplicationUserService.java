@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -70,11 +69,6 @@ public class ApplicationUserService {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
         translationService.map(patch, user);
-
-        if (!StringUtils.isEmpty(patch.getPassword())) {
-            user.setEncodedPassword(securityConfig.passwordEncoder().encode(patch.getPassword()));
-        }
-
         user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);
@@ -84,9 +78,6 @@ public class ApplicationUserService {
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, id);
 
         translationService.map(update, user);
-
-        user.setEncodedPassword(securityConfig.passwordEncoder().encode(update.getPassword()));
-
         user = applicationUserRepository.save(user);
 
         return translationService.translate(user, UserReadDTO.class);
@@ -127,5 +118,14 @@ public class ApplicationUserService {
 
     public List<UserInLeaderBoardDTO> getUsersLeaderBoard() {
         return applicationUserRepository.getUsersLeaderBoard();
+    }
+
+    public UserReadDTO resetPassword(UUID userId, ResetPasswordDTO resetDTO) {
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, userId);
+
+        user.setEncodedPassword(securityConfig.passwordEncoder().encode(resetDTO.getPassword()));
+        applicationUserRepository.save(user);
+
+        return translationService.translate(user, UserReadDTO.class);
     }
 }
