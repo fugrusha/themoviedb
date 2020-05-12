@@ -18,6 +18,12 @@ public class UserRoleController {
     @Autowired
     private UserRoleService userRoleService;
 
+    @ApiOperation(value = "Get all roles", notes = "Needs ADMIN authority")
+    @GetMapping("/user-roles")
+    public List<UserRoleReadDTO> getAllUserRoles() {
+        return userRoleService.getAllUserRoles();
+    }
+
     @ApiOperation(value = "Get all roles of user", notes = "Needs ADMIN authority")
     @GetMapping("/users/{userId}/roles")
     public List<UserRoleReadDTO> getUserRoles(@PathVariable UUID userId) {

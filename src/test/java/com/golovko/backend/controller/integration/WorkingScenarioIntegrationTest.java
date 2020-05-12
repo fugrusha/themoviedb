@@ -98,10 +98,6 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         a1.getUserRoles().add(userRole);
         applicationUserRepository.save(a1);
 
-        UUID moderatorRoleId = userRoleRepository.findByType(UserRoleType.MODERATOR).getId();
-        UUID contentManagerRoleId = userRoleRepository.findByType(UserRoleType.CONTENT_MANAGER).getId();
-        UUID userRoleId = userRoleRepository.findByType(UserRoleType.USER).getId();
-
         // check if repo contains only 1 record
         Assert.assertEquals(1, applicationUserRepository.count());
         // check if user has ADMIN authority
@@ -124,6 +120,19 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         UUID m1UserId = m1ReadDTO.getId();
 
         // FINAL_2 a1 gives m1 the role of moderator
+        List<UserRoleReadDTO> allUserRoles = performListRequest(
+                "/user-roles/",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(ADMIN_EMAIL, ADMIN_PASSWORD),
+                UserRoleReadDTO.class);
+
+        UUID moderatorRoleId = allUserRoles.stream()
+                .filter(role -> UserRoleType.MODERATOR.equals(role.getType()))
+                .findAny()
+                .map(UserRoleReadDTO::getId)
+                .orElse(null);
+
         List<UserRoleReadDTO> m1UserRoles = performListRequest(
                 "/users/" + m1UserId + "/roles/" + moderatorRoleId,
                 HttpMethod.POST,
@@ -131,10 +140,9 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
                 getAuthHeaders(ADMIN_EMAIL, ADMIN_PASSWORD),
                 UserRoleReadDTO.class);
 
-
         Assert.assertEquals(2, m1UserRoles.size());
-        Assertions.assertThat(m1UserRoles).extracting("id")
-                .containsExactlyInAnyOrder(userRoleId, moderatorRoleId);
+        Assertions.assertThat(m1UserRoles).extracting("type")
+                .containsExactlyInAnyOrder(UserRoleType.USER, UserRoleType.MODERATOR);
 
         // FINAL_3 register user c1
         UserCreateDTO c1CreateDTO = createUserDTO(C1_EMAIL, C1_PASSWORD, Gender.MALE);
@@ -152,6 +160,12 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         UUID c1UserId = c1ReadDTO.getId();
 
         // FINAL_4 a1 gives c1 the role of content manager
+        UUID contentManagerRoleId = allUserRoles.stream()
+                .filter(role -> UserRoleType.CONTENT_MANAGER.equals(role.getType()))
+                .findAny()
+                .map(UserRoleReadDTO::getId)
+                .orElse(null);
+
         List<UserRoleReadDTO> c1UserRoles = performListRequest(
                 "/users/" + c1UserId + "/roles/" + contentManagerRoleId,
                 HttpMethod.POST,
@@ -160,8 +174,8 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
                 UserRoleReadDTO.class);
 
         Assert.assertEquals(2, c1UserRoles.size());
-        Assertions.assertThat(c1UserRoles).extracting("id")
-                .containsExactlyInAnyOrder(userRoleId, contentManagerRoleId);
+        Assertions.assertThat(c1UserRoles).extracting("type")
+                .containsExactlyInAnyOrder(UserRoleType.USER, UserRoleType.CONTENT_MANAGER);
 
         // FINAL_5 Three regular users are registered. Men: u1, u2 and woman: u3
         // register u1

@@ -70,8 +70,7 @@ public class UserRoleControllerTest extends BaseControllerTest {
 
     @WithMockUser
     @Test
-    public void testDuplicatedRole() throws Exception {
-        UserRoleReadDTO readDTO = createUserRoleReadDTO();
+    public void testDuplicatedRole() throws Exception { ;
         UUID userId = UUID.randomUUID();
         UUID userRoleId = UUID.randomUUID();
 
@@ -110,6 +109,25 @@ public class UserRoleControllerTest extends BaseControllerTest {
         Assert.assertTrue(actualResult.isEmpty());
 
         Mockito.verify(userRoleService).removeRoleFromUser(userId, userRoleId);
+    }
+
+    @WithMockUser
+    @Test
+    public void testGetAllUserRoles() throws Exception {
+        UserRoleReadDTO readDTO = createUserRoleReadDTO();
+        List<UserRoleReadDTO> expectedResult = List.of(readDTO);
+
+        Mockito.when(userRoleService.getAllUserRoles()).thenReturn(expectedResult);
+
+        String resultJson = mockMvc
+                .perform(get("/api/v1/user-roles/"))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        List<UserRoleReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
+        Assert.assertEquals(expectedResult, actualResult);
+
+        Mockito.verify(userRoleService).getAllUserRoles();
     }
 
     private UserRoleReadDTO createUserRoleReadDTO() {

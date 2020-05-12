@@ -18,6 +18,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import static com.golovko.backend.domain.UserRoleType.*;
+
 public class UseRoleServiceTest extends BaseTest {
 
     @Autowired
@@ -133,5 +135,14 @@ public class UseRoleServiceTest extends BaseTest {
         UUID wrongUserRoleId = UUID.randomUUID();
 
         userRoleService.removeRoleFromUser(user.getId(), wrongUserRoleId);
+    }
+
+    @Test
+    public void testGetAllUseRoles() {
+        List<UserRoleReadDTO> allUserRoles = userRoleService.getAllUserRoles();
+
+        Assert.assertEquals(4, allUserRoles.size());
+        Assertions.assertThat(allUserRoles).extracting("type")
+                .containsExactlyInAnyOrder(USER, ADMIN, CONTENT_MANAGER, MODERATOR);
     }
 }

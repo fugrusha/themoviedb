@@ -6,11 +6,11 @@ import com.golovko.backend.domain.Gender;
 import com.golovko.backend.domain.Person;
 import com.golovko.backend.repository.PersonRepository;
 import com.golovko.backend.repository.RepositoryHelper;
-import com.golovko.backend.util.Utils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -72,13 +72,13 @@ public class PersonImporterService {
             person.setBirthday(LocalDate.of(1900, 1, 1));
         }
 
-        if (!Utils.empty(readDTO.getPlaceOfBirth())) {
+        if (!StringUtils.isEmpty(readDTO.getPlaceOfBirth())) {
             person.setPlaceOfBirth(readDTO.getPlaceOfBirth());
         } else {
             person.setPlaceOfBirth("Unknown");
         }
 
-        if (!Utils.empty(readDTO.getBiography())) {
+        if (!StringUtils.isEmpty(readDTO.getBiography())) {
             person.setBio(readDTO.getBiography());
         } else {
             person.setBio(String.format("Biography for %s will be added later", readDTO.getName()));

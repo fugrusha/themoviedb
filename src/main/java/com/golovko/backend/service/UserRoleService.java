@@ -7,6 +7,7 @@ import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.LinkDuplicatedException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import com.golovko.backend.repository.UserRoleRepository;
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,9 @@ public class UserRoleService {
 
     @Autowired
     private TranslationService translationService;
+
+    @Autowired
+    private UserRoleRepository userRoleRepository;
 
     @Transactional
     public List<UserRoleReadDTO> getUserRoles(UUID userId) {
@@ -66,5 +70,12 @@ public class UserRoleService {
         user = applicationUserRepository.save(user);
 
         return translationService.translateList(user.getUserRoles(), UserRoleReadDTO.class);
+    }
+
+    public List<UserRoleReadDTO> getAllUserRoles() {
+        List<UserRole> allRoles = userRoleRepository.findAllRoles();
+
+        return translationService.translateList(allRoles, UserRoleReadDTO.class);
+
     }
 }

@@ -9,12 +9,12 @@ import com.golovko.backend.exception.UserAlreadyExistsException;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.RepositoryHelper;
 import com.golovko.backend.repository.UserRoleRepository;
-import com.golovko.backend.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.List;
 import java.util.UUID;
@@ -71,7 +71,7 @@ public class ApplicationUserService {
 
         translationService.map(patch, user);
 
-        if (!Utils.empty(patch.getPassword())) {
+        if (!StringUtils.isEmpty(patch.getPassword())) {
             user.setEncodedPassword(securityConfig.passwordEncoder().encode(patch.getPassword()));
         }
 

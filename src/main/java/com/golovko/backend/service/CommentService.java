@@ -10,13 +10,13 @@ import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
 import com.golovko.backend.repository.RepositoryHelper;
-import com.golovko.backend.util.Utils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -67,7 +67,7 @@ public class CommentService {
 
         validateTargetObject(targetObjectId, createDTO);
 
-        if (!Utils.empty(createDTO.getSpoiler())) {
+        if (!StringUtils.isEmpty(createDTO.getSpoiler())) {
             checkIfMessageContainsSpoilerText(createDTO.getSpoiler(), createDTO.getMessage());
         }
 
@@ -91,7 +91,7 @@ public class CommentService {
 
         translationService.map(putDTO, comment);
 
-        if (!Utils.empty(comment.getSpoiler())) {
+        if (!StringUtils.isEmpty(comment.getSpoiler())) {
             checkIfMessageContainsSpoilerText(comment.getSpoiler(), comment.getMessage());
         }
 
@@ -105,7 +105,7 @@ public class CommentService {
 
         translationService.map(patchDTO, comment);
 
-        if (!Utils.empty(comment.getSpoiler()) && !Utils.empty(patchDTO.getSpoiler())) {
+        if (!StringUtils.isEmpty(comment.getSpoiler()) && !StringUtils.isEmpty(patchDTO.getSpoiler())) {
             checkIfMessageContainsSpoilerText(comment.getSpoiler(), comment.getMessage());
         }
 
