@@ -3,7 +3,7 @@ package com.golovko.backend.domain;
 public enum ComplaintType {
     SPAM,
     SPOILER,
-    MISPRINT,
+    PROFANITY,
     VIOLENCE,
     CHILD_ABUSE,
     OTHER

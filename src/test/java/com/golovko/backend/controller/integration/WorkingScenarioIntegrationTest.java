@@ -9,6 +9,8 @@ import com.golovko.backend.dto.article.ArticleReadExtendedDTO;
 import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentModerateDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
+import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
+import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.dto.genre.GenreCreateDTO;
 import com.golovko.backend.dto.genre.GenreReadDTO;
 import com.golovko.backend.dto.like.LikeCreateDTO;
@@ -39,7 +41,6 @@ import com.golovko.backend.util.MyParameterizedTypeImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -52,7 +53,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
@@ -60,7 +60,6 @@ import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.COMMENT;
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
-import static org.awaitility.Awaitility.await;
 
 @ActiveProfiles({"test", "working-scenario-profile"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -812,10 +811,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         Assert.assertEquals(CommentStatus.PENDING, u1CommentReadDTO.getStatus());
 
         // u1 adds rating
-        RatingCreateDTO u1RatingCreateDTO = new RatingCreateDTO();
-        u1RatingCreateDTO.setRating(9);
-        u1RatingCreateDTO.setAuthorId(u1UserId);
-        u1RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
+        RatingCreateDTO u1RatingCreateDTO = createRatingDTO(9, u1UserId, MOVIE);
 
         RatingReadDTO u1RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
@@ -838,10 +834,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         Assert.assertEquals(0, u2MovieCommentsReadDTO.getData().size());
 
         // FINAL_21 u2 adds rating to movie
-        RatingCreateDTO u2RatingCreateDTO = new RatingCreateDTO();
-        u2RatingCreateDTO.setRating(7);
-        u2RatingCreateDTO.setAuthorId(u2UserId);
-        u2RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
+        RatingCreateDTO u2RatingCreateDTO = createRatingDTO(7, u2UserId, MOVIE);
 
         RatingReadDTO u2RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
@@ -912,10 +905,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         Assert.assertEquals(movieCreateDTO.getMovieTitle(), u3MovieReadExtendedDTO.getMovieTitle());
 
         // u3 adds rating
-        RatingCreateDTO u3RatingCreateDTO = new RatingCreateDTO();
-        u3RatingCreateDTO.setRating(2);
-        u3RatingCreateDTO.setAuthorId(u3UserId);
-        u3RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
+        RatingCreateDTO u3RatingCreateDTO = createRatingDTO(2, u3UserId, MOVIE);
 
         RatingReadDTO u3RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
@@ -960,47 +950,167 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
 
         // FINAL_26 unregistered user opens movie sees average rating
         // wait and check if updateAverageRating() was invoked
-        Thread.sleep(5000);
-        await().atMost(Duration.ofSeconds(20))
-                .untilAsserted(() ->
-                        Mockito.verify(updateAverageRatingOfMoviesJob, Mockito.atLeast(1))
-                                .updateAverageRating());
-
-
-        MovieReadExtendedDTO unregisteredUserMovieReadDTO = performRequest(
-                "/movies/" + movieId + "/extended/",
-                HttpMethod.GET,
-                null,
-                null,
-                MovieReadExtendedDTO.class);
-
-        Assert.assertNotNull(unregisteredUserMovieReadDTO.getAverageRating());
-        Assert.assertEquals(6.0, unregisteredUserMovieReadDTO.getAverageRating(), Double.MIN_NORMAL);
+//        Thread.sleep(5000);
+//        await().atMost(Duration.ofSeconds(20))
+//                .untilAsserted(() ->
+//                        Mockito.verify(updateAverageRatingOfMoviesJob, Mockito.atLeast(1))
+//                                .updateAverageRating());
+//
+//        MovieReadExtendedDTO unregisteredUserMovieReadDTO = performRequest(
+//                "/movies/" + movieId + "/extended/",
+//                HttpMethod.GET,
+//                null,
+//                null,
+//                MovieReadExtendedDTO.class);
+//
+//        Assert.assertNotNull(unregisteredUserMovieReadDTO.getAverageRating());
+//        Assert.assertEquals(6.0, unregisteredUserMovieReadDTO.getAverageRating(), Double.MIN_NORMAL);
 
         // FINAL_27 c1 imports movie from TheMovieDB with common actor
         // The Curious Case of Benjamin Button
         String externalMovieId = "4922";
 
-        MovieReadExtendedDTO c1ImportedMovie = performRequest(
+        MovieReadExtendedDTO c1ImportedMovieReadDTO = performRequest(
                 "/movies/import-movie/" + externalMovieId,
                 HttpMethod.POST,
                 null,
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieReadExtendedDTO.class);
 
-        Assert.assertEquals("The Curious Case of Benjamin Button", c1ImportedMovie.getMovieTitle());
-        Assert.assertNotNull(c1ImportedMovie.getGenres());
-        Assert.assertNotNull(c1ImportedMovie.getMovieCrews());
-        Assert.assertNotNull(c1ImportedMovie.getMovieCasts());
+        UUID importedMovieId = c1ImportedMovieReadDTO.getId();
+
+        Assert.assertEquals("The Curious Case of Benjamin Button", c1ImportedMovieReadDTO.getMovieTitle());
+        Assert.assertNotNull(c1ImportedMovieReadDTO.getGenres());
+        Assert.assertNotNull(c1ImportedMovieReadDTO.getMovieCrews());
+        Assert.assertNotNull(c1ImportedMovieReadDTO.getMovieCasts());
 
         // common person is Mahershala Ali
-        UUID commonPersonId = c1ImportedMovie.getMovieCasts().stream()
+        UUID commonPersonId = c1ImportedMovieReadDTO.getMovieCasts().stream()
                 .filter(cast -> actor2Id.equals(cast.getPersonId()))
                 .findAny()
                 .map(MovieCastReadDTO::getPersonId)
                 .orElse(null);
 
         Assert.assertEquals(actor2Id, commonPersonId);
+
+        // FINAL_28 u1 adds low rating and writes bad comment
+        // u1 add rating
+        RatingCreateDTO u1ImportedMovieRatingCreateDTO = createRatingDTO(1, u1UserId, MOVIE);
+
+        performRequest(
+                "/movies/" + importedMovieId + "/ratings",
+                HttpMethod.POST,
+                u1ImportedMovieRatingCreateDTO,
+                getAuthHeaders(U1_EMAIL, U1_PASSWORD),
+                RatingReadDTO.class);
+
+        // u1 adds comment
+        CommentCreateDTO u1BadCommentCreateDTO = new CommentCreateDTO();
+        u1BadCommentCreateDTO.setMessage("message that contains ");
+        u1BadCommentCreateDTO.setAuthorId(u1UserId);
+        u1BadCommentCreateDTO.setTargetObjectType(MOVIE);
+
+        CommentReadDTO u1BadCommentReadDTO = performRequest(
+                "/movies/" + importedMovieId + "/comments",
+                HttpMethod.POST,
+                u1BadCommentCreateDTO,
+                getAuthHeaders(U1_EMAIL, U1_PASSWORD),
+                CommentReadDTO.class);
+
+        UUID u1BadCommentId = u1BadCommentReadDTO.getId();
+
+        Assertions.assertThat(u1BadCommentCreateDTO).isEqualToComparingFieldByField(u1BadCommentReadDTO);
+        Assert.assertEquals(importedMovieId, u1BadCommentReadDTO.getTargetObjectId());
+        Assert.assertEquals(CommentStatus.APPROVED, u1BadCommentReadDTO.getStatus());
+
+        // FINAL_29 u2 and u3 add ratings to importedMovie, see u1BadComment and send two complaints
+        // u2 adds rating
+        RatingCreateDTO u2ImportedMovieRatingCreateDTO = createRatingDTO(6, u2UserId, MOVIE);
+
+        performRequest(
+                "/movies/" + importedMovieId + "/ratings",
+                HttpMethod.POST,
+                u2ImportedMovieRatingCreateDTO,
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD),
+                RatingReadDTO.class);
+
+        // u3 adds rating
+        RatingCreateDTO u3ImportedMovieRatingCreateDTO = createRatingDTO(10, u3UserId, MOVIE);
+
+        performRequest(
+                "/movies/" + importedMovieId + "/ratings",
+                HttpMethod.POST,
+                u3ImportedMovieRatingCreateDTO,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                RatingReadDTO.class);
+
+        // u2 can see u1BadComment
+        PageResult<CommentReadDTO> u2ImportedMovieComments = performPageRequest(
+                "/movies/" + importedMovieId + "/comments",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD),
+                CommentReadDTO.class);
+
+        Assert.assertEquals(u1BadCommentId, u2ImportedMovieComments.getData().get(0).getId());
+
+        // u3 can see u1BadComment
+        PageResult<CommentReadDTO> u3ImportedMovieComments = performPageRequest(
+                "/movies/" + importedMovieId + "/comments",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                CommentReadDTO.class);
+
+        Assert.assertEquals(u1BadCommentId, u3ImportedMovieComments.getData().get(0).getId());
+
+        // u2 creates complaint on u1BadComment cause it contains adult language(profanity)
+        ComplaintCreateDTO u2ComplaintCreateDTO = new ComplaintCreateDTO();
+        u2ComplaintCreateDTO.setComplaintTitle("Comment contains bad words");
+        u2ComplaintCreateDTO.setComplaintText("Moderator, you should ban comment's author");
+        u2ComplaintCreateDTO.setComplaintType(ComplaintType.PROFANITY);
+        u2ComplaintCreateDTO.setTargetObjectId(u1BadCommentId);
+        u2ComplaintCreateDTO.setTargetObjectType(COMMENT);
+
+        ComplaintReadDTO u2ComplaintReadDTO = performRequest(
+                "/users/" + u2UserId + "/complaints",
+                HttpMethod.POST,
+                u2ComplaintCreateDTO,
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD),
+                ComplaintReadDTO.class);
+
+        UUID u2ComplaintId = u2ComplaintReadDTO.getId();
+        Assertions.assertThat(u2ComplaintCreateDTO).isEqualToComparingFieldByField(u2ComplaintReadDTO);
+
+        // u3 creates complaint on u1BadComment cause it contains adult language(profanity)
+        ComplaintCreateDTO u3ComplaintCreateDTO = new ComplaintCreateDTO();
+        u3ComplaintCreateDTO.setComplaintTitle("Author uses profanity");
+        u3ComplaintCreateDTO.setComplaintText("Dear moderator, this comment contains bad words");
+        u3ComplaintCreateDTO.setComplaintType(ComplaintType.PROFANITY);
+        u3ComplaintCreateDTO.setTargetObjectId(u1BadCommentId);
+        u3ComplaintCreateDTO.setTargetObjectType(COMMENT);
+
+        ComplaintReadDTO u3ComplaintReadDTO = performRequest(
+                "/users/" + u2UserId + "/complaints",
+                HttpMethod.POST,
+                u3ComplaintCreateDTO,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                ComplaintReadDTO.class);
+
+        UUID u3ComplaintId = u3ComplaintReadDTO.getId();
+        Assertions.assertThat(u3ComplaintCreateDTO).isEqualToComparingFieldByField(u3ComplaintReadDTO);
+
+        // FINAL_30 m1 opens pending complaints and sees two new complaints
+        PageResult<ComplaintReadDTO> m1AllComplaints = performPageRequest(
+                "/complaints?statuses=INITIATED",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(M1_EMAIL, M1_PASSWORD),
+                ComplaintReadDTO.class);
+
+        Assert.assertEquals(2, m1AllComplaints.getData().size());
+        Assertions.assertThat(m1AllComplaints.getData()).extracting("id")
+                .containsExactlyInAnyOrder(u2ComplaintId, u3ComplaintId);
     }
 
     private <T> T performRequest(
@@ -1064,6 +1174,14 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
     private String getBasicAuthorizationHeaderValue(String email, String password) {
         return "Basic " + new String(Base64.getEncoder()
                 .encode(String.format("%s:%s", email, password).getBytes()));
+    }
+
+    private RatingCreateDTO createRatingDTO(int rating, UUID authorId, TargetObjectType objectType) {
+        RatingCreateDTO dto = new RatingCreateDTO();
+        dto.setRating(rating);
+        dto.setAuthorId(authorId);
+        dto.setRatedObjectType(objectType);
+        return dto;
     }
 
     private MisprintCreateDTO createMisprintDTO(UUID targetObjectId, TargetObjectType objectType) {
