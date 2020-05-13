@@ -32,14 +32,17 @@ import com.golovko.backend.dto.user.UserPatchDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.dto.user.UserTrustLevelDTO;
 import com.golovko.backend.dto.userrole.UserRoleReadDTO;
+import com.golovko.backend.job.UpdateAverageRatingOfMoviesJob;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.UserRoleRepository;
 import com.golovko.backend.util.MyParameterizedTypeImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.SpyBean;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
@@ -49,6 +52,7 @@ import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
@@ -56,8 +60,9 @@ import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.COMMENT;
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
+import static org.awaitility.Awaitility.await;
 
-@ActiveProfiles({"another-profile"})
+@ActiveProfiles({"test", "working-scenario-profile"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class WorkingScenarioIntegrationTest extends BaseTest {
 
@@ -70,10 +75,13 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @SpyBean
+    private UpdateAverageRatingOfMoviesJob updateAverageRatingOfMoviesJob;
+
     private final String API_URL = "http://localhost:8080/api/v1";
 
     @Test
-    public void testWorkingScenario() {
+    public void testWorkingScenario() throws InterruptedException {
         final String ADMIN_EMAIL = "admin@mail.com";
         final String ADMIN_PASSWORD = "admin_password";
         final String M1_EMAIL = "moderator1@mail.com";
@@ -905,7 +913,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
 
         // u3 adds rating
         RatingCreateDTO u3RatingCreateDTO = new RatingCreateDTO();
-        u3RatingCreateDTO.setRating(3);
+        u3RatingCreateDTO.setRating(2);
         u3RatingCreateDTO.setAuthorId(u3UserId);
         u3RatingCreateDTO.setRatedObjectType(TargetObjectType.MOVIE);
 
@@ -949,6 +957,50 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
                 CommentReadDTO.class);
 
         Assert.assertEquals((Integer) 1, u3CommentReadDTO.getLikesCount());
+
+        // FINAL_26 unregistered user opens movie sees average rating
+        // wait and check if updateAverageRating() was invoked
+        Thread.sleep(5000);
+        await().atMost(Duration.ofSeconds(20))
+                .untilAsserted(() ->
+                        Mockito.verify(updateAverageRatingOfMoviesJob, Mockito.atLeast(1))
+                                .updateAverageRating());
+
+
+        MovieReadExtendedDTO unregisteredUserMovieReadDTO = performRequest(
+                "/movies/" + movieId + "/extended/",
+                HttpMethod.GET,
+                null,
+                null,
+                MovieReadExtendedDTO.class);
+
+        Assert.assertNotNull(unregisteredUserMovieReadDTO.getAverageRating());
+        Assert.assertEquals(6.0, unregisteredUserMovieReadDTO.getAverageRating(), Double.MIN_NORMAL);
+
+        // FINAL_27 c1 imports movie from TheMovieDB with common actor
+        // The Curious Case of Benjamin Button
+        String externalMovieId = "4922";
+
+        MovieReadExtendedDTO c1ImportedMovie = performRequest(
+                "/movies/import-movie/" + externalMovieId,
+                HttpMethod.POST,
+                null,
+                getAuthHeaders(C1_EMAIL, C1_PASSWORD),
+                MovieReadExtendedDTO.class);
+
+        Assert.assertEquals("The Curious Case of Benjamin Button", c1ImportedMovie.getMovieTitle());
+        Assert.assertNotNull(c1ImportedMovie.getGenres());
+        Assert.assertNotNull(c1ImportedMovie.getMovieCrews());
+        Assert.assertNotNull(c1ImportedMovie.getMovieCasts());
+
+        // common person is Mahershala Ali
+        UUID commonPersonId = c1ImportedMovie.getMovieCasts().stream()
+                .filter(cast -> actor2Id.equals(cast.getPersonId()))
+                .findAny()
+                .map(MovieCastReadDTO::getPersonId)
+                .orElse(null);
+
+        Assert.assertEquals(actor2Id, commonPersonId);
     }
 
     private <T> T performRequest(
@@ -1154,8 +1206,8 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
 
     private PersonCreateDTO createP5() {
         PersonCreateDTO dto = new PersonCreateDTO();
-        dto.setFirstName("Ali");
-        dto.setLastName("Mahershala");
+        dto.setFirstName("Mahershala");
+        dto.setLastName("Ali");
         dto.setBio("Mahershala Ali is one of the most in-demand faces in Hollywood"
                 + " with his extraordinarily diverse skill set and wide-ranging background in film, and theater.");
         dto.setGender(Gender.MALE);

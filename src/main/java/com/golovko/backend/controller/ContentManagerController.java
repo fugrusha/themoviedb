@@ -10,7 +10,9 @@ import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
 import com.golovko.backend.dto.misprint.MisprintFilter;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.misprint.MisprintRejectDTO;
+import com.golovko.backend.dto.movie.MovieReadExtendedDTO;
 import com.golovko.backend.service.ArticleService;
+import com.golovko.backend.service.ContentManagerService;
 import com.golovko.backend.service.MisprintService;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +33,16 @@ public class ContentManagerController {
 
     @Autowired
     private ArticleService articleService;
+
+    @Autowired
+    private ContentManagerService contentManagerService;
+
+    @ApiOperation(value = "Import movie, cast and crew team from TheMovieDB",
+            notes = "Needs CONTENT_MANAGER authority")
+    @PostMapping("/movies/import-movie/{externalMovieId}")
+    public MovieReadExtendedDTO importMovie(@PathVariable String externalMovieId) {
+        return contentManagerService.importMovie(externalMovieId);
+    }
 
     @ApiOperation(value = "Confirm misprint moderation", notes = "Needs CONTENT_MANAGER authority")
     @PostMapping("/misprints/{id}/confirm")

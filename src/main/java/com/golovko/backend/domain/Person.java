@@ -18,7 +18,6 @@ public class Person extends AbstractEntity {
     @Size(min = 1, max = 128)
     private String firstName;
 
-    @NotNull
     @Size(min = 1, max = 128)
     private String lastName;
 

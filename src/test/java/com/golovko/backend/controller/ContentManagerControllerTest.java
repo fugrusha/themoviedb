@@ -12,10 +12,12 @@ import com.golovko.backend.dto.misprint.MisprintConfirmDTO;
 import com.golovko.backend.dto.misprint.MisprintFilter;
 import com.golovko.backend.dto.misprint.MisprintReadDTO;
 import com.golovko.backend.dto.misprint.MisprintRejectDTO;
+import com.golovko.backend.dto.movie.MovieReadExtendedDTO;
 import com.golovko.backend.exception.ControllerValidationException;
 import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.ArticleService;
+import com.golovko.backend.service.ContentManagerService;
 import com.golovko.backend.service.MisprintService;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -46,6 +48,9 @@ public class ContentManagerControllerTest extends BaseControllerTest {
 
     @MockBean
     private ArticleService articleService;
+
+    @MockBean
+    private ContentManagerService contentManagerService;
 
     @WithMockUser
     @Test
@@ -825,6 +830,25 @@ public class ContentManagerControllerTest extends BaseControllerTest {
 
         PageResult<MisprintReadDTO> actualResult = objectMapper.readValue(resultJson, new TypeReference<>() {});
         Assert.assertEquals(result, actualResult);
+    }
+
+    @WithMockUser
+    @Test
+    public void testImportMovie() throws Exception {
+        MovieReadExtendedDTO readDTO = generateObject(MovieReadExtendedDTO.class);
+        String externalMovieId = "id200";
+
+        Mockito.when(contentManagerService.importMovie(externalMovieId)).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/movies/import-movie/{id}", externalMovieId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        MovieReadExtendedDTO actualResult = objectMapper.readValue(resultJson, MovieReadExtendedDTO.class);
+        Assert.assertEquals(readDTO, actualResult);
+
+        Mockito.verify(contentManagerService).importMovie(externalMovieId);
     }
 
     private MisprintReadDTO createMisprintReadDTO() {

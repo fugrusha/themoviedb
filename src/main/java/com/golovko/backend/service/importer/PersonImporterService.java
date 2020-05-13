@@ -63,8 +63,8 @@ public class PersonImporterService {
 
     private Person createPerson(PersonReadDTO readDTO) {
         Person person = new Person();
-        person.setFirstName(readDTO.getName().split(" ")[0]);
-        person.setLastName(readDTO.getName().split(" ")[1]);
+        person.setFirstName(getFirstName(readDTO.getName()));
+        person.setLastName(getLastName(readDTO.getName()));
 
         if (readDTO.getBirthday() != null) {
             person.setBirthday(readDTO.getBirthday());
@@ -93,5 +93,21 @@ public class PersonImporterService {
         }
 
         return personRepository.save(person);
+    }
+
+    private String getFirstName(String fullName) {
+        int index = fullName.lastIndexOf(" ");
+        if (index > -1) {
+            return fullName.substring(0, index);
+        }
+        return fullName;
+    }
+
+    private String getLastName(String fullName) {
+        int index = fullName.lastIndexOf(" ");
+        if (index > -1) {
+            return fullName.substring(index + 1 , fullName.length());
+        }
+        return null;
     }
 }
