@@ -11,7 +11,6 @@ import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.UserRoleRepository;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,12 +18,14 @@ import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Base64;
 
+@DirtiesContext
 @ActiveProfiles({"another-profile"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class SecurityIntegrationTest extends BaseTest {
@@ -259,7 +260,6 @@ public class SecurityIntegrationTest extends BaseTest {
         Assert.assertEquals(HttpStatus.OK, response.getStatusCode());
     }
 
-    @Ignore
     @Test
     public void testCreateRatingByBlockedUser() {
         String email = "test@mail.com";
@@ -286,7 +286,7 @@ public class SecurityIntegrationTest extends BaseTest {
                 .exchange(API_URL + "/movies/" + m.getId() + "/movie-casts/" + mc.getId() + "/ratings/",
                         HttpMethod.POST, httpEntity, RatingReadDTO.class);
 
-        Assert.assertEquals(HttpStatus.FORBIDDEN, response.getStatusCode());
+        Assert.assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
 
     private String getBasicAuthorizationHeaderValue(String email, String password) {

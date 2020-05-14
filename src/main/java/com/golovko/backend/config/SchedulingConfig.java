@@ -6,6 +6,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @Configuration
 @EnableScheduling
-@Profile({"!test", "test & working-scenario-profile"})
+@Profile({"!test", "working-scenario"})
 public class SchedulingConfig {
 }

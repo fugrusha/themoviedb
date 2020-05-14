@@ -937,7 +937,6 @@ public class MisprintServiceTest extends BaseTest {
         Assertions.assertThat(misprintService.getMisprintsByFilter(filter, pageRequest).getData())
                 .extracting("id")
                 .isEqualTo(Arrays.asList(m1.getId(), m2.getId()));
-
     }
 
     @Data

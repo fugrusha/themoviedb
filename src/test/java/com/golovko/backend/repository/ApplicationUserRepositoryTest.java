@@ -104,7 +104,7 @@ public class ApplicationUserRepositoryTest extends BaseTest {
         expectedResult.add(testObjectFactory.createUser().getId());
         expectedResult.add(testObjectFactory.createUser().getId());
 
-        transactionTemplate.executeWithoutResult(status -> {
+        inTransaction(() -> {
             Set<UUID> actualResult = applicationUserRepository.getUserIds().collect(Collectors.toSet());
             Assert.assertEquals(expectedResult, actualResult);
         });

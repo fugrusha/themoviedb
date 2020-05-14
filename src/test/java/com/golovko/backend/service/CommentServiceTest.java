@@ -4,7 +4,6 @@ import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
-import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.TextBetweenIndexesNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
@@ -278,19 +277,6 @@ public class CommentServiceTest extends BaseTest {
 
         Comment comment = commentRepository.findById(readDTO.getId()).get();
         Assert.assertEquals(comment.getStatus(), APPROVED);
-    }
-
-    @Test(expected = BlockedUserException.class)
-    public void testCreateCommentWithBlockedUser() {
-        ApplicationUser commentAuthor = testObjectFactory.createUser(5.0, true);
-        Movie movie = testObjectFactory.createMovie();
-
-        CommentCreateDTO createDTO = new CommentCreateDTO();
-        createDTO.setMessage("message text");
-        createDTO.setAuthorId(commentAuthor.getId());
-        createDTO.setTargetObjectType(MOVIE);
-
-        commentService.createComment(movie.getId(), createDTO);
     }
 
     @Test

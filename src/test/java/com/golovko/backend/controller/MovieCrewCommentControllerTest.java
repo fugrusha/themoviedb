@@ -8,7 +8,6 @@ import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentPatchDTO;
 import com.golovko.backend.dto.comment.CommentPutDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
-import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.CommentService;
@@ -127,32 +126,6 @@ public class MovieCrewCommentControllerTest extends BaseControllerTest {
         Assertions.assertThat(actualResult).isEqualToComparingFieldByField(readDTO);
 
         Mockito.verify(commentService).createComment(readDTO.getTargetObjectId(), createDTO);
-    }
-
-    @WithMockUser
-    @Test
-    public void testCreateMovieCrewCommentBlockedUserException() throws Exception {
-        UUID movieCrewId = UUID.randomUUID();
-
-        CommentCreateDTO createDTO = new CommentCreateDTO();
-        createDTO.setMessage("message text");
-        createDTO.setSpoiler("spoiler");
-        createDTO.setAuthorId(UUID.randomUUID());
-        createDTO.setTargetObjectType(TargetObjectType.MOVIE_CREW);
-
-        BlockedUserException exception = new BlockedUserException(createDTO.getAuthorId());
-
-        Mockito.when(commentService.createComment(movieCrewId, createDTO)).thenThrow(exception);
-
-        String resultJson = mockMvc
-                .perform(post("/api/v1/movies/{movieId}/movie-crews/{movieCrewId}/comments",
-                        UUID.randomUUID(), movieCrewId)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(createDTO)))
-                .andExpect(status().isForbidden())
-                .andReturn().getResponse().getContentAsString();
-
-        Assert.assertTrue(resultJson.contains(exception.getMessage()));
     }
 
     @WithMockUser

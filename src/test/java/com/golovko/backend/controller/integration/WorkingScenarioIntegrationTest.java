@@ -1,6 +1,5 @@
 package com.golovko.backend.controller.integration;
 
-import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.article.ArticleCreateDTO;
@@ -46,7 +45,7 @@ import com.golovko.backend.util.MyParameterizedTypeImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
-import org.mockito.Mockito;
+import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -54,7 +53,10 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
@@ -68,10 +70,31 @@ import java.util.UUID;
 
 import static com.golovko.backend.domain.TargetObjectType.*;
 import static org.awaitility.Awaitility.await;
+import static org.mockito.Mockito.atLeast;
+import static org.mockito.Mockito.verify;
 
-@ActiveProfiles({"test", "working-scenario-profile"})
+@Sql(statements = {
+        "delete from external_system_import",
+        "delete from like_entity",
+        "delete from misprint",
+        "delete from rating",
+        "delete from genre_movie",
+        "delete from genre",
+        "delete from comment",
+        "delete from complaint",
+        "delete from article",
+        "delete from user_user_role",
+        "delete from application_user",
+        "delete from movie_cast",
+        "delete from movie_crew",
+        "delete from person",
+        "delete from movie"},
+        executionPhase = Sql.ExecutionPhase.AFTER_TEST_METHOD)
+@ActiveProfiles({"working-scenario"})
+@DirtiesContext
+@RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-public class WorkingScenarioIntegrationTest extends BaseTest {
+public class WorkingScenarioIntegrationTest {
 
     @Autowired
     private ApplicationUserRepository applicationUserRepository;
@@ -971,7 +994,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         Thread.sleep(10000);
         await().atMost(Duration.ofSeconds(30))
                 .untilAsserted(() ->
-                        Mockito.verify(updateAverageRatingOfMoviesJob, Mockito.atLeast(2))
+                        verify(updateAverageRatingOfMoviesJob, atLeast(2))
                                 .updateAverageRating());
 
         MovieReadExtendedDTO unregisteredUserMovieReadDTO = performRequest(
@@ -1241,21 +1264,21 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         // FINAL_35 unregistered user opens person page and sees average ratings
         // wait and check if updateAverageRating() was invoked
         Thread.sleep(10000);
-        await().atMost(Duration.ofSeconds(20))
+        await().atMost(Duration.ofSeconds(60))
                 .untilAsserted(() ->
-                        Mockito.verify(updateAverageRatingOfMovieCastsJob, Mockito.atLeast(3))
+                        verify(updateAverageRatingOfMovieCastsJob, atLeast(4))
                                 .updateAverageRatingOfMovieCast());
 
-        Thread.sleep(5000);
-        await().atMost(Duration.ofSeconds(20))
+        Thread.sleep(10000);
+        await().atMost(Duration.ofSeconds(60))
                 .untilAsserted(() ->
-                        Mockito.verify(updateAverageRatingOfPersonMoviesJob, Mockito.atLeast(3))
+                        verify(updateAverageRatingOfPersonMoviesJob, atLeast(4))
                                 .updateAverageRating());
 
-        Thread.sleep(5000);
-        await().atMost(Duration.ofSeconds(20))
+        Thread.sleep(10000);
+        await().atMost(Duration.ofSeconds(60))
                 .untilAsserted(() ->
-                        Mockito.verify(updateAverageRatingOfPersonRolesJob, Mockito.atLeast(3))
+                        verify(updateAverageRatingOfPersonRolesJob, atLeast(4))
                                 .updateAverageRating());
 
         PersonReadExtendedDTO actorReadDTO = performRequest(
@@ -1414,7 +1437,8 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
     }
 
     private UserCreateDTO createUserDTO(String email, String password, Gender gender) {
-        UserCreateDTO dto = generateObject(UserCreateDTO.class);
+        UserCreateDTO dto = new UserCreateDTO();
+        dto.setUsername("username");
         dto.setPassword(password);
         dto.setPasswordConfirmation(password);
         dto.setEmail(email);

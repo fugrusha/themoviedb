@@ -3,7 +3,6 @@ package com.golovko.backend.service;
 import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
-import com.golovko.backend.exception.BlockedUserException;
 import com.golovko.backend.exception.EntityNotFoundException;
 import com.golovko.backend.exception.TextBetweenIndexesNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
@@ -59,13 +58,6 @@ public class CommentService {
 
     @Transactional
     public CommentReadDTO createComment(UUID targetObjectId, CommentCreateDTO createDTO) {
-        ApplicationUser user = repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId());
-
-        // TODO remove this
-        if (user.getIsBlocked()) {
-            throw new BlockedUserException(user.getId());
-        }
-
         validateTargetObject(targetObjectId, createDTO);
 
         if (!StringUtils.isEmpty(createDTO.getSpoiler())) {
@@ -73,6 +65,8 @@ public class CommentService {
         }
 
         Comment comment = translationService.translate(createDTO, Comment.class);
+
+        ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, createDTO.getAuthorId());
 
         if (user.getTrustLevel() < 5) {
             comment.setStatus(CommentStatus.PENDING);

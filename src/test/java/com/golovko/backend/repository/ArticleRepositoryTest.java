@@ -36,12 +36,7 @@ public class ArticleRepositoryTest extends BaseTest {
     @Test
     public void testUpdatedAtIsSet() {
         ApplicationUser author = testObjectFactory.createUser();
-        Article article = new Article();
-        article.setText("text");
-        article.setTitle("title");
-        article.setStatus(ArticleStatus.DRAFT);
-        article.setAuthor(author);
-        article = articleRepository.save(article);
+        Article article = testObjectFactory.createArticle(author, ArticleStatus.DRAFT);
 
         Instant modifiedAtBeforeReload = article.getUpdatedAt();
         Assert.assertNotNull(modifiedAtBeforeReload);
