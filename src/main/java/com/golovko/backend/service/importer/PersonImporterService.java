@@ -106,7 +106,7 @@ public class PersonImporterService {
     private String getLastName(String fullName) {
         int index = fullName.lastIndexOf(" ");
         if (index > -1) {
-            return fullName.substring(index + 1 , fullName.length());
+            return fullName.substring(index + 1, fullName.length());
         }
         return null;
     }

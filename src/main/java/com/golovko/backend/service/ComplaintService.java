@@ -156,26 +156,26 @@ public class ComplaintService {
 
     private void validateTargetObject(ComplaintCreateDTO createDTO) {
         switch (createDTO.getTargetObjectType()) {
-            case MOVIE_CAST:
-                repoHelper.getReferenceIfExist(MovieCast.class, createDTO.getTargetObjectId());
-                break;
-            case MOVIE_CREW:
-                repoHelper.getReferenceIfExist(MovieCrew.class, createDTO.getTargetObjectId());
-                break;
-            case MOVIE:
-                repoHelper.getReferenceIfExist(Movie.class, createDTO.getTargetObjectId());
-                break;
-            case ARTICLE:
-                repoHelper.getReferenceIfExist(Article.class, createDTO.getTargetObjectId());
-                break;
-            case COMMENT:
-                repoHelper.getReferenceIfExist(Comment.class, createDTO.getTargetObjectId());
-                break;
-            case PERSON:
-                repoHelper.getReferenceIfExist(Person.class, createDTO.getTargetObjectId());
-                break;
-            default:
-                throw new WrongTargetObjectTypeException(ActionType.CREATE_COMPLAINT, createDTO.getTargetObjectType());
+          case MOVIE_CAST:
+              repoHelper.getReferenceIfExist(MovieCast.class, createDTO.getTargetObjectId());
+              break;
+          case MOVIE_CREW:
+              repoHelper.getReferenceIfExist(MovieCrew.class, createDTO.getTargetObjectId());
+              break;
+          case MOVIE:
+              repoHelper.getReferenceIfExist(Movie.class, createDTO.getTargetObjectId());
+              break;
+          case ARTICLE:
+              repoHelper.getReferenceIfExist(Article.class, createDTO.getTargetObjectId());
+              break;
+          case COMMENT:
+              repoHelper.getReferenceIfExist(Comment.class, createDTO.getTargetObjectId());
+              break;
+          case PERSON:
+              repoHelper.getReferenceIfExist(Person.class, createDTO.getTargetObjectId());
+              break;
+          default:
+              throw new WrongTargetObjectTypeException(ActionType.CREATE_COMPLAINT, createDTO.getTargetObjectType());
         }
     }
 
