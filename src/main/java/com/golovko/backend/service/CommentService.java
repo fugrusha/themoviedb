@@ -61,6 +61,7 @@ public class CommentService {
     public CommentReadDTO createComment(UUID targetObjectId, CommentCreateDTO createDTO) {
         ApplicationUser user = repoHelper.getReferenceIfExist(ApplicationUser.class, createDTO.getAuthorId());
 
+        // TODO remove this
         if (user.getIsBlocked()) {
             throw new BlockedUserException(user.getId());
         }

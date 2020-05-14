@@ -876,4 +876,29 @@ public class ComplaintServiceTest extends BaseTest {
                 .extracting("id")
                 .isEqualTo(Arrays.asList(c1.getId(), c2.getId()));
     }
+
+    @Test
+    public void testUpdateSimilarComplaints() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        ApplicationUser u2 = testObjectFactory.createUser();
+        ApplicationUser moderator = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+
+        Complaint c1 = testObjectFactory.createComplaint(m1.getId(), MOVIE, PROFANITY, u1);
+        Complaint c2 = testObjectFactory.createComplaint(m1.getId(), MOVIE, PROFANITY, u2);
+
+        ComplaintModerateDTO moderDTO = new ComplaintModerateDTO();
+        moderDTO.setModeratorId(moderator.getId());
+        moderDTO.setComplaintStatus(ComplaintStatus.CLOSED);
+
+        complaintService.moderateComplaint(c1.getId(), moderDTO);
+
+        Complaint updatedC1 = complaintRepository.findById(c1.getId()).get();
+        Assert.assertEquals(moderDTO.getModeratorId(), updatedC1.getModerator().getId());
+        Assert.assertEquals(moderDTO.getComplaintStatus(), updatedC1.getComplaintStatus());
+
+        Complaint updatedC2 = complaintRepository.findById(c2.getId()).get();
+        Assert.assertEquals(moderDTO.getModeratorId(), updatedC2.getModerator().getId());
+        Assert.assertEquals(moderDTO.getComplaintStatus(), updatedC2.getComplaintStatus());
+    }
 }

@@ -1,10 +1,7 @@
 package com.golovko.backend.controller;
 
 import com.golovko.backend.controller.documentation.ApiPageable;
-import com.golovko.backend.controller.security.Admin;
-import com.golovko.backend.controller.security.AdminOrCurrentUser;
-import com.golovko.backend.controller.security.AdminOrModeratorOrCurrentUser;
-import com.golovko.backend.controller.security.CurrentUser;
+import com.golovko.backend.controller.security.*;
 import com.golovko.backend.controller.validation.ControllerValidationUtil;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.user.*;
@@ -90,14 +87,14 @@ public class ApplicationUserController {
         applicationUserService.deleteUser(userId);
     }
 
-    @Admin
+    @AdminOrModerator
     @ApiOperation(value = "Block(ban) user by userId", notes = "Needs ADMIN authority.")
     @PostMapping("/{userId}/ban")
     public UserReadDTO banUser(@PathVariable UUID userId) {
         return applicationUserService.ban(userId);
     }
 
-    @Admin
+    @AdminOrModerator
     @ApiOperation(value = "Unblock user by userId", notes = "Needs ADMIN authority.")
     @PostMapping("/{userId}/pardon")
     public UserReadDTO pardonUser(@PathVariable UUID userId) {

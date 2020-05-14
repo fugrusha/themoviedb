@@ -17,11 +17,14 @@ public class UserDetailsImpl extends User {
 
     public UserDetailsImpl(ApplicationUser user) {
         super(user.getEmail(), user.getEncodedPassword(),
+                true,
+                true,
+                true,
+                !user.getIsBlocked(),
                 user.getUserRoles().stream()
                         .map(role -> new SimpleGrantedAuthority(role.getType().toString()))
                         .collect(Collectors.toList()));
 
         this.id = user.getId();
     }
-
 }

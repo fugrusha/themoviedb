@@ -7,10 +7,7 @@ import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingPatchDTO;
 import com.golovko.backend.dto.rating.RatingPutDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
-import com.golovko.backend.exception.ActionOfUserDuplicatedException;
-import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.exception.EntityWrongStatusException;
-import com.golovko.backend.exception.WrongTargetObjectTypeException;
+import com.golovko.backend.exception.*;
 import com.golovko.backend.repository.MovieCastRepository;
 import com.golovko.backend.repository.MovieCrewRepository;
 import com.golovko.backend.repository.MovieRepository;
@@ -158,6 +155,19 @@ public class RatingServiceTest extends BaseTest {
                 .isInstanceOf(ActionOfUserDuplicatedException.class)
                 .hasMessage(String.format("User with id=%s has already %s for %s with id=%s",
                         author.getId(), ActionType.ADD_RATING, createDTO.getRatedObjectType(), movie.getId()));
+    }
+
+    @Test(expected = BlockedUserException.class)
+    public void testCreateRatingBlockedUser() {
+        ApplicationUser author = testObjectFactory.createUser(8.5, true);
+        Movie movie = testObjectFactory.createMovie();
+
+        RatingCreateDTO createDTO = new RatingCreateDTO();
+        createDTO.setRating(6);
+        createDTO.setAuthorId(author.getId());
+        createDTO.setRatedObjectType(TargetObjectType.MOVIE);
+
+        ratingService.createRating(movie.getId(), createDTO);
     }
 
     @Test

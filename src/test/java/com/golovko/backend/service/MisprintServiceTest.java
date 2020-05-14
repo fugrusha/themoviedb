@@ -711,7 +711,6 @@ public class MisprintServiceTest extends BaseTest {
         Misprint updatedMisprint2 = misprintRepository.findById(m2.getId()).get();
         Assert.assertEquals(moderator.getId(), updatedMisprint2.getModerator().getId());
         Assert.assertEquals(confirmDTO.getReplaceTo(), updatedMisprint2.getReplacedWith());
-
         Assert.assertEquals(readDTO.getModeratorId(), updatedMisprint2.getModerator().getId());
         Assert.assertEquals(readDTO.getReplacedWith(), updatedMisprint2.getReplacedWith());
     }

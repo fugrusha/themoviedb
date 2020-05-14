@@ -21,7 +21,7 @@ public class UpdateAverageRatingOfPersonRolesJob {
     @Transactional(readOnly = true)
     @Scheduled(cron = "${update.average.rating.of.person.roles.job.cron}")
     public void updateAverageRating() {
-        log.info("Job started...");
+        log.info("Job updating average rating of person by roles started...");
 
         personRepository.getIdsOfPeople().forEach(personId -> {
             try {

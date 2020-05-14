@@ -12,6 +12,7 @@ import com.golovko.backend.exception.EntityWrongStatusException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.RatingRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class RatingService {
 
@@ -55,6 +57,7 @@ public class RatingService {
         rating.setRatedObjectId(targetId);
         rating = ratingRepository.save(rating);
 
+        log.info("{} with id={} was rated", createDTO.getRatedObjectType(), targetId);
         return translationService.translate(rating, RatingReadDTO.class);
     }
 

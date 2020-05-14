@@ -10,6 +10,7 @@ import com.golovko.backend.dto.comment.CommentCreateDTO;
 import com.golovko.backend.dto.comment.CommentModerateDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.dto.complaint.ComplaintCreateDTO;
+import com.golovko.backend.dto.complaint.ComplaintModerateDTO;
 import com.golovko.backend.dto.complaint.ComplaintReadDTO;
 import com.golovko.backend.dto.genre.GenreCreateDTO;
 import com.golovko.backend.dto.genre.GenreReadDTO;
@@ -27,6 +28,7 @@ import com.golovko.backend.dto.moviecrew.MovieCrewCreateDTO;
 import com.golovko.backend.dto.moviecrew.MovieCrewReadDTO;
 import com.golovko.backend.dto.person.PersonCreateDTO;
 import com.golovko.backend.dto.person.PersonReadDTO;
+import com.golovko.backend.dto.person.PersonReadExtendedDTO;
 import com.golovko.backend.dto.rating.RatingCreateDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.dto.user.UserCreateDTO;
@@ -34,13 +36,17 @@ import com.golovko.backend.dto.user.UserPatchDTO;
 import com.golovko.backend.dto.user.UserReadDTO;
 import com.golovko.backend.dto.user.UserTrustLevelDTO;
 import com.golovko.backend.dto.userrole.UserRoleReadDTO;
+import com.golovko.backend.job.UpdateAverageRatingOfMovieCastsJob;
 import com.golovko.backend.job.UpdateAverageRatingOfMoviesJob;
+import com.golovko.backend.job.UpdateAverageRatingOfPersonMoviesJob;
+import com.golovko.backend.job.UpdateAverageRatingOfPersonRolesJob;
 import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.UserRoleRepository;
 import com.golovko.backend.util.MyParameterizedTypeImpl;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
 import org.junit.Test;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.SpyBean;
@@ -49,17 +55,19 @@ import org.springframework.http.*;
 import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
 
-import static com.golovko.backend.domain.TargetObjectType.COMMENT;
-import static com.golovko.backend.domain.TargetObjectType.MOVIE;
+import static com.golovko.backend.domain.TargetObjectType.*;
+import static org.awaitility.Awaitility.await;
 
 @ActiveProfiles({"test", "working-scenario-profile"})
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -76,6 +84,15 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
 
     @SpyBean
     private UpdateAverageRatingOfMoviesJob updateAverageRatingOfMoviesJob;
+
+    @SpyBean
+    private UpdateAverageRatingOfMovieCastsJob updateAverageRatingOfMovieCastsJob;
+
+    @SpyBean
+    private UpdateAverageRatingOfPersonMoviesJob updateAverageRatingOfPersonMoviesJob;
+
+    @SpyBean
+    private UpdateAverageRatingOfPersonRolesJob updateAverageRatingOfPersonRolesJob;
 
     private final String API_URL = "http://localhost:8080/api/v1";
 
@@ -436,6 +453,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
                 getAuthHeaders(C1_EMAIL, C1_PASSWORD),
                 MovieCastReadDTO.class);
 
+        UUID movieCastId = cast2ReadDTO.getId();
         Assertions.assertThat(cast2CreateDTO).isEqualToIgnoringNullFields(cast2ReadDTO);
 
         // create person actor
@@ -811,7 +829,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         Assert.assertEquals(CommentStatus.PENDING, u1CommentReadDTO.getStatus());
 
         // u1 adds rating
-        RatingCreateDTO u1RatingCreateDTO = createRatingDTO(9, u1UserId, MOVIE);
+        RatingCreateDTO u1RatingCreateDTO = createRatingDTO(10, u1UserId, MOVIE);
 
         RatingReadDTO u1RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
@@ -834,7 +852,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         Assert.assertEquals(0, u2MovieCommentsReadDTO.getData().size());
 
         // FINAL_21 u2 adds rating to movie
-        RatingCreateDTO u2RatingCreateDTO = createRatingDTO(7, u2UserId, MOVIE);
+        RatingCreateDTO u2RatingCreateDTO = createRatingDTO(8, u2UserId, MOVIE);
 
         RatingReadDTO u2RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
@@ -905,7 +923,7 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         Assert.assertEquals(movieCreateDTO.getMovieTitle(), u3MovieReadExtendedDTO.getMovieTitle());
 
         // u3 adds rating
-        RatingCreateDTO u3RatingCreateDTO = createRatingDTO(2, u3UserId, MOVIE);
+        RatingCreateDTO u3RatingCreateDTO = createRatingDTO(6, u3UserId, MOVIE);
 
         RatingReadDTO u3RatingReadDTO = performRequest(
                 "/movies/" + movieId + "/ratings/",
@@ -950,21 +968,21 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
 
         // FINAL_26 unregistered user opens movie sees average rating
         // wait and check if updateAverageRating() was invoked
-//        Thread.sleep(5000);
-//        await().atMost(Duration.ofSeconds(20))
-//                .untilAsserted(() ->
-//                        Mockito.verify(updateAverageRatingOfMoviesJob, Mockito.atLeast(1))
-//                                .updateAverageRating());
-//
-//        MovieReadExtendedDTO unregisteredUserMovieReadDTO = performRequest(
-//                "/movies/" + movieId + "/extended/",
-//                HttpMethod.GET,
-//                null,
-//                null,
-//                MovieReadExtendedDTO.class);
-//
-//        Assert.assertNotNull(unregisteredUserMovieReadDTO.getAverageRating());
-//        Assert.assertEquals(6.0, unregisteredUserMovieReadDTO.getAverageRating(), Double.MIN_NORMAL);
+        Thread.sleep(10000);
+        await().atMost(Duration.ofSeconds(30))
+                .untilAsserted(() ->
+                        Mockito.verify(updateAverageRatingOfMoviesJob, Mockito.atLeast(2))
+                                .updateAverageRating());
+
+        MovieReadExtendedDTO unregisteredUserMovieReadDTO = performRequest(
+                "/movies/" + movieId + "/extended/",
+                HttpMethod.GET,
+                null,
+                null,
+                MovieReadExtendedDTO.class);
+
+        Assert.assertNotNull(unregisteredUserMovieReadDTO.getAverageRating());
+        Assert.assertEquals(8.0, unregisteredUserMovieReadDTO.getAverageRating(), Double.MIN_NORMAL);
 
         // FINAL_27 c1 imports movie from TheMovieDB with common actor
         // The Curious Case of Benjamin Button
@@ -993,9 +1011,16 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
 
         Assert.assertEquals(actor2Id, commonPersonId);
 
+        // get imported movie cast id for task #33
+        UUID importedMovieCastId = c1ImportedMovieReadDTO.getMovieCasts().stream()
+                .filter(cast -> actor2Id.equals(cast.getPersonId()))
+                .findAny()
+                .map(MovieCastReadDTO::getId)
+                .orElse(null);
+
         // FINAL_28 u1 adds low rating and writes bad comment
         // u1 add rating
-        RatingCreateDTO u1ImportedMovieRatingCreateDTO = createRatingDTO(1, u1UserId, MOVIE);
+        RatingCreateDTO u1ImportedMovieRatingCreateDTO = createRatingDTO(2, u1UserId, MOVIE);
 
         performRequest(
                 "/movies/" + importedMovieId + "/ratings",
@@ -1111,6 +1136,138 @@ public class WorkingScenarioIntegrationTest extends BaseTest {
         Assert.assertEquals(2, m1AllComplaints.getData().size());
         Assertions.assertThat(m1AllComplaints.getData()).extracting("id")
                 .containsExactlyInAnyOrder(u2ComplaintId, u3ComplaintId);
+
+        UUID firstComplaintId = m1AllComplaints.getData().get(0).getId();
+
+        // FINAL_31 m1 moderates one of the pending complaints, deletes comment and bans u1
+        ComplaintModerateDTO complaintModerateDTO = new ComplaintModerateDTO();
+        complaintModerateDTO.setComplaintStatus(ComplaintStatus.CLOSED);
+        complaintModerateDTO.setDeleteComment(true);
+        complaintModerateDTO.setBlockCommentAuthor(true);
+        complaintModerateDTO.setModeratorId(m1UserId);
+
+        ComplaintReadDTO m1ModeratesComplaintReadDTO = performRequest(
+                "/complaints/" + firstComplaintId + "/moderate",
+                HttpMethod.POST,
+                complaintModerateDTO,
+                getAuthHeaders(M1_EMAIL, M1_PASSWORD),
+                ComplaintReadDTO.class);
+
+        Assert.assertEquals(m1UserId, m1ModeratesComplaintReadDTO.getModeratorId());
+        Assert.assertEquals(ComplaintStatus.CLOSED, m1ModeratesComplaintReadDTO.getComplaintStatus());
+
+        // check if comment is not displayed
+        PageResult<CommentReadDTO> u3ImportedMovieComments2 = performPageRequest(
+                "/movies/" + importedMovieId + "/comments",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                CommentReadDTO.class);
+
+        Assert.assertEquals(0, u3ImportedMovieComments2.getData().size());
+
+        // check if u1 is blocked
+        UserReadDTO u1BlockedUserReadDTO = performRequest(
+                "/users/" + u1UserId,
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(ADMIN_EMAIL, ADMIN_PASSWORD),
+                UserReadDTO.class);
+
+        Assert.assertTrue(u1BlockedUserReadDTO.getIsBlocked());
+
+        // FINAL_32 m1 opens pending complaints and sees no new complaints
+        PageResult<ComplaintReadDTO> m1AllComplaints2 = performPageRequest(
+                "/complaints?statuses=INITIATED",
+                HttpMethod.GET,
+                null,
+                getAuthHeaders(M1_EMAIL, M1_PASSWORD),
+                ComplaintReadDTO.class);
+
+        Assert.assertEquals(0, m1AllComplaints2.getData().size());
+
+        // FINAL_33 u2 and u3 add ratings to casts of actor2Id in two movies
+        // u2 adds rating to cast in movieId
+        RatingCreateDTO u2MovieCastRatingCreateDTO = createRatingDTO(8, u2UserId, MOVIE_CAST);
+
+        performRequest(
+                "/movies/" + movieId + "/movie-casts/" + movieCastId + "/ratings/",
+                HttpMethod.POST,
+                u2MovieCastRatingCreateDTO,
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD),
+                RatingReadDTO.class);
+
+        // u2 adds rating to cast in imported movie
+        RatingCreateDTO u2ImportedMovieCastRatingCreateDTO = createRatingDTO(10, u2UserId, MOVIE_CAST);
+
+        performRequest(
+                "/movies/" + importedMovieId + "/movie-casts/" + importedMovieCastId + "/ratings/",
+                HttpMethod.POST,
+                u2ImportedMovieCastRatingCreateDTO,
+                getAuthHeaders(U2_EMAIL, U2_PASSWORD),
+                RatingReadDTO.class);
+
+        // u3 adds rating to cast in movieId
+        RatingCreateDTO u3MovieCastRatingCreateDTO = createRatingDTO(4, u3UserId, MOVIE_CAST);
+
+        performRequest(
+                "/movies/" + movieId + "/movie-casts/" + movieCastId + "/ratings/",
+                HttpMethod.POST,
+                u3MovieCastRatingCreateDTO,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                RatingReadDTO.class);
+
+        // u3 adds rating to cast in imported movie
+        RatingCreateDTO u3ImportedMovieCastRatingCreateDTO = createRatingDTO(6, u3UserId, MOVIE_CAST);
+
+        performRequest(
+                "/movies/" + importedMovieId + "/movie-casts/" + importedMovieCastId + "/ratings/",
+                HttpMethod.POST,
+                u3ImportedMovieCastRatingCreateDTO,
+                getAuthHeaders(U3_EMAIL, U3_PASSWORD),
+                RatingReadDTO.class);
+
+        // FINAL_34 u1 tries to add rating to cast but receives 403 error
+        RatingCreateDTO u1ImportedMovieCastRatingCreateDTO = createRatingDTO(8, u1UserId, MOVIE_CAST);
+
+        Assertions.assertThatThrownBy(() -> new RestTemplate().exchange(
+                API_URL + "/movies/" + importedMovieId + "/movie-casts/" + importedMovieCastId + "/ratings/",
+                HttpMethod.POST,
+                new HttpEntity<>(u1ImportedMovieCastRatingCreateDTO, getAuthHeaders(U1_EMAIL, U1_PASSWORD)),
+                new ParameterizedTypeReference<RatingReadDTO>() {}))
+                .isInstanceOf(HttpClientErrorException.class)
+                .extracting("statusCode").isEqualTo(HttpStatus.UNAUTHORIZED);
+
+        // FINAL_35 unregistered user opens person page and sees average ratings
+        // wait and check if updateAverageRating() was invoked
+        Thread.sleep(10000);
+        await().atMost(Duration.ofSeconds(20))
+                .untilAsserted(() ->
+                        Mockito.verify(updateAverageRatingOfMovieCastsJob, Mockito.atLeast(3))
+                                .updateAverageRatingOfMovieCast());
+
+        Thread.sleep(5000);
+        await().atMost(Duration.ofSeconds(20))
+                .untilAsserted(() ->
+                        Mockito.verify(updateAverageRatingOfPersonMoviesJob, Mockito.atLeast(3))
+                                .updateAverageRating());
+
+        Thread.sleep(5000);
+        await().atMost(Duration.ofSeconds(20))
+                .untilAsserted(() ->
+                        Mockito.verify(updateAverageRatingOfPersonRolesJob, Mockito.atLeast(3))
+                                .updateAverageRating());
+
+        PersonReadExtendedDTO actorReadDTO = performRequest(
+                "/people/" + actor2Id + "/extended/",
+                HttpMethod.GET,
+                null,
+                null,
+                PersonReadExtendedDTO.class);
+
+        Assert.assertEquals(2, actorReadDTO.getMovieCasts().size());
+        Assert.assertEquals(7.0, actorReadDTO.getAverageRatingByMovies(), Double.MIN_NORMAL);
+        Assert.assertEquals(7.0, actorReadDTO.getAverageRatingByRoles(), Double.MIN_NORMAL);
     }
 
     private <T> T performRequest(

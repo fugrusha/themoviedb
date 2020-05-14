@@ -155,7 +155,7 @@ public class MisprintService {
                 .forEach(m -> {
                     setStatusClosedAndSave(dto, m);
 
-                    log.info("And misprint with id={} saved successfully", m.getId());
+                    log.info("And misprint with id={} closed successfully", m.getId());
                 });
     }
 
@@ -166,7 +166,7 @@ public class MisprintService {
         misprint.setStatus(ComplaintStatus.CLOSED);
         misprintRepository.save(misprint);
 
-        log.info("Misprint with id={} saved successfully", misprint.getId());
+        log.info("Misprint with id={} closed successfully", misprint.getId());
     }
 
     public void fixIssue(Misprint misprint, MisprintConfirmDTO dto) {

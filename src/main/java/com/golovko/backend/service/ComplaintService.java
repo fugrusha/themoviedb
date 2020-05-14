@@ -10,6 +10,7 @@ import com.golovko.backend.repository.ApplicationUserRepository;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.ComplaintRepository;
 import com.golovko.backend.repository.RepositoryHelper;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +21,7 @@ import org.springframework.util.StringUtils;
 import java.util.Optional;
 import java.util.UUID;
 
+@Slf4j
 @Service
 public class ComplaintService {
 
@@ -67,31 +69,6 @@ public class ComplaintService {
         return translationService.translate(complaint, ComplaintReadDTO.class);
     }
 
-    private void validateTargetObject(ComplaintCreateDTO createDTO) {
-        switch (createDTO.getTargetObjectType()) {
-          case MOVIE_CAST:
-              repoHelper.getReferenceIfExist(MovieCast.class, createDTO.getTargetObjectId());
-              break;
-          case MOVIE_CREW:
-              repoHelper.getReferenceIfExist(MovieCrew.class, createDTO.getTargetObjectId());
-              break;
-          case MOVIE:
-              repoHelper.getReferenceIfExist(Movie.class, createDTO.getTargetObjectId());
-              break;
-          case ARTICLE:
-              repoHelper.getReferenceIfExist(Article.class, createDTO.getTargetObjectId());
-              break;
-          case COMMENT:
-              repoHelper.getReferenceIfExist(Comment.class, createDTO.getTargetObjectId());
-              break;
-          case PERSON:
-              repoHelper.getReferenceIfExist(Person.class, createDTO.getTargetObjectId());
-              break;
-          default:
-              throw new WrongTargetObjectTypeException(ActionType.CREATE_COMPLAINT, createDTO.getTargetObjectType());
-        }
-    }
-
     public ComplaintReadDTO patchComplaint(UUID userId, UUID id, ComplaintPatchDTO patchDTO) {
         Complaint complaint = getComplaintByUserId(id, userId);
 
@@ -130,11 +107,29 @@ public class ComplaintService {
             decreaseComplaintAuthorTrustLevelByOne(complaint.getAuthor());
         }
 
+        complaint = setStatusAndSave(dto, complaint);
+
+        updateSimilarComplaints(dto, complaint.getTargetObjectId(), complaint.getComplaintType());
+
+        return translationService.translate(complaint, ComplaintReadDTO.class);
+    }
+
+    private Complaint setStatusAndSave(ComplaintModerateDTO dto, Complaint complaint) {
         complaint.setModerator(repoHelper.getReferenceIfExist(ApplicationUser.class, dto.getModeratorId()));
         complaint.setComplaintStatus(dto.getComplaintStatus());
         complaint = complaintRepository.save(complaint);
 
-        return translationService.translate(complaint, ComplaintReadDTO.class);
+        log.info("Complaint with id={} updated successfully", complaint.getId());
+        return complaint;
+    }
+
+    private void updateSimilarComplaints(ComplaintModerateDTO dto, UUID objectId, ComplaintType complaintType) {
+        complaintRepository.findSimilarComplaints(objectId, complaintType, ComplaintStatus.INITIATED)
+                .forEach(c -> {
+                    setStatusAndSave(dto, c);
+
+                    log.info("And complaint with id={} updated successfully", c.getId());
+                });
     }
 
     private void decreaseComplaintAuthorTrustLevelByOne(ApplicationUser complaintAuthor) {
@@ -146,7 +141,7 @@ public class ComplaintService {
     private void moderateCommentComplaint(UUID commentId, ComplaintModerateDTO dto) {
         Comment comment = repoHelper.getEntityById(Comment.class, commentId);
 
-        if (!StringUtils.isEmpty(dto.getNewCommentMessage())) {
+        if (StringUtils.hasText(dto.getNewCommentMessage())) {
             comment.setMessage(dto.getNewCommentMessage());
         }
         if (dto.getDeleteComment() != null && dto.getDeleteComment()) {
@@ -156,6 +151,31 @@ public class ComplaintService {
             ApplicationUser commentAuthor = comment.getAuthor();
             commentAuthor.setIsBlocked(true);
             applicationUserRepository.save(commentAuthor);
+        }
+    }
+
+    private void validateTargetObject(ComplaintCreateDTO createDTO) {
+        switch (createDTO.getTargetObjectType()) {
+            case MOVIE_CAST:
+                repoHelper.getReferenceIfExist(MovieCast.class, createDTO.getTargetObjectId());
+                break;
+            case MOVIE_CREW:
+                repoHelper.getReferenceIfExist(MovieCrew.class, createDTO.getTargetObjectId());
+                break;
+            case MOVIE:
+                repoHelper.getReferenceIfExist(Movie.class, createDTO.getTargetObjectId());
+                break;
+            case ARTICLE:
+                repoHelper.getReferenceIfExist(Article.class, createDTO.getTargetObjectId());
+                break;
+            case COMMENT:
+                repoHelper.getReferenceIfExist(Comment.class, createDTO.getTargetObjectId());
+                break;
+            case PERSON:
+                repoHelper.getReferenceIfExist(Person.class, createDTO.getTargetObjectId());
+                break;
+            default:
+                throw new WrongTargetObjectTypeException(ActionType.CREATE_COMPLAINT, createDTO.getTargetObjectType());
         }
     }
 

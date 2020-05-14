@@ -91,7 +91,7 @@ public class PersonService {
         Double averageRating = movieCastRepository.calcAverageRatingOfPerson(personId);
         Person person = repoHelper.getEntityById(Person.class, personId);
 
-        log.info("Setting new average rating of person: {}. Old value {}, new value {}", personId,
+        log.info("Setting new average rating of person by roles: {}. Old value {}, new value {}", personId,
                 person.getAverageRatingByRoles(), averageRating);
 
         person.setAverageRatingByRoles(averageRating);
@@ -104,7 +104,7 @@ public class PersonService {
 
         Person person = repoHelper.getEntityById(Person.class, personId);
 
-        log.info("Setting new average rating by movies of person: {}. Old value={}, new value={}",
+        log.info("Setting new average rating of person by movies : {}. Old value={}, new value={}",
                 personId, person.getAverageRatingByMovies(), averageRating);
 
         person.setAverageRatingByMovies(averageRating);

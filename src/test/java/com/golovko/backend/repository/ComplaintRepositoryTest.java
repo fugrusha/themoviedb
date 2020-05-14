@@ -3,6 +3,7 @@ package com.golovko.backend.repository;
 import com.golovko.backend.BaseTest;
 import com.golovko.backend.domain.ApplicationUser;
 import com.golovko.backend.domain.Complaint;
+import com.golovko.backend.domain.ComplaintStatus;
 import com.golovko.backend.domain.Movie;
 import org.assertj.core.api.Assertions;
 import org.junit.Assert;
@@ -12,8 +13,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.Instant;
+import java.util.stream.Stream;
 
-import static com.golovko.backend.domain.ComplaintType.VIOLENCE;
+import static com.golovko.backend.domain.ComplaintType.*;
 import static com.golovko.backend.domain.TargetObjectType.MOVIE;
 
 public class ComplaintRepositoryTest extends BaseTest {
@@ -95,5 +97,26 @@ public class ComplaintRepositoryTest extends BaseTest {
 
         Assert.assertNotNull(modifiedAtAfterReload);
         Assert.assertTrue(modifiedAtBeforeReload.isBefore(modifiedAtAfterReload));
+    }
+
+    @Test
+    public void testFindSimilarComplaints() {
+        ApplicationUser u1 = testObjectFactory.createUser();
+        ApplicationUser u2 = testObjectFactory.createUser();
+        Movie m1 = testObjectFactory.createMovie();
+        Movie m2 = testObjectFactory.createMovie();
+
+        Complaint c1 = testObjectFactory.createComplaint(m1.getId(), MOVIE, PROFANITY, u1);
+        Complaint c2 = testObjectFactory.createComplaint(m1.getId(), MOVIE, PROFANITY, u2);
+        testObjectFactory.createComplaint(m1.getId(), MOVIE, SPAM, u1); // another complaintType
+        testObjectFactory.createComplaint(m2.getId(), MOVIE, PROFANITY, u1); // another movie
+
+        transactionTemplate.executeWithoutResult(status -> {
+            Stream<Complaint> complaints = complaintRepository
+                    .findSimilarComplaints(m1.getId(), PROFANITY, ComplaintStatus.INITIATED);
+
+            Assertions.assertThat(complaints).extracting("id")
+                    .containsExactlyInAnyOrder(c1.getId(), c2.getId());
+        });
     }
 }
