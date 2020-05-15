@@ -833,8 +833,7 @@ public class WorkingScenarioIntegrationTest {
         // FINAL_19 u1 writes a review on the film with a spoiler and adds high rating
         // u1 adds comment
         CommentCreateDTO commentCreateDTO = new CommentCreateDTO();
-        commentCreateDTO.setMessage("message text with spoiler");
-        commentCreateDTO.setSpoiler("spoiler");
+        commentCreateDTO.setMessage("message text with <spoiler visibility='hidden'>spoiler</spoiler>");
         commentCreateDTO.setAuthorId(u1UserId);
         commentCreateDTO.setTargetObjectType(MOVIE);
 
@@ -1278,7 +1277,7 @@ public class WorkingScenarioIntegrationTest {
         Thread.sleep(10000);
         await().atMost(Duration.ofSeconds(60))
                 .untilAsserted(() ->
-                        verify(updateAverageRatingOfPersonRolesJob, atLeast(4))
+                        verify(updateAverageRatingOfPersonRolesJob, atLeast(5))
                                 .updateAverageRating());
 
         PersonReadExtendedDTO actorReadDTO = performRequest(

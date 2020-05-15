@@ -4,7 +4,6 @@ import com.golovko.backend.domain.*;
 import com.golovko.backend.dto.PageResult;
 import com.golovko.backend.dto.comment.*;
 import com.golovko.backend.exception.EntityNotFoundException;
-import com.golovko.backend.exception.TextBetweenIndexesNotFoundException;
 import com.golovko.backend.exception.WrongTargetObjectTypeException;
 import com.golovko.backend.repository.CommentRepository;
 import com.golovko.backend.repository.LikeRepository;
@@ -15,7 +14,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.StringUtils;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -60,10 +58,6 @@ public class CommentService {
     public CommentReadDTO createComment(UUID targetObjectId, CommentCreateDTO createDTO) {
         validateTargetObject(targetObjectId, createDTO);
 
-        if (!StringUtils.isEmpty(createDTO.getSpoiler())) {
-            checkIfMessageContainsSpoilerText(createDTO.getSpoiler(), createDTO.getMessage());
-        }
-
         Comment comment = translationService.translate(createDTO, Comment.class);
 
         ApplicationUser user = repoHelper.getEntityById(ApplicationUser.class, createDTO.getAuthorId());
@@ -85,11 +79,6 @@ public class CommentService {
         Comment comment = getCommentRequired(targetObjectId, id);
 
         translationService.map(putDTO, comment);
-
-        if (!StringUtils.isEmpty(comment.getSpoiler())) {
-            checkIfMessageContainsSpoilerText(comment.getSpoiler(), comment.getMessage());
-        }
-
         comment = commentRepository.save(comment);
 
         return translationService.translate(comment, CommentReadDTO.class);
@@ -99,11 +88,6 @@ public class CommentService {
         Comment comment = getCommentRequired(targetObjectId, id);
 
         translationService.map(patchDTO, comment);
-
-        if (!StringUtils.isEmpty(comment.getSpoiler()) && !StringUtils.isEmpty(patchDTO.getSpoiler())) {
-            checkIfMessageContainsSpoilerText(comment.getSpoiler(), comment.getMessage());
-        }
-
         comment = commentRepository.save(comment);
 
         return translationService.translate(comment, CommentReadDTO.class);
@@ -149,12 +133,6 @@ public class CommentService {
               break;
           default:
               throw new WrongTargetObjectTypeException(ActionType.CREATE_COMMENT, createDTO.getTargetObjectType());
-        }
-    }
-
-    private void checkIfMessageContainsSpoilerText(String spoiler, String message) {
-        if (!message.contains(spoiler)) {
-            throw new TextBetweenIndexesNotFoundException("Message text does not contain text of spoiler");
         }
     }
 }

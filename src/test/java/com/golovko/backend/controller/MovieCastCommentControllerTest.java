@@ -108,7 +108,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
 
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("message text");
-        createDTO.setSpoiler("spoiler");
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE_CAST);
 
@@ -154,7 +153,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
     public void testCreateMovieCastCommentMinSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("");
-        createDTO.setSpoiler("");
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE_CAST);
 
@@ -177,7 +175,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
     public void testCreateMovieCastCommentMaxSizeValidationFailed() throws Exception {
         CommentCreateDTO createDTO = new CommentCreateDTO();
         createDTO.setMessage("comment message".repeat(100));
-        createDTO.setSpoiler("spoiler".repeat(1000));
         createDTO.setAuthorId(UUID.randomUUID());
         createDTO.setTargetObjectType(TargetObjectType.MOVIE_CAST);
 
@@ -204,7 +201,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
 
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("message text");
-        putDTO.setSpoiler("new spoiler");
 
         Mockito.when(commentService.updateComment(movieCastId, readDTO.getId(), putDTO))
                 .thenReturn(readDTO);
@@ -226,7 +222,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
     public void testUpdateMovieCastCommentMinSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();
         putDTO.setMessage("");
-        putDTO.setSpoiler("");
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/comments/{id}",
@@ -247,7 +242,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
     public void testUpdateMovieCastCommentMaxSizeValidationFailed() throws Exception {
         CommentPutDTO putDTO = new CommentPutDTO();;
         putDTO.setMessage("comment message".repeat(100));
-        putDTO.setSpoiler("new spoiler".repeat(1000));
 
         String resultJson = mockMvc
                 .perform(put("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/comments/{id}",
@@ -272,7 +266,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
 
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("New message");
-        patchDTO.setSpoiler("new spoiler");
 
         Mockito.when(commentService.patchComment(movieCastId, readDTO.getId(), patchDTO))
                 .thenReturn(readDTO);
@@ -294,7 +287,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
     public void testPatchMovieCastCommentMinSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("");
-        patchDTO.setSpoiler("");
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/comments/{id}",
@@ -315,7 +307,6 @@ public class MovieCastCommentControllerTest extends BaseControllerTest {
     public void testPatchMovieCastCommentMaxSizeValidationFailed() throws Exception {
         CommentPatchDTO patchDTO = new CommentPatchDTO();
         patchDTO.setMessage("comment message".repeat(100));
-        patchDTO.setSpoiler("new spoiler".repeat(1000));
 
         String resultJson = mockMvc
                 .perform(patch("/api/v1/movies/{movieId}/movie-casts/{movieCastId}/comments/{id}",
