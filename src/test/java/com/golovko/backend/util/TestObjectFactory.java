@@ -58,6 +58,9 @@ public class TestObjectFactory {
     @Autowired
     private UserRoleRepository userRoleRepository;
 
+    @Autowired
+    private WatchlistRepository watchlistRepository;
+
     protected RandomObjectGenerator flatGenerator;
     {
         Configuration c = new Configuration();
@@ -305,5 +308,13 @@ public class TestObjectFactory {
         esi.setEntityType(entityType);
         esi.setEntityId(UUID.randomUUID());
         return esiRepository.save(esi);
+    }
+
+    public Watchlist createWatchlist(ApplicationUser author, List<Movie> movies) {
+        Watchlist watchlist = new Watchlist();
+        watchlist.setName("movies to watch");
+        watchlist.setAuthor(author);
+        watchlist.setMovies(movies);
+        return watchlistRepository.save(watchlist);
     }
 }

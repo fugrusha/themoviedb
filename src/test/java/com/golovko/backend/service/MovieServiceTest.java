@@ -119,7 +119,7 @@ public class MovieServiceTest extends BaseTest {
 
         movie = movieRepository.findById(readDTO.getId()).get();
         assertThat(movie).isEqualToIgnoringGivenFields(readDTO,
-                "movieCrews", "movieCasts", "genres", "articles");
+                "movieCrews", "movieCasts", "genres", "articles", "watchlists");
     }
 
     @Test
@@ -138,7 +138,7 @@ public class MovieServiceTest extends BaseTest {
                 "likesCount", "dislikesCount");
 
         assertThat(movie).isEqualToIgnoringGivenFields(afterUpdate,
-                "movieCrews", "movieCasts", "genres", "articles");
+                "movieCrews", "movieCasts", "genres", "articles", "watchlists");
     }
 
     @Test
@@ -157,7 +157,7 @@ public class MovieServiceTest extends BaseTest {
 
         movie = movieRepository.findById(readDTO.getId()).get();
         assertThat(movie).isEqualToIgnoringGivenFields(readDTO,
-                "movieCrews", "movieCasts", "genres", "articles");
+                "movieCrews", "movieCasts", "genres", "articles", "watchlists");
     }
 
     @Test

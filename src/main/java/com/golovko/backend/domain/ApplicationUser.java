@@ -54,4 +54,7 @@ public class ApplicationUser extends AbstractEntity {
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "match_id"))
     private List<ApplicationUser> topMatches = new ArrayList<>();
+
+    @OneToMany(mappedBy = "author")
+    private List<Watchlist> watchlists = new ArrayList<>();
 }

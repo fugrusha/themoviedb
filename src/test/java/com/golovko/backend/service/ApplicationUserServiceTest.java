@@ -175,7 +175,8 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         user = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
-                "encodedPassword", "articles", "likes", "userRoles", "comments", "topMatches");
+                "encodedPassword", "articles", "likes", "userRoles",
+                "comments", "topMatches", "watchlists");
     }
 
     @Test
@@ -191,7 +192,8 @@ public class ApplicationUserServiceTest extends BaseTest {
 
         Assertions.assertThat(userAfterUpdate).hasNoNullFieldsOrProperties();
         Assertions.assertThat(user).isEqualToIgnoringGivenFields(userAfterUpdate,
-                "encodedPassword", "articles", "likes", "userRoles", "comments", "topMatches");
+                "encodedPassword", "articles", "likes", "userRoles",
+                "comments", "topMatches", "watchlists");
     }
 
     @Test
@@ -211,7 +213,7 @@ public class ApplicationUserServiceTest extends BaseTest {
         user = applicationUserRepository.findById(readDTO.getId()).get();
         Assertions.assertThat(user).isEqualToIgnoringGivenFields(readDTO,
                 "encodedPassword", "passwordConfirmation", "articles",
-                "likes", "userRoles", "comments", "topMatches");
+                "likes", "userRoles", "comments", "topMatches", "watchlists");
     }
 
     @Test

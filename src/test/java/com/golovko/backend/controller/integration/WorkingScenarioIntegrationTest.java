@@ -74,6 +74,8 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
 
 @Sql(statements = {
+        "delete from movie_watchlist",
+        "delete from watchlist",
         "delete from external_system_import",
         "delete from like_entity",
         "delete from misprint",

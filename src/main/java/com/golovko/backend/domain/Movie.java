@@ -70,4 +70,7 @@ public class Movie extends AbstractEntity {
 
     @ManyToMany(mappedBy = "movies")
     private List<Article> articles = new ArrayList<>();
+
+    @ManyToMany(mappedBy = "movies")
+    private List<Watchlist> watchlists = new ArrayList<>();
 }

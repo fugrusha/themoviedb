@@ -14,6 +14,8 @@ import org.springframework.transaction.support.TransactionTemplate;
 @SpringBootTest
 @ActiveProfiles("test")
 @Sql(statements = {
+        "delete from movie_watchlist",
+        "delete from watchlist",
         "delete from external_system_import",
         "delete from like_entity",
         "delete from misprint",

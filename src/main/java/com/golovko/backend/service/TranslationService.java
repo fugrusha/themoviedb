@@ -36,6 +36,7 @@ import com.golovko.backend.dto.rating.RatingPutDTO;
 import com.golovko.backend.dto.rating.RatingReadDTO;
 import com.golovko.backend.dto.user.UserPatchDTO;
 import com.golovko.backend.dto.user.UserPutDTO;
+import com.golovko.backend.dto.watchlist.WatchlistReadDTO;
 import com.golovko.backend.repository.RepositoryHelper;
 import lombok.extern.slf4j.Slf4j;
 import org.bitbucket.brunneng.ot.Configuration;
@@ -78,6 +79,7 @@ public class TranslationService {
         configureForMovie(c);
         configureForPerson(c);
         configureForRating(c);
+        configureForWatchlist(c);
 
         return c;
     }
@@ -194,6 +196,11 @@ public class TranslationService {
         c.beanOfClass(RatingPatchDTO.class).translationTo(Rating.class).mapOnlyNotNullProperties();
 
         c.beanOfClass(RatingPutDTO.class).translationTo(Rating.class);
+    }
+
+    private void configureForWatchlist(Configuration c) {
+        Configuration.Translation t = c.beanOfClass(Watchlist.class).translationTo(WatchlistReadDTO.class);
+        t.srcProperty("author.id").translatesTo("authorId");
     }
 
     public <T> T translate(Object srcObject, Class<T> targetClass) {
