@@ -197,4 +197,14 @@
         </loadUpdateData>
     </changeSet>
 
+    <changeSet id="load watchlist table" author="andrew" runOnChange="true">
+        <loadUpdateData tableName="watchlist" file="db/data/watchlist.csv" separator=";" primaryKey="id">
+            <column name="id" type="uuid"/>
+            <column name="name" type="string"/>
+            <column name="author_id" type="uuid"/>
+            <column name="created_at" type="timestamp"/>
+            <column name="updated_at" type="timestamp"/>
+        </loadUpdateData>
+    </changeSet>
+
 </databaseChangeLog>

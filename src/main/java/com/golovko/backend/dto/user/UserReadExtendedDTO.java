@@ -5,6 +5,7 @@ import com.golovko.backend.dto.article.ArticleReadDTO;
 import com.golovko.backend.dto.comment.CommentReadDTO;
 import com.golovko.backend.dto.like.LikeReadDTO;
 import com.golovko.backend.dto.userrole.UserRoleReadDTO;
+import com.golovko.backend.dto.watchlist.WatchlistReadDTO;
 import lombok.Data;
 
 import java.time.Instant;
@@ -35,6 +36,8 @@ public class UserReadExtendedDTO {
     private List<CommentReadDTO> comments;
 
     private List<UserReadDTO> topMatches;
+
+    private List<WatchlistReadDTO> watchlists;
 
     private Instant createdAt;
 

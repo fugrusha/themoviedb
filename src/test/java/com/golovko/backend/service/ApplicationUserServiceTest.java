@@ -95,18 +95,18 @@ public class ApplicationUserServiceTest extends BaseTest {
         ApplicationUser user = testObjectFactory.createUser();
         UserRole userRole = userRoleRepository.findByType(UserRoleType.USER);
         user.setUserRoles(List.of(userRole));
-
         user.getTopMatches().add(userWithCommonTastes);
         applicationUserRepository.save(user);
 
         Article article = testObjectFactory.createArticle(user, ArticleStatus.PUBLISHED);
         Comment comment = testObjectFactory.createComment(user, article.getId(), APPROVED, ARTICLE);
         Like like = testObjectFactory.createLike(true, user, article.getId(), ARTICLE);
+        Watchlist watchlist =testObjectFactory.createWatchlist(user, null);
 
         UserReadExtendedDTO readDTO = applicationUserService.getExtendedUser(user.getId());
 
         Assertions.assertThat(readDTO).isEqualToIgnoringGivenFields(user,
-                "userRoles", "likes", "articles", "comments", "topMatches");
+                "userRoles", "likes", "articles", "comments", "topMatches", "watchlists");
 
         Assertions.assertThat(readDTO.getUserRoles()).extracting("id")
                 .containsExactlyInAnyOrder(userRole.getId());
@@ -118,6 +118,8 @@ public class ApplicationUserServiceTest extends BaseTest {
                 .containsExactlyInAnyOrder(like.getId());
         Assertions.assertThat(readDTO.getTopMatches()).extracting("id")
                 .containsExactlyInAnyOrder(userWithCommonTastes.getId());
+        Assertions.assertThat(readDTO.getWatchlists()).extracting("id")
+                .containsExactlyInAnyOrder(watchlist.getId());
     }
 
     @Test(expected = EntityNotFoundException.class)
