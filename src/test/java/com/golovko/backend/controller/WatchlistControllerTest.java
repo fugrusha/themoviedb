@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.golovko.backend.domain.Movie;
 import com.golovko.backend.dto.watchlist.*;
 import com.golovko.backend.exception.EntityNotFoundException;
+import com.golovko.backend.exception.LinkDuplicatedException;
 import com.golovko.backend.exception.handler.ErrorInfo;
 import com.golovko.backend.service.WatchlistService;
 import org.assertj.core.api.Assertions;
@@ -376,5 +377,73 @@ public class WatchlistControllerTest extends BaseControllerTest {
                 .andExpect(status().isOk());
 
         Mockito.verify(watchlistService).deleteWatchlist(userId, id);
+    }
+
+    @WithMockUser
+    @Test
+    public void testAddMovieToWatchlist() throws Exception {
+        WatchlistReadDTO readDTO = generateObject(WatchlistReadDTO.class);
+        UUID userId = readDTO.getAuthorId();
+        UUID watchlistId = readDTO.getId();
+        UUID movieId = UUID.randomUUID();
+
+        Mockito.when(watchlistService.addMovieToWatchlist(userId, watchlistId, movieId)).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/watchlists/{id}/movies/{movieId}",
+                       userId, watchlistId, movieId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        WatchlistReadDTO actualResult = objectMapper.readValue(resultJson, WatchlistReadDTO.class);
+        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(actualResult);
+
+        Mockito.verify(watchlistService).addMovieToWatchlist(userId, watchlistId, movieId);
+    }
+
+    @WithMockUser
+    @Test
+    public void testRemoveMovieFromWatchlist() throws Exception {
+        WatchlistReadDTO readDTO = generateObject(WatchlistReadDTO.class);
+        UUID userId = readDTO.getAuthorId();
+        UUID watchlistId = readDTO.getId();
+        UUID movieId = UUID.randomUUID();
+
+        Mockito.when(watchlistService.removeMovieFromWatchlist(userId, watchlistId, movieId)).thenReturn(readDTO);
+
+        String resultJson = mockMvc
+                .perform(delete("/api/v1/users/{userId}/watchlists/{id}/movies/{movieId}",
+                        userId, watchlistId, movieId))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+
+        WatchlistReadDTO actualResult = objectMapper.readValue(resultJson, WatchlistReadDTO.class);
+        Assertions.assertThat(readDTO).isEqualToComparingFieldByField(actualResult);
+
+        Mockito.verify(watchlistService).removeMovieFromWatchlist(userId, watchlistId, movieId);
+    }
+
+    @WithMockUser
+    @Test
+    public void testDuplicatedMovieToWatchlist() throws Exception { ;
+        UUID userId = UUID.randomUUID();
+        UUID watchlistId = UUID.randomUUID();
+        UUID movieId = UUID.randomUUID();
+
+        LinkDuplicatedException ex = new LinkDuplicatedException(
+                String.format("Watchlist %s already has movie %s", watchlistId, movieId));
+
+        Mockito.when(watchlistService.addMovieToWatchlist(userId, watchlistId, movieId)).thenThrow(ex);
+
+        String resultJson = mockMvc
+                .perform(post("/api/v1/users/{userId}/watchlists/{id}/movies/{movieId}",
+                        userId, watchlistId, movieId))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse().getContentAsString();
+
+        ErrorInfo actualResult = objectMapper.readValue(resultJson, ErrorInfo.class);
+        Assert.assertEquals(actualResult.getMessage(), ex.getMessage());
+
+        Mockito.verify(watchlistService).addMovieToWatchlist(userId, watchlistId, movieId);
     }
 }
