@@ -56,6 +56,19 @@ public class WatchlistServiceTest extends BaseTest {
     }
 
     @Test
+    public void testGetAllUserWatchlists() {
+        ApplicationUser user = testObjectFactory.createUser();
+        Watchlist w1 = testObjectFactory.createWatchlist(user, null);
+        Watchlist w2 = testObjectFactory.createWatchlist(user, null);
+        Watchlist w3 = testObjectFactory.createWatchlist(user, null);
+
+        List<WatchlistReadDTO> actualResult = watchlistService.getAllUserWatchlists(user.getId());
+
+        Assertions.assertThat(actualResult).extracting("id")
+                .containsExactlyInAnyOrder(w1.getId(), w2.getId(), w3.getId());
+    }
+
+    @Test
     public void testGetUserWatchlistExtended() {
         ApplicationUser user = testObjectFactory.createUser();
         Movie movie = testObjectFactory.createMovie();
