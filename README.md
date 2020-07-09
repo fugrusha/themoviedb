@@ -18,6 +18,9 @@
 - **PMD Maven plugin** - tool, that produces a report on both code rule violations and detected copy and paste fragments
 - **Checkstyle Maven plugin** - code was written according to google checkstyle
 
+### Domain model diagram
+![diagram](https://github.com/fugrusha/themoviedb/blob/master/domain-model-diagrams/Backend%20class%20diagram%20v2.png)
+
 ### Application features
 - Store information about the movie, its actors and creators (director, producer, etc). 
 - Classification of movies by genre
